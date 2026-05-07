@@ -1,0 +1,184 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: Lint + Format
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run fmt:check
+
+  test:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - name: Coverage report
+        run: npm run test:coverage
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: coverage
+          path: coverage/
+
+  build:
+    name: Production build
+    runs-on: ubuntu-latest
+    needs: [test]
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+        env:
+          # Build-time placeholders — values aren't used at runtime, but
+          # @supabase/ssr throws if these env vars are missing during the
+          # prerender step.
+          NEXT_PUBLIC_SUPABASE_URL: http://localhost:54321
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci_build_placeholder
+
+  e2e-smoke:
+    name: E2E smoke
+    runs-on: ubuntu-latest
+    needs: [test]
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - uses: supabase/setup-cli@v2
+        with:
+          version: latest
+      - name: Start local Supabase
+        run: supabase start
+      - name: Seed local buckets
+        run: supabase seed buckets
+      - name: Export local Supabase env
+        run: |
+          set -a
+          source <(supabase status -o env)
+          set +a
+          {
+            printf 'NEXT_PUBLIC_SUPABASE_URL=%s\n' "$API_URL"
+            printf 'NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=%s\n' "$PUBLISHABLE_KEY"
+          } >> "$GITHUB_ENV"
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+        env:
+          PLAYWRIGHT_BASE_URL: http://localhost:3000
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: playwright-smoke-report
+          path: playwright-report/
+      - name: Stop Supabase
+        if: always()
+        run: supabase stop
+
+  integration:
+    name: RLS integration
+    runs-on: ubuntu-latest
+    needs: [test]
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - uses: supabase/setup-cli@v2
+        with:
+          version: latest
+      - name: Start local Supabase
+        run: supabase start
+      - name: Apply migrations
+        run: supabase db reset --local
+      - name: Export local Supabase env
+        run: |
+          set -a
+          source <(supabase status -o env)
+          set +a
+          {
+            printf 'E2E_SUPABASE_URL=%s\n' "$API_URL"
+            printf 'E2E_SUPABASE_ANON_KEY=%s\n' "$ANON_KEY"
+            printf 'E2E_SUPABASE_SERVICE_KEY=%s\n' "$SERVICE_ROLE_KEY"
+          } >> "$GITHUB_ENV"
+      - run: npm run test:integration
+      - name: Stop Supabase
+        if: always()
+        run: supabase stop
+
+  e2e-auth:
+    name: E2E auth
+    runs-on: ubuntu-latest
+    needs: [test]
+    env:
+      E2E_SUPABASE_URL: http://127.0.0.1:54321
+      E2E_USER_EMAIL: e2e@supagist.test
+      E2E_USER_PASSWORD: LocalE2EPass123!
+      E2E_TEST_SECRET: local-e2e-test-secret
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - uses: supabase/setup-cli@v2
+        with:
+          version: latest
+      - name: Start local Supabase
+        run: supabase start
+      - name: Seed local buckets
+        run: supabase seed buckets
+      - name: Export local Supabase env
+        run: |
+          set -a
+          source <(supabase status -o env)
+          set +a
+          {
+            printf 'NEXT_PUBLIC_SUPABASE_URL=%s\n' "$API_URL"
+            printf 'NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=%s\n' "$PUBLISHABLE_KEY"
+            printf 'E2E_SUPABASE_ANON_KEY=%s\n' "$ANON_KEY"
+            printf 'E2E_SUPABASE_SERVICE_KEY=%s\n' "$SERVICE_ROLE_KEY"
+          } >> "$GITHUB_ENV"
+      - name: Apply migrations
+        run: supabase db reset --local
+      - run: npx playwright install --with-deps chromium
+      - run: npx playwright test --project=setup
+      - run: npm run test:e2e:auth
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: playwright-auth-report
+          path: playwright-report/
+      - name: Stop Supabase
+        if: always()
+        run: supabase stop

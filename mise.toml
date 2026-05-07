@@ -1,0 +1,5 @@
+[tools]
+node = "22"
+supabase = "latest"
+gh = "latest"
+vercel = "latest"

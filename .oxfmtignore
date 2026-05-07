@@ -1,0 +1,4 @@
+.agents/
+.next/
+node_modules/
+supabase/.branches/

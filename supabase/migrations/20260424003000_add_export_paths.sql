@@ -1,0 +1,3 @@
+ALTER TABLE snippets
+  ADD COLUMN IF NOT EXISTS svg_path TEXT,
+  ADD COLUMN IF NOT EXISTS raw_path TEXT;
