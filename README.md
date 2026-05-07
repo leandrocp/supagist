@@ -1,6 +1,6 @@
 # supagist
 
-Share a code snippet. Reactions and comments on every line, live.
+Share a code snippet. Reactions and comments on every line.
 
 ![supagist](./supagist.png)
 
