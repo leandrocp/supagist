@@ -2,7 +2,7 @@
 
 Share a code snippet. Reactions and comments on every line.
 
-<video src="./supagist.mp4" controls width="100%"></video>
+[![supagist demo](./public/supagist.png)](https://supagist.app/supagist.mp4)
 
 Live at **[supagist.app](https://supagist.app)**
 
