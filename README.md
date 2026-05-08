@@ -15,8 +15,6 @@ Live at **[supagist.app](https://supagist.app)**
 - Export as PNG or SVG, with optional gradient backgrounds and font choices.
 - Sign in with GitHub or email. Reading is free; reacting and commenting need an account.
 
-![export](./public/export.png)
-
 ## Run locally
 
 Tool versions live in `mise.toml` (Node, Supabase CLI, gh, Vercel CLI). Install [mise](https://mise.jdx.dev), then:
