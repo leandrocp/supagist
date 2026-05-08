@@ -88,6 +88,25 @@ async function loadImageDataUrl(url: string): Promise<string | null> {
 // the same so we now reuse it for brand pattern PNGs as well.
 const loadAvatarDataUrl = loadImageDataUrl;
 
+// Pick a readable text colour for a known card-fill colour. Brand frames
+// override `cardFill` with a fixed hex (Vercel #000, Stripe #0c2e4e, etc.),
+// so the editor's `editorFg` from the syntax theme often clashes — light
+// theme + dark brand card means dark-on-dark filename text.
+//
+// Returns "#ffffff" for cards that read dark, "#000000" otherwise. Callers
+// typically wrap in fill-opacity for the soft secondary look used elsewhere.
+export function readableOnFill(fill: string): "#000000" | "#ffffff" {
+  const m = /^#?([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(fill.trim());
+  if (!m) return "#000000";
+  const hex = m[1].length === 3 ? m[1].replace(/(.)/g, "$1$1") : m[1];
+  const n = parseInt(hex, 16);
+  const r = (n >> 16) & 0xff;
+  const g = (n >> 8) & 0xff;
+  const b = n & 0xff;
+  // Rec. 601 luma — good enough for picking light vs dark.
+  return r * 0.299 + g * 0.587 + b * 0.114 > 140 ? "#000000" : "#ffffff";
+}
+
 /**
  * Per-brand chrome customisations for the editor card itself. Each brand has
  * a recognisable shape — Vercel is borderless and chromeless, Stripe sits in
@@ -186,7 +205,6 @@ export const EXPORT_BRAND_BACKGROUNDS: ExportBackground[] = [
     brandId: "vercel",
     frame: {
       showDots: false,
-      showCenteredFilename: false,
       cardBorder: null,
       cardRadius: 0,
       cardFill: "#000000",
@@ -202,7 +220,6 @@ export const EXPORT_BRAND_BACKGROUNDS: ExportBackground[] = [
     brandId: "tailwind",
     frame: {
       showDots: true,
-      showCenteredFilename: false,
       cardBorder: { color: "rgba(255,255,255,0.25)", width: 1 },
       cardRadius: 8,
     },
@@ -233,7 +250,6 @@ export const EXPORT_BRAND_BACKGROUNDS: ExportBackground[] = [
     brandId: "stripe",
     frame: {
       showDots: false,
-      showCenteredFilename: false,
       cardBorder: { color: "#0F395E", width: 1 },
       cardRadius: 8,
       cardFill: "#0c2e4e",
@@ -711,11 +727,17 @@ export async function createHighlightedSvg(
     bgSection = `<rect width="${totalWidth}" height="${totalHeight}" fill="${escapeXml(editorBg)}"/>`;
   }
 
+  // Pick a chrome text colour from the card fill, not from `editorFg`. Brand
+  // frames override cardFill independently of the syntax theme, so a
+  // light-themed snippet on, say, the Stripe card (#0c2e4e) needs *light*
+  // chrome text — dark `editorFg` would render invisible.
+  const chromeColor = readableOnFill(cardFill);
+
   // Centred filename — present unless the frame opts out. Brand frames that
   // use a left-aligned header strip render their own filename below.
   const useCenteredFilename = showFilename && filename && (frame?.showCenteredFilename ?? true);
   const filenameMarkup = useCenteredFilename
-    ? `<text x="${pad + Math.round(actualWidth / 2)}" y="${dotsY}" font-size="12" font-family="${escapeXml(fontFamily)}" text-anchor="middle" dominant-baseline="middle" fill="${escapeXml(editorFg)}" fill-opacity="0.5">${escapeXml(filename)}</text>`
+    ? `<text x="${pad + Math.round(actualWidth / 2)}" y="${dotsY}" font-size="12" font-family="${escapeXml(fontFamily)}" text-anchor="middle" dominant-baseline="middle" fill="${chromeColor}" fill-opacity="0.5">${escapeXml(filename)}</text>`
     : "";
 
   // Brand-style header strip — left-aligned filename + optional language
@@ -732,15 +754,15 @@ export async function createHighlightedSvg(
     const labelY = stripY + stripHeight / 2;
     const fileText =
       `<text x="${leftX}" y="${labelY}" font-size="13" font-family="${escapeXml(fontFamily)}" ` +
-      `dominant-baseline="central" fill="${escapeXml(editorFg)}" fill-opacity="0.85">${escapeXml(filename)}</text>`;
+      `dominant-baseline="central" fill="${chromeColor}" fill-opacity="0.85">${escapeXml(filename)}</text>`;
     const langText =
       frame.headerStrip.showLanguage && language
         ? `<text x="${rightX}" y="${labelY}" font-size="12" font-family="${escapeXml(fontFamily)}" ` +
-          `text-anchor="end" dominant-baseline="central" fill="${escapeXml(editorFg)}" fill-opacity="0.55">${escapeXml(languageDisplayName(language))}</text>`
+          `text-anchor="end" dominant-baseline="central" fill="${chromeColor}" fill-opacity="0.55">${escapeXml(languageDisplayName(language))}</text>`
         : "";
     const divider =
       `<line x1="${pad}" y1="${stripBottom}" x2="${pad + actualWidth}" y2="${stripBottom}" ` +
-      `stroke="${escapeXml(editorFg)}" stroke-opacity="0.12" stroke-width="1"/>`;
+      `stroke="${chromeColor}" stroke-opacity="0.12" stroke-width="1"/>`;
     headerStripMarkup = fileText + langText + divider;
   }
 

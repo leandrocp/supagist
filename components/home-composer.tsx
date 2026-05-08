@@ -516,7 +516,7 @@ export function HomeComposer() {
       {/* Hero */}
       <div className="mx-auto max-w-2xl space-y-2 text-center">
         <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">Supagist</h1>
-        <p className="text-muted-foreground">Share, export, comment, react.</p>
+        <p className="text-muted-foreground">Comment, react, share.</p>
         {(isAnonymous || !viewerLabel) && isHydrated ? (
           <p className="text-sm text-muted-foreground/50">Log in to enable all features.</p>
         ) : null}

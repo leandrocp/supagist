@@ -138,7 +138,7 @@ supabase/
 3. Lumis highlights the code server-side using `loadTheme(snippet.theme)`, which resolves brand themes from the local registry first and falls through to `@lumis-sh/themes/<name>`. `preRenderedLines` is passed to the client as a prop — no WASM in the browser just to view.
 4. `SnippetAnnotationsView` subscribes to the `snippet:<id>` Broadcast channel for live reactions, comments, and typing indicators.
 5. `SnippetPresenceFooter` joins the Presence channel — the visitor stack updates in real time.
-6. `generateMetadata` produces a three-line social-card description (`<filename> by @<author>` / `<lang> | <theme> | <lines> lines | <chars> / 8,000` / `# Supagist. Share, export, comment, react.`) and an `og:image:alt` to match. Slack and X show it on link unfurl.
+6. `generateMetadata` produces a three-line social-card description (`<filename> by @<author>` / `<lang> | <theme> | <lines> lines | <chars> / 8,000` / `# Supagist. Comment, react, share.`) and an `og:image:alt` to match. Slack and X show it on link unfurl.
 
 ## Export
 

@@ -559,7 +559,7 @@ describe("buildSnippetSocialAlt", () => {
     expect(alt).toBe(
       "foo.ts by @leandrocp\n" +
         "TypeScript | everforest_light | 83 lines | 4,424 / 8,000\n" +
-        "# Supagist. Share, export, comment, react.",
+        "# Supagist. Comment, react, share.",
     );
   });
 
@@ -625,6 +625,6 @@ describe("buildSnippetSocialAlt", () => {
       lineCount: 1,
       charCount: 1,
     });
-    expect(alt.split("\n").at(-1)).toBe("# Supagist. Share, export, comment, react.");
+    expect(alt.split("\n").at(-1)).toBe("# Supagist. Comment, react, share.");
   });
 });

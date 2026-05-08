@@ -223,9 +223,11 @@ export function ThemePicker({
   );
 }
 
-// Small inline brand logo via <img>. We use an <img> rather than next/image
-// because the picker mounts inside a popover and we don't need the Image
-// optimisation pipeline for ~14px icons.
+// Small inline brand logo. Rendered as a CSS mask so the visible color is
+// driven by `currentColor` — the same SVG can read white on the dark export
+// swatches AND the editor's foreground colour inside the theme-picker
+// popover, instead of being baked to a single fill that breaks one of the
+// two contexts.
 function BrandLogo({
   brand,
   size,
@@ -236,14 +238,22 @@ function BrandLogo({
   className?: string;
 }) {
   return (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
-      src={brand.logoUrl}
-      alt=""
-      width={size}
-      height={size}
+    <span
+      aria-hidden
       className={cn("inline-block shrink-0", className)}
-      style={{ width: size, height: size }}
+      style={{
+        width: size,
+        height: size,
+        backgroundColor: "currentColor",
+        maskImage: `url(${brand.logoUrl})`,
+        WebkitMaskImage: `url(${brand.logoUrl})`,
+        maskRepeat: "no-repeat",
+        WebkitMaskRepeat: "no-repeat",
+        maskSize: "contain",
+        WebkitMaskSize: "contain",
+        maskPosition: "center",
+        WebkitMaskPosition: "center",
+      }}
     />
   );
 }

@@ -676,7 +676,7 @@ describe("createHighlightedSvg", () => {
 // ── Brand frame chrome ───────────────────────────────────────────────────────
 
 describe("EXPORT_BRAND_BACKGROUNDS — frame chrome", () => {
-  it("Vercel hides the macOS dots and the centred filename", async () => {
+  it("Vercel hides the macOS dots but shows the centred filename when toggle is on", async () => {
     const { EXPORT_BRAND_BACKGROUNDS, createHighlightedSvg } = await import("./export-utils");
     const vercel = EXPORT_BRAND_BACKGROUNDS.find((b) => b.label === "Vercel")!;
     const svg = await createHighlightedSvg(
@@ -692,10 +692,57 @@ describe("EXPORT_BRAND_BACKGROUNDS — frame chrome", () => {
       null,
       null,
       false,
-      true, // showFilename — but Vercel frame opts out
+      true, // showFilename
     );
-    expect(svg).not.toContain("#ff5f57"); // red dot
-    expect(svg).not.toContain(">snippet.tsx<"); // centred filename
+    expect(svg).not.toContain("#ff5f57"); // red dot still hidden
+    // Centred filename now renders for branded themes that don't ship a
+    // headerStrip — gated solely on the showFilename toggle.
+    expect(svg).toMatch(/<text[^>]*>snippet.tsx<\/text>/);
+  });
+
+  it("Vercel hides the centred filename when showFilename is off", async () => {
+    const { EXPORT_BRAND_BACKGROUNDS, createHighlightedSvg } = await import("./export-utils");
+    const vercel = EXPORT_BRAND_BACKGROUNDS.find((b) => b.label === "Vercel")!;
+    const svg = await createHighlightedSvg(
+      "x",
+      "snippet.tsx",
+      "github_light",
+      1200,
+      undefined,
+      vercel,
+      undefined,
+      false,
+      "system",
+      null,
+      null,
+      false,
+      false, // showFilename
+    );
+    expect(svg).not.toContain(">snippet.tsx<");
+  });
+
+  it("dark cardFill (Vercel) draws the chrome filename in white, not editorFg", async () => {
+    // Regression: filename used to inherit editorFg (light theme = dark text)
+    // and disappeared on dark brand cards (#000000 for Vercel). Now derived
+    // from cardFill luminance.
+    const { EXPORT_BRAND_BACKGROUNDS, createHighlightedSvg } = await import("./export-utils");
+    const vercel = EXPORT_BRAND_BACKGROUNDS.find((b) => b.label === "Vercel")!;
+    const svg = await createHighlightedSvg(
+      "x",
+      "snippet.tsx",
+      "github_light",
+      1200,
+      undefined,
+      vercel,
+      undefined,
+      false,
+      "system",
+      null,
+      null,
+      false,
+      true, // showFilename
+    );
+    expect(svg).toMatch(/<text[^>]*fill="#ffffff"[^>]*>snippet.tsx<\/text>/);
   });
 
   it("Vercel renders sharp-cornered card (radius 0)", async () => {

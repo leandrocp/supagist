@@ -315,13 +315,24 @@ export function ExportModal({
                 }
               >
                 {b.logoUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={b.logoUrl}
-                    alt=""
-                    width={14}
-                    height={14}
-                    style={{ width: 14, height: 14 }}
+                  // CSS mask so the logo's color is controlled here, not
+                  // baked into the SVG. White reads on every brand swatch
+                  // (all of them have dark `from`/`to` gradients).
+                  <span
+                    aria-hidden
+                    style={{
+                      width: 14,
+                      height: 14,
+                      backgroundColor: "white",
+                      maskImage: `url(${b.logoUrl})`,
+                      WebkitMaskImage: `url(${b.logoUrl})`,
+                      maskRepeat: "no-repeat",
+                      WebkitMaskRepeat: "no-repeat",
+                      maskSize: "contain",
+                      WebkitMaskSize: "contain",
+                      maskPosition: "center",
+                      WebkitMaskPosition: "center",
+                    }}
                   />
                 ) : null}
               </button>
