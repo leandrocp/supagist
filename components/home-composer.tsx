@@ -18,6 +18,7 @@ import {
 import { languageDisplayName, codePointLength } from "@/lib/snippet-utils";
 import { ThemePicker } from "@/components/theme-picker";
 import { ExportModal } from "@/components/export-modal";
+import { HomePresence } from "@/components/home-presence";
 import type { EditorPalette, InlineComment } from "@/components/inline-code-block";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -517,6 +518,7 @@ export function HomeComposer() {
       <div className="mx-auto max-w-2xl space-y-2 text-center">
         <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">Supagist</h1>
         <p className="text-muted-foreground">Comment, react, share, export.</p>
+        <HomePresence />
         {(isAnonymous || !viewerLabel) && isHydrated ? (
           <p className="text-sm text-muted-foreground/50">Log in to enable all features.</p>
         ) : null}

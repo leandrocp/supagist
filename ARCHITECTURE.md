@@ -57,7 +57,12 @@ Initial state loads from the DB once on mount; after that everything is event-dr
 
 ### Realtime — Presence
 
-`snippet-presence:<snippet_id>` (`app/[snippet]/snippet-presence.tsx`) drives the live visitor stack in the code block footer. Each visitor's presence key is their `auth.uid()`. Signed-in users track their GitHub username and avatar; anonymous users track the name `generateGuestName` returns for them. Avatar colours are deterministic hex values derived from the name and applied via inline `style` (Tailwind classes wouldn't survive the JIT purge).
+Two presence channels:
+
+- `supagist:lobby` (`components/home-presence.tsx`) — the homepage pulse. Renders an inline avatar+name list under the hero ("Bold Lynx, Fast Oryx are writing snippets…") so the realtime layer is visible the moment a visitor lands, before they touch a snippet.
+- `snippet-presence:<snippet_id>` (`app/[snippet]/snippet-presence.tsx`) — the live visitor stack in the code block footer.
+
+Each visitor's presence key is their `auth.uid()`. Signed-in users track their GitHub username and avatar; anonymous users track the name `generateGuestName` returns for them. Avatar colours are deterministic hex values derived from the name and applied via inline `style` (Tailwind classes wouldn't survive the JIT purge). Both channels untrack on `pagehide` so closed tabs disappear from the list quickly instead of waiting for the server-side heartbeat to time out.
 
 ### Cron
 
@@ -105,6 +110,7 @@ components/
   home-composer.tsx            Editor + toolbar + publish flow
   inline-code-block.tsx        Lumis-powered interactive code editor
   my-snippets.tsx              Homepage list of the signed-in user's saved snippets
+  home-presence.tsx            Homepage live "X, Y are writing snippets…" presence pulse
   export-modal.tsx             Export settings (background, padding, font, size, language, lines, footer)
   theme-picker.tsx             Combobox theme picker — Brands + Themes groups, fuzzy filter
   notifications-listener.tsx   Author notifications via sonner toasts (postgres_changes)
