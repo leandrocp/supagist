@@ -18,6 +18,14 @@ run = [
 description = "Run the Next.js dev server"
 run = "npm run dev"
 
+[tasks.lint]
+description = "Run oxlint"
+run = "npm run lint"
+
+[tasks.fmt]
+description = "Run oxfmt"
+run = "npm run fmt"
+
 [tasks.test]
 description = "Run the Vitest unit suite"
 run = "npm test"
