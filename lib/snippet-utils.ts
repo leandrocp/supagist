@@ -44,7 +44,7 @@ export function buildSnippetSocialAlt(args: {
     `${args.lineCount} lines`,
     `${args.charCount.toLocaleString()} / 8,000`,
   ].join(" | ");
-  return [`${args.filename} by ${handle}`, meta, `# Supagist. Comment, react, share.`].join(
+  return [`${args.filename} by ${handle}`, meta, `# Supagist. Comment, react, share, export.`].join(
     "\n",
   );
 }
