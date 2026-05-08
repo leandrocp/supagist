@@ -720,8 +720,10 @@ export async function createHighlightedSvg(
 
   // Brand-style header strip — left-aligned filename + optional language
   // label on the right, with a divider underneath. Used by Supabase + Resend.
+  // Gated on showFilename so the toggle hides the strip on branded themes
+  // the same way it hides the centred filename on the default frame.
   let headerStripMarkup = "";
-  if (frame?.headerStrip && filename) {
+  if (frame?.headerStrip && filename && showFilename) {
     const stripY = pad;
     const stripHeight = 36;
     const stripBottom = stripY + stripHeight;

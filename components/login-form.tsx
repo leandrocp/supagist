@@ -80,7 +80,7 @@ export function LoginForm({ className, next = "/" }: { className?: string; next?
           className="inline-flex items-center gap-2 text-lg font-medium tracking-tight hover:opacity-80"
         >
           <BrandDot />
-          supagist
+          Supagist
         </Link>
         <p className="font-mono text-xs uppercase tracking-code-label text-muted-foreground">
           {mode === "signin" ? "Sign in to your account" : "Create an account"}

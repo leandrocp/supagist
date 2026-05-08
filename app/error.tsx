@@ -16,7 +16,7 @@ export default function GlobalError({
     // Surface the error in the browser console so it shows up in session
     // recordings / dev tools. Real error tracking (Sentry et al.) is a
     // separate follow-up.
-    console.error("[supagist] route render error", error);
+    console.error("[Supagist] route render error", error);
   }, [error]);
 
   return (
@@ -25,7 +25,7 @@ export default function GlobalError({
         <nav className="flex h-16 items-center border-b border-border text-sm">
           <Link href="/" className="flex items-center gap-2 hover:opacity-80">
             <BrandDot />
-            <span className="font-medium tracking-tight">supagist</span>
+            <span className="font-medium tracking-tight">Supagist</span>
           </Link>
         </nav>
 
@@ -49,7 +49,7 @@ export default function GlobalError({
               Try again
             </Button>
             <Button asChild variant="pill-secondary" size="pill">
-              <Link href="/">Back to supagist</Link>
+              <Link href="/">Back to Supagist</Link>
             </Button>
           </div>
         </section>

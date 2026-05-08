@@ -728,6 +728,9 @@ describe("EXPORT_BRAND_BACKGROUNDS — frame chrome", () => {
       false,
       "system",
       "markdown",
+      null,
+      false,
+      true, // showFilename
     );
     expect(svg).not.toContain("#ff5f57");
     // Filename + language sit in their own header strip (left-aligned, with
@@ -761,12 +764,44 @@ describe("EXPORT_BRAND_BACKGROUNDS — frame chrome", () => {
       false,
       "system",
       "typescript",
+      null,
+      false,
+      true, // showFilename
     );
     expect(svg).not.toContain("#ff5f57");
     expect(svg).toMatch(/<text[^>]*>snippet.tsx<\/text>/);
     // Supabase's headerStrip has showLanguage=false, so we should NOT see
     // a TypeScript label text node anywhere.
     expect(svg).not.toMatch(/<text[^>]*>TypeScript<\/text>/);
+  });
+
+  it("brand header strip hides the filename when showFilename is false", async () => {
+    // Regression: the headerStrip used by Supabase + Resend was rendering
+    // unconditionally — gated only on `filename`, not on the showFilename
+    // toggle. Toggling filename off in the export modal had no effect on
+    // those two brands.
+    const { EXPORT_BRAND_BACKGROUNDS, createHighlightedSvg } = await import("./export-utils");
+    for (const label of ["Supabase", "Resend"] as const) {
+      const bg = EXPORT_BRAND_BACKGROUNDS.find((b) => b.label === label)!;
+      const svg = await createHighlightedSvg(
+        "x",
+        "secret.tsx",
+        "github_light",
+        1200,
+        undefined,
+        bg,
+        undefined,
+        false,
+        "system",
+        "typescript",
+        null,
+        false,
+        false, // showFilename = false
+      );
+      expect(svg, `${label} should hide filename when showFilename=false`).not.toMatch(
+        /<text[^>]*>secret.tsx<\/text>/,
+      );
+    }
   });
 });
 

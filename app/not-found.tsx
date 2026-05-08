@@ -9,7 +9,7 @@ export default function NotFound() {
         <nav className="flex h-16 items-center border-b border-border text-sm">
           <Link href="/" className="flex items-center gap-2 hover:opacity-80">
             <BrandDot />
-            <span className="font-medium tracking-tight">supagist</span>
+            <span className="font-medium tracking-tight">Supagist</span>
           </Link>
         </nav>
 
@@ -23,7 +23,7 @@ export default function NotFound() {
             are cleaned up automatically.
           </p>
           <Button asChild variant="pill" size="pill">
-            <Link href="/">Back to supagist</Link>
+            <Link href="/">Back to Supagist</Link>
           </Button>
         </section>
       </div>

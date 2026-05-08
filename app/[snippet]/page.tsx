@@ -160,7 +160,7 @@ export default async function SnippetPage({ params }: Props) {
           <div className="flex items-center gap-4">
             <Link href="/" className="flex items-center gap-2 hover:opacity-80">
               <BrandDot />
-              <p className="font-medium tracking-tight">supagist</p>
+              <p className="font-medium tracking-tight">Supagist</p>
             </Link>
           </div>
           <div className="flex items-center gap-2">

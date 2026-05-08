@@ -1,4 +1,4 @@
-# supagist
+# Supagist
 
 Share a code snippet. Reactions and comments on every line.
 
@@ -14,6 +14,8 @@ Live at **[supagist.app](https://supagist.app)**
 - Syntax highlighting via [Lumis](https://lumis.sh). 100+ languages, plenty of themes.
 - Export as PNG or SVG, with optional gradient backgrounds and font choices.
 - Sign in with GitHub or email. Reading is free; reacting and commenting need an account.
+
+![export](./public/export.png)
 
 ## Run locally
 

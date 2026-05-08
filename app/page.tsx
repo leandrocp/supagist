@@ -17,7 +17,7 @@ export default function Home() {
           <div className="flex items-center gap-4">
             <a href="/" className="flex items-center gap-2">
               <BrandDot />
-              <p className="font-medium tracking-tight">supagist</p>
+              <p className="font-medium tracking-tight">Supagist</p>
             </a>
           </div>
 

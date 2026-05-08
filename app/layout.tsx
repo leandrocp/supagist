@@ -9,7 +9,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL(getAppUrl()),
-  title: "supagist",
+  title: "Supagist",
   description: "A super gist built with Supabase and Lumis.",
 };
 
