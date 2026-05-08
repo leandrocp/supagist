@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { generateGuestName } from "@/lib/presence-utils";
 import { UserAvatar } from "@/components/user-avatar";
 
 type PresenceUser = { key: string; name: string; avatarUrl?: string };
 
-const MAX_INLINE_USERS = 3;
+const MAX_AVATARS = 5;
 
 /**
  * Live presence pulse on the homepage. Joins the `supagist:lobby`
@@ -106,33 +106,66 @@ export function HomePresence() {
 
   if (visitors.length === 0) return null;
 
-  // Self ordered last so other names lead in the inline list.
+  // Self ordered last so the lead name belongs to someone else when possible.
   const ordered = [...visitors].sort((a, b) => {
     if (a.key === selfKey) return 1;
     if (b.key === selfKey) return -1;
     return 0;
   });
-  const visible = ordered.slice(0, MAX_INLINE_USERS);
-  const remaining = ordered.length - visible.length;
+  const stack = ordered.slice(0, MAX_AVATARS);
+  const overflow = ordered.length - stack.length;
 
-  const tail =
-    visitors.length === 1 ? "is writing a snippet…" : "are writing snippets…";
+  const others = ordered.filter((v) => v.key !== selfKey);
+  const lead = others[0] ?? ordered[0];
+  const remainingAfterLead = ordered.length - 1;
+
+  let label: ReactNode;
+  if (visitors.length === 1) {
+    // Just the viewer in the lobby.
+    label = (
+      <>
+        <span className="text-foreground/80">{lead.name}</span>
+        <span> is writing a snippet…</span>
+      </>
+    );
+  } else if (remainingAfterLead === 1) {
+    label = (
+      <>
+        <span className="text-foreground/80">{lead.name}</span>
+        <span> and 1 other are writing snippets…</span>
+      </>
+    );
+  } else {
+    label = (
+      <>
+        <span className="text-foreground/80">{lead.name}</span>
+        <span> and {remainingAfterLead} others are writing snippets…</span>
+      </>
+    );
+  }
 
   return (
-    <div className="flex flex-wrap items-center justify-center gap-x-1.5 gap-y-1 pt-1 text-xs text-muted-foreground">
-      {visible.map((v, i) => (
-        <span key={v.key} className="inline-flex items-center gap-1">
-          <UserAvatar username={v.name} avatarUrl={v.avatarUrl} size="xs" />
-          <span className="text-foreground/80">{v.name}</span>
-          {i < visible.length - 1 || remaining > 0 ? <span aria-hidden>,</span> : null}
-        </span>
-      ))}
-      {remaining > 0 ? (
-        <span>
-          and {remaining} {remaining === 1 ? "other" : "others"}
-        </span>
-      ) : null}
-      <span>{tail}</span>
+    <div
+      className="flex items-center justify-center gap-2 pt-1 text-xs text-muted-foreground"
+      title={ordered.map((v) => v.name).join(", ")}
+    >
+      <div className="flex -space-x-1.5">
+        {stack.map((v) => (
+          <UserAvatar
+            key={v.key}
+            username={v.name}
+            avatarUrl={v.avatarUrl}
+            size="xs"
+            className="ring-2 ring-background"
+          />
+        ))}
+        {overflow > 0 ? (
+          <div className="flex size-4 shrink-0 items-center justify-center rounded-full bg-muted text-[9px] font-semibold ring-2 ring-background">
+            +{overflow}
+          </div>
+        ) : null}
+      </div>
+      <span className="truncate">{label}</span>
     </div>
   );
 }
