@@ -88,7 +88,7 @@ export function HomeComposer() {
     pixelRatio: 4,
     lineNumbers: false,
     showReactions: false,
-    showFilename: false,
+    showFilename: true,
     showFooter: false,
   });
   const [exportModalOpen, setExportModalOpen] = useState(false);
@@ -122,7 +122,7 @@ export function HomeComposer() {
           pixelRatio: p.pixelRatio ?? 4,
           lineNumbers: p.lineNumbers ?? false,
           showReactions: p.showReactions ?? false,
-          showFilename: p.showFilename ?? false,
+          showFilename: p.showFilename ?? true,
           showFooter: p.showFooter ?? false,
         });
       } catch {

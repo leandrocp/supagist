@@ -2,7 +2,7 @@
 
 Share a code snippet. Reactions and comments on every line.
 
-[![supagist demo](./public/supagist.png)](https://supagist.app/supagist.mp4)
+![supagist](./public/supagist.png)
 
 Live at **[supagist.app](https://supagist.app)**
 
