@@ -405,22 +405,56 @@ export async function createHighlightedSvg(
   // hugs the content tightly without leftover slack on the right.
   const hasReactions = showReactions && reactions && Object.keys(reactions).length > 0;
   const lineNumOffset = lineNumbers ? EXPORT_LINE_NUM_WIDTH : 0;
-  // Chip width: padding + emoji + inner gap + avatar + padding = 39 px.
-  // First chip starts 6 px after the code; subsequent chips have a 5 px gap.
-  const CHIP_WIDTH = 39;
+  // Chip layout matches the live UI: emoji + up to 3 stacked avatars
+  // overlapping by 4 px, plus an optional `+N` overflow pill when the chip
+  // has more than 3 reactors. Widths below feed both the longest-line
+  // calculation and the per-chip render so they stay in sync.
+  const CHIP_PAD = 5;
+  const CHIP_EMOJI_W = 14;
+  const CHIP_INNER_GAP = 3;
+  const CHIP_AVATAR_SIZE = 12;
+  const CHIP_AVATAR_OVERLAP = 4;
+  const CHIP_AVATARS_MAX = 3;
+  const CHIP_OVERFLOW_PAD = 4;
+  const CHIP_OVERFLOW_FONT = 8;
   const CHIP_FIRST_GAP = 6;
   const CHIP_INTER_GAP = 5;
 
-  // Pre-fetch every unique avatar URL we'll need (chip reactor[0] + footer
-  // author) and inline them as <pattern> defs. Patterns are referenced by id
-  // in circle fills — one def per URL even if reused across many chips. URLs
-  // that fail to load fall back to the initial-circle render.
+  const overflowPillWidth = (overflow: number): number => {
+    if (overflow <= 0) return 0;
+    const label = `+${overflow}`;
+    return Math.ceil(label.length * CHIP_OVERFLOW_FONT * 0.62) + CHIP_OVERFLOW_PAD * 2;
+  };
+  const chipWidthFor = (chip: ExportReactionChip): number => {
+    const visible = Math.min(chip.reactors.length, CHIP_AVATARS_MAX);
+    const overflow = chip.reactors.length - visible;
+    const stackedAvatars =
+      visible === 0
+        ? 0
+        : CHIP_AVATAR_SIZE + Math.max(0, visible - 1) * (CHIP_AVATAR_SIZE - CHIP_AVATAR_OVERLAP);
+    const overflowExtra =
+      overflow > 0 ? overflowPillWidth(overflow) - CHIP_AVATAR_OVERLAP : 0;
+    return CHIP_PAD + CHIP_EMOJI_W + CHIP_INNER_GAP + stackedAvatars + overflowExtra + CHIP_PAD;
+  };
+  const lineChipsWidth = (chips: ExportReactionChip[]): number =>
+    chips.length === 0
+      ? 0
+      : CHIP_FIRST_GAP +
+        chips.reduce((acc, chip) => acc + chipWidthFor(chip), 0) +
+        CHIP_INTER_GAP * (chips.length - 1);
+
+  // Pre-fetch every unique avatar URL we'll need (each visible reactor on
+  // every chip + footer author) and inline them as <pattern> defs. Patterns
+  // are referenced by id in circle fills — one def per URL even if reused
+  // across many chips. URLs that fail to load fall back to the initial-
+  // circle render.
   const avatarUrls = new Set<string>();
   if (hasReactions) {
     for (const chips of Object.values(reactions!)) {
       for (const chip of chips) {
-        const url = chip.reactors[0]?.avatarUrl;
-        if (url) avatarUrls.add(url);
+        for (const reactor of chip.reactors.slice(0, CHIP_AVATARS_MAX)) {
+          if (reactor.avatarUrl) avatarUrls.add(reactor.avatarUrl);
+        }
       }
     }
   }
@@ -450,12 +484,8 @@ export async function createHighlightedSvg(
     Math.max(
       ...sourceLines.map((l, idx) => {
         const lineNum = idx + 1;
-        const chipCount = hasReactions ? (reactions![lineNum]?.length ?? 0) : 0;
-        const chipExtra =
-          chipCount > 0
-            ? CHIP_FIRST_GAP + CHIP_WIDTH * chipCount + CHIP_INTER_GAP * (chipCount - 1)
-            : 0;
-        return Math.ceil(l.length * EXPORT_CHAR_WIDTH) + chipExtra;
+        const chips = hasReactions ? (reactions![lineNum] ?? []) : [];
+        return Math.ceil(l.length * EXPORT_CHAR_WIDTH) + lineChipsWidth(chips);
       }),
       0,
     ),
@@ -618,7 +648,7 @@ export async function createHighlightedSvg(
       })();
       if (hasReactions && chipSrcLine !== null && reactions![chipSrcLine]?.length) {
         const lineChars = tokens.reduce((n, t) => n + t.text.length, 0);
-        let chipX = codeX + Math.ceil(lineChars * EXPORT_CHAR_WIDTH) + 6;
+        let chipX = codeX + Math.ceil(lineChars * EXPORT_CHAR_WIDTH) + CHIP_FIRST_GAP;
 
         const chipH = 18;
         // Align the chip's vertical CENTRE with the code line's optical centre.
@@ -629,37 +659,67 @@ export async function createHighlightedSvg(
         const cy = chipY + chipH / 2;
 
         const chipR = chipH / 2;
-        const chipPad = 5;
-        const emojiW = 14;
-        const avatarSize = 12;
-        const innerGap = 3;
-        const interChipGap = 5;
         reactionMarkup = reactions![chipSrcLine]
           .map((chip) => {
-            const reactor = chip.reactors[0];
-            const patternId = reactor?.avatarUrl ? avatarPatternIds.get(reactor.avatarUrl) : null;
-            const chipW = chipPad + emojiW + innerGap + avatarSize + chipPad;
+            const visibleReactors = chip.reactors.slice(0, CHIP_AVATARS_MAX);
+            const overflow = chip.reactors.length - visibleReactors.length;
+            const chipW = chipWidthFor(chip);
             const x = chipX;
-            const emojiX = x + chipPad + emojiW / 2;
-            const avatarCx = x + chipPad + emojiW + innerGap + avatarSize / 2;
-            const avatarMarkup = patternId
-              ? `<circle cx="${avatarCx}" cy="${cy}" r="${avatarSize / 2}" fill="url(#${patternId})"/>`
-              : (() => {
-                  const avatarColor = reactor ? nameToColor(reactor.username) : "#888";
-                  const avatarLetter = reactor ? nameToInitials(reactor.username)[0] : "·";
-                  return (
-                    `<circle cx="${avatarCx}" cy="${cy}" r="${avatarSize / 2}" fill="${escapeXml(avatarColor)}"/>` +
-                    `<text x="${avatarCx}" y="${cy}" font-size="8" font-family="${escapeXml(fontFamily)}" font-weight="700" fill="#ffffff" text-anchor="middle" dominant-baseline="central">${escapeXml(avatarLetter)}</text>`
-                  );
-                })();
+            const emojiX = x + CHIP_PAD + CHIP_EMOJI_W / 2;
+            const firstAvatarLeft = x + CHIP_PAD + CHIP_EMOJI_W + CHIP_INNER_GAP;
+
+            // Slack-style stack: each subsequent avatar overlaps the previous
+            // by CHIP_AVATAR_OVERLAP, with a thin ring stroke for separation
+            // (the live UI uses a box-shadow ring; SVG can't do that, so we
+            // approximate with a stroke matched to the chip background).
+            const avatarsMarkup = visibleReactors
+              .map((reactor, i) => {
+                const cxAvatar =
+                  firstAvatarLeft +
+                  CHIP_AVATAR_SIZE / 2 +
+                  i * (CHIP_AVATAR_SIZE - CHIP_AVATAR_OVERLAP);
+                const patternId = reactor.avatarUrl
+                  ? avatarPatternIds.get(reactor.avatarUrl)
+                  : null;
+                const ringAttrs = `stroke="${escapeXml(editorBg)}" stroke-width="1"`;
+                if (patternId) {
+                  return `<circle cx="${cxAvatar}" cy="${cy}" r="${CHIP_AVATAR_SIZE / 2}" fill="url(#${patternId})" ${ringAttrs}/>`;
+                }
+                const avatarColor = nameToColor(reactor.username);
+                const avatarLetter = nameToInitials(reactor.username)[0] ?? "?";
+                return (
+                  `<circle cx="${cxAvatar}" cy="${cy}" r="${CHIP_AVATAR_SIZE / 2}" fill="${escapeXml(avatarColor)}" ${ringAttrs}/>` +
+                  `<text x="${cxAvatar}" y="${cy}" font-size="8" font-family="${escapeXml(fontFamily)}" font-weight="700" fill="#ffffff" text-anchor="middle" dominant-baseline="central">${escapeXml(avatarLetter)}</text>`
+                );
+              })
+              .join("");
+
+            let overflowMarkup = "";
+            if (overflow > 0) {
+              const overflowW = overflowPillWidth(overflow);
+              const lastAvatarRight =
+                firstAvatarLeft +
+                CHIP_AVATAR_SIZE +
+                Math.max(0, visibleReactors.length - 1) * (CHIP_AVATAR_SIZE - CHIP_AVATAR_OVERLAP);
+              const pillX = lastAvatarRight - CHIP_AVATAR_OVERLAP;
+              const pillCx = pillX + overflowW / 2;
+              const pillR = CHIP_AVATAR_SIZE / 2;
+              const pillY = cy - pillR;
+              overflowMarkup =
+                `<rect x="${pillX}" y="${pillY}" width="${overflowW}" height="${CHIP_AVATAR_SIZE}" rx="${pillR}" ry="${pillR}" ` +
+                `fill="${escapeXml(editorBg)}" stroke="${escapeXml(editorFg)}" stroke-opacity="0.35" stroke-width="1"/>` +
+                `<text x="${pillCx}" y="${cy}" font-size="${CHIP_OVERFLOW_FONT}" font-family="${escapeXml(fontFamily)}" font-weight="700" fill="${escapeXml(editorFg)}" text-anchor="middle" dominant-baseline="central">+${overflow}</text>`;
+            }
+
             const markup =
               `<g>` +
               `<rect x="${x}" y="${chipY}" width="${chipW}" height="${chipH}" rx="${chipR}" ry="${chipR}" ` +
               `fill="${escapeXml(editorBg)}" stroke="${escapeXml(editorFg)}" stroke-opacity="0.22" stroke-width="1"/>` +
               `<text x="${emojiX}" y="${cy}" font-size="13" text-anchor="middle" dominant-baseline="central">${chip.emoji}</text>` +
-              avatarMarkup +
+              avatarsMarkup +
+              overflowMarkup +
               `</g>`;
-            chipX += chipW + interChipGap;
+            chipX += chipW + CHIP_INTER_GAP;
             return markup;
           })
           .join("");

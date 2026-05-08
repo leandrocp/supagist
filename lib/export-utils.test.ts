@@ -504,6 +504,65 @@ describe("createHighlightedSvg", () => {
     expect(svg).toContain("👀");
   });
 
+  it("renders every visible reactor's avatar (not just the first) and a +N overflow pill", async () => {
+    // Regression: the export was rendering only `chip.reactors[0]`, so a
+    // chip with multiple reactors collapsed to a single-avatar chip even
+    // though the live UI shows up to 3 stacked avatars + a `+N` pill.
+    // Each fetch must return a fresh Response — bodies are consumed once,
+    // and we expect three concurrent reads in parallel inside Promise.all.
+    const fetchSpy = vi.spyOn(globalThis, "fetch").mockImplementation(
+      async () =>
+        new Response(new Blob(["png-bytes"], { type: "image/png" }), {
+          status: 200,
+          headers: { "content-type": "image/png" },
+        }),
+    );
+    try {
+      const svg = await createHighlightedSvg(
+        "const x = 1;",
+        "test.ts",
+        "github_light",
+        1200,
+        undefined,
+        null,
+        undefined,
+        false,
+        "system",
+        null,
+        {
+          1: [
+            {
+              emoji: "🚀",
+              reactors: [
+                { username: "alice", avatarUrl: "https://example.com/multi-a.png" },
+                { username: "bob", avatarUrl: "https://example.com/multi-b.png" },
+                { username: "carol", avatarUrl: "https://example.com/multi-c.png" },
+                { username: "dave", avatarUrl: "https://example.com/multi-d.png" },
+              ],
+            },
+          ],
+        },
+        true,
+      );
+      // Three distinct <pattern> defs — one per visible reactor avatar.
+      expect(svg).toMatch(/<pattern id="avatar-1"/);
+      expect(svg).toMatch(/<pattern id="avatar-2"/);
+      expect(svg).toMatch(/<pattern id="avatar-3"/);
+      // Three circles fill from those patterns inside the chip.
+      expect(svg).toContain('fill="url(#avatar-1)"');
+      expect(svg).toContain('fill="url(#avatar-2)"');
+      expect(svg).toContain('fill="url(#avatar-3)"');
+      // The 4th reactor collapses into a `+1` overflow pill.
+      expect(svg).toContain(">+1<");
+      // The 4th avatar's URL is NOT pre-fetched (we cap at 3 visible).
+      expect(fetchSpy).not.toHaveBeenCalledWith("https://example.com/multi-d.png", {
+        mode: "cors",
+      });
+    } finally {
+      fetchSpy.mockRestore();
+    }
+  });
+
   it("embeds the reactor's avatar URL as an SVG <pattern> when present", async () => {
     const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue(
       new Response(new Blob(["png-bytes"], { type: "image/png" }), {
