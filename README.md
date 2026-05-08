@@ -19,19 +19,12 @@ Live at **[supagist.app](https://supagist.app)**
 
 ## Run locally
 
-Tool versions live in `mise.toml` (Node, Supabase CLI, gh, Vercel CLI). Install [mise](https://mise.jdx.dev), then:
-
 ```bash
 git clone https://github.com/leandrocp/supagist
 cd supagist
 mise install
-npm install
-supabase start
-supabase db reset
-supabase seed buckets
-
-cp .env.example .env.local
-npm run dev
+mise run setup
+mise run dev
 ```
 
 App runs on `http://localhost:3000`. Studio at `http://127.0.0.1:54323`.
@@ -41,12 +34,10 @@ For GitHub OAuth in dev, set `SUPABASE_AUTH_GITHUB_CLIENT_ID` and `SUPABASE_AUTH
 ## Tests
 
 ```bash
-npm test                  # vitest unit suite
-npm run test:integration  # RLS tests against local Supabase
-npm run test:e2e          # Playwright smoke + auth flows
+mise run test
+mise run test:integration
+mise run test:e2e
 ```
-
-Integration tests boot real users and hit the RLS policies. Run them when touching `snippet_comments` or `snippet_line_reactions`.
 
 ## How it works
 

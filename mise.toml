@@ -3,3 +3,29 @@ node = "22"
 supabase = "latest"
 gh = "latest"
 vercel = "latest"
+
+[tasks.setup]
+description = "Install deps, start Supabase, reset DB, seed buckets, copy env file"
+run = [
+  "npm install",
+  "supabase start",
+  "supabase db reset",
+  "supabase seed buckets",
+  "[ -f .env.local ] || cp .env.example .env.local",
+]
+
+[tasks.dev]
+description = "Run the Next.js dev server"
+run = "npm run dev"
+
+[tasks.test]
+description = "Run the Vitest unit suite"
+run = "npm test"
+
+[tasks."test:integration"]
+description = "Run RLS integration tests against local Supabase"
+run = "npm run test:integration"
+
+[tasks."test:e2e"]
+description = "Run Playwright smoke and auth flows"
+run = "npm run test:e2e:all"
