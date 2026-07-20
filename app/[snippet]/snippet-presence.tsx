@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { generateGuestName } from "@/lib/presence-utils";
@@ -107,7 +108,7 @@ export function SnippetPresenceInline({ snippetId, author, textColor }: Props) {
   return (
     <>
       {author ? (
-        <a
+        <Link
           href={`https://github.com/${author.username}`}
           target="_blank"
           rel="noopener noreferrer"
@@ -116,7 +117,7 @@ export function SnippetPresenceInline({ snippetId, author, textColor }: Props) {
         >
           <UserAvatar username={author.username} avatarUrl={author.avatar_url} size="xs" />
           <span>@{author.username}</span>
-        </a>
+        </Link>
       ) : null}
 
       {visitors.length > 0 ? (

@@ -19,7 +19,6 @@ function makeMockSupabase({
   uploadError = null as { message: string } | null,
   insertError = null as { message: string } | null,
   upsertError = null as { message: string } | null,
-  rateLimitAllowed = true as boolean,
 } = {}) {
   const mockSingle = vi
     .fn()
@@ -35,7 +34,7 @@ function makeMockSupabase({
   const mockUpload = vi.fn().mockResolvedValue({ data: {}, error: uploadError });
   const mockRemove = vi.fn().mockResolvedValue({});
   const mockStorageFrom = vi.fn().mockReturnValue({ upload: mockUpload, remove: mockRemove });
-  const mockRpc = vi.fn().mockResolvedValue({ data: rateLimitAllowed, error: null });
+  const mockRpc = vi.fn();
 
   return {
     auth: {
@@ -144,14 +143,29 @@ describe("publishSnippet — auth guard", () => {
 
   it("rejects when user is not signed in", async () => {
     mockCreateClient.mockResolvedValue(makeMockSupabase({ user: null }));
-    expect((await publishSnippet(makeFormData())).error).toBe("You must be signed in to publish.");
+    expect((await publishSnippet(makeFormData())).error).toBe(
+      "You must be signed in with a permanent account to publish.",
+    );
+  });
+
+  it("rejects anonymous Supabase users", async () => {
+    const supabase = makeMockSupabase({ user: { id: "guest-1", is_anonymous: true } });
+    mockCreateClient.mockResolvedValue(supabase);
+
+    expect((await publishSnippet(makeFormData())).error).toBe(
+      "You must be signed in with a permanent account to publish.",
+    );
+    expect(supabase._.mockUpload).not.toHaveBeenCalled();
+    expect(supabase._.mockInsert).not.toHaveBeenCalled();
   });
 
   it("rejects when auth returns an error", async () => {
     mockCreateClient.mockResolvedValue(
       makeMockSupabase({ user: null, authError: { message: "token expired" } }),
     );
-    expect((await publishSnippet(makeFormData())).error).toBe("You must be signed in to publish.");
+    expect((await publishSnippet(makeFormData())).error).toBe(
+      "You must be signed in with a permanent account to publish.",
+    );
   });
 });
 
@@ -172,6 +186,27 @@ describe("publishSnippet — happy path", () => {
     const result = await publishSnippet(makeFormData({ filename: "my-script.ts" }));
     // toSlug preserves the extension as part of the slug: "my-script.ts" → "my-script-ts"
     expect(result.path).toMatch(/^\/my-script-ts-[a-z0-9]{6}$/);
+  });
+
+  it("uploads every asset under the authenticated user's storage prefix", async () => {
+    const supabase = makeMockSupabase();
+    mockCreateClient.mockResolvedValue(supabase);
+
+    await publishSnippet(makeFormData());
+
+    const uploadedPaths = supabase._.mockUpload.mock.calls.map(([path]) => path as string);
+    expect(uploadedPaths).toHaveLength(4);
+    expect(uploadedPaths).toEqual(
+      expect.arrayContaining([
+        expect.stringMatching(/^user-1\/snippets\/[0-9a-f-]+\/canonical\.png$/),
+        expect.stringMatching(/^user-1\/snippets\/[0-9a-f-]+\/og\.png$/),
+        expect.stringMatching(/^user-1\/snippets\/[0-9a-f-]+\/canonical\.svg$/),
+        expect.stringMatching(/^user-1\/snippets\/[0-9a-f-]+\/raw\.ts$/),
+      ]),
+    );
+    expect(new Set(uploadedPaths.map((path) => path.split("/").slice(0, 3).join("/"))).size).toBe(
+      1,
+    );
   });
 
   it("inserts reactions when provided", async () => {
@@ -269,7 +304,7 @@ describe("publishSnippet — error handling", () => {
     const supabase = makeMockSupabase({ insertError: { message: "unique constraint" } });
     mockCreateClient.mockResolvedValue(supabase);
     const result = await publishSnippet(makeFormData());
-    expect(result.error).toMatch(/unique constraint/);
+    expect(result.error).toBe("Failed to publish the snippet. Please try again.");
   });
 
   it("cleans up uploaded files when snippet insert fails", async () => {
@@ -320,51 +355,44 @@ describe("publishSnippet — error handling", () => {
 
 // ── Rate limiting ─────────────────────────────────────────────────────────────
 
-describe("publishSnippet — rate limiting", () => {
+describe("publishSnippet — database-enforced rate limiting", () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it("rejects with the hourly message when the hourly bucket is full", async () => {
-    const supabase = makeMockSupabase();
-    // First RPC (hourly) returns false; subsequent calls would return true.
-    supabase._.mockRpc
-      .mockResolvedValueOnce({ data: false, error: null })
-      .mockResolvedValue({ data: true, error: null });
+  it("maps the database hourly-limit error to a user-facing message", async () => {
+    const supabase = makeMockSupabase({
+      insertError: { message: "publish_hour_rate_limit" },
+    });
     mockCreateClient.mockResolvedValue(supabase);
+
     const result = await publishSnippet(makeFormData());
-    expect(result.error).toMatch(/last hour/);
+
+    expect(result.error).toBe("Too many snippets in the last hour. Try again later.");
+    expect(supabase._.mockRemove).toHaveBeenCalled();
   });
 
-  it("rejects with the daily message when only the daily bucket is full", async () => {
-    const supabase = makeMockSupabase();
-    supabase._.mockRpc
-      .mockResolvedValueOnce({ data: true, error: null })
-      .mockResolvedValueOnce({ data: false, error: null });
+  it("maps the database daily-limit error to a user-facing message", async () => {
+    const supabase = makeMockSupabase({
+      insertError: { message: "publish_day_rate_limit" },
+    });
     mockCreateClient.mockResolvedValue(supabase);
+
     const result = await publishSnippet(makeFormData());
-    expect(result.error).toMatch(/Daily snippet limit/);
+
+    expect(result.error).toBe("Daily snippet limit reached. Come back tomorrow.");
+    expect(supabase._.mockRemove).toHaveBeenCalled();
   });
 
-  it("does not upload assets when rate-limited", async () => {
-    const supabase = makeMockSupabase({ rateLimitAllowed: false });
-    mockCreateClient.mockResolvedValue(supabase);
-    await publishSnippet(makeFormData());
-    expect(supabase._.mockUpload).not.toHaveBeenCalled();
-    expect(supabase._.mockInsert).not.toHaveBeenCalled();
-  });
-
-  it("calls check_rate_limit keyed by the user id", async () => {
+  it("does not call the generic rate-limit RPC from the application", async () => {
     const supabase = makeMockSupabase();
     mockCreateClient.mockResolvedValue(supabase);
+
     await publishSnippet(makeFormData());
-    const calls = supabase._.mockRpc.mock.calls;
-    expect(calls.length).toBeGreaterThanOrEqual(2);
-    const [name, args] = calls[0];
-    expect(name).toBe("check_rate_limit");
-    expect((args as { p_key: string }).p_key).toMatch(/^publish_hour:user-1$/);
+
+    expect(supabase._.mockRpc).not.toHaveBeenCalled();
   });
 
-  it("publishes normally when both buckets allow the call", async () => {
-    const supabase = makeMockSupabase({ rateLimitAllowed: true });
+  it("publishes normally when the database accepts the insert", async () => {
+    const supabase = makeMockSupabase();
     mockCreateClient.mockResolvedValue(supabase);
     const result = await publishSnippet(makeFormData());
     expect(result.error).toBeUndefined();

@@ -4,13 +4,30 @@
  * post-login callback (`/auth/oauth`) and by the login form to round-trip the
  * page the user came from.
  */
+const SAFE_REDIRECT_ORIGIN = "https://supagist.invalid";
+
+function hasUnsafeRedirectCharacter(value: string): boolean {
+  for (const character of value) {
+    const codePoint = character.codePointAt(0);
+    if (character === "\\" || codePoint === undefined || codePoint <= 0x1f || codePoint === 0x7f) {
+      return true;
+    }
+  }
+  return false;
+}
+
 export function safeNextPath(value: string | null | undefined, fallback: string = "/"): string {
   if (typeof value !== "string" || value.length === 0) return fallback;
-  // Must start with a single `/` and not be a protocol-relative URL like `//evil.com`.
-  if (value[0] !== "/" || value.startsWith("//")) return fallback;
-  // Reject anything containing a scheme (defensive against `/\/evil.com` etc.).
-  if (value.includes(":")) return fallback;
-  return value;
+  if (!value.startsWith("/") || hasUnsafeRedirectCharacter(value)) return fallback;
+
+  try {
+    // URL parsing, rather than string-prefix checks, catches authority-path
+    // variants such as `///evil.com` and browser-normalized backslashes.
+    const resolved = new URL(value, SAFE_REDIRECT_ORIGIN);
+    return resolved.origin === SAFE_REDIRECT_ORIGIN ? value : fallback;
+  } catch {
+    return fallback;
+  }
 }
 
 /**

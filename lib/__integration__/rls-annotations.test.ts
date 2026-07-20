@@ -141,10 +141,21 @@ describe.skipIf(skip)("RLS: annotations delete policies", () => {
     expect(deleted).toHaveLength(1);
   });
 
+  it("rejects reactions outside the supported emoji catalog", async () => {
+    const { error } = await alice.client.from("snippet_line_reactions").insert({
+      snippet_id: snippetId,
+      author_id: alice.id,
+      line_number: 1,
+      emoji: "not-an-emoji",
+    });
+
+    expect(error?.message).toContain("snippet_line_reactions_emoji_allowed_check");
+  });
+
   it("user cannot delete another user's reaction (RLS returns 0 rows, not an error)", async () => {
     const { data: aliceReaction } = await alice.client
       .from("snippet_line_reactions")
-      .insert({ snippet_id: snippetId, author_id: alice.id, line_number: 2, emoji: "💡" })
+      .insert({ snippet_id: snippetId, author_id: alice.id, line_number: 1, emoji: "💡" })
       .select("id")
       .single();
     expect(aliceReaction?.id).toBeTruthy();
@@ -220,7 +231,7 @@ describe.skipIf(skip)("RLS: annotations delete policies", () => {
     const insertOne = (body: string) =>
       alice.client
         .from("snippet_comments")
-        .insert({ snippet_id: snippetId, author_id: alice.id, line_number: 7, body })
+        .insert({ snippet_id: snippetId, author_id: alice.id, line_number: 1, body })
         .select("id")
         .single();
 
@@ -233,5 +244,41 @@ describe.skipIf(skip)("RLS: annotations delete policies", () => {
     expect(first.data!.id).not.toBe(second.data!.id);
 
     await admin.from("snippet_comments").delete().in("id", [first.data!.id, second.data!.id]);
+  });
+
+  it("rejects comments and reactions outside the snippet's line range", async () => {
+    const comment = await alice.client.from("snippet_comments").insert({
+      snippet_id: snippetId,
+      author_id: alice.id,
+      line_number: 2,
+      body: "outside",
+    });
+    const reaction = await alice.client.from("snippet_line_reactions").insert({
+      snippet_id: snippetId,
+      author_id: alice.id,
+      line_number: 2,
+      emoji: "🔥",
+    });
+
+    expect(comment.error?.message).toContain("annotation_line_out_of_bounds");
+    expect(reaction.error?.message).toContain("annotation_line_out_of_bounds");
+  });
+
+  it("rejects oversized comment and emoji payloads", async () => {
+    const comment = await alice.client.from("snippet_comments").insert({
+      snippet_id: snippetId,
+      author_id: alice.id,
+      line_number: 1,
+      body: "x".repeat(2001),
+    });
+    const reaction = await alice.client.from("snippet_line_reactions").insert({
+      snippet_id: snippetId,
+      author_id: alice.id,
+      line_number: 1,
+      emoji: "x".repeat(17),
+    });
+
+    expect(comment.error).not.toBeNull();
+    expect(reaction.error).not.toBeNull();
   });
 });

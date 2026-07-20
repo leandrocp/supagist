@@ -81,24 +81,13 @@ export async function publishSnippet(formData: FormData): Promise<PublishResult>
     error: authError,
   } = await supabase.auth.getUser();
 
-  if (authError || !user) {
-    return { error: "You must be signed in to publish." };
+  if (authError || !user || user.is_anonymous) {
+    return { error: "You must be signed in with a permanent account to publish." };
   }
 
-  // Rate-limit publishes per user. Checked before storage uploads so a
-  // throttled caller doesn't burn upload quota. The hourly bucket catches
-  // burst abuse; the daily bucket catches steady drips. Both must pass.
-  for (const [bucket, max, window, message] of [
-    ["publish_hour", 10, "1 hour", "Too many snippets in the last hour. Try again later."],
-    ["publish_day", 30, "1 day", "Daily snippet limit reached. Come back tomorrow."],
-  ] as const) {
-    const { data: allowed } = await supabase.rpc("check_rate_limit", {
-      p_key: `${bucket}:${user.id}`,
-      p_max: max,
-      p_window: window,
-    });
-    if (allowed === false) return { error: message };
-  }
+  // Publish limits are enforced by a BEFORE INSERT trigger on snippets. This
+  // keeps direct PostgREST writes and this action on the same non-bypassable
+  // boundary; the generic rate-limit primitive is not executable by clients.
 
   // Ensure profile exists — trigger covers new users; this is a safety net
   const { data: profile } = await supabase.from("profiles").select("id").eq("id", user.id).single();
@@ -131,11 +120,14 @@ export async function publishSnippet(formData: FormData): Promise<PublishResult>
   const shortId = generateShortId();
   const slug = toSlug(filename);
 
-  const canonicalPath = `snippets/${snippetId}/canonical.png`;
-  const ogPath = `snippets/${snippetId}/og.png`;
-  const svgPath = `snippets/${snippetId}/canonical.svg`;
+  // Storage RLS requires every asset to live under the authenticated owner's
+  // UUID prefix. The snippet ID remains the second-level isolation boundary.
+  const assetPrefix = `${user.id}/snippets/${snippetId}`;
+  const canonicalPath = `${assetPrefix}/canonical.png`;
+  const ogPath = `${assetPrefix}/og.png`;
+  const svgPath = `${assetPrefix}/canonical.svg`;
   const rawExt = getRawFileExtension(filename);
-  const rawPath = `snippets/${snippetId}/raw.${rawExt}`;
+  const rawPath = `${assetPrefix}/raw.${rawExt}`;
 
   // Upload all assets in parallel
   const rawBuffer = Buffer.from(normalizedCode, "utf-8");
@@ -177,7 +169,18 @@ export async function publishSnippet(formData: FormData): Promise<PublishResult>
 
   if (insertError) {
     await supabase.storage.from("snippet-images").remove([canonicalPath, ogPath, svgPath, rawPath]);
-    return { error: `Failed to publish: ${insertError.message}` };
+
+    if (insertError.message.includes("publish_hour_rate_limit")) {
+      return { error: "Too many snippets in the last hour. Try again later." };
+    }
+    if (insertError.message.includes("publish_day_rate_limit")) {
+      return { error: "Daily snippet limit reached. Come back tomorrow." };
+    }
+    if (insertError.message.includes("persistent_account_required")) {
+      return { error: "You must be signed in with a permanent account to publish." };
+    }
+
+    return { error: "Failed to publish the snippet. Please try again." };
   }
 
   const reactionRows = buildReactionRows(snippetId, user.id, reactions);
