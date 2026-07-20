@@ -14,6 +14,15 @@ CI runs `npm run audit:prod` and fails on high or critical production dependency
 - **Compensating controls:** User code is escaped before rendering, HTML-producing paths have regression tests, and a production CSP is part of the release hardening plan.
 - **Removal condition:** Upgrade Next.js as soon as it ships with PostCSS 8.5.10 or newer, then remove this exception after `npm audit --omit=dev` is clean.
 
+## Hosted database advisor baseline
+
+The hosted Security Advisor is reviewed after each migration release. The 2026-07-20 baseline has no exposed `SECURITY DEFINER` RPCs and no unresolved application-owned findings. The remaining expected warnings are:
+
+- **Anonymous-access policies:** intentional visitor reactions and comments. Writes remain scoped to `auth.uid()`, bounded by database triggers, and anonymous identities cannot publish snippets.
+- **`pg_net` extension namespace:** required by the nightly Edge Function invocation. The installed extension is non-relocatable; its warning is accepted while its use remains limited to the reviewed Vault-backed Cron request.
+
+Leaked-password protection is enabled in hosted Supabase Auth. Performance Advisor reports no issues.
+
 ## Reporting
 
 Do not open a public issue for a suspected vulnerability. Contact the repository owner privately with reproduction steps and affected versions.

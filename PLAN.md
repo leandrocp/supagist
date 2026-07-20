@@ -2,6 +2,8 @@
 
 This plan closes the release blockers found in the Auth, Storage, database, Realtime, dependency, and CI audits. Work proceeds strictly in order; each item must pass its focused tests before the next item begins.
 
+**Status:** Completed and deployed on 2026-07-20. Production release `d962dec9a392` passed every required GitHub Actions job, the hosted migration matrix, the cleanup invocation, and the production smoke suite.
+
 ## 1. Enforce Storage ownership
 
 - Change `snippet-images` object policies so authenticated users can insert and delete only objects they own.

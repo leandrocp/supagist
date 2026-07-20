@@ -39,6 +39,14 @@ curl --fail --silent --show-error https://supagist.app/api/health
 
 Then exercise login, publish, snippet rendering, reaction, comment, PNG/SVG export, and logout in the production deployment.
 
+### Current production baseline
+
+- Release `d962dec9a392` was deployed on 2026-07-20.
+- Supabase stores the function credential in Vault as `cleanup_function_secret`; Cron sends it only in the `apikey` header expected by `auth: ["secret"]`.
+- `nightly-cleanup` invokes the `cleanup` Edge Function at `0 2 * * *`; `cleanup_rate_limit_buckets` runs at `30 2 * * *`.
+- A one-row cleanup invocation and the Vault-backed `pg_net` request both returned HTTP 200 after deployment.
+- Hosted physical backups were present before migration deployment.
+
 ## Monitoring
 
 - `.github/workflows/uptime.yml` probes `/api/health` every 15 minutes.
