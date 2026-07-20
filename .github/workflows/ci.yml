@@ -21,6 +21,7 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - run: npm run audit:prod
       - run: npm run lint
       - run: npm run fmt:check
 
@@ -60,7 +61,30 @@ jobs:
           # @supabase/ssr throws if these env vars are missing during the
           # prerender step.
           NEXT_PUBLIC_SUPABASE_URL: http://localhost:54321
-          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci_build_placeholder
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: >-
+            sb_publishable_ci_build_placeholder
+      - name: Verify production security headers
+        run: |
+          npm start -- -p 3010 > /tmp/supagist-next.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid"' EXIT
+          for _ in $(seq 1 30); do
+            curl --fail --silent http://127.0.0.1:3010/ > /dev/null && break
+            sleep 1
+          done
+          headers="$(curl --fail --silent --show-error \
+            --head http://127.0.0.1:3010/)"
+          csp="$(printf '%s' "$headers" \
+            | grep -i '^content-security-policy:')"
+          printf '%s' "$csp" | grep -q "default-src 'self'"
+          if printf '%s' "$csp" | grep -q "'unsafe-eval'"; then
+            echo 'Production CSP must not allow unsafe-eval' >&2
+            exit 1
+          fi
+          if printf '%s' "$headers" | grep -qi '^x-powered-by:'; then
+            echo 'Production response exposed X-Powered-By' >&2
+            exit 1
+          fi
 
   e2e-smoke:
     name: E2E smoke
@@ -75,7 +99,7 @@ jobs:
       - run: npm ci
       - uses: supabase/setup-cli@v2
         with:
-          version: latest
+          version: 2.109.1
       - name: Start local Supabase
         run: supabase start
       - name: Seed local buckets
@@ -83,11 +107,13 @@ jobs:
       - name: Export local Supabase env
         run: |
           set -a
+          # shellcheck source=/dev/null
           source <(supabase status -o env)
           set +a
           {
             printf 'NEXT_PUBLIC_SUPABASE_URL=%s\n' "$API_URL"
-            printf 'NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=%s\n' "$PUBLISHABLE_KEY"
+            printf '%s=%s\n' \
+              'NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY' "$PUBLISHABLE_KEY"
           } >> "$GITHUB_ENV"
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
@@ -115,7 +141,7 @@ jobs:
       - run: npm ci
       - uses: supabase/setup-cli@v2
         with:
-          version: latest
+          version: 2.109.1
       - name: Start local Supabase
         run: supabase start
       - name: Apply migrations
@@ -123,6 +149,7 @@ jobs:
       - name: Export local Supabase env
         run: |
           set -a
+          # shellcheck source=/dev/null
           source <(supabase status -o env)
           set +a
           {
@@ -153,7 +180,7 @@ jobs:
       - run: npm ci
       - uses: supabase/setup-cli@v2
         with:
-          version: latest
+          version: 2.109.1
       - name: Start local Supabase
         run: supabase start
       - name: Seed local buckets
@@ -161,11 +188,13 @@ jobs:
       - name: Export local Supabase env
         run: |
           set -a
+          # shellcheck source=/dev/null
           source <(supabase status -o env)
           set +a
           {
             printf 'NEXT_PUBLIC_SUPABASE_URL=%s\n' "$API_URL"
-            printf 'NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=%s\n' "$PUBLISHABLE_KEY"
+            printf '%s=%s\n' \
+              'NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY' "$PUBLISHABLE_KEY"
             printf 'E2E_SUPABASE_ANON_KEY=%s\n' "$ANON_KEY"
             printf 'E2E_SUPABASE_SERVICE_KEY=%s\n' "$SERVICE_ROLE_KEY"
           } >> "$GITHUB_ENV"
