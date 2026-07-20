@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect } from "react";
 import { BrandDot } from "@/components/brand-dot";
 import { Button } from "@/components/ui/button";
+import { reportClientError } from "@/lib/client-error-reporting";
 
 export default function GlobalError({
   error,
@@ -13,10 +14,8 @@ export default function GlobalError({
   reset: () => void;
 }) {
   useEffect(() => {
-    // Surface the error in the browser console so it shows up in session
-    // recordings / dev tools. Real error tracking (Sentry et al.) is a
-    // separate follow-up.
     console.error("[Supagist] route render error", error);
+    reportClientError(error);
   }, [error]);
 
   return (

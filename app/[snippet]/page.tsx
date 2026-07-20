@@ -180,7 +180,7 @@ export default async function SnippetPage({ params }: Props) {
               <h1 className="text-2xl font-semibold tracking-tight">{snippet.filename}</h1>
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
                 {author ? (
-                  <a
+                  <Link
                     href={`https://github.com/${author.username}`}
                     target="_blank"
                     rel="noopener noreferrer"
@@ -192,7 +192,7 @@ export default async function SnippetPage({ params }: Props) {
                       size="sm"
                     />
                     <span>@{author.username}</span>
-                  </a>
+                  </Link>
                 ) : null}
                 <span>{snippet.theme}</span>
                 {snippet.language ? <span>{snippet.language}</span> : null}
@@ -230,50 +230,50 @@ export default async function SnippetPage({ params }: Props) {
         <footer className="flex flex-col gap-3 border-t border-border py-8 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:gap-4">
           <p className="font-mono uppercase tracking-code-label">
             Built with{" "}
-            <a
+            <Link
               href="https://supabase.com"
               target="_blank"
               rel="noopener noreferrer"
               className="text-brand-link underline-offset-2 hover:underline"
             >
               Supabase
-            </a>{" "}
+            </Link>{" "}
             and{" "}
-            <a
+            <Link
               href="https://lumis.sh"
               target="_blank"
               rel="noopener noreferrer"
               className="underline-offset-2 hover:text-foreground hover:underline"
             >
               Lumis
-            </a>{" "}
+            </Link>{" "}
             · Backgrounds by{" "}
-            <a
+            <Link
               href="https://ray.so"
               target="_blank"
               rel="noopener noreferrer"
               className="underline-offset-2 hover:text-foreground hover:underline"
             >
               ray.so
-            </a>
+            </Link>
           </p>
           <div className="flex items-center gap-5 font-mono uppercase tracking-code-label">
-            <a
+            <Link
               href="https://github.com/leandrocp/supagist/blob/main/ARCHITECTURE.md"
               target="_blank"
               rel="noopener noreferrer"
               className="underline-offset-2 hover:text-foreground hover:underline"
             >
               Architecture
-            </a>
-            <a
+            </Link>
+            <Link
               href="https://github.com/leandrocp/supagist"
               target="_blank"
               rel="noopener noreferrer"
               className="underline-offset-2 hover:text-foreground hover:underline"
             >
               GitHub
-            </a>
+            </Link>
             <Link
               href="/terms"
               className="underline-offset-2 hover:text-foreground hover:underline"

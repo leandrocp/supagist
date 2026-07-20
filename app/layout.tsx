@@ -4,11 +4,11 @@ import { ThemeProvider } from "next-themes";
 import { Providers } from "./providers";
 import { NotificationsListener } from "@/components/notifications-listener";
 import { Toaster } from "@/components/ui/sonner";
-import { getAppUrl } from "@/lib/utils";
+import { getMetadataBase, hasEnvVars } from "@/lib/utils";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  metadataBase: new URL(getAppUrl()),
+  metadataBase: getMetadataBase(),
   title: "Supagist",
   description: "A super gist built with Supabase and Lumis.",
 };
@@ -35,8 +35,8 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`${geistSans.className} ${sourceCodePro.variable} antialiased`}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
-          <Providers>{children}</Providers>
-          <NotificationsListener />
+          <Providers enableSupabaseSession={hasEnvVars}>{children}</Providers>
+          {hasEnvVars ? <NotificationsListener /> : null}
           <Toaster richColors closeButton position="bottom-right" />
         </ThemeProvider>
       </body>

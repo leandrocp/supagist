@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import type { NextRequest } from "next/server";
+import { NextRequest } from "next/server";
 
 const { mockCreateClient, mockRedirect } = vi.hoisted(() => ({
   mockCreateClient: vi.fn(),
@@ -17,7 +17,7 @@ vi.mock("next/navigation", () => ({ redirect: mockRedirect }));
 import { GET } from "./route";
 
 function makeRequest(url: string): NextRequest {
-  return { url } as NextRequest;
+  return new NextRequest(url);
 }
 
 function makeAuth({

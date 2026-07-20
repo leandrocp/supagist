@@ -3,15 +3,20 @@
 import { useState } from "react";
 import { Download } from "lucide-react";
 import { ExportModal, type ExportSettings } from "@/components/export-modal";
+import { EXPORT_INNER_PADDING } from "@/lib/export-utils";
+import { DEFAULT_FOOTER_SETTINGS, DEFAULT_HEADER_SETTINGS } from "@/lib/export-metadata";
 
 const DEFAULT_SETTINGS: ExportSettings = {
   background: null,
-  padding: 64,
+  outerPadding: 64,
+  innerPadding: EXPORT_INNER_PADDING,
+  cornerRadius: 12,
   pixelRatio: 4,
   lineNumbers: false,
   showReactions: false,
-  showFilename: true,
-  showFooter: false,
+  header: DEFAULT_HEADER_SETTINGS,
+  footer: DEFAULT_FOOTER_SETTINGS,
+  windowDecoration: "macos",
   fontId: "system",
   language: null,
 };
@@ -23,6 +28,7 @@ type Props = {
   authorUsername?: string | null;
   authorAvatarUrl?: string | null;
   reactions?: Record<number, import("@/lib/snippet-utils").ExportReactionChip[]>;
+  sourceUrl?: string | null;
   /** Inline style forwarded to the trigger so it can pick up the active syntax palette. */
   style?: React.CSSProperties;
 };
@@ -34,6 +40,7 @@ export function SnippetExportModal({
   authorUsername,
   authorAvatarUrl,
   reactions,
+  sourceUrl,
   style,
 }: Props) {
   const [open, setOpen] = useState(false);
@@ -61,6 +68,7 @@ export function SnippetExportModal({
         authorUsername={authorUsername}
         authorAvatarUrl={authorAvatarUrl}
         reactions={reactions}
+        sourceUrl={sourceUrl}
         settings={settings}
         onSettingsChange={setSettings}
       />

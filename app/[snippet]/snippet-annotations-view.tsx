@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Check, Copy, MessageSquarePlus, SmilePlus } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -15,12 +16,11 @@ import {
 } from "@/lib/snippet-utils";
 import { nameToColor, nameToInitials } from "@/lib/presence-utils";
 import { UserAvatar } from "@/components/user-avatar";
-import { formatCommentTimestamp, formatReactorList, formatTypingNames } from "@/lib/format-utils";
+import { formatCommentTimestamp, formatReactorList } from "@/lib/format-utils";
 import { buildLoginUrl } from "@/lib/auth-redirect";
 import { SnippetPresenceInline } from "./snippet-presence";
 import { ShareButton } from "./share-button";
 import { SnippetExportModal } from "./snippet-export-modal";
-import type { RealtimeChannel } from "@supabase/supabase-js";
 
 const DEV_MODE = process.env.NODE_ENV !== "production";
 
@@ -162,25 +162,21 @@ type LineComment = {
   createdAt: string;
 };
 
-// Broadcast event payloads
-type ReactionEvent = {
-  op: "upsert" | "delete";
+type ReactionRow = {
   id: string;
-  lineNumber: number;
+  snippet_id: string;
+  line_number: number;
   emoji: string;
-  authorId: string;
-  authorUsername: string;
-  authorAvatarUrl: string | null;
+  author_id: string;
 };
-type CommentEvent = {
-  op: "upsert" | "delete";
+
+type CommentRow = {
   id: string;
-  lineNumber: number;
+  snippet_id: string;
+  line_number: number;
   body: string;
-  authorId: string;
-  authorUsername: string;
-  authorAvatarUrl: string | null;
-  createdAt: string;
+  author_id: string;
+  created_at: string;
 };
 
 type Author = { id: string; username: string; avatar_url: string } | null;
@@ -253,14 +249,6 @@ export function SnippetAnnotationsView({
   const [reactionPulses, setReactionPulses] = useState<
     Array<{ key: string; line: number; emoji: string }>
   >([]);
-  // typingByUser tracks { userId → { username, line, lastSeenAt } } for everyone
-  // currently composing. Stale entries are pruned every 4s, so a viewer who
-  // disconnects mid-type stops appearing for others without us needing a
-  // dedicated "stopped typing" event.
-  const [typingByUser, setTypingByUser] = useState<
-    Record<string, { username: string; line: number; lastSeenAt: number }>
-  >({});
-
   const handleCopy = useCallback(() => {
     void navigator.clipboard.writeText(code).then(() => {
       setCopied(true);
@@ -269,7 +257,6 @@ export function SnippetAnnotationsView({
   }, [code]);
 
   const commentInputRef = useRef<HTMLTextAreaElement | null>(null);
-  const channelRef = useRef<RealtimeChannel | null>(null);
 
   const lines = useMemo(() => code.split("\n"), [code]);
 
@@ -350,179 +337,119 @@ export function SnippetAnnotationsView({
       });
   }, [supabase, currentUserId]);
 
-  // ── Broadcast channel ──────────────────────────────────────────────────────
+  // ── Authoritative Realtime state ───────────────────────────────────────────
+  // Reactions and comments are driven only by RLS-filtered Postgres Changes.
+  // Public broadcast payloads are intentionally not consumed: callers could
+  // forge their author identity and make uncommitted content appear genuine.
   useEffect(() => {
-    const channel = supabase.channel(`snippet:${snippetId}`, {
-      config: { broadcast: { self: true } },
-    });
+    async function loadProfile(authorId: string) {
+      const { data } = await supabase
+        .from("profiles")
+        .select("username, avatar_url")
+        .eq("id", authorId)
+        .maybeSingle();
+      return {
+        username: data?.username ?? "unknown",
+        avatarUrl: data?.avatar_url || null,
+      };
+    }
 
-    channel
-      .on("broadcast", { event: "reaction" }, ({ payload }: { payload: ReactionEvent }) => {
-        if (payload.op === "upsert") {
-          setLineReactions((prev) => {
-            const rest = (prev[payload.lineNumber] ?? []).filter(
-              (r) => r.authorId !== payload.authorId,
-            );
-            return {
+    const channel = supabase
+      .channel(`snippet-db:${snippetId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "snippet_line_reactions",
+          filter: `snippet_id=eq.${snippetId}`,
+        },
+        async (payload) => {
+          const row = (payload.eventType === "DELETE" ? payload.old : payload.new) as ReactionRow;
+          if (!row.id) return;
+
+          if (payload.eventType === "DELETE") {
+            setLineReactions((prev) => ({
               ...prev,
-              [payload.lineNumber]: [
-                ...rest,
-                {
-                  id: payload.id,
-                  emoji: payload.emoji,
-                  authorId: payload.authorId,
-                  authorUsername: payload.authorUsername,
-                  authorAvatarUrl: payload.authorAvatarUrl,
-                },
-              ],
-            };
-          });
-          // Fire a brief animation when the reaction came from someone else.
-          // Self-broadcasts also reach this handler (config.broadcast.self =
-          // true), so we filter on author to avoid pulsing your own clicks.
-          if (payload.emoji && payload.authorId !== currentUserId) {
+              [row.line_number]: (prev[row.line_number] ?? []).filter(
+                (reaction) => reaction.id !== row.id,
+              ),
+            }));
+            return;
+          }
+
+          const profile = await loadProfile(row.author_id);
+          setLineReactions((prev) => ({
+            ...prev,
+            [row.line_number]: [
+              ...(prev[row.line_number] ?? []).filter((reaction) => reaction.id !== row.id),
+              {
+                id: row.id,
+                emoji: row.emoji,
+                authorId: row.author_id,
+                authorUsername: profile.username,
+                authorAvatarUrl: profile.avatarUrl,
+              },
+            ],
+          }));
+
+          if (row.author_id !== currentUserId) {
             const pulseKey = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
             setReactionPulses((prev) => [
               ...prev,
-              { key: pulseKey, line: payload.lineNumber, emoji: payload.emoji },
+              { key: pulseKey, line: row.line_number, emoji: row.emoji },
             ]);
             setTimeout(() => {
-              setReactionPulses((prev) => prev.filter((p) => p.key !== pulseKey));
+              setReactionPulses((prev) => prev.filter((pulse) => pulse.key !== pulseKey));
             }, 800);
           }
-        } else {
-          setLineReactions((prev) => {
-            const next: Record<number, LineReaction[]> = {};
-            for (const [ln, rxns] of Object.entries(prev)) {
-              next[Number(ln)] = rxns.filter((r) => r.id !== payload.id);
-            }
-            return next;
-          });
-        }
-      })
-      .on("broadcast", { event: "comment" }, ({ payload }: { payload: CommentEvent }) => {
-        if (payload.op === "upsert") {
-          setLineComments((prev) => {
-            // Dedupe by id so the broadcast that echoes back to the sender
-            // doesn't double-render the comment they just posted.
-            const rest = (prev[payload.lineNumber] ?? []).filter((c) => c.id !== payload.id);
-            return {
-              ...prev,
-              [payload.lineNumber]: [
-                ...rest,
-                {
-                  id: payload.id,
-                  authorId: payload.authorId,
-                  authorUsername: payload.authorUsername,
-                  authorAvatarUrl: payload.authorAvatarUrl,
-                  body: payload.body,
-                  createdAt: payload.createdAt,
-                },
-              ],
-            };
-          });
-        } else {
-          setLineComments((prev) => {
-            const next: Record<number, LineComment[]> = {};
-            for (const [ln, cmts] of Object.entries(prev)) {
-              next[Number(ln)] = cmts.filter((c) => c.id !== payload.id);
-            }
-            return next;
-          });
-        }
-      })
+        },
+      )
       .on(
-        "broadcast",
-        { event: "typing" },
-        ({
-          payload,
-        }: {
-          payload: { userId: string; username: string; line: number | null; ts: number };
-        }) => {
-          // Filter our own broadcasts (config.broadcast.self echoes back to us)
-          if (payload.userId === currentUserId) return;
-          setTypingByUser((prev) => {
-            const next = { ...prev };
-            if (payload.line === null) {
-              delete next[payload.userId];
-            } else {
-              next[payload.userId] = {
-                username: payload.username,
-                line: payload.line,
-                lastSeenAt: payload.ts,
-              };
-            }
-            return next;
-          });
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "snippet_comments",
+          filter: `snippet_id=eq.${snippetId}`,
+        },
+        async (payload) => {
+          const row = (payload.eventType === "DELETE" ? payload.old : payload.new) as CommentRow;
+          if (!row.id) return;
+
+          if (payload.eventType === "DELETE") {
+            setLineComments((prev) => ({
+              ...prev,
+              [row.line_number]: (prev[row.line_number] ?? []).filter(
+                (comment) => comment.id !== row.id,
+              ),
+            }));
+            return;
+          }
+
+          const profile = await loadProfile(row.author_id);
+          setLineComments((prev) => ({
+            ...prev,
+            [row.line_number]: [
+              ...(prev[row.line_number] ?? []).filter((comment) => comment.id !== row.id),
+              {
+                id: row.id,
+                authorId: row.author_id,
+                authorUsername: profile.username,
+                authorAvatarUrl: profile.avatarUrl,
+                body: row.body,
+                createdAt: row.created_at,
+              },
+            ],
+          }));
         },
       )
       .subscribe();
 
-    channelRef.current = channel;
     return () => {
       void supabase.removeChannel(channel);
     };
   }, [supabase, snippetId, currentUserId]);
-
-  // ── Typing indicator: broadcast over the existing snippet channel ─────────
-  // Presence-based detection was finicky around subscribe timing — switching
-  // to plain broadcast events on the same channel we already use for
-  // reactions/comments. Each composer fires "typing" with their current line
-  // (or null when the form closes); other clients track who's typing where
-  // and prune entries that haven't been refreshed in TIMEOUT_MS.
-  const TYPING_TIMEOUT_MS = 5000;
-
-  useEffect(() => {
-    const id = setInterval(() => {
-      const cutoff = Date.now() - TYPING_TIMEOUT_MS;
-      setTypingByUser((prev) => {
-        let changed = false;
-        const next: typeof prev = {};
-        for (const [uid, entry] of Object.entries(prev)) {
-          if (entry.lastSeenAt > cutoff) next[uid] = entry;
-          else changed = true;
-        }
-        return changed ? next : prev;
-      });
-    }, 1500);
-    return () => clearInterval(id);
-  }, []);
-
-  // Publish our typingLine whenever the form opens/closes/switches lines, and
-  // keep refreshing it on a heartbeat while the form is open so a late-arriving
-  // viewer also picks up that we're typing.
-  useEffect(() => {
-    if (!currentUserId) return;
-    const username = currentUsername || "Guest";
-
-    const broadcastTyping = (line: number | null) => {
-      const ch = channelRef.current;
-      if (!ch) return;
-      // httpSend is the explicit REST broadcast — channel.send() with
-      // {type:"broadcast"} silently falls back to REST when the channel
-      // isn't yet SUBSCRIBED (which is common here because the typing
-      // useEffect fires immediately on mount, before the subscribe
-      // handshake completes), and that fallback is being deprecated.
-      void ch.httpSend("typing", { userId: currentUserId, username, line, ts: Date.now() });
-    };
-
-    // Fire immediately on open/close/switch.
-    broadcastTyping(selectedCommentLine);
-
-    // Heartbeat while the form is open so the receiver's TTL doesn't kick in.
-    if (selectedCommentLine === null) return;
-    const id = setInterval(() => broadcastTyping(selectedCommentLine), 2500);
-    return () => clearInterval(id);
-  }, [selectedCommentLine, currentUserId, currentUsername]);
-
-  const typingByLine = useMemo(() => {
-    const result: Record<number, string[]> = {};
-    for (const entry of Object.values(typingByUser)) {
-      if (!result[entry.line]) result[entry.line] = [];
-      result[entry.line].push(entry.username);
-    }
-    return result;
-  }, [typingByUser]);
 
   // ── Derived display ────────────────────────────────────────────────────────
   const displayReactions = useMemo(() => {
@@ -643,18 +570,11 @@ export function SnippetAnnotationsView({
         .select("id");
       if (error || !deleted?.length) return;
 
-      const existing = lineReactions[line]?.find((r) => r.authorId === currentUserId);
-      if (existing && channelRef.current) {
-        await channelRef.current.httpSend("reaction", {
-          op: "delete",
-          id: existing.id,
-          lineNumber: line,
-          emoji: "",
-          authorId: currentUserId,
-          authorUsername: currentUsername ?? "unknown",
-          authorAvatarUrl: currentUserAvatar,
-        } satisfies ReactionEvent);
-      }
+      const deletedIds = new Set(deleted.map((row) => row.id));
+      setLineReactions((prev) => ({
+        ...prev,
+        [line]: (prev[line] ?? []).filter((reaction) => !deletedIds.has(reaction.id)),
+      }));
       return;
     }
 
@@ -667,16 +587,20 @@ export function SnippetAnnotationsView({
       .select("id")
       .single();
 
-    if (data?.id && channelRef.current) {
-      await channelRef.current.httpSend("reaction", {
-        op: "upsert",
-        id: data.id,
-        lineNumber: line,
-        emoji,
-        authorId: currentUserId,
-        authorUsername: currentUsername ?? "unknown",
-        authorAvatarUrl: currentUserAvatar,
-      } satisfies ReactionEvent);
+    if (data?.id) {
+      setLineReactions((prev) => ({
+        ...prev,
+        [line]: [
+          ...(prev[line] ?? []).filter((reaction) => reaction.id !== data.id),
+          {
+            id: data.id,
+            emoji,
+            authorId: currentUserId,
+            authorUsername: currentUsername ?? "unknown",
+            authorAvatarUrl: currentUserAvatar,
+          },
+        ],
+      }));
     }
   };
 
@@ -719,17 +643,21 @@ export function SnippetAnnotationsView({
       .select("id, created_at")
       .single();
 
-    if (data?.id && channelRef.current) {
-      await channelRef.current.httpSend("comment", {
-        op: "upsert",
-        id: data.id,
-        lineNumber: line,
-        body,
-        authorId: currentUserId,
-        authorUsername: currentUsername ?? "unknown",
-        authorAvatarUrl: currentUserAvatar,
-        createdAt: data.created_at ?? new Date().toISOString(),
-      } satisfies CommentEvent);
+    if (data?.id) {
+      setLineComments((prev) => ({
+        ...prev,
+        [line]: [
+          ...(prev[line] ?? []).filter((comment) => comment.id !== data.id),
+          {
+            id: data.id,
+            authorId: currentUserId,
+            authorUsername: currentUsername ?? "unknown",
+            authorAvatarUrl: currentUserAvatar,
+            body,
+            createdAt: data.created_at ?? new Date().toISOString(),
+          },
+        ],
+      }));
     }
   };
 
@@ -780,6 +708,7 @@ export function SnippetAnnotationsView({
             authorUsername={author?.username ?? null}
             authorAvatarUrl={author?.avatar_url ?? null}
             reactions={exportReactions}
+            sourceUrl={snippetUrl}
             style={{ color: c.buttonText }}
           />
           <ShareButton url={snippetUrl} style={{ color: c.buttonText }} />
@@ -1043,14 +972,14 @@ export function SnippetAnnotationsView({
                     className="flex items-baseline gap-2 text-xs"
                     style={{ color: c.headerText }}
                   >
-                    <a
+                    <Link
                       href={`https://github.com/${cmt.authorUsername}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="font-medium hover:underline"
                     >
                       @{cmt.authorUsername}
-                    </a>
+                    </Link>
                     <time dateTime={cmt.createdAt} className="opacity-70">
                       {formatCommentTimestamp(cmt.createdAt)}
                     </time>
@@ -1065,19 +994,10 @@ export function SnippetAnnotationsView({
               </div>
             ))}
 
-          {typingByLine[selectedCommentLine] && typingByLine[selectedCommentLine].length > 0 ? (
-            <p
-              className="font-sans text-xs italic"
-              style={{ color: c.headerText }}
-              aria-live="polite"
-            >
-              {formatTypingNames(typingByLine[selectedCommentLine])} typing…
-            </p>
-          ) : null}
-
           <div className="space-y-2 pt-1">
             <textarea
               ref={commentInputRef}
+              maxLength={2000}
               className="themed-placeholder min-h-16 w-full resize-none rounded-md border px-3 py-2 font-sans text-sm outline-none transition-colors focus-visible:ring-2"
               style={
                 {
@@ -1131,13 +1051,13 @@ export function SnippetAnnotationsView({
           style={{ borderColor: c.border, backgroundColor: c.gutter }}
         >
           <span style={{ color: c.headerText }}>Log in to leave reactions or comments.</span>
-          <a
+          <Link
             href={loginUrl}
             className="rounded-md px-3 py-1 text-xs font-medium transition-opacity hover:opacity-80"
             style={{ backgroundColor: c.bg, color: c.headerText, border: `1px solid ${c.border}` }}
           >
             Log in
-          </a>
+          </Link>
         </div>
       ) : null}
 

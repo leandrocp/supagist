@@ -36,61 +36,88 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
+    /* Supabase Design System: semantic app background and surface hierarchy. */
+    --background: 0 0% 98.4%;
+    --background-alternative: 0 0% 99.2%;
+    --background-200: 0 0% 100%;
+    --surface-100: 0 0% 100%;
+    --surface-200: 0 0% 98%;
+    --surface-300: 0 0% 96.1%;
     --foreground: 0 0% 6%;
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 6%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 6%;
-    --primary: 0 0% 6%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 0 0% 96.1%;
-    --secondary-foreground: 0 0% 9%;
-    --muted: 0 0% 96.1%;
-    --muted-foreground: 0 0% 45.1%;
-    --accent: 0 0% 96.1%;
-    --accent-foreground: 0 0% 9%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
+    --foreground-light: 0 0% 32.2%;
+    --foreground-lighter: 0 0% 43.9%;
+    --foreground-muted: 0 0% 43.9%;
+    --foreground-contrast: 0 0% 98.4%;
+    --card: var(--surface-100);
+    --card-foreground: var(--foreground);
+    --popover: var(--surface-100);
+    --popover-foreground: var(--foreground);
+    --primary: 156.5 86.5% 26.1%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: var(--surface-200);
+    --secondary-foreground: var(--foreground);
+    --muted: var(--surface-300);
+    --muted-foreground: var(--foreground-muted);
+    --accent: var(--surface-300);
+    --accent-foreground: var(--foreground);
+    --destructive: 10.2 77.9% 53.9%;
+    --destructive-foreground: 0 0% 100%;
     --border: 0 0% 89.8%;
-    --input: 0 0% 89.8%;
-    --ring: 153 60% 53%;
-    --chart-1: 153 60% 53%;
+    --border-strong: 0 0% 78%;
+    --border-control: 0 0% 84%;
+    --input: var(--border-control);
+    --ring: 153.1 60.2% 52.7%;
+    --chart-1: 153.1 60.2% 52.7%;
     --chart-2: 173 58% 39%;
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
-    --brand: 153 60% 53%;
-    --brand-link: 153 100% 39%;
+    --brand: 153.1 60.2% 52.7%;
+    --brand-link: 156.5 86.5% 26.1%;
+    --brand-subtle: 147.6 72.5% 90%;
+    --brand-strong: 156.5 86.5% 26.1%;
   }
   .dark {
-    --background: 0 0% 9%;
+    --background: 0 0% 7.1%;
+    --background-alternative: 0 0% 5.5%;
+    --background-200: 0 0% 9%;
+    --surface-100: 0 0% 9%;
+    --surface-200: 0 0% 11%;
+    --surface-300: 0 0% 13.5%;
     --foreground: 0 0% 98%;
-    --card: 0 0% 9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 10%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 6%;
-    --secondary: 0 0% 14%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 14%;
-    --muted-foreground: 0 0% 54%;
-    --accent: 0 0% 18%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
+    --foreground-light: 0 0% 70.6%;
+    --foreground-lighter: 0 0% 61%;
+    --foreground-muted: 0 0% 53.7%;
+    --foreground-contrast: 0 0% 8.6%;
+    --card: var(--surface-100);
+    --card-foreground: var(--foreground);
+    --popover: var(--surface-200);
+    --popover-foreground: var(--foreground);
+    --primary: 153.1 60.2% 52.7%;
+    --primary-foreground: 154 70% 7%;
+    --secondary: var(--surface-200);
+    --secondary-foreground: var(--foreground);
+    --muted: var(--surface-300);
+    --muted-foreground: var(--foreground-muted);
+    --accent: var(--surface-300);
+    --accent-foreground: var(--foreground);
+    --destructive: 10.2 77.9% 53.9%;
+    --destructive-foreground: 0 0% 100%;
     --border: 0 0% 18%;
-    --input: 0 0% 18%;
-    --ring: 153 60% 53%;
-    --chart-1: 153 60% 53%;
+    --border-strong: 0 0% 25%;
+    --border-control: 0 0% 22%;
+    --input: var(--border-control);
+    --ring: 153.1 60.2% 52.7%;
+    --chart-1: 153.1 60.2% 52.7%;
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
-    --brand: 153 60% 53%;
-    --brand-link: 153 60% 53%;
+    --brand: 153.1 60.2% 52.7%;
+    --brand-link: 153.1 60.2% 52.7%;
+    --brand-subtle: 155.1 100% 8%;
+    --brand-strong: 153.1 59.5% 70%;
   }
 }
 
@@ -100,11 +127,19 @@
   }
 
   html {
-    @apply min-h-full;
+    scrollbar-gutter: stable;
+    @apply min-h-full overflow-x-clip;
   }
 
   body {
-    @apply min-h-screen bg-background text-foreground;
+    @apply min-h-screen overflow-x-clip bg-background text-foreground;
+  }
+
+  /* Radix Select locks body scrolling and adds a scrollbar-width margin.
+     The stable root gutter already reserves that space, so the extra margin
+     would shift the viewport-bound composer horizontally. */
+  html body[data-scroll-locked="1"] {
+    margin-right: 0 !important;
   }
 }
 

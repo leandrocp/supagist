@@ -43,6 +43,8 @@ mise run test:e2e
 
 See [ARCHITECTURE.md](./ARCHITECTURE.md) for auth states, realtime channels, storage layout, the export pipeline, and URL design.
 
+Release, monitoring, rollback, recovery, and incident procedures live in [OPERATIONS.md](./OPERATIONS.md). Dependency exceptions and vulnerability reporting guidance live in [SECURITY.md](./SECURITY.md).
+
 ## License
 
 MIT.

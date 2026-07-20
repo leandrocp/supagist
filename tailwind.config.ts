@@ -11,8 +11,23 @@ export default {
   theme: {
     extend: {
       colors: {
-        background: "hsl(var(--background))",
-        foreground: "hsl(var(--foreground))",
+        background: {
+          DEFAULT: "hsl(var(--background))",
+          alternative: "hsl(var(--background-alternative))",
+          200: "hsl(var(--background-200))",
+        },
+        foreground: {
+          DEFAULT: "hsl(var(--foreground))",
+          light: "hsl(var(--foreground-light))",
+          lighter: "hsl(var(--foreground-lighter))",
+          muted: "hsl(var(--foreground-muted))",
+          contrast: "hsl(var(--foreground-contrast))",
+        },
+        surface: {
+          100: "hsl(var(--surface-100))",
+          200: "hsl(var(--surface-200))",
+          300: "hsl(var(--surface-300))",
+        },
         card: {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
@@ -41,7 +56,11 @@ export default {
           DEFAULT: "hsl(var(--destructive))",
           foreground: "hsl(var(--destructive-foreground))",
         },
-        border: "hsl(var(--border))",
+        border: {
+          DEFAULT: "hsl(var(--border))",
+          strong: "hsl(var(--border-strong))",
+          control: "hsl(var(--border-control))",
+        },
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
         chart: {
@@ -54,6 +73,8 @@ export default {
         brand: {
           DEFAULT: "hsl(var(--brand))",
           link: "hsl(var(--brand-link))",
+          subtle: "hsl(var(--brand-subtle))",
+          strong: "hsl(var(--brand-strong))",
         },
       },
       borderRadius: {

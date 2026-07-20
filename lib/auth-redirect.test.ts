@@ -28,9 +28,20 @@ describe("safeNextPath", () => {
     expect(safeNextPath("//evil.com/path")).toBe("/");
   });
 
-  it("rejects values containing a `:` (defensive against scheme injection)", () => {
-    expect(safeNextPath("/javascript:alert(1)")).toBe("/");
-    expect(safeNextPath("/path?x=javascript:alert(1)")).toBe("/");
+  it("rejects backslash authority paths that browsers normalize off-origin", () => {
+    expect(safeNextPath("/\\evil.com")).toBe("/");
+    expect(safeNextPath("/\\/evil.com")).toBe("/");
+  });
+
+  it("rejects control characters that URL parsing can trim or normalize", () => {
+    expect(safeNextPath("/\t//evil.com")).toBe("/");
+    expect(safeNextPath("/safe\npath")).toBe("/");
+    expect(safeNextPath("/safe\u007fpath")).toBe("/");
+  });
+
+  it("allows colons inside a same-origin path or query", () => {
+    expect(safeNextPath("/notes/10:30")).toBe("/notes/10:30");
+    expect(safeNextPath("/search?q=type:typescript")).toBe("/search?q=type:typescript");
   });
 });
 

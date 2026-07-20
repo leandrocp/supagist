@@ -11,12 +11,10 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-  CommandSeparator,
 } from "@/components/ui/command";
-import { BRAND_THEMES, type BrandTheme } from "@/lib/brand-themes";
 
-export type ThemeOption = {
-  /** Stable id matching either a Lumis theme name or a brand id (e.g. "vercel-dark"). */
+type ThemeOption = {
+  /** Stable official Lumis theme id. */
   id: string;
   /** User-facing label rendered in the picker. */
   label: string;
@@ -25,7 +23,7 @@ export type ThemeOption = {
 type Props = {
   value: string;
   onChange: (next: string) => void;
-  /** Lumis themes (everforest_light, etc.) — Brands are pulled from BRAND_THEMES. */
+  /** Official Lumis themes (everforest_light, github_dark, etc.). */
   themes: ThemeOption[];
   /** Inline styles forwarded to the trigger so it can pick up the editor palette. */
   triggerStyle?: React.CSSProperties;
@@ -47,16 +45,7 @@ type Props = {
   };
 };
 
-/**
- * Theme picker with two groups (Brands, Themes) and a fuzzy search input —
- * cmdk under the hood handles filtering across both groups simultaneously.
- * Brand entries also render a tiny logo so the row reads at a glance.
- *
- * The native <select> + <optgroup> we shipped first didn't allow searching;
- * once Brands shipped (5 brands × 2 variants = 9 entries) sitting on top of
- * ~50 Lumis themes, scanning the dropdown for a name was painful. cmdk's
- * search feels right for that scale.
- */
+/** Searchable picker for official Lumis syntax colorschemes only. */
 export function ThemePicker({
   value,
   onChange,
@@ -68,11 +57,7 @@ export function ThemePicker({
 }: Props) {
   const [open, setOpen] = useState(false);
 
-  const brandById = new Map(BRAND_THEMES.map((b) => [b.id, b] as const));
-  const activeBrand = brandById.get(value);
-  const activeLabel = activeBrand
-    ? `${activeBrand.name} (${activeBrand.appearance})`
-    : (themes.find((t) => t.id === value)?.label ?? value);
+  const activeLabel = themes.find((theme) => theme.id === value)?.label ?? value;
 
   // Inline style helpers used to neutralize shadcn/CommandGroup's hardcoded
   // text-foreground / text-muted-foreground / bg-accent classes when the
@@ -90,14 +75,20 @@ export function ThemePicker({
   const itemHoverClass = popoverPalette
     ? "data-[selected=true]:!bg-[var(--cmd-hover-bg)] data-[selected=true]:!text-[var(--cmd-hover-text)]"
     : "";
-  const listStyle = popoverPalette
-    ? ({
-        "--cmd-heading-color": popoverPalette.headerText,
-        "--cmd-hover-bg": popoverPalette.hoverBg,
-        "--cmd-hover-text": popoverPalette.text,
-        color: popoverPalette.text,
-      } as React.CSSProperties)
-    : undefined;
+  const listStyle = {
+    ...(popoverPalette
+      ? {
+          "--cmd-heading-color": popoverPalette.headerText,
+          "--cmd-hover-bg": popoverPalette.hoverBg,
+          "--cmd-hover-text": popoverPalette.text,
+          color: popoverPalette.text,
+        }
+      : {}),
+    // Keep the search input and every list edge inside the collision-aware
+    // Popover viewport. Inline style wins over CommandList's built-in 300px
+    // max-height utility and avoids class-order conflicts.
+    maxHeight: "min(70vh, calc(var(--radix-popover-content-available-height) - 3rem))",
+  } as React.CSSProperties;
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -112,7 +103,6 @@ export function ThemePicker({
           )}
           style={triggerStyle}
         >
-          {activeBrand ? <BrandLogo brand={activeBrand} size={14} /> : null}
           <span className="truncate">{activeLabel}</span>
           <ChevronsUpDown
             className="ml-auto size-3.5 shrink-0 opacity-60"
@@ -121,9 +111,11 @@ export function ThemePicker({
         </button>
       </PopoverTrigger>
       <PopoverContent
-        className="w-[260px] p-0"
+        className="max-h-[var(--radix-popover-content-available-height)] w-[260px] overflow-hidden p-0"
         align="start"
+        side="top"
         sideOffset={6}
+        collisionPadding={12}
         style={
           popoverPalette
             ? {
@@ -166,38 +158,9 @@ export function ThemePicker({
               ended up with the app-light foreground (or vice versa) bleeding
               through. We override the heading + item text via inline styles
               on each element. */}
-          <CommandList className="max-h-[70vh]" style={listStyle}>
+          <CommandList style={listStyle}>
             <CommandEmpty>No themes match.</CommandEmpty>
-            <CommandGroup heading="Brands" className={headingClass}>
-              {BRAND_THEMES.map((b) => (
-                <CommandItem
-                  key={b.id}
-                  // value is what cmdk filters against — include both the
-                  // brand name and appearance so "supabase dark" matches.
-                  value={`${b.name} ${b.appearance} ${b.id}`}
-                  onSelect={() => {
-                    onChange(b.id);
-                    setOpen(false);
-                  }}
-                  className={itemHoverClass}
-                  style={itemStyle}
-                >
-                  <BrandLogo brand={b} size={16} className="mr-2" />
-                  <span>{b.name}</span>
-                  <span
-                    className="ml-1 text-xs"
-                    style={popoverPalette ? { color: popoverPalette.headerText } : undefined}
-                  >
-                    ({b.appearance})
-                  </span>
-                  <Check
-                    className={cn("ml-auto size-4", value === b.id ? "opacity-100" : "opacity-0")}
-                  />
-                </CommandItem>
-              ))}
-            </CommandGroup>
-            <CommandSeparator />
-            <CommandGroup heading="Themes" className={headingClass}>
+            <CommandGroup heading="Lumis themes" className={headingClass}>
               {themes.map((t) => (
                 <CommandItem
                   key={t.id}
@@ -220,40 +183,5 @@ export function ThemePicker({
         </Command>
       </PopoverContent>
     </Popover>
-  );
-}
-
-// Small inline brand logo. Rendered as a CSS mask so the visible color is
-// driven by `currentColor` — the same SVG can read white on the dark export
-// swatches AND the editor's foreground colour inside the theme-picker
-// popover, instead of being baked to a single fill that breaks one of the
-// two contexts.
-function BrandLogo({
-  brand,
-  size,
-  className,
-}: {
-  brand: BrandTheme;
-  size: number;
-  className?: string;
-}) {
-  return (
-    <span
-      aria-hidden
-      className={cn("inline-block shrink-0", className)}
-      style={{
-        width: size,
-        height: size,
-        backgroundColor: "currentColor",
-        maskImage: `url(${brand.logoUrl})`,
-        WebkitMaskImage: `url(${brand.logoUrl})`,
-        maskRepeat: "no-repeat",
-        WebkitMaskRepeat: "no-repeat",
-        maskSize: "contain",
-        WebkitMaskSize: "contain",
-        maskPosition: "center",
-        WebkitMaskPosition: "center",
-      }}
-    />
   );
 }

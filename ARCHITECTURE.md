@@ -11,7 +11,7 @@ Two identity states.
 - **Anonymous.** `signInAnonymously()` runs on first page load (`app/providers.tsx`). Every visitor gets a stable `auth.uid()` without seeing a sign-in screen, which is what carries presence and lets reactions/comments be authored at all. The DB profile is created with username `guest_<uuid_prefix>` by the `handle_new_user` trigger; presence and reaction-chip displays use a separate adjective+animal name from `lib/presence-utils.ts` (`generateGuestName`). Avatars are coloured circles with two-letter initials.
 - **GitHub OAuth + email/password.** PKCE flow via `signInWithOAuth` for GitHub; standard email+password through Supabase Auth otherwise. The callback at `/auth/oauth` exchanges the code and sets the session cookie.
 
-Anonymous sessions are treated as logged-out for the chrome (no "Hey {name}", no Logout button) and for the publish flow (Save routes to `/auth/login`). The session still exists, so presence and reactions keep working — it's a UI distinction, not an auth one.
+Anonymous sessions are treated as logged-out for the chrome (no "Hey {name}", no Logout button) and for the publish flow (Save routes to `/auth/login`). The publish server action and database trigger independently reject anonymous identities. The visitor session still exists, so presence and reactions keep working; after logout the root auth listener creates a fresh anonymous session.
 
 The `handle_new_user` trigger keeps `public.profiles` in sync as new auth rows land or GitHub metadata changes.
 
@@ -19,9 +19,8 @@ The `handle_new_user` trigger keeps `public.profiles` in sync as new auth rows l
 
 Snippet, social, and activity data lives in Postgres. RLS is on for every public table; anonymous users read everything but only write rows scoped to their own `auth.uid()`. Privileged writes go through security-definer RPCs:
 
-- `increment_view_count` atomically bumps the snippet's view counter and refreshes `last_seen_at`.
-- `record_visit` inserts into `snippet_visits`.
-- `check_rate_limit(key, max, window)` is the publish-side rate limiter. `app/actions/publish.ts` calls it twice (10/hour and 30/day per user) before writing storage or DB rows. Reactions and comments don't go through the server action, so they're rate-limited at the trigger level on the same RPC.
+- `record_snippet_view` atomically rate-limits and deduplicates a viewer, increments `view_count`, refreshes `last_seen_at`, and inserts the visit row. The former independent visit/counter RPCs are not client-executable.
+- `check_rate_limit(key, max, window)` is an internal bucket primitive executable only by the service role and security-definer triggers. A `BEFORE INSERT` trigger on `snippets` derives the caller from `auth.uid()` and enforces 10/hour plus 30/day, so direct PostgREST inserts cannot bypass the publish limits. Reactions and comments use their own trigger-selected limits on the same internal primitive.
 
 Two tables back the per-line social layer: `snippet_line_reactions` (one row per user × line × emoji) and `snippet_comments` (chat-style threads, multiple per line). Both have RLS policies that let anyone read but only the author can write or delete their own row.
 
@@ -32,28 +31,19 @@ A check constraint on `snippets.code_char_count` enforces equality with `char_le
 One public bucket: `snippet-images`. Each snippet gets four assets generated client-side via Lumis WASM at publish time:
 
 ```
-snippets/<snippet_id>/canonical.png   — export at user's chosen pixel ratio
-snippets/<snippet_id>/og.png          — fixed 1200×630 for social cards
-snippets/<snippet_id>/canonical.svg   — vector, fonts embedded as base64
-snippets/<snippet_id>/raw.<ext>       — plain source code
+<author_id>/snippets/<snippet_id>/canonical.png — export at user's chosen pixel ratio
+<author_id>/snippets/<snippet_id>/og.png        — fixed 1200×630 for social cards
+<author_id>/snippets/<snippet_id>/canonical.svg — vector, fonts embedded as base64
+<author_id>/snippets/<snippet_id>/raw.<ext>     — plain source code
 ```
 
-All four upload in parallel. If the DB insert fails afterward, the storage objects get cleaned up.
-
-### Realtime — Broadcast
-
-Live updates on snippet pages run on Broadcast.
-
-- `snippet:<snippet_id>` carries line reactions, comments, and typing indicators.
-- `snippet-reactions:<snippet_id>` carries snippet-level emoji reactions.
-
-Pattern in both cases: write to the DB, then `channel.httpSend(event, payload)`. `httpSend` is preferred over `channel.send({ type: "broadcast" })` because `send()` silently falls back to REST when the channel isn't yet `SUBSCRIBED`, and supabase-js is deprecating that fallback. The typing-indicator effect fires its first broadcast immediately on mount, before the subscribe handshake completes; that's exactly the case the deprecation warning calls out.
-
-Initial state loads from the DB once on mount; after that everything is event-driven.
+All four upload in parallel. The public bucket serves CDN URLs without allowing object listing. Storage RLS requires both `owner_id = auth.uid()` and the caller's UUID as the first path segment for inserts and deletes. If the DB insert fails afterward, the owner-scoped storage objects get cleaned up.
 
 ### Realtime — Postgres Changes
 
-`postgres_changes` shows up in exactly one place: `components/notifications-listener.tsx`, mounted globally in the layout. It subscribes to INSERTs on `snippet_line_reactions` and `snippet_comments` filtered by the viewer's authored snippet IDs, and surfaces fresh activity as a sonner toast. The listener tears down and re-subscribes on every `auth.onAuthStateChange` event so a sign-in mid-session creates the channel without a page reload.
+Saved-snippet reactions and comments use RLS-filtered `postgres_changes` subscriptions on `snippet_line_reactions` and `snippet_comments`. The UI applies local optimistic state after a successful database mutation, then deduplicates the authoritative row event by ID. It intentionally does not consume public Broadcast payloads for persisted annotations or typing identity, because those payloads can be forged independently of database RLS.
+
+`components/notifications-listener.tsx`, mounted globally in the layout, also subscribes to INSERTs on those tables filtered by the viewer's authored snippet IDs and surfaces fresh activity as a sonner toast. The listener tears down and re-subscribes on every `auth.onAuthStateChange` event so a sign-in mid-session creates the channel without a page reload.
 
 ### Realtime — Presence
 
@@ -64,23 +54,33 @@ Two presence channels:
 
 Each visitor's presence key is their `auth.uid()`. Signed-in users track their GitHub username and avatar; anonymous users track the name `generateGuestName` returns for them. Avatar colours are deterministic hex values derived from the name and applied via inline `style` (Tailwind classes wouldn't survive the JIT purge). Both channels untrack on `pagehide` so closed tabs disappear from the list quickly instead of waiting for the server-side heartbeat to time out.
 
-### Cron
+### Cleanup
 
-`pg_cron` runs `public.cleanup_old_snippets()` nightly at 02:00 UTC. The function deletes Storage objects first, then removes snippet rows; cascade handles comments, reactions, and visits. A second job at 02:30 UTC trims expired entries from the `rate_limit_buckets` table. No Edge Functions required for either.
+Stale snippet deletion is two-stage. The service-role-only `queue_old_snippets_for_cleanup` RPC locks and rechecks stale rows, writes their asset paths to `storage_cleanup_queue`, and deletes the snippet rows atomically; FK cascades remove comments, reactions, and visits. The `cleanup` Edge Function drains that durable queue through `storage.remove()`, deleting queue entries only after the Storage API succeeds so failed object removals remain retryable. The old SQL job that deleted `storage.objects` metadata directly is unscheduled. A separate 02:30 UTC cron continues trimming expired rate-limit buckets.
 
-## Brand themes
+## Brand presets and Lumis themes
 
-Five branded presets — Supabase, Vercel, Tailwind, Resend, Stripe — each ship as a Lumis-compatible theme plus a per-brand "frame" that customises the editor card itself, not just the background. Vercel is borderless with sharp corners; Stripe sits in a rounded card with a brand-blue hairline; Resend and Supabase ship a left-aligned filename strip (Resend includes the language label, Supabase doesn't); Tailwind keeps the macOS dots. The bg decoration helpers — Vercel's registration brackets and grid, Stripe's diagonal stripe, Tailwind's gridlines — render behind the card.
+Brand and Theme are independent controls. **Brand** is an atomic appearance preset that sets the outer canvas, frame fill/border, window decoration, font, spacing, corners, line numbers, granular Header/Footer metadata defaults, and a closest-fit official Lumis theme. **Theme** changes only the Lumis syntax colorscheme. Any later Theme or appearance change leaves the remaining Brand-applied values untouched and makes the Brand control read `Custom`.
 
-Every brand respects the export modal's toggles (Filename, Reactions, Lines, Footer). Frames only choose _where_ the filename sits when the toggle is on — centred over the dots for Vercel/Tailwind/Stripe, left-aligned in a header strip for Supabase/Resend. Chrome text colour is derived from the card fill via a luminance check so a light syntax theme on a dark brand card doesn't render dark-on-dark.
+`lib/brand-presets.ts` is the single 25-brand registry for Supabase, Vercel, Tailwind, Resend, Stripe, GitHub, OpenAI, Cloudflare, Linear, Cursor, Anthropic, Gemini, Perplexity, Hugging Face, Docker, Clerk, Prisma, AWS, Mintlify, Nuxt, Auth0, ElevenLabs, Firecrawl, Browserbase, and Trigger.dev. `EXPORT_BRAND_BACKGROUNDS` is derived from this registry rather than maintaining a second palette/frame catalog.
 
-`buildLumisThemeFromBrand` expands each brand's compact 10-key palette into the ~70 Lumis scope entries (`keyword.*`, `function.*`, `string.*`) so token highlighting works without re-coding the highlighter. `lib/theme-loader.ts` is a thin seam: brand id first, then `@lumis-sh/themes/<name>` fallback. All three render surfaces (saved-view server render, home-composer client render, export SVG) load themes through it.
+Every Brand resolves to a typed premium scene from `lib/brand-scenes.ts`: three ambient light fields, vignette, canvas rim, multi-layer frame rim, inner highlight, and bounded shadow. Six signature Brands add bespoke geometry: Tailwind crosshairs, Vercel registration guides, Supabase Studio rings/rails, Stripe color planes, OpenAI orbital halos, and Linear directional beams. React preview and SVG export consume the same scene colors and geometry roles. Brand frame fill, dot visibility, centered filename, header strip, and language label are also passed into the live editor so chrome matches export behavior.
 
-Brand colours, frame configs, and pattern PNGs (`tailwind-beams.png`, `resend-dark.png`) follow ray.so's catalog. Vercel and Stripe don't ship pattern assets — those frames are inline SVG that mirrors ray.so's CSS.
+Brand defaults use 32px outer padding (64px for Vercel) so ordinary cards occupy roughly 84–88% of the canvas width; short snippets stay compact while longer snippets grow naturally. PNG rendering remains density-independent through the selected 2x/4x/6x pixel ratio.
 
-## Theme picker
+Brand application is a one-time patch to the existing composer draft fields, not a second active styling engine. `findMatchingBrandPreset` derives whether the current fields—including Header and Footer options—still exactly match a preset. Legacy local drafts containing synthetic IDs such as `supabase-dark` are explicitly mapped to official Lumis IDs; `brand-themes.ts` and `theme-loader.ts` remain only as compatibility for already-published snippets.
 
-The home composer's theme dropdown is a Combobox (shadcn `Command` inside `Popover`). Two `CommandGroup`s, Brands and Themes, get fuzzy-filtered together by cmdk. Brand rows render the SVG logo as a CSS mask painted with `currentColor` so the same asset reads correctly on both the dark export swatches (white logo) and the popover painted in the editor palette's text colour. The popover surface picks up the editor palette (bg, text, border, hover background derived from `selectedLine`) so the dropdown blends with the active theme instead of flashing the app's default white.
+## Header and Footer metadata
+
+`lib/export-metadata.ts` owns the shared metadata schema and compatibility normalization. Header settings control category visibility plus independent filename and language positions; filename defaults to center and language to right, with Brand presets free to override either. Disabling Header collapses the complete window-chrome row. Footer settings independently control language, theme, line count, character count, author, and alignment; enabling Footer with no selected items does not reserve an empty strip. React preview, SVG, PNG, OG, and the saved-snippet export modal consume the same settings. The selected Window decoration is authoritative: choosing macOS or macOS Subtle always renders its dots, even when a Brand frame originally defaults to a dotless Minimal/None style. Header insets are directional—macOS reserves only the left control area, Windows reserves only the right, and Minimal reserves neither. Legacy drafts with `showFilename` / `showFooter` are migrated into the new objects during hydration.
+
+## Composer workspace layout
+
+The composer is bounded to the available viewport below the site navigation. At `lg+`, `components/home-composer.tsx` uses a persistent preview pane plus a 28rem settings pane. Its options scroll inside a shadcn `ScrollArea` with an overlay, hover-only scrollbar, while Export/Publish stays in a fixed pane footer outside the scroll viewport. Below `lg`, the same viewport is split into a `clamp(13rem, 34dvh, 22rem)` preview row and the same overlay-scrolling settings region. The root scrollbar gutter stays stable, and Radix body scroll locking is prevented from adding duplicate margin compensation, so opening Select overlays cannot shift the composer. This keeps visual feedback in view while any advanced option is changed and prevents the long settings form from moving the preview off-screen.
+
+## Brand and Theme pickers
+
+The Brand picker uses a visual, searchable shadcn `Command` inside `Popover`, showing all 25 brand compositions in a two-column grid. The Theme picker uses the same collision-aware pattern but contains only official Lumis themes. Both lists respect the available popover viewport and scroll internally.
 
 ## Key files
 
@@ -95,7 +95,7 @@ app/
     page.tsx                   Server component — fetches snippet + author, server-renders Lumis highlighting,
                                 builds og:image:alt + social description
     snippet-code-block.tsx     Server-side Lumis highlighter (singleton, deduped via React cache())
-    snippet-annotations-view.tsx   Live line reactions + comments, typing indicators (Broadcast)
+    snippet-annotations-view.tsx   Live RLS-backed line reactions + comments (Postgres Changes)
     snippet-reactions.tsx      Snippet-level emoji reactions (Broadcast on snippet-reactions:<id>)
     snippet-presence.tsx       Code block footer — live visitor stack (Presence)
     snippet-export-modal.tsx   Wraps ExportModal with the saved-snippet's author/avatar
@@ -104,7 +104,7 @@ app/
   actions/
     publish.ts                 Auth + rate-limit gates, CRLF normalization, asset uploads, snippets insert
     get-my-snippets.ts         Returns the signed-in user's snippets for the homepage list
-    record-visit.ts            Fires increment_view_count + record_visit RPCs
+    record-visit.ts            Fires the bounded atomic record_snippet_view RPC
 
 components/
   home-composer.tsx            Editor + toolbar + publish flow
@@ -112,15 +112,20 @@ components/
   my-snippets.tsx              Homepage list of the signed-in user's saved snippets
   home-presence.tsx            Homepage live "X, Y are writing snippets…" presence pulse
   export-modal.tsx             Export settings (background, padding, font, size, language, lines, footer)
-  theme-picker.tsx             Combobox theme picker — Brands + Themes groups, fuzzy filter
+  brand-picker.tsx             Visual searchable picker that applies complete Brand presets
+  brand-scene-decoration.tsx   Responsive scene guides/artwork behind the live editor
+  theme-picker.tsx             Searchable official-Lumis-theme picker
   notifications-listener.tsx   Author notifications via sonner toasts (postgres_changes)
   user-avatar.tsx              shadcn Avatar wrapper with deterministic name → colour fallback
   auth-button.tsx              Renders the "Log in" pill for anon + logged-out viewers, "Hey {name} / Logout" for real users
   brand-dot.tsx                The brand pulse dot in the nav and login form
 
 lib/
-  brand-themes.ts              5-brand registry, palette → Lumis-theme builder (buildLumisThemeFromBrand)
-  theme-loader.ts              Single seam: brand id first, then @lumis-sh/themes/<name>
+  brand-presets.ts             25-brand appearance registry + six signature scene recipes
+  brand-scenes.ts              Shared premium lighting/frame primitives and CSS serialization
+  export-metadata.ts           Header/Footer schema, defaults, migration, and visible-item ordering
+  brand-themes.ts              Legacy synthetic-theme compatibility for published snippets
+  theme-loader.ts              Loads legacy compatibility ids or @lumis-sh/themes/<name>
   export-utils.ts              createHighlightedSvg, renderToFile, EXPORT_BACKGROUNDS,
                                 EXPORT_BRAND_BACKGROUNDS, BrandFrame, readableOnFill
   snippet-utils.ts             parseSnippetParam, codePointLength, buildSnippetSocialAlt,
@@ -132,7 +137,7 @@ lib/
   supabase/server.ts           Server Supabase client (cookie-based SSR)
   supabase/proxy.ts            updateSession — refreshes the auth cookie on every matched request
 
-public/brands/                 SVG logos + raster patterns for the 5 brand themes
+public/brands/                 SVG logos + raster patterns for the 25 Brand presets
 proxy.ts                       Next.js middleware entry — calls updateSession()
 
 supabase/
@@ -142,7 +147,7 @@ supabase/
 
 ## Data flow: saving a snippet
 
-1. User pastes code and sets filename, language, theme, and font in the toolbar.
+1. User pastes code, applies an optional Brand preset, and can independently customize Theme, filename, language, frame, and spacing controls.
 2. Clicks Save. Anonymous and logged-out viewers route to `/auth/login`; the draft and annotations are already in `localStorage`, so they pick up where they left off after sign-in.
 3. `publishSnippet` server action:
    - Verifies the user is signed in (`getUser()`).
@@ -158,9 +163,9 @@ supabase/
 ## Data flow: viewing a snippet
 
 1. Server component fetches snippet + author in one round-trip (deduped via `cache()`).
-2. `recordVisit()` fires-and-forgets, calling `increment_view_count` and `record_visit`.
+2. `recordVisit()` fires-and-forgets, calling the bounded `record_snippet_view` RPC.
 3. Lumis highlights the code server-side using `loadTheme(snippet.theme)`, which resolves brand themes from the local registry first and falls through to `@lumis-sh/themes/<name>`. `preRenderedLines` is passed to the client as a prop, so the browser doesn't load WASM just to view.
-4. `SnippetAnnotationsView` subscribes to the `snippet:<id>` Broadcast channel for live line reactions, comments, and typing indicators. `SnippetReactions` subscribes to `snippet-reactions:<id>` for snippet-level emoji.
+4. `SnippetAnnotationsView` subscribes to RLS-backed Postgres Changes for live line reactions and comments; forgeable Broadcast payloads are not treated as persisted UI truth.
 5. `SnippetPresenceFooter` joins the Presence channel — the visitor stack updates in real time.
 6. `generateMetadata` produces a three-line social-card description (`<filename> by @<author>` / `<lang> | <theme> | <lines> lines | <chars> / 8,000` / `# Supagist. Comment, react, share, export.`) and an `og:image:alt` to match. Slack and X show it on link unfurl.
 
@@ -168,16 +173,21 @@ supabase/
 
 The export pipeline runs entirely in the browser via Lumis WASM. `createHighlightedSvg` produces a self-contained SVG — monospace fonts (JetBrains Mono, Fira Code, Geist Mono, Hack, or System) are fetched from `/fonts/` and embedded as base64 so the file renders correctly even when loaded via an `<img>` tag (no page CSS).
 
-The card width follows one rule:
+The card width separates the configurable editor inset from stable chrome spacing:
 
 ```
-naturalWidth = max(longestLinePx + lineNumOffset, footerWidthPx)
-             + 2 * EXPORT_WIN_PAD_X
+fixedGutterWidth = EXPORT_CHROME_PAD_X + EXPORT_LINE_NUM_WIDTH + EXPORT_LINE_NUM_GAP
+codeStartInset = lineNumbers ? fixedGutterWidth + innerPadding : innerPadding
+
+naturalWidth = max(
+  longestLinePx + codeStartInset + innerPadding,
+  footerWidthPx + 2 * EXPORT_CHROME_PAD_X,
+)
 ```
 
-Footer width is part of the calc because it can exceed the longest code line — without that the footer pushes against the right edge and reads asymmetric against the line-number column. Line numbers are left-aligned at the same inset as the right edge, so the gutters match by construction.
+The line-number gutter is fixed chrome and never changes with `innerPadding`. Inner padding applies to all four sides of the code body after that gutter. `outerPadding` remains separate and only surrounds the card when a background is enabled.
 
-When the snippet uses a brand theme, `createHighlightedSvg` defaults to the matching brand background (Supabase wash, Vercel black, Tailwind beams, Resend folded-paper, Stripe navy + diagonal stripe). Per-brand `BrandFrame` configs drive the chrome shape — macOS dots on/off, optional left-aligned filename strip with a language label, card stroke, corner radius, and an explicit card fill that overrides the syntax theme's bg. The Filename toggle is honored on every brand: when on, the filename renders centred (Vercel/Tailwind/Stripe) or in the left-aligned strip (Supabase/Resend); when off, no filename anywhere. Chrome text picks white or black based on `cardFill` luminance, so contrast holds regardless of which syntax theme is paired with which brand.
+Brand styling is always explicit: selecting a Brand writes its background, frame, official Lumis theme, window, font, and spacing values into the draft. `createHighlightedSvg` never infers a background from a theme; `null` always means no background. Per-brand `BrandFrame` configs drive macOS dots on/off, optional left-aligned filename strips, card stroke, corner radius, and card fill. Chrome text picks white or black based on `cardFill` luminance so contrast holds when Theme is customized independently.
 
 Reactor avatars in chip pills are fetched, base64-encoded, and embedded as a single SVG `<pattern>` per unique URL — the canvas-rasterisation step would otherwise taint the canvas and refuse to produce a PNG.
 

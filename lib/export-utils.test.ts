@@ -44,12 +44,34 @@ import {
   triggerDownload,
   createHighlightedSvg,
   renderToFile,
+  estimateExportDimensions,
+  addPngTextMetadata,
+  exportCornerRadiusFromSliderIndex,
+  exportCornerRadiusToSliderIndex,
+  exportInnerPaddingFromSliderIndex,
+  exportInnerPaddingToSliderIndex,
+  exportOuterPaddingFromSliderIndex,
+  exportOuterPaddingToSliderIndex,
+  normalizeExportCornerRadius,
+  normalizeExportInnerPadding,
+  normalizeExportOuterPadding,
+  EXPORT_METADATA_URL,
 } from "./export-utils";
 import type { SvgToken } from "./export-utils";
 
 // Re-apply highlighter implementations before each test so mock call counts
 // are fresh and implementations are always set even after vi.clearAllMocks().
 beforeEach(() => {
+  // Brand patterns are browser-relative assets. Give them a deterministic
+  // response so SVG tests never depend on a dev server listening on :3000.
+  vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
+    const url = typeof input === "string" ? input : input.toString();
+    if (url.startsWith("/brands/")) {
+      return new Response(new Blob(["pattern"], { type: "image/png" }), { status: 200 });
+    }
+    return new Response(null, { status: 404 });
+  });
+
   mockHighlighter.loadLanguage.mockResolvedValue(undefined);
   mockHighlighter.highlightIter.mockImplementation(
     (
@@ -92,6 +114,198 @@ describe("toPngFilename", () => {
 
   it("strips only the last extension segment", () => {
     expect(toPngFilename("archive.tar.gz")).toBe("archive.tar.png");
+  });
+});
+
+// ── estimateExportDimensions ─────────────────────────────────────────────────
+
+describe("estimateExportDimensions", () => {
+  const background = { label: "Test", from: "#000", to: "#fff" };
+
+  it("reports final canvas dimensions including background padding", () => {
+    const small = estimateExportDimensions({
+      code: "const x = 1;",
+      language: "typescript",
+      theme: "github_light",
+      background,
+      outerPadding: 16,
+    });
+    const large = estimateExportDimensions({
+      code: "const x = 1;",
+      language: "typescript",
+      theme: "github_light",
+      background,
+      outerPadding: 128,
+    });
+
+    expect(large.width - small.width).toBe(224);
+    expect(large.height - small.height).toBe(224);
+  });
+
+  it("applies inner padding proportionally and independently of outer padding", () => {
+    const code = "const proportionalPadding = 'wide enough to avoid the minimum width';";
+    const compact = estimateExportDimensions({
+      code,
+      language: "typescript",
+      theme: "github_light",
+      background,
+      outerPadding: 64,
+      innerPadding: 8,
+      windowDecoration: "none",
+    });
+    const spacious = estimateExportDimensions({
+      code,
+      language: "typescript",
+      theme: "github_light",
+      background,
+      outerPadding: 64,
+      innerPadding: 48,
+      windowDecoration: "none",
+    });
+
+    expect(spacious.width - compact.width).toBe(80);
+    expect(spacious.height - compact.height).toBe(80);
+  });
+
+  it("keeps line-number gutter width fixed as inner padding changes", () => {
+    const code = "const fixedGutter = 'wide enough to avoid the minimum width';";
+    const compact = estimateExportDimensions({
+      code,
+      language: "typescript",
+      theme: "github_light",
+      lineNumbers: true,
+      innerPadding: 8,
+      windowDecoration: "none",
+    });
+    const spacious = estimateExportDimensions({
+      code,
+      language: "typescript",
+      theme: "github_light",
+      lineNumbers: true,
+      innerPadding: 48,
+      windowDecoration: "none",
+    });
+
+    expect(spacious.width - compact.width).toBe(80);
+    expect(spacious.height - compact.height).toBe(80);
+  });
+
+  it("uses the measured monospace advance so right padding matches inner padding", () => {
+    const dimensions = estimateExportDimensions({
+      code: "x".repeat(32),
+      language: "typescript",
+      theme: "github_light",
+      innerPadding: 8,
+      windowDecoration: "none",
+    });
+
+    expect(dimensions.width).toBe(286);
+  });
+
+  it("uses compact emoji-only reaction width for the live composer", () => {
+    const settings = {
+      code: "x".repeat(32),
+      language: "typescript",
+      theme: "github_light",
+      innerPadding: 8,
+      windowDecoration: "none" as const,
+      reactions: {
+        1: [{ emoji: "⭐", reactors: [{ username: "tester", avatarUrl: null }] }],
+      },
+      showReactions: true,
+    };
+
+    const exported = estimateExportDimensions(settings);
+    const composer = estimateExportDimensions({ ...settings, compactReactions: true });
+
+    expect(exported.width).toBe(331);
+    expect(composer.width).toBe(324);
+  });
+
+  it("keeps short snippets compact instead of forcing the legacy 420px width", () => {
+    const dimensions = estimateExportDimensions({
+      code: "x",
+      language: "typescript",
+      theme: "github_light",
+      windowDecoration: "none",
+    });
+
+    expect(dimensions).toEqual({ width: 240, height: 56 });
+  });
+
+  it("does not bake export scale into logical image dimensions", () => {
+    const dimensions = estimateExportDimensions({
+      code: "const x = 1;",
+      language: "typescript",
+      theme: "github_light",
+      background,
+      outerPadding: 64,
+    });
+
+    expect(dimensions).toEqual({ width: 368, height: 224 });
+  });
+
+  it("uses less vertical space when window decoration is disabled", () => {
+    const decorated = estimateExportDimensions({
+      code: "const x = 1;",
+      language: "typescript",
+      theme: "github_light",
+    });
+    const chromeless = estimateExportDimensions({
+      code: "const x = 1;",
+      language: "typescript",
+      theme: "github_light",
+      windowDecoration: "none",
+    });
+
+    expect(decorated.height - chromeless.height).toBe(40);
+  });
+
+  it("ignores comments when estimating export dimensions", () => {
+    const withoutComment = estimateExportDimensions({
+      code: "const x = 1;",
+      language: "typescript",
+      theme: "github_light",
+    });
+    const withComment = estimateExportDimensions({
+      code: "const x = 1;",
+      language: "typescript",
+      theme: "github_light",
+    });
+
+    expect(withComment).toEqual(withoutComment);
+  });
+});
+
+// ── addPngTextMetadata ────────────────────────────────────────────────────────
+
+describe("addPngTextMetadata", () => {
+  it("inserts a PNG tEXt metadata chunk after IHDR", () => {
+    const signature = new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10]);
+    const ihdrLength = new Uint8Array([0, 0, 0, 13]);
+    const ihdrType = new TextEncoder().encode("IHDR");
+    const ihdrData = new Uint8Array(13);
+    const ihdrCrc = new Uint8Array([0, 0, 0, 0]);
+    const iend = new Uint8Array([0, 0, 0, 0, 73, 69, 78, 68, 0, 0, 0, 0]);
+    const png = new Uint8Array([
+      ...signature,
+      ...ihdrLength,
+      ...ihdrType,
+      ...ihdrData,
+      ...ihdrCrc,
+      ...iend,
+    ]);
+
+    const withMetadata = addPngTextMetadata(png, "Source", EXPORT_METADATA_URL);
+    const text = new TextDecoder().decode(withMetadata);
+
+    expect(text).toContain("tEXtSource");
+    expect(text).toContain(EXPORT_METADATA_URL);
+  });
+
+  it("leaves invalid PNG bytes unchanged", () => {
+    const bytes = new TextEncoder().encode("not-png");
+    expect(addPngTextMetadata(bytes, "Source", EXPORT_METADATA_URL)).toBe(bytes);
   });
 });
 
@@ -301,6 +515,51 @@ describe("triggerDownload", () => {
   });
 });
 
+describe("export corner radius values", () => {
+  it("maps the five product radius tokens", () => {
+    expect(
+      Array.from({ length: 5 }, (_, index) => exportCornerRadiusFromSliderIndex(index)),
+    ).toEqual([0, 4, 8, 12, 16]);
+  });
+
+  it("normalizes subtle legacy values to the nearest larger token", () => {
+    expect(normalizeExportCornerRadius(2)).toBe(4);
+    expect(normalizeExportCornerRadius(6)).toBe(8);
+    expect(normalizeExportCornerRadius(14)).toBe(16);
+    expect(exportCornerRadiusToSliderIndex(14)).toBe(4);
+  });
+});
+
+describe("export outer padding values", () => {
+  it("maps the six meaningful slider positions", () => {
+    expect(
+      Array.from({ length: 6 }, (_, index) => exportOuterPaddingFromSliderIndex(index)),
+    ).toEqual([0, 16, 32, 64, 96, 128]);
+  });
+
+  it("normalizes removed intermediate values to the nearest larger option", () => {
+    expect(normalizeExportOuterPadding(48)).toBe(64);
+    expect(normalizeExportOuterPadding(80)).toBe(96);
+    expect(normalizeExportOuterPadding(112)).toBe(128);
+    expect(exportOuterPaddingToSliderIndex(112)).toBe(5);
+  });
+});
+
+describe("export inner padding values", () => {
+  it("maps the six proportional editor inset positions", () => {
+    expect(
+      Array.from({ length: 6 }, (_, index) => exportInnerPaddingFromSliderIndex(index)),
+    ).toEqual([8, 12, 16, 24, 32, 48]);
+  });
+
+  it("normalizes arbitrary values to the nearest supported inset", () => {
+    expect(normalizeExportInnerPadding(10)).toBe(12);
+    expect(normalizeExportInnerPadding(20)).toBe(24);
+    expect(normalizeExportInnerPadding(40)).toBe(48);
+    expect(exportInnerPaddingToSliderIndex(40)).toBe(5);
+  });
+});
+
 // ── createHighlightedSvg ─────────────────────────────────────────────────────
 
 describe("createHighlightedSvg", () => {
@@ -314,6 +573,75 @@ describe("createHighlightedSvg", () => {
     );
     expect(svg).toMatch(/^<svg /);
     expect(svg).toMatch(/<\/svg>$/);
+  });
+
+  it("renders an explicit square editor card", async () => {
+    const svg = await createHighlightedSvg(
+      "x",
+      "test.ts",
+      "github_light",
+      1200,
+      undefined,
+      { label: "Test", from: "#000000", to: "#111111" },
+      undefined,
+      false,
+      "system",
+      null,
+      null,
+      false,
+      true,
+      false,
+      null,
+      null,
+      null,
+      false,
+      null,
+      "macos",
+      0,
+    );
+
+    expect(svg).toContain('rx="0" ry="0"');
+  });
+
+  it("embeds Supagist source metadata", async () => {
+    const svg = await createHighlightedSvg(
+      "const x = 1;",
+      "test.ts",
+      "github_light",
+      1200,
+      undefined,
+    );
+
+    expect(svg).toContain("<metadata>");
+    expect(svg).toContain(`<dc:source>${EXPORT_METADATA_URL}</dc:source>`);
+  });
+
+  it("embeds a provided share URL as source metadata", async () => {
+    const sourceUrl = "https://supagist.app/example-abc123";
+    const svg = await createHighlightedSvg(
+      "const x = 1;",
+      "test.ts",
+      "github_light",
+      1200,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      sourceUrl,
+    );
+
+    expect(svg).toContain(`<dc:source>${sourceUrl}</dc:source>`);
+    expect(svg).toContain(`rdf:about="${sourceUrl}"`);
   });
 
   it("embeds the code text", async () => {
@@ -332,6 +660,165 @@ describe("createHighlightedSvg", () => {
     expect(svg).toContain("#ff5f57");
     expect(svg).toContain("#febc2e");
     expect(svg).toContain("#28c840");
+  });
+
+  it("renders neutral dots for the macOS Subtle window decoration", async () => {
+    const svg = await createHighlightedSvg(
+      "x",
+      "test.ts",
+      "github_light",
+      1200,
+      undefined,
+      null,
+      undefined,
+      false,
+      "system",
+      null,
+      null,
+      false,
+      true,
+      false,
+      null,
+      null,
+      undefined,
+      false,
+      undefined,
+      "macos-subtle",
+    );
+
+    expect(svg).not.toContain("#ff5f57");
+    expect(svg).toContain('fill-opacity="0.22"');
+  });
+
+  it("renders only the centered filename for the Minimal window decoration", async () => {
+    const svg = await createHighlightedSvg(
+      "x",
+      "test.ts",
+      "github_light",
+      1200,
+      undefined,
+      null,
+      undefined,
+      false,
+      "system",
+      null,
+      null,
+      false,
+      true,
+      false,
+      null,
+      null,
+      undefined,
+      false,
+      undefined,
+      "minimal",
+    );
+
+    expect(svg).not.toContain("#ff5f57");
+    expect(svg).not.toContain('fill-opacity="0.22"');
+    expect(svg).toMatch(/<text[^>]*>test.ts<\/text>/);
+    expect(svg).toContain('data-export-window-divider="true"');
+  });
+
+  it("renders right-aligned controls for the Windows window decoration", async () => {
+    const svg = await createHighlightedSvg(
+      "x",
+      "test.ts",
+      "github_light",
+      1200,
+      undefined,
+      null,
+      undefined,
+      false,
+      "system",
+      null,
+      null,
+      false,
+      true,
+      false,
+      null,
+      null,
+      undefined,
+      false,
+      undefined,
+      "windows",
+    );
+
+    expect(svg).not.toContain("#ff5f57");
+    expect(svg).toContain(">×</text>");
+    expect(svg).toContain('width="10" height="10" fill="none"');
+  });
+
+  it("reserves metadata inset only on the window-control side", async () => {
+    const render = (windowDecoration: "macos" | "windows") =>
+      createHighlightedSvg(
+        "x",
+        "test.ts",
+        "github_light",
+        1200,
+        undefined,
+        null,
+        undefined,
+        false,
+        "system",
+        null,
+        null,
+        false,
+        true,
+        false,
+        null,
+        null,
+        undefined,
+        false,
+        undefined,
+        windowDecoration,
+        undefined,
+        16,
+        {
+          enabled: true,
+          showFilename: true,
+          showLanguage: false,
+          filenamePosition: "left",
+          languagePosition: "right",
+        },
+      );
+
+    const macos = await render("macos");
+    const windows = await render("windows");
+    const filenameX = (svg: string) =>
+      Number(/<text x="([\d.]+)"[^>]*>test\.ts<\/text>/.exec(svg)?.[1]);
+
+    expect(filenameX(macos)).toBe(82);
+    expect(filenameX(windows)).toBe(18);
+  });
+
+  it("omits window chrome when decoration is none", async () => {
+    const svg = await createHighlightedSvg(
+      "x",
+      "test.ts",
+      "github_light",
+      1200,
+      undefined,
+      null,
+      undefined,
+      false,
+      "system",
+      null,
+      null,
+      false,
+      true,
+      false,
+      null,
+      null,
+      undefined,
+      false,
+      undefined,
+      "none",
+    );
+
+    expect(svg).not.toContain("#ff5f57");
+    expect(svg).not.toContain("test.ts");
+    expect(svg).toContain(">x</tspan>");
   });
 
   it("aligns the first traffic-light dot's left edge with the footer text", async () => {
@@ -407,6 +894,99 @@ describe("createHighlightedSvg", () => {
     expect(svg).toContain(">2<");
   });
 
+  it("right-aligns exported single- and multi-digit line numbers", async () => {
+    const code = Array.from({ length: 10 }, (_value, index) => `line ${index + 1}`).join("\n");
+    const svg = await createHighlightedSvg(
+      code,
+      "test.ts",
+      "github_light",
+      1200,
+      undefined,
+      null,
+      undefined,
+      true,
+    );
+
+    expect(svg).toContain('text-anchor="end" fill="#333333" fill-opacity="0.4">9</text>');
+    expect(svg).toContain('text-anchor="end" fill="#333333" fill-opacity="0.4">10</text>');
+  });
+
+  it("renders the line-number gutter divider only when line numbers are enabled", async () => {
+    const withLineNumbers = await createHighlightedSvg(
+      "line1\nline2",
+      "test.ts",
+      "github_light",
+      1200,
+      undefined,
+      null,
+      undefined,
+      true,
+    );
+    const withoutLineNumbers = await createHighlightedSvg(
+      "line1\nline2",
+      "test.ts",
+      "github_light",
+      1200,
+      undefined,
+      null,
+      undefined,
+      false,
+    );
+
+    expect(withLineNumbers).toContain('data-export-gutter-divider="true"');
+    expect(withLineNumbers).toContain('<line data-export-gutter-divider="true" x1="54"');
+    expect(withoutLineNumbers).not.toContain('data-export-gutter-divider="true"');
+  });
+
+  it("renders a divider between window chrome and the code body", async () => {
+    const svg = await createHighlightedSvg(
+      "line1\nline2",
+      "test.ts",
+      "github_light",
+      1200,
+      undefined,
+    );
+
+    expect(svg).toContain('data-export-window-divider="true"');
+    expect(svg).toContain('<line data-export-window-divider="true" x1="0" y1="40"');
+  });
+
+  it("keeps the SVG gutter fixed while moving code with inner padding", async () => {
+    const renderWithInnerPadding = (innerPadding: number) =>
+      createHighlightedSvg(
+        "line1",
+        "test.ts",
+        "github_light",
+        1200,
+        undefined,
+        null,
+        undefined,
+        true,
+        "system",
+        null,
+        null,
+        false,
+        true,
+        false,
+        null,
+        null,
+        null,
+        false,
+        null,
+        "none",
+        undefined,
+        innerPadding,
+      );
+
+    const compact = await renderWithInnerPadding(8);
+    const spacious = await renderWithInnerPadding(48);
+
+    expect(compact).toContain('<text x="36"');
+    expect(compact).toContain('<text x="62"');
+    expect(spacious).toContain('<text x="36"');
+    expect(spacious).toContain('<text x="102"');
+  });
+
   it("omits line numbers when lineNumbers is false", async () => {
     const svg = await createHighlightedSvg(
       "line1\nline2",
@@ -437,6 +1017,32 @@ describe("createHighlightedSvg", () => {
       true,
     );
     expect(svg).toContain("🔥");
+  });
+
+  it("does not render comments into generated SVG output", async () => {
+    const svg = await createHighlightedSvg(
+      "const x = 1;",
+      "test.ts",
+      "github_light",
+      1200,
+      undefined,
+      null,
+      undefined,
+      false,
+      undefined,
+      null,
+      null,
+      false,
+      true,
+      false,
+      null,
+      null,
+      { 1: { author: "dev", body: "check this branch" } },
+      true,
+    );
+
+    expect(svg).not.toContain("check this branch");
+    expect(svg).not.toContain("↳");
   });
 
   it("places the reaction chip on the LAST visual row of a wrapped source line", async () => {
@@ -676,6 +1282,11 @@ describe("createHighlightedSvg", () => {
       true,
     );
     expect(svg).toContain(">my-file.ts<");
+    const filenameX = Number(/<text x="([\d.]+)"[^>]*>my-file\.ts<\/text>/.exec(svg)?.[1]);
+    const languageX = Number(
+      /<text x="([\d.]+)"[^>]*>(?:TypeScript|typescript)<\/text>/.exec(svg)?.[1],
+    );
+    expect(filenameX).toBeLessThan(languageX);
   });
 
   it("omits the filename when showFilename is false", async () => {
@@ -695,6 +1306,144 @@ describe("createHighlightedSvg", () => {
       false,
     );
     expect(svg).not.toContain(">my-file.ts<");
+  });
+
+  it("renders granular header and footer metadata selections", async () => {
+    const svg = await createHighlightedSvg(
+      "const x = 1;\nconst y = 2;",
+      "private-name.ts",
+      "github_light",
+      1200,
+      undefined,
+      null,
+      undefined,
+      false,
+      "system",
+      "typescript",
+      null,
+      false,
+      true,
+      true,
+      "alice",
+      null,
+      undefined,
+      false,
+      undefined,
+      "minimal",
+      12,
+      16,
+      {
+        enabled: true,
+        showFilename: false,
+        showLanguage: true,
+        filenamePosition: "center",
+        languagePosition: "right",
+      },
+      {
+        enabled: true,
+        showLanguage: false,
+        showTheme: true,
+        showLineCount: true,
+        showCharCount: false,
+        showAuthor: false,
+        alignment: "center",
+      },
+    );
+
+    expect(svg).not.toContain(">private-name.ts<");
+    expect(svg).toContain(">typescript<");
+    expect(svg).toContain(">github_light<");
+    expect(svg).toContain(">2 lines<");
+    expect(svg).not.toContain("/ 8,000");
+    expect(svg).not.toContain(">@alice<");
+  });
+
+  it("collapses header and footer height when their categories are disabled", async () => {
+    const visible = await createHighlightedSvg(
+      "x",
+      "test.ts",
+      "github_light",
+      1200,
+      undefined,
+      null,
+      undefined,
+      false,
+      "system",
+      null,
+      null,
+      false,
+      true,
+      true,
+      null,
+      null,
+      undefined,
+      false,
+      undefined,
+      "minimal",
+      12,
+      16,
+      {
+        enabled: true,
+        showFilename: true,
+        showLanguage: true,
+        filenamePosition: "center",
+        languagePosition: "right",
+      },
+      {
+        enabled: true,
+        showLanguage: false,
+        showTheme: true,
+        showLineCount: false,
+        showCharCount: false,
+        showAuthor: false,
+        alignment: "left",
+      },
+    );
+    const hidden = await createHighlightedSvg(
+      "x",
+      "test.ts",
+      "github_light",
+      1200,
+      undefined,
+      null,
+      undefined,
+      false,
+      "system",
+      null,
+      null,
+      false,
+      true,
+      true,
+      null,
+      null,
+      undefined,
+      false,
+      undefined,
+      "minimal",
+      12,
+      16,
+      {
+        enabled: false,
+        showFilename: true,
+        showLanguage: true,
+        filenamePosition: "center",
+        languagePosition: "right",
+      },
+      {
+        enabled: false,
+        showLanguage: true,
+        showTheme: true,
+        showLineCount: true,
+        showCharCount: true,
+        showAuthor: true,
+        alignment: "left",
+      },
+    );
+
+    const visibleHeight = Number(/height="(\d+)"/.exec(visible)?.[1]);
+    const hiddenHeight = Number(/height="(\d+)"/.exec(hidden)?.[1]);
+    expect(visibleHeight - hiddenHeight).toBe(76);
+    expect(hidden).not.toContain("data-export-window-divider");
   });
 
   it("clips to the provided height", async () => {
@@ -732,10 +1481,55 @@ describe("createHighlightedSvg", () => {
   });
 });
 
+// ── Premium brand scenes ─────────────────────────────────────────────────────
+
+describe("EXPORT_BRAND_BACKGROUNDS — premium scenes", () => {
+  it("renders layered lighting, canvas rims, frame depth, and finite geometry for all brands", async () => {
+    const { EXPORT_BRAND_BACKGROUNDS, createHighlightedSvg } = await import("./export-utils");
+
+    for (const background of EXPORT_BRAND_BACKGROUNDS) {
+      const svg = await createHighlightedSvg(
+        "const polished = true",
+        "scene.ts",
+        "github_light",
+        1200,
+        undefined,
+        background,
+      );
+      expect(svg, background.label).toContain('data-scene-layer="glow-0"');
+      expect(svg, background.label).toContain('data-scene-layer="canvas-rim"');
+      expect(svg, background.label).toContain('data-scene-layer="frame-rim"');
+      expect(svg, background.label).toContain('filter="url(#brand-card-shadow)"');
+      const geometryMarkup = svg.replace(/data:image\/[^;]+;base64,[^"]+/g, "embedded-image");
+      expect(geometryMarkup, background.label).not.toContain("NaN");
+    }
+  });
+
+  it.each([
+    ["Supabase", "studio-ring-large"],
+    ["OpenAI", "halo-outer"],
+    ["Linear", "beam-a"],
+  ])("renders the %s signature composition", async (label, marker) => {
+    const { EXPORT_BRAND_BACKGROUNDS, createHighlightedSvg } = await import("./export-utils");
+    const background = EXPORT_BRAND_BACKGROUNDS.find((candidate) => candidate.label === label);
+    if (!background) throw new Error(`${label} background is missing`);
+
+    const svg = await createHighlightedSvg(
+      "const polished = true",
+      "scene.ts",
+      "github_light",
+      1200,
+      undefined,
+      background,
+    );
+    expect(svg).toContain(`data-scene-node="${marker}"`);
+  });
+});
+
 // ── Brand frame chrome ───────────────────────────────────────────────────────
 
 describe("EXPORT_BRAND_BACKGROUNDS — frame chrome", () => {
-  it("Vercel hides the macOS dots but shows the centred filename when toggle is on", async () => {
+  it("Vercel honors an explicitly selected macOS decoration", async () => {
     const { EXPORT_BRAND_BACKGROUNDS, createHighlightedSvg } = await import("./export-utils");
     const vercel = EXPORT_BRAND_BACKGROUNDS.find((b) => b.label === "Vercel")!;
     const svg = await createHighlightedSvg(
@@ -753,8 +1547,8 @@ describe("EXPORT_BRAND_BACKGROUNDS — frame chrome", () => {
       false,
       true, // showFilename
     );
-    expect(svg).not.toContain("#ff5f57"); // red dot still hidden
-    // Centred filename now renders for branded themes that don't ship a
+    expect(svg).toContain("#ff5f57");
+    // Centred filename renders for branded themes that don't ship a
     // headerStrip — gated solely on the showFilename toggle.
     expect(svg).toMatch(/<text[^>]*>snippet.tsx<\/text>/);
   });
@@ -812,15 +1606,16 @@ describe("EXPORT_BRAND_BACKGROUNDS — frame chrome", () => {
     expect(svg).toMatch(/<rect[^>]*rx="0" ry="0"[^>]*fill="#000000"/);
   });
 
-  it("Stripe hides the dots, has a rounded card with a brand-blue stroke", async () => {
+  it("Stripe honors macOS dots and uses a rounded gradient frame rim", async () => {
     const { EXPORT_BRAND_BACKGROUNDS, createHighlightedSvg } = await import("./export-utils");
     const stripe = EXPORT_BRAND_BACKGROUNDS.find((b) => b.label === "Stripe")!;
     const svg = await createHighlightedSvg("x", "f.ts", "github_light", 1200, undefined, stripe);
-    expect(svg).not.toContain("#ff5f57");
-    expect(svg).toMatch(/<rect[^>]*rx="8"[^>]*stroke="#0F395E"/);
+    expect(svg).toContain("#ff5f57");
+    expect(svg).toContain('data-scene-layer="frame-rim"');
+    expect(svg).toContain('stroke="url(#brand-frame-rim)"');
   });
 
-  it("Resend hides the dots and renders a left-aligned filename strip with the language", async () => {
+  it("Resend honors macOS dots and renders filename plus language", async () => {
     const { EXPORT_BRAND_BACKGROUNDS, createHighlightedSvg } = await import("./export-utils");
     const resend = EXPORT_BRAND_BACKGROUNDS.find((b) => b.label === "Resend")!;
     const svg = await createHighlightedSvg(
@@ -838,8 +1633,8 @@ describe("EXPORT_BRAND_BACKGROUNDS — frame chrome", () => {
       false,
       true, // showFilename
     );
-    expect(svg).not.toContain("#ff5f57");
-    // Filename + language sit in their own header strip (left-aligned, with
+    expect(svg).toContain("#ff5f57");
+    // Filename + language sit in their own header strip, with
     // the language label in the right slot). The lumis mock in this test
     // file doesn't carry display names, so languageDisplayName falls
     // through to the id verbatim.
@@ -847,16 +1642,22 @@ describe("EXPORT_BRAND_BACKGROUNDS — frame chrome", () => {
     expect(svg).toMatch(/<text[^>]*>markdown<\/text>/);
   });
 
-  it("Tailwind keeps the macOS dots", async () => {
+  it("Tailwind keeps the macOS dots and layers beams over its gradient", async () => {
     const { EXPORT_BRAND_BACKGROUNDS, createHighlightedSvg } = await import("./export-utils");
     const tailwind = EXPORT_BRAND_BACKGROUNDS.find((b) => b.label === "Tailwind")!;
     const svg = await createHighlightedSvg("x", "f.ts", "github_light", 1200, undefined, tailwind);
     expect(svg).toContain("#ff5f57");
     expect(svg).toContain("#febc2e");
     expect(svg).toContain("#28c840");
+    expect(svg).toContain(`<stop offset="0%" stop-color="${tailwind.from}"/>`);
+    expect(svg).toContain(`<stop offset="100%" stop-color="${tailwind.to}"/>`);
+    expect(svg).toContain('data-scene-node="crosshair-top"');
+    expect(svg.indexOf('fill="url(#outerBg)"')).toBeLessThan(
+      svg.indexOf('data-scene-node="crosshair-top"'),
+    );
   });
 
-  it("Supabase hides dots and renders a left-aligned filename strip without a language label", async () => {
+  it("Supabase honors macOS dots and renders its filename", async () => {
     const { EXPORT_BRAND_BACKGROUNDS, createHighlightedSvg } = await import("./export-utils");
     const supabase = EXPORT_BRAND_BACKGROUNDS.find((b) => b.label === "Supabase")!;
     const svg = await createHighlightedSvg(
@@ -874,7 +1675,7 @@ describe("EXPORT_BRAND_BACKGROUNDS — frame chrome", () => {
       false,
       true, // showFilename
     );
-    expect(svg).not.toContain("#ff5f57");
+    expect(svg).toContain("#ff5f57");
     expect(svg).toMatch(/<text[^>]*>snippet.tsx<\/text>/);
     // Supabase's headerStrip has showLanguage=false, so we should NOT see
     // a TypeScript label text node anywhere.

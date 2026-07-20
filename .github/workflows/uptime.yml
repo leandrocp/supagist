@@ -1,0 +1,33 @@
+name: Production uptime
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  health:
+    name: Check production health
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Probe application and database
+        run: |
+          response="$(curl \
+            --fail \
+            --silent \
+            --show-error \
+            --retry 3 \
+            --retry-all-errors \
+            --max-time 20 \
+            https://supagist.app/api/health)"
+          node -e '
+            const health = JSON.parse(process.argv[1]);
+            if (health.status !== "ok" || health.database !== "ok") {
+              console.error("Unhealthy response", health);
+              process.exit(1);
+            }
+          ' "$response"
