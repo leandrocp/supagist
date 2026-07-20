@@ -49,6 +49,13 @@ supabase/.temp/
 *.tsbuildinfo
 next-env.d.ts
 
-# ai
+# ai / local agent artifacts
 .mcp.json
 .claude/settings.local.json
+.claude/skills/impeccable
+.agents/skills/impeccable/
+.impeccable/
+.pi-subagents/
+
+# editor-local settings
+.vscode/

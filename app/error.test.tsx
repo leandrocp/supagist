@@ -2,6 +2,13 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { render, screen, cleanup } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+
+const { mockReportClientError } = vi.hoisted(() => ({ mockReportClientError: vi.fn() }));
+
+vi.mock("@/lib/client-error-reporting", () => ({
+  reportClientError: mockReportClientError,
+}));
+
 import GlobalError from "./error";
 
 const originalError = console.error;
@@ -9,6 +16,7 @@ const originalError = console.error;
 afterEach(() => {
   cleanup();
   console.error = originalError;
+  vi.clearAllMocks();
 });
 
 describe("GlobalError", () => {
@@ -33,11 +41,12 @@ describe("GlobalError", () => {
     expect(screen.queryByText(/Reference:/)).toBeNull();
   });
 
-  it("logs the error to console.error so it surfaces in dev tools", () => {
+  it("logs and reports the error to production observability", () => {
     const spy = vi.fn();
     console.error = spy;
     const error = new Error("boom");
     render(<GlobalError error={error} reset={() => {}} />);
     expect(spy).toHaveBeenCalledWith(expect.stringMatching(/route render error/), error);
+    expect(mockReportClientError).toHaveBeenCalledWith(error);
   });
 });

@@ -51,3 +51,38 @@ test("login link is reachable from the home page nav", async ({ page }) => {
   const response = await page.goto("/auth/login");
   expect(response?.status()).toBe(200);
 });
+
+test("composer remains usable at 375px with a stable overlay selector", async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 });
+  await page.goto("/");
+
+  const shell = page.getByTestId("composer-shell");
+  const preview = page.getByTestId("preview-pane");
+  const workspace = page.getByTestId("composer-workspace");
+  const actions = page.getByTestId("composer-actions");
+  await expect(shell).toBeVisible();
+  await expect(preview).toBeVisible();
+  await expect(workspace).toBeVisible();
+  await expect(actions).toBeVisible();
+
+  const before = await workspace.boundingBox();
+  await page.getByRole("button", { name: "Theme", exact: true }).click();
+  await expect(page.getByRole("option").first()).toBeVisible();
+  const after = await workspace.boundingBox();
+  expect(after?.x).toBe(before?.x);
+  expect(after?.width).toBe(before?.width);
+  await page.keyboard.press("Escape");
+
+  const viewport = page
+    .getByTestId("customization-scroll")
+    .locator("[data-radix-scroll-area-viewport]");
+  await viewport.evaluate((element) => {
+    element.scrollTop = element.scrollHeight;
+  });
+  await expect(actions.getByRole("button", { name: /publish/i })).toBeVisible();
+
+  const hasHorizontalOverflow = await page.evaluate(() => {
+    return document.documentElement.scrollWidth > window.innerWidth;
+  });
+  expect(hasHorizontalOverflow).toBe(false);
+});
