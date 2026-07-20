@@ -12,6 +12,14 @@ export function getAppUrl() {
   );
 }
 
+export function getMetadataBase(): URL {
+  try {
+    return new URL(getAppUrl());
+  } catch {
+    return new URL("http://localhost:3000");
+  }
+}
+
 export function getRequestOrigin(headers: Pick<Headers, "get">) {
   const host = headers.get("x-forwarded-host") ?? headers.get("host");
   if (!host) return getAppUrl();
@@ -28,6 +36,22 @@ export function buildAppUrl(path: string, origin: string = getAppUrl()) {
   return new URL(normalizedPath, origin).toString();
 }
 
-// This check can be removed, it is just for tutorial purposes
+function isHttpUrl(value: string | undefined) {
+  if (!value) return false;
+
+  try {
+    const url = new URL(value);
+    return url.protocol === "http:" || url.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
+function isConfiguredSupabaseKey(value: string | undefined) {
+  if (!value) return false;
+  return value.trim() !== "your-publishable-or-anon-key";
+}
+
 export const hasEnvVars =
-  process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+  isHttpUrl(process.env.NEXT_PUBLIC_SUPABASE_URL) &&
+  isConfiguredSupabaseKey(process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY);

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { cn, buildAppUrl, getRequestOrigin } from "./utils";
+import { cn, buildAppUrl, getMetadataBase, getRequestOrigin } from "./utils";
 
 describe("cn", () => {
   it("merges class names", () => {
@@ -59,6 +59,39 @@ describe("hasEnvVars", () => {
     delete process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
     const { hasEnvVars } = await import("./utils");
     expect(hasEnvVars).toBeFalsy();
+  });
+
+  it("is falsy when URL is the starter placeholder", async () => {
+    process.env.NEXT_PUBLIC_SUPABASE_URL = "your-project-url";
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY = "anon-key";
+    const { hasEnvVars } = await import("./utils");
+    expect(hasEnvVars).toBeFalsy();
+  });
+
+  it("is falsy when URL is not HTTP or HTTPS", async () => {
+    process.env.NEXT_PUBLIC_SUPABASE_URL = "ftp://example.supabase.co";
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY = "anon-key";
+    const { hasEnvVars } = await import("./utils");
+    expect(hasEnvVars).toBeFalsy();
+  });
+
+  it("is falsy when key is the starter placeholder", async () => {
+    process.env.NEXT_PUBLIC_SUPABASE_URL = "https://example.supabase.co";
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY = "your-publishable-or-anon-key";
+    const { hasEnvVars } = await import("./utils");
+    expect(hasEnvVars).toBeFalsy();
+  });
+});
+
+describe("getMetadataBase", () => {
+  it("falls back safely when the configured site URL is invalid", () => {
+    const original = process.env.NEXT_PUBLIC_SITE_URL;
+    process.env.NEXT_PUBLIC_SITE_URL = "not a valid URL";
+    try {
+      expect(getMetadataBase().toString()).toBe("http://localhost:3000/");
+    } finally {
+      process.env.NEXT_PUBLIC_SITE_URL = original;
+    }
   });
 });
 
