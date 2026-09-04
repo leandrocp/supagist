@@ -679,6 +679,95 @@ describe("createHighlightedSvg", () => {
     expect(svg).toContain('rx="0" ry="0"');
   });
 
+  it("rounds the card corners with no background selected", async () => {
+    // Regression: the no-background branch used to paint a plain full-bleed
+    // rect and skip the card rect entirely, so the corner-radius setting was
+    // silently dropped on export while the live preview still rounded.
+    const svg = await createHighlightedSvg(
+      "x",
+      "test.ts",
+      "github_light",
+      1200,
+      undefined,
+      null, // no background
+      undefined,
+      false,
+      "system",
+      null,
+      null,
+      false,
+      true,
+      false,
+      null,
+      null,
+      null,
+      false,
+      null,
+      "macos",
+      16,
+    );
+
+    expect(svg).toContain('rx="16" ry="16"');
+  });
+
+  it("keeps square corners on a no-background export when the radius is zero", async () => {
+    const svg = await createHighlightedSvg(
+      "x",
+      "test.ts",
+      "github_light",
+      1200,
+      undefined,
+      null,
+      undefined,
+      false,
+      "system",
+      null,
+      null,
+      false,
+      true,
+      false,
+      null,
+      null,
+      null,
+      false,
+      null,
+      "macos",
+      0,
+    );
+
+    expect(svg).toContain('rx="0" ry="0"');
+  });
+
+  it("applies every corner radius the UI offers to a no-background export", async () => {
+    for (const radius of [0, 4, 8, 12, 16]) {
+      const svg = await createHighlightedSvg(
+        "x",
+        "test.ts",
+        "github_light",
+        1200,
+        undefined,
+        null,
+        undefined,
+        false,
+        "system",
+        null,
+        null,
+        false,
+        true,
+        false,
+        null,
+        null,
+        null,
+        false,
+        null,
+        "macos",
+        radius,
+      );
+
+      expect(svg).toContain(`rx="${radius}" ry="${radius}"`);
+    }
+  });
+
   it("renders code at the default font size when none is given", async () => {
     const svg = await createHighlightedSvg(
       "const x = 1;",
@@ -1868,6 +1957,77 @@ describe("EXPORT_BRAND_BACKGROUNDS — frame chrome", () => {
         /<text[^>]*>secret.tsx<\/text>/,
       );
     }
+  });
+});
+
+// ── option plumbing audit ────────────────────────────────────────────────────
+
+// Guards the whole class of bug behind the square-corners regression: a setting
+// the live preview honours but `createHighlightedSvg` silently drops. Each case
+// renders twice, changing exactly one argument, and asserts the SVG actually
+// differs. An option that stops being threaded through fails here instead of
+// shipping as a "preview looks fine, export doesn't" report.
+describe("createHighlightedSvg — every export option reaches the output", () => {
+  const BG = { label: "Test", from: "#000000", to: "#111111" };
+
+  // Positional tail after (code, filename, theme, width, height).
+  const BASE: unknown[] = [
+    null, // 0  background
+    undefined, // 1  outerPadding
+    false, // 2  lineNumbers
+    "system", // 3  fontId
+    null, // 4  languageOverride
+    null, // 5  reactions
+    false, // 6  showReactions
+    true, // 7  showFilename
+    false, // 8  showFooter
+    null, // 9  footerAuthorUsername
+    null, // 10 footerAuthorAvatarUrl
+    null, // 11 comments
+    false, // 12 showComments
+    null, // 13 sourceUrl
+    "macos", // 14 windowDecoration
+    8, // 15 cornerRadius
+    16, // 16 innerPadding
+    undefined, // 17 headerSettings
+    undefined, // 18 footerSettings
+    14, // 19 fontSize
+  ];
+
+  function render(overrides: Record<number, unknown> = {}) {
+    const args = BASE.slice();
+    for (const key of Object.keys(overrides)) args[Number(key)] = overrides[Number(key)];
+    const call = createHighlightedSvg as unknown as (...a: unknown[]) => Promise<string>;
+    return call(
+      "const value = 1;\nconst other = 2;",
+      "test.ts",
+      "github_light",
+      1200,
+      undefined,
+      ...args,
+    );
+  }
+
+  const cases: Array<[string, Record<number, unknown>]> = [
+    ["background", { 0: BG }],
+    ["outerPadding", { 0: BG, 1: 128 }],
+    ["lineNumbers", { 2: true }],
+    ["fontId", { 3: "jetbrains" }],
+    ["languageOverride", { 4: "python" }],
+    ["showReactions", { 5: { 1: [{ emoji: "\u{1F525}", reactors: [] }] }, 6: true }],
+    ["showFilename", { 7: false }],
+    ["showFooter", { 8: true }],
+    ["sourceUrl", { 13: "https://example.com/abc" }],
+    ["windowDecoration", { 14: "windows" }],
+    ["cornerRadius", { 15: 16 }],
+    ["innerPadding", { 16: 48 }],
+    ["fontSize", { 19: 20 }],
+  ];
+
+  it.each(cases)("%s changes the rendered SVG", async (_name, overrides) => {
+    const reference = await render();
+    const changed = await render(overrides);
+    expect(changed).not.toEqual(reference);
   });
 });
 

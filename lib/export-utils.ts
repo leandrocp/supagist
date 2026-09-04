@@ -1110,7 +1110,12 @@ export async function createHighlightedSvg(
       cardRect +
       sceneFrame;
   } else {
-    bgSection = `<rect width="${totalWidth}" height="${totalHeight}" fill="${escapeXml(editorBg)}"/>`;
+    // No background: the card *is* the whole image. Still emit `cardRect`
+    // rather than a plain full-bleed rect, otherwise the corner-radius setting
+    // is silently dropped here while the live preview keeps rounding. With
+    // nothing painted behind it the rounded corners come out transparent,
+    // which is what a standalone snippet image should do.
+    bgSection = cardRect;
   }
 
   // Pick a chrome text colour from the card fill, not from `editorFg`. Brand
