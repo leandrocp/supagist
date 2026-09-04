@@ -38,7 +38,10 @@ export type BrandFramePreset = {
 export type BrandPresetShape = {
   id: string;
   name: string;
-  logoUrl: string;
+  /** Public path to the brand's official mark. Omitted for brands that have
+   *  no logo to source — the picker falls back to an accent dot rather than
+   *  us inventing a mark that could be mistaken for theirs. */
+  logoUrl?: string;
   accent: string;
   appearance: BrandSceneAppearance;
   scene?: BrandScenePreset;
@@ -200,6 +203,85 @@ const LINEAR_SCENE = signatureScene("dark", "#8B5CF6", "#4F46E5", {
     rimFrom: "rgba(139,92,246,0.68)",
     rimTo: "rgba(79,70,229,0.54)",
     shadow: { color: "#09051A", opacity: 0.68, y: 14, blur: 30 },
+  },
+});
+
+// Paper-white canvas, near-invisible guides. The card carries the whole
+// design, so the scene only has to stay out of its way.
+const FLUE_SCENE = signatureScene("light", "#4F46E5", "#94A3B8", {
+  glows: [
+    { x: 88, y: 6, radius: 58, color: "#E0E7FF", opacity: 0.55 },
+    { x: 6, y: 94, radius: 62, color: "#E2E8F0", opacity: 0.5 },
+    { x: 50, y: 40, radius: 50, color: "#FFFFFF", opacity: 0.6 },
+  ],
+  vignette: { color: "#0F172A", opacity: 0.03 },
+  canvasBorder: "rgba(15,23,42,0.07)",
+  guide: "crosshair",
+  guideColor: "rgba(15,23,42,0.07)",
+  frame: {
+    rimFrom: "rgba(228,228,231,0.9)",
+    rimTo: "rgba(228,228,231,0.9)",
+    innerStroke: "rgba(255,255,255,0.9)",
+    highlight: "rgba(255,255,255,1)",
+    shadow: { color: "#0F172A", opacity: 0.1, y: 12, blur: 26 },
+  },
+});
+
+const FILES_SDK_SCENE = signatureScene("light", "#6366F1", "#A5B4FC", {
+  glows: [
+    { x: 6, y: 6, radius: 60, color: "#DDD6FE", opacity: 0.6 },
+    { x: 94, y: 92, radius: 66, color: "#C7D2FE", opacity: 0.55 },
+    { x: 50, y: 44, radius: 52, color: "#FFFFFF", opacity: 0.45 },
+  ],
+  vignette: { color: "#6366F1", opacity: 0.06 },
+  canvasBorder: "rgba(99,102,241,0.16)",
+  guide: "crosshair",
+  guideColor: "rgba(99,102,241,0.2)",
+  frame: {
+    rimFrom: "rgba(255,255,255,0.95)",
+    rimTo: "rgba(165,180,252,0.55)",
+    innerStroke: "rgba(99,102,241,0.12)",
+    highlight: "rgba(255,255,255,0.95)",
+    shadow: { color: "#4338CA", opacity: 0.2, y: 16, blur: 34 },
+  },
+});
+
+// Pure black with a single soft diagonal sheen — the `beam` guide painted at
+// a few percent white, which is what reads as "sheen" rather than "stripe".
+const RIVETKIT_SCENE = signatureScene("dark", "#FFFFFF", "#A1A1AA", {
+  glows: [
+    { x: 50, y: 6, radius: 54, color: "#FFFFFF", opacity: 0.05 },
+    { x: 96, y: 10, radius: 44, color: "#FFFFFF", opacity: 0.035 },
+  ],
+  vignette: { color: "#000000", opacity: 0.6 },
+  canvasBorder: "rgba(255,255,255,0.08)",
+  guide: "beam",
+  guideColor: "rgba(255,255,255,0.06)",
+  frame: {
+    rimFrom: "rgba(255,255,255,0.14)",
+    rimTo: "rgba(255,255,255,0.04)",
+    innerStroke: "rgba(255,255,255,0.05)",
+    shadow: { color: "#000000", opacity: 0.8, y: 20, blur: 40 },
+  },
+});
+
+// The signature here is two concentric teal hairlines: the canvas rim and the
+// card border, kept close together by a deliberately tight outer padding.
+const PLZ_SCENE = signatureScene("dark", "#2DD4BF", "#5EEAD4", {
+  glows: [
+    { x: 50, y: 0, radius: 60, color: "#2DD4BF", opacity: 0.08 },
+    { x: 50, y: 100, radius: 60, color: "#0D9488", opacity: 0.06 },
+  ],
+  vignette: { color: "#000000", opacity: 0.34 },
+  canvasBorder: "rgba(45,212,191,0.28)",
+  canvasRadius: 18,
+  guide: "none",
+  guideColor: "rgba(45,212,191,0.2)",
+  frame: {
+    rimFrom: "rgba(45,212,191,0.3)",
+    rimTo: "rgba(45,212,191,0.12)",
+    innerStroke: "rgba(45,212,191,0.1)",
+    shadow: { color: "#020F14", opacity: 0.7, y: 12, blur: 26 },
   },
 });
 
@@ -673,6 +755,138 @@ export const BRAND_PRESETS = [
       frame: darkFrame("#15161B", "#49315F", 8),
     },
     settings: defaults("tokyonight_night", { windowDecoration: "minimal", fontId: "geist" }),
+  },
+  {
+    id: "flue",
+    name: "Flue",
+    logoUrl: "/brands/flue.svg",
+    accent: "#4F46E5",
+    appearance: "light",
+    scene: FLUE_SCENE,
+    background: {
+      label: "Flue",
+      from: "#FCFCFD",
+      to: "#F1F1F4",
+      brandId: "flue",
+      frame: {
+        showDots: false,
+        showCenteredFilename: false,
+        headerStrip: { showLanguage: false },
+        cardBorder: { color: "#E4E4E7", width: 1 },
+        cardRadius: 12,
+        cardFill: "#FFFFFF",
+      },
+    },
+    settings: defaults("github_light", {
+      windowDecoration: "minimal",
+      outerPadding: 64,
+      innerPadding: 32,
+      cornerRadius: 12,
+      fontId: "jetbrains",
+      header: {
+        ...DEFAULT_HEADER_SETTINGS,
+        showLanguage: false,
+        filenamePosition: "left",
+      },
+    }),
+  },
+  {
+    id: "files-sdk",
+    name: "Files SDK",
+    logoUrl: "/brands/files-sdk.svg",
+    accent: "#6366F1",
+    appearance: "light",
+    scene: FILES_SDK_SCENE,
+    background: {
+      label: "Files SDK",
+      from: "#EDE9FE",
+      to: "#E0E7FF",
+      brandId: "files-sdk",
+      frame: {
+        showDots: true,
+        showCenteredFilename: false,
+        headerStrip: { showLanguage: true },
+        cardBorder: { color: "rgba(255,255,255,0.7)", width: 1 },
+        cardRadius: 16,
+        cardFill: "#FDFCF7",
+      },
+    },
+    settings: defaults("catppuccin_latte", {
+      windowDecoration: "macos-subtle",
+      outerPadding: 64,
+      innerPadding: 24,
+      cornerRadius: 16,
+      lineNumbers: true,
+      fontId: "jetbrains",
+      header: { ...DEFAULT_HEADER_SETTINGS, filenamePosition: "left" },
+    }),
+  },
+  {
+    id: "rivetkit",
+    name: "RivetKit",
+    logoUrl: "/brands/rivetkit.svg",
+    accent: "#FFFFFF",
+    appearance: "dark",
+    scene: RIVETKIT_SCENE,
+    background: {
+      label: "RivetKit",
+      from: "#000000",
+      to: "#0A0A0A",
+      brandId: "rivetkit",
+      frame: {
+        showDots: false,
+        showCenteredFilename: true,
+        cardBorder: { color: "rgba(255,255,255,0.14)", width: 1 },
+        cardRadius: 16,
+        cardFill: "#0B0B0B",
+      },
+    },
+    settings: defaults("onedark", {
+      windowDecoration: "minimal",
+      outerPadding: 96,
+      innerPadding: 24,
+      cornerRadius: 16,
+      lineNumbers: true,
+      fontId: "jetbrains",
+      header: {
+        ...DEFAULT_HEADER_SETTINGS,
+        showLanguage: false,
+        filenamePosition: "center",
+      },
+    }),
+  },
+  {
+    id: "plz",
+    name: "plz",
+    accent: "#2DD4BF",
+    appearance: "dark",
+    scene: PLZ_SCENE,
+    background: {
+      label: "plz",
+      from: "#04141B",
+      to: "#04141B",
+      brandId: "plz",
+      frame: {
+        showDots: false,
+        showCenteredFilename: false,
+        headerStrip: { showLanguage: false },
+        cardBorder: { color: "rgba(45,212,191,0.22)", width: 1 },
+        cardRadius: 16,
+        cardFill: "#061A22",
+      },
+    },
+    settings: defaults("terafox", {
+      windowDecoration: "minimal",
+      outerPadding: 16,
+      innerPadding: 24,
+      cornerRadius: 16,
+      fontId: "jetbrains",
+      header: {
+        ...DEFAULT_HEADER_SETTINGS,
+        showLanguage: false,
+        filenamePosition: "left",
+      },
+    }),
   },
 ] as const satisfies readonly BrandPresetShape[];
 

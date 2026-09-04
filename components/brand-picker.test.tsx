@@ -28,4 +28,23 @@ describe("BrandPicker", () => {
     render(<BrandPicker value={null} onChange={vi.fn()} />);
     expect(screen.getByRole("button", { name: "Brand" }).textContent).toContain("Custom");
   });
+
+  it("falls back to an accent dot for a brand with no sourceable mark", () => {
+    render(<BrandPicker value="plz" onChange={vi.fn()} />);
+
+    // `plz` has no logo upstream, so its swatch must render the dot rather
+    // than a masked <span> pointing at a file that does not exist.
+    const trigger = screen.getByRole("button", { name: "Brand" });
+    const fallback = trigger.querySelector("[data-testid='brand-logo-fallback']");
+    expect(fallback).toBeTruthy();
+    expect((fallback as HTMLElement).style.backgroundColor).toBeTruthy();
+  });
+
+  it("masks the brand mark for a brand that ships one", () => {
+    render(<BrandPicker value="flue" onChange={vi.fn()} />);
+
+    const trigger = screen.getByRole("button", { name: "Brand" });
+    expect(trigger.querySelector("[data-testid='brand-logo-fallback']")).toBeNull();
+    expect(trigger.innerHTML).toContain("/brands/flue.svg");
+  });
 });
