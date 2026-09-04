@@ -142,16 +142,83 @@ export const EXPORT_FONTS: ExportFont[] = [
   { id: "hack", label: "Hack", family: "Hack", file: "/fonts/hack.woff2" },
 ];
 
+/**
+ * Resolves a root-relative asset path (`/fonts/…`, `/brands/…`) to its bytes.
+ *
+ * In the browser these paths are served by the app itself, so a plain `fetch`
+ * works. On the server there is no origin to resolve them against, so
+ * `lib/export-server.ts` installs a loader that reads the same files off disk.
+ * Absolute URLs (avatars on githubusercontent, …) always go through `fetch`.
+ */
+export type ExportAssetLoader = (path: string) => Promise<{
+  bytes: Uint8Array;
+  contentType: string;
+} | null>;
+
+let exportAssetLoader: ExportAssetLoader | null = null;
+
+/**
+ * The highlighter `createHighlightedSvg` renders tokens with.
+ *
+ * The browser default is the WASM singleton in `lib/lumis-client.ts`, whose
+ * language bundle resolves each parser through a `file://` URL that only a
+ * browser can fetch. Node callers install their own via
+ * `setExportHighlighterProvider` (see `lib/export-server.ts`).
+ */
+export type ExportHighlighter = {
+  loadLanguage: (language: string) => Promise<unknown>;
+  highlightIter: (
+    code: string,
+    language: string,
+    theme: unknown,
+    visit: (text: string, language: string, range: unknown, scope: string | undefined) => void,
+  ) => void;
+};
+
+let exportHighlighterProvider: (() => Promise<ExportHighlighter>) | null = null;
+
+export function setExportHighlighterProvider(provider: (() => Promise<ExportHighlighter>) | null) {
+  exportHighlighterProvider = provider;
+}
+
+async function resolveExportHighlighter(): Promise<ExportHighlighter> {
+  if (exportHighlighterProvider) return exportHighlighterProvider();
+  const { clientHighlighterPromise } = await import("@/lib/lumis-client");
+  return (await clientHighlighterPromise) as unknown as ExportHighlighter;
+}
+
+export function setExportAssetLoader(loader: ExportAssetLoader | null) {
+  exportAssetLoader = loader;
+  fontBase64Cache.clear();
+  imageDataUrlCache.clear();
+}
+
+function isRootRelative(path: string) {
+  return path.startsWith("/");
+}
+
+function toBase64(bytes: Uint8Array): string {
+  let binary = "";
+  bytes.forEach((b) => (binary += String.fromCharCode(b)));
+  return btoa(binary);
+}
+
 const fontBase64Cache = new Map<string, string>();
 
 async function loadFontBase64(file: string): Promise<string> {
   if (fontBase64Cache.has(file)) return fontBase64Cache.get(file)!;
-  const resp = await fetch(file);
-  const buf = await resp.arrayBuffer();
-  const bytes = new Uint8Array(buf);
-  let binary = "";
-  bytes.forEach((b) => (binary += String.fromCharCode(b)));
-  const b64 = btoa(binary);
+
+  let bytes: Uint8Array;
+  if (exportAssetLoader && isRootRelative(file)) {
+    const asset = await exportAssetLoader(file);
+    if (!asset) throw new Error(`Could not load export font: ${file}`);
+    bytes = asset.bytes;
+  } else {
+    const resp = await fetch(file);
+    bytes = new Uint8Array(await resp.arrayBuffer());
+  }
+
+  const b64 = toBase64(bytes);
   fontBase64Cache.set(file, b64);
   return b64;
 }
@@ -164,6 +231,14 @@ const imageDataUrlCache = new Map<string, string | null>();
 
 async function loadImageDataUrl(url: string): Promise<string | null> {
   if (imageDataUrlCache.has(url)) return imageDataUrlCache.get(url) ?? null;
+
+  if (exportAssetLoader && isRootRelative(url)) {
+    const asset = await exportAssetLoader(url);
+    const dataUrl = asset ? `data:${asset.contentType};base64,${toBase64(asset.bytes)}` : null;
+    imageDataUrlCache.set(url, dataUrl);
+    return dataUrl;
+  }
+
   try {
     const resp = await fetch(url, { mode: "cors" });
     if (!resp.ok) {
@@ -689,13 +764,12 @@ export async function createHighlightedSvg(
   void comments;
   void showComments;
   const language = languageOverride || inferLanguage(filename, code);
-  const [{ clientHighlighterPromise }, { loadTheme }] = await Promise.all([
-    import("@/lib/lumis-client"),
+  const [highlighter, { loadTheme }] = await Promise.all([
+    resolveExportHighlighter(),
     import("@/lib/theme-loader"),
   ]);
   const loaded = await loadTheme(theme);
   const themeData = loaded.data;
-  const highlighter = await clientHighlighterPromise;
   await highlighter.loadLanguage(language);
 
   const editorBg: string =

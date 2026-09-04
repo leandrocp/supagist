@@ -28,7 +28,7 @@ A check constraint on `snippets.code_char_count` enforces equality with `char_le
 
 ### Storage
 
-One public bucket: `snippet-images`. Each snippet gets four assets generated client-side via Lumis WASM at publish time:
+One public bucket: `snippet-images`. Each snippet gets four assets, generated with Lumis WASM at publish time — in the browser for a composer publish, on the server for a CLI publish:
 
 ```
 <author_id>/snippets/<snippet_id>/canonical.png — export at user's chosen pixel ratio
@@ -57,6 +57,34 @@ Each visitor's presence key is their `auth.uid()`. Signed-in users track their G
 ### Cleanup
 
 Stale snippet deletion is two-stage. The service-role-only `queue_old_snippets_for_cleanup` RPC locks and rechecks stale rows, writes their asset paths to `storage_cleanup_queue`, and deletes the snippet rows atomically; FK cascades remove comments, reactions, and visits. The `cleanup` Edge Function drains that durable queue through `storage.remove()`, deleting queue entries only after the Storage API succeeds so failed object removals remain retryable. The old SQL job that deleted `storage.objects` metadata directly is unscheduled. A separate 02:30 UTC cron continues trimming expired rate-limit buckets.
+
+## CLI
+
+`npx supagist <file>` publishes a snippet and prints its URL. The CLI (`cli/`, an npm workspace published as `supagist`) is a thin HTTP client with no runtime dependencies: it does no highlighting, no rendering, and no rasterising. It posts source plus an appearance object and gets a URL back, so the user visits Supagist to preview the card, annotate lines, and export images.
+
+Two server surfaces back it:
+
+- `GET /api/cli/config` — discovery. Returns the Supabase URL and publishable key the CLI should refresh tokens against, plus the current brand/background/font/window vocabulary. Because the option lists come from the server, adding a brand doesn't require a CLI release, and `--host` works against previews and local dev with the same binary.
+- `POST /api/cli/publish` — renders the four snippet assets and publishes. The Supabase client is bound to the caller's own access token, so RLS, the storage ownership policies, and the publish rate-limit trigger apply exactly as they do to a browser publish. The route grants no extra authority.
+
+Publishing is shared, not duplicated: `lib/snippet-publish.ts` holds the auth gate, validation, storage layout, and rate-limit error mapping, and both `publishSnippet` (the composer's server action) and the CLI route call it. Failures carry a typed `reason`, which the route maps to an HTTP status.
+
+### Server-side rendering
+
+The export pipeline was browser-only. Two seams in `lib/export-utils.ts` let `lib/export-server.ts` swap in Node equivalents:
+
+- **Assets.** `createHighlightedSvg` loads `/fonts/*` and `/brands/*` with `fetch`, which has no origin to resolve against on the server. `setExportAssetLoader` redirects those root-relative reads to `public/` on disk, behind a traversal guard.
+- **Highlighter.** `lib/lumis-client.ts` builds its bundle with `withWasmBundle`, where each parser is a `new URL(…, import.meta.url)` the runtime fetches — a `file://` URL under Node, which `fetch` refuses. `setExportHighlighterProvider` swaps in a `bundles/full` highlighter, the same one the saved-snippet view already uses server-side.
+
+Rasterising uses `@resvg/resvg-js`. resvg cannot read woff2 — neither through a `@font-face` data URL nor through `fontFiles`; both render zero glyphs — so each bundled font is decompressed to a real sfnt with `wawoff2` once per process. The embedded `@font-face` block is inert during rasterisation and only matters when the SVG is viewed directly. `defaultFontFamily` and `monospaceFamily` point at JetBrains Mono so the "System" option, whose family is a CSS stack, resolves to a real face.
+
+Both packages are in `serverExternalPackages` (a native addon and a WASM loader; neither is placeable in an ESM chunk), and `outputFileTracingIncludes` ships `public/fonts` and `public/brands` with the route.
+
+### CLI login
+
+`npx supagist auth login` binds an ephemeral listener on `127.0.0.1`, opens `/auth/cli?port=…&state=…`, and waits. The consent page requires a persistent account — anonymous sessions are rejected, same as publishing — then POSTs the Supabase session to the loopback listener. Posting rather than redirecting keeps the refresh token out of browser history; the echoed `state` is what stops an unrelated page from posting a session into a listener it did not open, and the listener also refuses a foreign `Origin` and closes after the first valid callback.
+
+`/auth/cli` is the only route whose CSP allows `connect-src` to reach `127.0.0.1`, applied as a path-scoped header override so no other page can talk to processes on a visitor's machine. Credentials land in `~/.config/supagist/<host>.json` at mode `0600`, one file per host.
 
 ## Brand presets and Lumis themes
 
@@ -101,8 +129,14 @@ app/
     snippet-export-modal.tsx   Wraps ExportModal with the saved-snippet's author/avatar
     export-button.tsx          DropdownMenu trigger for the saved-view export modal
     share-button.tsx           Copies the snippet URL to clipboard
+  api/cli/
+    config/route.ts            CLI discovery — Supabase project + option vocabulary
+    publish/route.ts           CLI publish — server-side render, then the shared publish core
+  auth/cli/
+    page.tsx                   CLI consent screen (persistent accounts only)
+    cli-authorize-form.tsx     POSTs the session to the CLI's loopback listener
   actions/
-    publish.ts                 Auth + rate-limit gates, CRLF normalization, asset uploads, snippets insert
+    publish.ts                 FormData adapter over the shared publish core
     get-my-snippets.ts         Returns the signed-in user's snippets for the homepage list
     record-visit.ts            Fires the bounded atomic record_snippet_view RPC
 
@@ -120,6 +154,14 @@ components/
   auth-button.tsx              Renders the "Log in" pill for anon + logged-out viewers, "Hey {name} / Logout" for real users
   brand-dot.tsx                The brand pulse dot in the nav and login form
 
+cli/                           npm workspace published as `supagist`
+  src/index.ts                 Command dispatch and process exit codes
+  src/args.ts                  Argument parsing (forwards option values; the server validates)
+  src/api.ts                   Host discovery, token refresh, publish request
+  src/login.ts                 Loopback listener + browser launch
+  src/credentials.ts           Per-host credential store (mode 0600)
+  src/protocol.ts              Login handshake contract, re-exported by lib/cli-auth.ts
+
 lib/
   brand-presets.ts             25-brand appearance registry + six signature scene recipes
   brand-scenes.ts              Shared premium lighting/frame primitives and CSS serialization
@@ -128,6 +170,11 @@ lib/
   theme-loader.ts              Loads legacy compatibility ids or @lumis-sh/themes/<name>
   export-utils.ts              createHighlightedSvg, renderToFile, EXPORT_BACKGROUNDS,
                                 EXPORT_BRAND_BACKGROUNDS, BrandFrame, readableOnFill
+  export-server.ts             Node asset loader, woff2 -> sfnt cache, resvg rasteriser
+  cli-appearance.ts            Validates and resolves the CLI's appearance payload
+  cli-render.ts                Renders the canonical PNG, OG PNG, and SVG server-side
+  cli-auth.ts                  App-side re-export of the CLI login handshake contract
+  snippet-publish.ts           Shared publish core for the composer and the CLI
   snippet-utils.ts             parseSnippetParam, codePointLength, buildSnippetSocialAlt,
                                 generateShortId, line-reaction grouping helpers
   presence-utils.ts            generateGuestName, nameToColor (hex), nameToInitials

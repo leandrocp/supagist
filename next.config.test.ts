@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import nextConfig, { buildContentSecurityPolicy, securityHeaders } from "./next.config";
+import nextConfig, {
+  buildContentSecurityPolicy,
+  buildCliAuthContentSecurityPolicy,
+  securityHeaders,
+} from "./next.config";
 
 describe("Next.js production security configuration", () => {
   it("disables the framework disclosure header", () => {
@@ -32,6 +36,11 @@ describe("Next.js production security configuration", () => {
     expect(production).toContain("https://cdn.jsdelivr.net");
   });
 
+  it("keeps loopback out of the production baseline", () => {
+    // Only /auth/cli may talk to processes on the visitor's machine.
+    expect(buildContentSecurityPolicy("production")).not.toContain("127.0.0.1");
+  });
+
   it("keeps the existing defense-in-depth headers", () => {
     expect(securityHeaders).toEqual(
       expect.arrayContaining([
@@ -39,6 +48,54 @@ describe("Next.js production security configuration", () => {
         { key: "X-Frame-Options", value: "DENY" },
         { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
       ]),
+    );
+  });
+});
+
+describe("CLI login Content Security Policy", () => {
+  const cliCsp = buildCliAuthContentSecurityPolicy("production");
+
+  it("lets /auth/cli reach the loopback listener the CLI opened", () => {
+    expect(cliCsp).toContain("http://127.0.0.1:*");
+  });
+
+  it("widens only connect-src, leaving every other directive untouched", () => {
+    const baseline = buildContentSecurityPolicy("production");
+    const directives = (policy: string) =>
+      Object.fromEntries(
+        policy.split("; ").map((directive) => {
+          const [name, ...values] = directive.split(" ");
+          return [name, values.join(" ")];
+        }),
+      );
+
+    const base = directives(baseline);
+    const cli = directives(cliCsp);
+
+    expect(Object.keys(cli)).toEqual(Object.keys(base));
+    for (const name of Object.keys(base)) {
+      if (name === "connect-src") continue;
+      expect(cli[name]).toBe(base[name]);
+    }
+  });
+
+  it("keeps the Supabase connect sources it started with", () => {
+    expect(cliCsp).toContain("https://*.supabase.co");
+    expect(cliCsp).toContain("wss://*.supabase.co");
+  });
+
+  it("still forbids framing and inline objects on the consent page", () => {
+    expect(cliCsp).toContain("frame-ancestors 'none'");
+    expect(cliCsp).toContain("object-src 'none'");
+  });
+});
+
+describe("output file tracing", () => {
+  it("bundles the fonts and brand art the CLI renderer reads at request time", () => {
+    // resvg needs the woff2 files on disk; the tracer cannot infer the path
+    // because it is built at runtime from the EXPORT_FONTS registry.
+    expect(nextConfig.outputFileTracingIncludes?.["/api/cli/publish"]).toEqual(
+      expect.arrayContaining(["./public/fonts/**", "./public/brands/**"]),
     );
   });
 });

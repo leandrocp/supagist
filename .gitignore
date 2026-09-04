@@ -24,6 +24,9 @@ e2e/.auth/user.json
 # production
 /build
 
+# cli build output
+/cli/dist/
+
 # misc
 .DS_Store
 *.pem

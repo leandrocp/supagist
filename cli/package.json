@@ -1,0 +1,35 @@
+{
+  "name": "supagist",
+  "version": "0.1.0",
+  "description": "Publish a code snippet to Supagist from your terminal and get a shareable URL.",
+  "keywords": [
+    "cli",
+    "code",
+    "share",
+    "snippet",
+    "supagist"
+  ],
+  "homepage": "https://supagist.app",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/leandrocp/supagist.git",
+    "directory": "cli"
+  },
+  "bin": {
+    "supagist": "./dist/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "type": "module",
+  "main": "./dist/index.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "prepublishOnly": "npm run build"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
