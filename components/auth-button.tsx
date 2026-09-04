@@ -1,7 +1,8 @@
 import { Button } from "./ui/button";
 import { createClient } from "@/lib/supabase/server";
-import { LogoutButton } from "./logout-button";
 import { LoginLink } from "./login-link";
+import { ThemeSwitcher } from "./theme-switcher";
+import { UserMenu } from "./user-menu";
 
 // Anonymous users get an `auth.uid()` so they can carry presence + reactions,
 // but they are NOT a "real" identity for the chrome's purposes — we don't want
@@ -11,6 +12,11 @@ function isPersistentUser(claims: { is_anonymous?: boolean } | null | undefined)
   return !!claims && claims.is_anonymous !== true;
 }
 
+/**
+ * Right-hand side of the nav. Signed in, everything collapses into a single
+ * avatar menu; signed out, the theme picker stays visible on its own next to
+ * the login CTA so appearance is always adjustable.
+ */
 export async function AuthButton() {
   const supabase = await createClient();
 
@@ -20,25 +26,20 @@ export async function AuthButton() {
 
   if (!isPersistentUser(user)) {
     return (
-      <Button asChild size="sm" variant="pill" className="px-5">
-        <LoginLink>Log in</LoginLink>
-      </Button>
+      <>
+        <Button asChild size="sm" variant="pill" className="px-5">
+          <LoginLink>Log in</LoginLink>
+        </Button>
+        <ThemeSwitcher />
+      </>
     );
   }
 
+  const metadata = user?.user_metadata as Record<string, string> | undefined;
   const displayName =
-    (user?.user_metadata as Record<string, string> | undefined)?.user_name ||
-    (user?.user_metadata as Record<string, string> | undefined)?.preferred_username ||
-    user?.email;
+    metadata?.user_name || metadata?.preferred_username || user?.email || "account";
 
-  return (
-    <div className="flex items-center gap-4 text-sm">
-      <span className="text-muted-foreground">
-        Hey <span className="text-foreground">{displayName}</span>
-      </span>
-      <LogoutButton />
-    </div>
-  );
+  return <UserMenu username={displayName} avatarUrl={metadata?.avatar_url ?? null} />;
 }
 
 export { isPersistentUser };

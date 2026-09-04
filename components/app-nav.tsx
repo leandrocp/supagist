@@ -5,7 +5,6 @@ import { BrandDot } from "@/components/brand-dot";
 import { EnvVarWarning } from "@/components/env-var-warning";
 import { HomePresence } from "@/components/home-presence";
 import { ThemeSwitcher } from "@/components/theme-switcher";
-import { Badge } from "@/components/ui/badge";
 import { cn, hasEnvVars } from "@/lib/utils";
 
 type Props = {
@@ -15,11 +14,17 @@ type Props = {
   fullBleed?: boolean;
 };
 
+const NAV_LINKS = [
+  { href: "/", label: "New" },
+  { href: "/snippets", label: "Snippets" },
+] as const;
+
 /**
  * The single app bar, shared by every page that has chrome.
  *
- * It previously existed as three hand-copied variants (home, snippet view, and
- * whatever came next), which is how they drifted apart in the first place.
+ * Layout follows the usual reading order: brand and destinations on the left,
+ * account and preferences on the right. Everything account-shaped lives behind
+ * one avatar menu — see `UserMenu`.
  */
 export function AppNav({ showPresence = false, fullBleed = false }: Props) {
   const showEnvWarning = process.env.NODE_ENV === "development" && !hasEnvVars;
@@ -32,38 +37,43 @@ export function AppNav({ showPresence = false, fullBleed = false }: Props) {
         fullBleed && "px-5",
       )}
     >
-      <div className="flex min-w-0 items-center gap-3">
+      <div className="flex min-w-0 items-center gap-4 sm:gap-6">
         <Link href="/" className="flex shrink-0 items-center gap-2 hover:opacity-80">
           <BrandDot />
           <p className="font-semibold tracking-tight">Supagist</p>
         </Link>
-        <Badge
-          variant="outline"
-          className="hidden gap-1.5 border-brand/20 bg-brand-subtle font-normal text-brand-strong sm:inline-flex"
-        >
-          <span aria-hidden className="size-1.5 rounded-full bg-brand" />
-          Built on Supabase
-        </Badge>
+
+        {/* "New" is an explicit destination rather than relying on the wordmark
+            doubling as the way back to the composer. */}
+        <div className="flex min-w-0 items-center gap-4 sm:gap-5">
+          {NAV_LINKS.map(({ href, label }) =>
+            href === "/snippets" && !hasEnvVars ? null : (
+              <Link
+                key={href}
+                href={href}
+                className="shrink-0 text-foreground-light transition-colors hover:text-foreground"
+              >
+                {label}
+              </Link>
+            ),
+          )}
+        </div>
       </div>
 
-      <div className="flex min-w-0 items-center gap-3 sm:gap-4">
+      <div className="flex min-w-0 items-center gap-3">
         {showPresence && hasEnvVars ? <HomePresence /> : null}
-        {hasEnvVars ? (
-          <Link
-            href="/snippets"
-            className="shrink-0 text-foreground-light transition-colors hover:text-foreground"
-          >
-            Snippets
-          </Link>
-        ) : null}
         {showEnvWarning ? (
-          <EnvVarWarning />
+          <>
+            <EnvVarWarning />
+            <ThemeSwitcher />
+          </>
         ) : hasEnvVars ? (
           <Suspense fallback={null}>
             <AuthButton />
           </Suspense>
-        ) : null}
-        <ThemeSwitcher />
+        ) : (
+          <ThemeSwitcher />
+        )}
       </div>
     </nav>
   );

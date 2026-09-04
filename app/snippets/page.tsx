@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { getMySnippets } from "@/app/actions/get-my-snippets";
 import { AppNav } from "@/components/app-nav";
+import { SiteFooter } from "@/components/site-footer";
 import { SnippetList } from "@/components/snippet-list";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/server";
@@ -73,6 +74,8 @@ export default async function SnippetsPage() {
             <SnippetList snippets={snippets} />
           )}
         </section>
+
+        <SiteFooter />
       </div>
     </main>
   );
