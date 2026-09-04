@@ -16,6 +16,9 @@ import {
   EXPORT_BACKGROUNDS,
   EXPORT_BRAND_BACKGROUNDS,
   EXPORT_FONTS,
+  EXPORT_FONT_SIZE,
+  EXPORT_FONT_SIZE_VALUES,
+  normalizeExportFontSize,
   exportCornerRadiusFromSliderIndex,
   exportCornerRadiusToSliderIndex,
   exportInnerPaddingFromSliderIndex,
@@ -73,6 +76,7 @@ export type ExportSettings = {
   footer: ExportFooterSettings;
   windowDecoration: WindowDecoration;
   fontId: string;
+  fontSize: number;
   language: string | null;
 };
 
@@ -120,6 +124,7 @@ export function ExportModal({
     settings.innerPadding ?? EXPORT_INNER_PADDING,
   );
   const normalizedCornerRadius = normalizeExportCornerRadius(settings.cornerRadius);
+  const normalizedFontSize = normalizeExportFontSize(settings.fontSize ?? EXPORT_FONT_SIZE);
   const outerPadding = settings.background ? normalizedOuterPadding : 0;
 
   useEffect(() => {
@@ -152,6 +157,7 @@ export function ExportModal({
       normalizedInnerPadding,
       settings.header,
       settings.footer,
+      normalizedFontSize,
     ).then((svg) => {
       if (cancelled) return;
       const blob = new Blob([svg], { type: "image/svg+xml" });
@@ -177,6 +183,7 @@ export function ExportModal({
     settings.cornerRadius,
     settings.lineNumbers,
     settings.fontId,
+    normalizedFontSize,
     settings.language,
     settings.showReactions,
     settings.header,
@@ -224,6 +231,7 @@ export function ExportModal({
         normalizedInnerPadding,
         settings.header,
         settings.footer,
+        normalizedFontSize,
       );
       triggerDownload(URL.createObjectURL(file), file.name, true);
     } finally {
@@ -259,6 +267,7 @@ export function ExportModal({
         normalizedInnerPadding,
         settings.header,
         settings.footer,
+        normalizedFontSize,
       );
       const blob = new Blob([svg], { type: "image/svg+xml;charset=utf-8" });
       triggerDownload(
@@ -495,8 +504,8 @@ export function ExportModal({
           </div>
         </div>
 
-        {/* Row 3: Language | Font */}
-        <div className="grid grid-cols-2 gap-5">
+        {/* Row 3: Language | Font | Font size */}
+        <div className="grid grid-cols-2 gap-5 sm:grid-cols-3">
           <div className="space-y-2.5">
             <p className="text-sm font-medium">Language</p>
             <select
@@ -523,6 +532,24 @@ export function ExportModal({
               {EXPORT_FONTS.map((f) => (
                 <option key={f.id} value={f.id} style={{ fontFamily: f.family }}>
                   {f.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="space-y-2.5">
+            <p className="text-sm font-medium">Font size</p>
+            <select
+              aria-label="Font size"
+              value={String(normalizedFontSize)}
+              onChange={(e) =>
+                onSettingsChange({ ...settings, fontSize: Number(e.target.value) })
+              }
+              className="h-8 w-full rounded-md border border-input bg-background px-2 text-sm text-foreground outline-none transition focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              {EXPORT_FONT_SIZE_VALUES.map((size) => (
+                <option key={size} value={size}>
+                  {size}px
                 </option>
               ))}
             </select>

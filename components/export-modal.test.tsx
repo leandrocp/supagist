@@ -34,6 +34,7 @@ const settings: ExportSettings = {
   footer: DEFAULT_FOOTER_SETTINGS,
   windowDecoration: "macos",
   fontId: "system",
+  fontSize: 14,
   language: null,
 };
 
@@ -155,6 +156,51 @@ describe("ExportModal", () => {
     expect(onSettingsChange).toHaveBeenCalledWith({
       ...settings,
       footer: { ...settings.footer, enabled: true },
+    });
+  });
+
+  it("changes the code font size alongside the font picker", async () => {
+    const onSettingsChange = vi.fn();
+
+    render(
+      <ExportModal
+        open
+        onClose={vi.fn()}
+        code="console.log('hello')"
+        filename="snippet.ts"
+        theme="github_dark"
+        settings={settings}
+        onSettingsChange={onSettingsChange}
+      />,
+    );
+
+    const fontSize = screen.getByLabelText("Font size") as HTMLSelectElement;
+    expect(fontSize.value).toBe("14");
+
+    fireEvent.change(fontSize, { target: { value: "20" } });
+
+    await waitFor(() => {
+      expect(onSettingsChange).toHaveBeenCalledWith({ ...settings, fontSize: 20 });
+    });
+  });
+
+  it("renders the export preview at the selected font size", async () => {
+    const { createHighlightedSvg } = await import("@/lib/export-utils");
+
+    render(
+      <ExportModal
+        open
+        onClose={vi.fn()}
+        code="console.log('hello')"
+        filename="snippet.ts"
+        theme="github_dark"
+        settings={{ ...settings, fontSize: 20 }}
+        onSettingsChange={vi.fn()}
+      />,
+    );
+
+    await waitFor(() => {
+      expect(vi.mocked(createHighlightedSvg).mock.calls.at(-1)?.at(-1)).toBe(20);
     });
   });
 

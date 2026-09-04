@@ -38,6 +38,7 @@ export const EXPORT_CORNER_RADIUS_VALUES = [0, 4, 8, 12, 16] as const;
 export const EXPORT_WIN_RADIUS = 12;
 export const EXPORT_MAX_CHARS_PER_LINE = 110;
 export const EXPORT_CHAR_WIDTH = 8.43; // measured monospace advance at 14px
+export const EXPORT_FONT_SIZE_VALUES = [12, 13, 14, 16, 18, 20] as const;
 export const EXPORT_MIN_WIDTH = 240;
 export const EXPORT_LINE_NUM_WIDTH = 18; // width reserved for line number column
 export const EXPORT_LINE_NUM_GAP = 18; // visual gap between line-number gutter and code
@@ -98,6 +99,20 @@ export function exportCornerRadiusToSliderIndex(cornerRadius: number) {
 
 export function exportCornerRadiusFromSliderIndex(index: number) {
   return exportValueFromSliderIndex(EXPORT_CORNER_RADIUS_VALUES, index);
+}
+
+export function normalizeExportFontSize(fontSize: number) {
+  return nearestExportValue(EXPORT_FONT_SIZE_VALUES, fontSize);
+}
+
+// Line height and character advance are both measured at the 14px default, so
+// a resized code font keeps the same optical rhythm by scaling them with it.
+export function exportLineHeightForFontSize(fontSize: number) {
+  return Math.round(normalizeExportFontSize(fontSize) * (EXPORT_LINE_HEIGHT / EXPORT_FONT_SIZE));
+}
+
+export function exportCharWidthForFontSize(fontSize: number) {
+  return (EXPORT_CHAR_WIDTH / EXPORT_FONT_SIZE) * normalizeExportFontSize(fontSize);
 }
 
 export type ExportComment = { author?: string; body: string };
@@ -478,6 +493,7 @@ export function estimateExportDimensions({
   footerAuthorUsername,
   windowDecoration = "macos",
   innerPadding = EXPORT_INNER_PADDING,
+  fontSize = EXPORT_FONT_SIZE,
   compactReactions = false,
 }: {
   code: string;
@@ -497,10 +513,13 @@ export function estimateExportDimensions({
   footerAuthorUsername?: string | null;
   windowDecoration?: WindowDecoration;
   innerPadding?: number;
+  fontSize?: number;
   compactReactions?: boolean;
 }) {
   const rawLines = code.split(/\r?\n/);
   const innerPaddingPx = normalizeExportInnerPadding(innerPadding);
+  const codeLineHeight = exportLineHeightForFontSize(fontSize);
+  const codeCharWidth = exportCharWidthForFontSize(fontSize);
   const resolvedHeader = normalizeHeaderSettings(header);
   const resolvedFooter = normalizeFooterSettings(footer, showFooter);
   const footerItems = visibleFooterItems(resolvedFooter);
@@ -519,11 +538,11 @@ export function estimateExportDimensions({
         const lineNum = idx + 1;
         const chips = hasReactions ? (reactions![lineNum] ?? []) : [];
         const reactionWidth = compactReactions ? inlineReactionWidth(chips) : lineChipsWidth(chips);
-        return Math.ceil(line.length * EXPORT_CHAR_WIDTH) + reactionWidth;
+        return Math.ceil(line.length * codeCharWidth) + reactionWidth;
       }),
       0,
     ),
-    Math.ceil(EXPORT_MAX_CHARS_PER_LINE * EXPORT_CHAR_WIDTH),
+    Math.ceil(EXPORT_MAX_CHARS_PER_LINE * codeCharWidth),
   );
   const author = footerAuthorUsername || "you";
   const footerWidthPx = renderFooter
@@ -551,7 +570,7 @@ export function estimateExportDimensions({
   const actualWidth =
     height !== undefined ? width : Math.min(width, Math.max(EXPORT_MIN_WIDTH, naturalWidth));
   const maxLines = height
-    ? Math.max(1, Math.floor((height - topPad - innerPaddingPx) / EXPORT_LINE_HEIGHT))
+    ? Math.max(1, Math.floor((height - topPad - innerPaddingPx) / codeLineHeight))
     : EXPORT_MAX_LINES;
   const sourceTruncated = rawLines.length > maxLines;
   const visibleRawLines = rawLines.slice(0, maxLines);
@@ -559,7 +578,7 @@ export function estimateExportDimensions({
   const footerHeight = renderFooter ? 36 : 0;
   const actualHeight =
     height ??
-    topPad + Math.max(displayLineCount, 1) * EXPORT_LINE_HEIGHT + innerPaddingPx + footerHeight;
+    topPad + Math.max(displayLineCount, 1) * codeLineHeight + innerPaddingPx + footerHeight;
   const outerPaddingPx = background ? (outerPadding ?? EXPORT_OUTER_PADDING) : 0;
 
   return {
@@ -665,6 +684,7 @@ export async function createHighlightedSvg(
   innerPadding = EXPORT_INNER_PADDING,
   headerSettings?: ExportHeaderSettings,
   footerSettings?: ExportFooterSettings,
+  fontSize = EXPORT_FONT_SIZE,
 ): Promise<string> {
   void comments;
   void showComments;
@@ -696,6 +716,9 @@ export async function createHighlightedSvg(
   }
 
   const innerPaddingPx = normalizeExportInnerPadding(innerPadding);
+  const codeFontSize = normalizeExportFontSize(fontSize);
+  const codeLineHeight = exportLineHeightForFontSize(codeFontSize);
+  const codeCharWidth = exportCharWidthForFontSize(codeFontSize);
   const resolvedHeader = normalizeHeaderSettings(headerSettings, showFilename ?? true);
   const resolvedFooter = normalizeFooterSettings(footerSettings, showFooter ?? false);
   const footerItems = visibleFooterItems(resolvedFooter);
@@ -709,7 +732,7 @@ export async function createHighlightedSvg(
   const topPad = exportTopPad(renderedWindowDecoration, innerPaddingPx);
   const maxSourceLines =
     height !== undefined
-      ? Math.max(1, Math.floor((height - topPad - innerPaddingPx) / EXPORT_LINE_HEIGHT))
+      ? Math.max(1, Math.floor((height - topPad - innerPaddingPx) / codeLineHeight))
       : EXPORT_MAX_LINES;
 
   const rawLines = code.split("\n");
@@ -767,11 +790,11 @@ export async function createHighlightedSvg(
       ...sourceLines.map((l, idx) => {
         const lineNum = idx + 1;
         const chips = hasReactions ? (reactions![lineNum] ?? []) : [];
-        return Math.ceil(l.length * EXPORT_CHAR_WIDTH) + lineChipsWidth(chips);
+        return Math.ceil(l.length * codeCharWidth) + lineChipsWidth(chips);
       }),
       0,
     ),
-    Math.ceil(EXPORT_MAX_CHARS_PER_LINE * EXPORT_CHAR_WIDTH),
+    Math.ceil(EXPORT_MAX_CHARS_PER_LINE * codeCharWidth),
   );
   // The selected footer details participate in natural-width sizing so a
   // long theme or author handle never crowds the card edge.
@@ -839,7 +862,7 @@ export async function createHighlightedSvg(
 
   const maxVisualLines =
     height !== undefined
-      ? Math.max(1, Math.floor((height - topPad - innerPaddingPx) / EXPORT_LINE_HEIGHT))
+      ? Math.max(1, Math.floor((height - topPad - innerPaddingPx) / codeLineHeight))
       : EXPORT_MAX_LINES;
 
   const visualTruncated = allVisualRows.length > maxVisualLines;
@@ -869,7 +892,7 @@ export async function createHighlightedSvg(
   const actualHeight =
     height ??
     topPad +
-      Math.max(displayRows.length, 1) * EXPORT_LINE_HEIGHT +
+      Math.max(displayRows.length, 1) * codeLineHeight +
       innerPaddingPx +
       (renderFooter ? FOOTER_HEIGHT : 0);
 
@@ -881,7 +904,7 @@ export async function createHighlightedSvg(
   const firstLineY =
     outerPaddingPx +
     topPad +
-    Math.round((EXPORT_LINE_HEIGHT - EXPORT_FONT_SIZE) / 2 + EXPORT_FONT_SIZE * 0.8);
+    Math.round((codeLineHeight - codeFontSize) / 2 + codeFontSize * 0.8);
   // The line-number gutter is fixed chrome and never expands with inner
   // padding. The code body receives inner padding on all four sides after it.
   const lineNumX = outerPaddingPx + EXPORT_CHROME_PAD_X + EXPORT_LINE_NUM_WIDTH;
@@ -895,12 +918,12 @@ export async function createHighlightedSvg(
     ? `<line data-export-gutter-divider="true" x1="${gutterDividerX}" y1="${gutterDividerTop}" x2="${gutterDividerX}" y2="${gutterDividerBottom}" stroke="${escapeXml(editorFg)}" stroke-opacity="0.12" stroke-width="1"/>`
     : "";
 
-  const fontAttrs = `font-size="${EXPORT_FONT_SIZE}" font-family="${escapeXml(fontFamily)}" xml:space="preserve" text-rendering="geometricPrecision" letter-spacing="0"`;
+  const fontAttrs = `font-size="${codeFontSize}" font-family="${escapeXml(fontFamily)}" xml:space="preserve" text-rendering="geometricPrecision" letter-spacing="0"`;
 
   const lineMarkup = displayRows
     .map((row, i) => {
       const { tokens } = row;
-      const y = firstLineY + i * EXPORT_LINE_HEIGHT;
+      const y = firstLineY + i * codeLineHeight;
 
       let numMarkup = "";
       if (lineNumbers) {
@@ -938,13 +961,13 @@ export async function createHighlightedSvg(
       })();
       if (hasReactions && chipSrcLine !== null && reactions![chipSrcLine]?.length) {
         const lineChars = tokens.reduce((n, t) => n + t.text.length, 0);
-        let chipX = codeX + Math.ceil(lineChars * EXPORT_CHAR_WIDTH) + CHIP_FIRST_GAP;
+        let chipX = codeX + Math.ceil(lineChars * codeCharWidth) + CHIP_FIRST_GAP;
 
         const chipH = 18;
         // Align the chip's vertical CENTRE with the code line's optical centre.
         // SVG `<text y>` is the baseline; the optical centre of a
         // line of text sits roughly fontSize*0.35 above the baseline.
-        const lineCenterY = y - EXPORT_FONT_SIZE * 0.35;
+        const lineCenterY = y - codeFontSize * 0.35;
         const chipY = lineCenterY - chipH / 2;
         const cy = chipY + chipH / 2;
 
@@ -1318,6 +1341,7 @@ export async function renderToFile(
   innerPadding?: number,
   headerSettings?: ExportHeaderSettings,
   footerSettings?: ExportFooterSettings,
+  fontSize?: number,
 ): Promise<File> {
   const svg = await createHighlightedSvg(
     code,
@@ -1344,6 +1368,7 @@ export async function renderToFile(
     innerPadding,
     headerSettings,
     footerSettings,
+    fontSize,
   );
   const svgW = parseInt(/\bwidth="(\d+)"/.exec(svg)?.[1] ?? String(width));
   const svgH = parseInt(/\bheight="(\d+)"/.exec(svg)?.[1] ?? "400");

@@ -12,9 +12,12 @@ import { DEFAULT_HEADER_SETTINGS, type ExportHeaderSettings } from "@/lib/export
 import { loadTheme } from "@/lib/theme-loader";
 import {
   EXPORT_COMMENT_PREFIX,
+  EXPORT_FONT_SIZE,
   EXPORT_GUTTER_WIDTH,
   EXPORT_INNER_PADDING,
   EXPORT_LINE_NUM_WIDTH,
+  exportLineHeightForFontSize,
+  normalizeExportFontSize,
   type WindowDecoration,
 } from "@/lib/export-utils";
 
@@ -133,6 +136,8 @@ type InlineCodeBlockProps = {
   code: string;
   theme: string;
   fontFamily?: string;
+  /** Code font size in px. Line height scales with it, matching the export. */
+  fontSize?: number;
   language?: string | null;
   comments: Record<number, InlineComment>;
   reactions: Record<number, string>;
@@ -216,6 +221,7 @@ export function InlineCodeBlock({
   code,
   theme,
   fontFamily,
+  fontSize = EXPORT_FONT_SIZE,
   language: languageProp,
   comments,
   reactions,
@@ -273,6 +279,11 @@ export function InlineCodeBlock({
     [languageProp, filename, code],
   );
   const lines = useMemo(() => code.split("\n"), [code]);
+  // Every row in the editor — gutter, highlight overlay, textarea — is one
+  // fixed-height line. Both the height and the type size are derived from the
+  // same font size the export uses so the preview matches the rendered image.
+  const codeFontSize = normalizeExportFontSize(fontSize);
+  const codeLineHeight = exportLineHeightForFontSize(codeFontSize);
   const compactPreviewGutter = compactGutter;
   const gutterWidth = showLineNumbers
     ? compactPreviewGutter
@@ -659,7 +670,7 @@ export function InlineCodeBlock({
             {displayRows.map((row) => {
               const ln = row.lineNumber;
               if (row.type === "comment") {
-                return <div key={`comment-${ln}`} className="h-6" />;
+                return <div key={`comment-${ln}`} style={{ height: codeLineHeight }} />;
               }
               const comment = comments[ln];
               const isHovered = hoveredLine === ln;
@@ -671,11 +682,12 @@ export function InlineCodeBlock({
                 <div
                   key={ln}
                   className={cn(
-                    "relative flex h-6 items-center gap-1",
+                    "relative flex items-center gap-1",
                     compactPreviewGutter && showLineNumbers
                       ? "justify-start pl-[18px] pr-0"
                       : "justify-end pr-1.5 pl-1",
                   )}
+                  style={{ height: codeLineHeight }}
                   onMouseEnter={() => setHoveredLine(ln)}
                 >
                   {showToolbar ? (
@@ -694,8 +706,12 @@ export function InlineCodeBlock({
                       ) : null}
                       {showLineNumbers ? (
                         <span
-                          className="text-right text-xs leading-6 tabular-nums"
-                          style={{ color: c.lineNum, width: EXPORT_LINE_NUM_WIDTH }}
+                          className="text-right text-xs tabular-nums"
+                          style={{
+                            color: c.lineNum,
+                            width: EXPORT_LINE_NUM_WIDTH,
+                            lineHeight: `${codeLineHeight}px`,
+                          }}
                         >
                           {ln}
                         </span>
@@ -715,7 +731,7 @@ export function InlineCodeBlock({
               className="absolute z-20"
               style={{
                 left: innerPadding,
-                top: innerPadding + (activeInlineActionLine - 1) * 24 + 1,
+                top: innerPadding + (activeInlineActionLine - 1) * codeLineHeight + 1,
               }}
               onMouseEnter={() => setHoveredLine(activeInlineActionLine)}
             >
@@ -727,7 +743,7 @@ export function InlineCodeBlock({
           <div
             ref={highlightRef}
             data-testid="highlight-layer"
-            className="pointer-events-none absolute inset-0 overflow-hidden leading-6"
+            className="pointer-events-none absolute inset-0 overflow-hidden"
             // Tokens with no scope come back as plain escaped text (no inline
             // color span), so they'd otherwise fall back to whatever the page's
             // foreground is. Pin the default to the theme's fg so unstyled
@@ -735,6 +751,8 @@ export function InlineCodeBlock({
             // text colour.
             style={{
               color: themeFg ?? c.caret,
+              fontSize: `${codeFontSize}px`,
+              lineHeight: `${codeLineHeight}px`,
               paddingTop: innerPadding,
               paddingRight: codePadX,
               paddingBottom: innerPadding,
@@ -749,8 +767,12 @@ export function InlineCodeBlock({
                 return (
                   <div
                     key={`comment-${ln}`}
-                    className="min-h-6 whitespace-pre-wrap break-words text-xs leading-6 italic"
-                    style={{ color: c.headerText }}
+                    className="whitespace-pre-wrap break-words text-xs italic"
+                    style={{
+                      color: c.headerText,
+                      minHeight: codeLineHeight,
+                      lineHeight: `${codeLineHeight}px`,
+                    }}
                   >
                     {EXPORT_COMMENT_PREFIX} {comment?.body}
                   </div>
@@ -761,12 +783,13 @@ export function InlineCodeBlock({
                 <div key={`source-${ln}`}>
                   <div
                     data-testid={`source-line-${ln}`}
-                    className="h-6 whitespace-pre"
-                    style={
-                      selectedCommentLine === ln
+                    className="whitespace-pre"
+                    style={{
+                      height: codeLineHeight,
+                      ...(selectedCommentLine === ln
                         ? { backgroundColor: c.selectedLine, borderRadius: "2px" }
-                        : undefined
-                    }
+                        : null),
+                    }}
                   >
                     {line.length > 0
                       ? line.map((token, index) => (
@@ -810,11 +833,13 @@ export function InlineCodeBlock({
             aria-label="Code"
             wrap="off"
             className={cn(
-              "relative z-10 block h-full w-full resize-none bg-transparent leading-6 text-transparent outline-none [-webkit-text-fill-color:transparent] selection:bg-blue-400/15",
+              "relative z-10 block h-full w-full resize-none bg-transparent text-transparent outline-none [-webkit-text-fill-color:transparent] selection:bg-blue-400/15",
               showScrollbars ? "overflow-auto" : "overflow-hidden",
             )}
             style={{
               caretColor: c.caret,
+              fontSize: `${codeFontSize}px`,
+              lineHeight: `${codeLineHeight}px`,
               whiteSpace: "pre",
               paddingTop: innerPadding,
               paddingRight: codePadX,
@@ -826,12 +851,12 @@ export function InlineCodeBlock({
             onScroll={handleScroll}
             // Hovering the code area drives the same gutter toolbar as
             // hovering the gutter itself. Subtract the configured top inset,
-            // then divide by the 24px line height to map to a source line.
+            // then divide by the line height to map to a source line.
             onMouseMove={(event) => {
               const ta = event.currentTarget;
               const rect = ta.getBoundingClientRect();
               const y = event.clientY - rect.top + ta.scrollTop - innerPadding;
-              const ln = Math.floor(y / 24) + 1;
+              const ln = Math.floor(y / codeLineHeight) + 1;
               if (ln >= 1 && ln <= lines.length) {
                 setHoveredLine((prev) => (prev === ln ? prev : ln));
               }

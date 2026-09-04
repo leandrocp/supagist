@@ -7,12 +7,15 @@ import { Check, ChevronDown, Copy, Download, Shuffle, Upload, X } from "lucide-r
 import { useRouter } from "next/navigation";
 import {
   EXPORT_WIDTH,
-  EXPORT_LINE_HEIGHT,
   EXPORT_MAX_LINES,
   EXPORT_INNER_PADDING,
   EXPORT_BACKGROUNDS,
   EXPORT_BRAND_BACKGROUNDS,
   EXPORT_FONTS,
+  EXPORT_FONT_SIZE,
+  EXPORT_FONT_SIZE_VALUES,
+  exportLineHeightForFontSize,
+  normalizeExportFontSize,
   exportCornerRadiusFromSliderIndex,
   exportCornerRadiusToSliderIndex,
   exportInnerPaddingFromSliderIndex,
@@ -155,6 +158,7 @@ type Draft = {
   code: string;
   theme: string;
   fontId: string;
+  fontSize: number;
   languageOverride: string | null;
   background: string | null;
   outerPadding: number;
@@ -178,6 +182,7 @@ export function HomeComposer() {
     code: DEFAULT_CODE,
     theme: defaultTheme,
     fontId: "system",
+    fontSize: EXPORT_FONT_SIZE,
     languageOverride: null,
     background: null,
     outerPadding: 64,
@@ -222,6 +227,7 @@ export function HomeComposer() {
           code: p.code || DEFAULT_CODE,
           theme: normalizeLegacyBrandTheme(p.theme || defaultTheme),
           fontId: p.fontId ?? "system",
+          fontSize: normalizeExportFontSize(p.fontSize ?? EXPORT_FONT_SIZE),
           languageOverride: p.languageOverride ?? null,
           background: p.background ?? null,
           outerPadding: normalizeExportOuterPadding(p.outerPadding ?? p.padding ?? 64),
@@ -414,6 +420,7 @@ export function HomeComposer() {
           draft.innerPadding,
           draft.header,
           draft.footer,
+          draft.fontSize,
         ),
       ]);
       const svgBlob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
@@ -455,7 +462,8 @@ export function HomeComposer() {
   const busy = isPublishing || isExporting;
 
   const previewLineCount = getPreviewLineCount(draft.code);
-  const previewHeight = Math.max(previewLineCount, 1) * EXPORT_LINE_HEIGHT + draft.innerPadding * 2;
+  const previewLineHeight = exportLineHeightForFontSize(draft.fontSize);
+  const previewHeight = Math.max(previewLineCount, 1) * previewLineHeight + draft.innerPadding * 2;
   const showPreviewGutter = shouldShowPreviewGutter(draft.lineNumbers, true, true);
   const previewCanvasPadding = getPreviewOuterPadding(
     Boolean(selectedBackground),
@@ -504,6 +512,7 @@ export function HomeComposer() {
     footerAuthorUsername: effectiveViewerLabel || "you",
     windowDecoration: draft.windowDecoration,
     innerPadding: draft.innerPadding,
+    fontSize: draft.fontSize,
     compactReactions: true,
   });
   const previewFontFamily = EXPORT_FONTS.find((font) => font.id === draft.fontId)?.family;
@@ -541,6 +550,7 @@ export function HomeComposer() {
         draft.innerPadding,
         draft.header,
         draft.footer,
+        draft.fontSize,
       );
       triggerDownload(URL.createObjectURL(file), file.name, true);
     } catch (error: unknown) {
@@ -579,6 +589,7 @@ export function HomeComposer() {
         draft.innerPadding,
         draft.header,
         draft.footer,
+        draft.fontSize,
       );
       const blob = new Blob([svg], { type: "image/svg+xml;charset=utf-8" });
       triggerDownload(
@@ -760,6 +771,7 @@ export function HomeComposer() {
               code={draft.code}
               theme={draft.theme}
               fontFamily={previewFontFamily}
+              fontSize={draft.fontSize}
               language={draft.languageOverride}
               comments={{}}
               reactions={draft.showReactions ? annotations.reactions : {}}
@@ -992,6 +1004,28 @@ export function HomeComposer() {
                                   {EXPORT_FONTS.map((f) => (
                                     <SelectItem key={f.id} value={f.id}>
                                       {f.label}
+                                    </SelectItem>
+                                  ))}
+                                </SelectGroup>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="flex min-w-0 flex-col gap-1">
+                            <span className={panelLabelClass}>Font size</span>
+                            <Select
+                              value={String(draft.fontSize)}
+                              onValueChange={(fontSize) =>
+                                setDraft((d) => ({ ...d, fontSize: Number(fontSize) }))
+                              }
+                            >
+                              <SelectTrigger aria-label="Font size" className={panelControlClass}>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent side="top" position="popper">
+                                <SelectGroup>
+                                  {EXPORT_FONT_SIZE_VALUES.map((size) => (
+                                    <SelectItem key={size} value={String(size)}>
+                                      {size}px
                                     </SelectItem>
                                   ))}
                                 </SelectGroup>
@@ -1494,6 +1528,7 @@ async function createPreviewImage(
     draft.innerPadding,
     draft.header,
     draft.footer,
+    draft.fontSize,
   );
 }
 
@@ -1532,5 +1567,6 @@ async function createOgImage(
     draft.innerPadding,
     draft.header,
     draft.footer,
+    draft.fontSize,
   );
 }

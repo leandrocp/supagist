@@ -331,4 +331,29 @@ describe("InlineCodeBlock preview mode", () => {
     expect(screen.getByText("×")).toBeTruthy();
     expect(screen.queryByText("Copied")).toBeNull();
   });
+
+  it("lays out lines at the 14px default font size", () => {
+    render(<InlineCodeBlock {...baseProps} />);
+
+    const textarea = screen.getByLabelText("Code");
+    expect(textarea.style.fontSize).toBe("14px");
+    expect(textarea.style.lineHeight).toBe("24px");
+    expect((screen.getByTestId("source-line-1") as HTMLElement).style.height).toBe("24px");
+  });
+
+  it("scales line height with a larger font size", () => {
+    render(<InlineCodeBlock {...baseProps} fontSize={20} />);
+
+    const textarea = screen.getByLabelText("Code");
+    expect(textarea.style.fontSize).toBe("20px");
+    expect(textarea.style.lineHeight).toBe("34px");
+    expect((screen.getByTestId("source-line-1") as HTMLElement).style.height).toBe("34px");
+    expect((screen.getByTestId("highlight-layer") as HTMLElement).style.fontSize).toBe("20px");
+  });
+
+  it("snaps an unsupported font size to the nearest supported one", () => {
+    render(<InlineCodeBlock {...baseProps} fontSize={15} />);
+
+    expect(screen.getByLabelText("Code").style.fontSize).toBe("16px");
+  });
 });

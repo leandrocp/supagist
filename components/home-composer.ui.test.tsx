@@ -16,10 +16,12 @@ vi.mock("next/dynamic", () => ({
       windowDecoration,
       brandFrame,
       header,
+      fontSize,
     }: {
       style?: React.CSSProperties;
       footer?: React.ReactNode;
       innerPadding?: number;
+      fontSize?: number;
       showGutter?: boolean;
       showLineNumbers?: boolean;
       reactions?: Record<number, string>;
@@ -38,6 +40,7 @@ vi.mock("next/dynamic", () => ({
         <div
           data-testid="code-preview"
           data-inner-padding={innerPadding}
+          data-font-size={fontSize}
           data-show-gutter={showGutter}
           data-show-line-numbers={showLineNumbers}
           data-reactions={JSON.stringify(reactions)}
@@ -228,6 +231,35 @@ describe("HomeComposer controls", () => {
 
     expect(screen.getByRole("option", { name: "Minimal" })).toBeTruthy();
     expect(screen.getByRole("option", { name: "macOS Subtle" })).toBeTruthy();
+  });
+
+  it("offers a font size picker next to the font picker", () => {
+    render(<HomeComposer />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Advanced settings" }));
+
+    expect(screen.getByRole("combobox", { name: "Font" }).textContent).toBe("System");
+    expect(screen.getByRole("combobox", { name: "Font size" }).textContent).toBe("14px");
+
+    fireEvent.click(screen.getByRole("combobox", { name: "Font size" }));
+    expect(screen.getByRole("option", { name: "12px" })).toBeTruthy();
+    expect(screen.getByRole("option", { name: "20px" })).toBeTruthy();
+  });
+
+  it("restores a persisted font size and forwards it to the preview", () => {
+    window.localStorage.setItem("supagist:draft:v1", JSON.stringify({ fontSize: 20 }));
+
+    render(<HomeComposer />);
+
+    expect(screen.getByTestId("code-preview").getAttribute("data-font-size")).toBe("20");
+  });
+
+  it("snaps an unsupported persisted font size to a supported one", () => {
+    window.localStorage.setItem("supagist:draft:v1", JSON.stringify({ fontSize: 15 }));
+
+    render(<HomeComposer />);
+
+    expect(screen.getByTestId("code-preview").getAttribute("data-font-size")).toBe("16");
   });
 
   it("migrates a legacy synthetic brand theme to an official Lumis theme", () => {

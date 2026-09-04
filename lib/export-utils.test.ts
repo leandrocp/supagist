@@ -55,7 +55,13 @@ import {
   normalizeExportCornerRadius,
   normalizeExportInnerPadding,
   normalizeExportOuterPadding,
+  normalizeExportFontSize,
+  exportLineHeightForFontSize,
+  exportCharWidthForFontSize,
   EXPORT_METADATA_URL,
+  EXPORT_FONT_SIZE,
+  EXPORT_LINE_HEIGHT,
+  EXPORT_CHAR_WIDTH,
 } from "./export-utils";
 import type { SvgToken } from "./export-utils";
 
@@ -114,6 +120,46 @@ describe("toPngFilename", () => {
 
   it("strips only the last extension segment", () => {
     expect(toPngFilename("archive.tar.gz")).toBe("archive.tar.png");
+  });
+});
+
+// ── font size ────────────────────────────────────────────────────────────────
+
+describe("normalizeExportFontSize", () => {
+  it("keeps supported sizes untouched", () => {
+    expect(normalizeExportFontSize(12)).toBe(12);
+    expect(normalizeExportFontSize(20)).toBe(20);
+  });
+
+  it("snaps arbitrary sizes to the nearest supported value", () => {
+    expect(normalizeExportFontSize(15)).toBe(16);
+    expect(normalizeExportFontSize(100)).toBe(20);
+    expect(normalizeExportFontSize(0)).toBe(12);
+  });
+});
+
+describe("exportLineHeightForFontSize", () => {
+  it("returns the historical line height at the default font size", () => {
+    expect(exportLineHeightForFontSize(EXPORT_FONT_SIZE)).toBe(EXPORT_LINE_HEIGHT);
+  });
+
+  it("scales with the font size", () => {
+    expect(exportLineHeightForFontSize(20)).toBe(34);
+    expect(exportLineHeightForFontSize(12)).toBe(21);
+  });
+
+  it("normalizes unsupported sizes before scaling", () => {
+    expect(exportLineHeightForFontSize(15)).toBe(exportLineHeightForFontSize(16));
+  });
+});
+
+describe("exportCharWidthForFontSize", () => {
+  it("returns the measured advance at the default font size", () => {
+    expect(exportCharWidthForFontSize(EXPORT_FONT_SIZE)).toBeCloseTo(EXPORT_CHAR_WIDTH, 5);
+  });
+
+  it("scales linearly with the font size", () => {
+    expect(exportCharWidthForFontSize(20)).toBeCloseTo((EXPORT_CHAR_WIDTH / 14) * 20, 5);
   });
 });
 
@@ -220,6 +266,36 @@ describe("estimateExportDimensions", () => {
 
     expect(exported.width).toBe(331);
     expect(composer.width).toBe(324);
+  });
+
+  it("grows both dimensions with the font size", () => {
+    const settings = {
+      code: `${"x".repeat(40)}\n${"y".repeat(40)}`,
+      language: "typescript",
+      theme: "github_light",
+      innerPadding: 8,
+      windowDecoration: "none" as const,
+    };
+    const small = estimateExportDimensions({ ...settings, fontSize: 12 });
+    const large = estimateExportDimensions({ ...settings, fontSize: 20 });
+
+    // Two source lines: 21px vs 34px per line.
+    expect(large.height - small.height).toBe(26);
+    expect(large.width).toBeGreaterThan(small.width);
+  });
+
+  it("defaults to the 14px font size when none is given", () => {
+    const settings = {
+      code: "x".repeat(32),
+      language: "typescript",
+      theme: "github_light",
+      innerPadding: 8,
+      windowDecoration: "none" as const,
+    };
+
+    expect(estimateExportDimensions(settings)).toEqual(
+      estimateExportDimensions({ ...settings, fontSize: EXPORT_FONT_SIZE }),
+    );
   });
 
   it("keeps short snippets compact instead of forcing the legacy 420px width", () => {
@@ -601,6 +677,83 @@ describe("createHighlightedSvg", () => {
     );
 
     expect(svg).toContain('rx="0" ry="0"');
+  });
+
+  it("renders code at the default font size when none is given", async () => {
+    const svg = await createHighlightedSvg("const x = 1;", "test.ts", "github_light", 1200, undefined);
+
+    expect(svg).toContain(`font-size="${EXPORT_FONT_SIZE}" font-family=`);
+  });
+
+  it("renders code at the requested font size and taller lines", async () => {
+    const args = [
+      "const x = 1;\nconst y = 2;",
+      "test.ts",
+      "github_light",
+      1200,
+      undefined,
+      null,
+      undefined,
+      false,
+      "system",
+      null,
+      null,
+      false,
+      true,
+      false,
+      null,
+      null,
+      null,
+      false,
+      null,
+      "none",
+      0,
+      8,
+      undefined,
+      undefined,
+    ] as const;
+
+    const small = await createHighlightedSvg(...args, 12);
+    const large = await createHighlightedSvg(...args, 20);
+
+    expect(small).toContain('font-size="12" font-family=');
+    expect(large).toContain('font-size="20" font-family=');
+
+    const heightOf = (svg: string) => Number(/^<svg [^>]*\bheight="(\d+)"/.exec(svg)![1]);
+    // Two lines at 21px vs 34px line height.
+    expect(heightOf(large) - heightOf(small)).toBe(26);
+  });
+
+  it("snaps an unsupported font size to the nearest supported one", async () => {
+    const svg = await createHighlightedSvg(
+      "const x = 1;",
+      "test.ts",
+      "github_light",
+      1200,
+      undefined,
+      null,
+      undefined,
+      false,
+      "system",
+      null,
+      null,
+      false,
+      true,
+      false,
+      null,
+      null,
+      null,
+      false,
+      null,
+      "none",
+      0,
+      8,
+      undefined,
+      undefined,
+      15,
+    );
+
+    expect(svg).toContain('font-size="16" font-family=');
   });
 
   it("embeds Supagist source metadata", async () => {

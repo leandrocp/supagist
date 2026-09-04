@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Download } from "lucide-react";
 import { ExportModal, type ExportSettings } from "@/components/export-modal";
-import { EXPORT_INNER_PADDING } from "@/lib/export-utils";
+import { EXPORT_FONT_SIZE, EXPORT_INNER_PADDING } from "@/lib/export-utils";
 import { DEFAULT_FOOTER_SETTINGS, DEFAULT_HEADER_SETTINGS } from "@/lib/export-metadata";
 
 const DEFAULT_SETTINGS: ExportSettings = {
@@ -18,6 +18,7 @@ const DEFAULT_SETTINGS: ExportSettings = {
   footer: DEFAULT_FOOTER_SETTINGS,
   windowDecoration: "macos",
   fontId: "system",
+  fontSize: EXPORT_FONT_SIZE,
   language: null,
 };
 
