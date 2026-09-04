@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { cache } from "react";
-import { createHighlighter } from "@lumis-sh/lumis";
+import { createHighlighter } from "@lumis-sh/lumis/client";
 import { bundledLanguages } from "@lumis-sh/lumis/bundles/full";
 import { spanInline } from "@lumis-sh/lumis/formatters/html";
 import type { ThemeData } from "@lumis-sh/themes";

@@ -1,4 +1,4 @@
-import { availableLanguages } from "@lumis-sh/lumis";
+import { availableLanguages } from "@lumis-sh/lumis/client";
 
 /** Returns the decoded slug + shortId from a URL segment like "my-file-abc123". */
 export function parseSnippetParam(param: string): { slug: string; shortId: string } | null {

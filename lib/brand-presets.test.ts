@@ -1,6 +1,6 @@
 import { existsSync } from "node:fs";
 import { join } from "node:path";
-import { availableThemes } from "@lumis-sh/lumis";
+import { availableThemes } from "@lumis-sh/lumis/client";
 import { describe, expect, it } from "vitest";
 import { DEFAULT_FOOTER_SETTINGS, DEFAULT_HEADER_SETTINGS } from "./export-metadata";
 import {

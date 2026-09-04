@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { availableLanguages, createHighlighter, withWasmBundle } from "@lumis-sh/lumis";
+import { availableLanguages, createHighlighter, withWasmBundle } from "@lumis-sh/lumis/client";
 import { bundledLanguages } from "@lumis-sh/lumis/bundles/full";
 import { htmlInline } from "@lumis-sh/lumis/formatters";
 import { CodeBlock } from "@lumis-sh/react";

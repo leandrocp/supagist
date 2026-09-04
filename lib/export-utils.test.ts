@@ -11,7 +11,7 @@ const { mockHighlighter } = vi.hoisted(() => ({
   },
 }));
 
-vi.mock("@lumis-sh/lumis", () => ({
+vi.mock("@lumis-sh/lumis/client", () => ({
   availableLanguages: vi.fn(() => [
     { id: "javascript", extensions: ["*.js", "*.jsx", "*.mjs"] },
     { id: "typescript", extensions: ["*.ts", "*.tsx"] },

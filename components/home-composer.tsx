@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { availableThemes, availableLanguages } from "@lumis-sh/lumis";
+import { availableThemes, availableLanguages } from "@lumis-sh/lumis/client";
 import { Check, ChevronDown, Copy, Download, Shuffle, Upload, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import {

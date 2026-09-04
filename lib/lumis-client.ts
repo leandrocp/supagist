@@ -1,6 +1,6 @@
 // Uses web + system + backend language bundles + a few extras.
 // 26MB vs 109MB for wasm-bundle-full.
-import { createHighlighter, withWasmBundle } from "@lumis-sh/lumis";
+import { createHighlighter, withWasmBundle } from "@lumis-sh/lumis/client";
 import { bundledLanguages as webLangs } from "@lumis-sh/lumis/bundles/web";
 import { bundledLanguages as systemLangs } from "@lumis-sh/lumis/bundles/system";
 import { bundledLanguages as backendLangs } from "@lumis-sh/lumis/bundles/backend";

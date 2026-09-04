@@ -9,7 +9,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { FileImage, FileText, ImageIcon } from "lucide-react";
-import { availableLanguages } from "@lumis-sh/lumis";
+import { availableLanguages } from "@lumis-sh/lumis/client";
 import {
   EXPORT_WIDTH,
   EXPORT_INNER_PADDING,
