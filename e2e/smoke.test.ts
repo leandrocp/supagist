@@ -52,6 +52,22 @@ test("login link is reachable from the home page nav", async ({ page }) => {
   expect(response?.status()).toBe(200);
 });
 
+test("home page has exactly one header bar, flush with the composer", async ({ page }) => {
+  await page.goto("/");
+
+  const nav = page.getByTestId("app-nav");
+  await expect(nav).toBeVisible();
+  await expect(page.locator("nav")).toHaveCount(1);
+
+  // Brand and account controls share the single row.
+  await expect(nav.getByText("Supagist")).toBeVisible();
+
+  // The composer starts immediately below the nav — no second chrome row.
+  const navBox = await nav.boundingBox();
+  const shellBox = await page.getByTestId("composer-shell").boundingBox();
+  expect(Math.abs((shellBox?.y ?? 0) - ((navBox?.y ?? 0) + (navBox?.height ?? 0)))).toBeLessThan(2);
+});
+
 test("composer remains usable at 375px with a stable overlay selector", async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 });
   await page.goto("/");

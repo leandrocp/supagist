@@ -43,7 +43,6 @@ import {
   findMatchingBrandPreset,
   normalizeLegacyBrandTheme,
 } from "@/lib/brand-presets";
-import { HomePresence } from "@/components/home-presence";
 import { createBrandCanvasBackground, createBrandFrameShadow } from "@/lib/brand-scenes";
 import {
   DEFAULT_FOOTER_SETTINGS,
@@ -200,7 +199,6 @@ export function HomeComposer() {
   const [selectedReactionLine, setSelectedReactionLine] = useState<number | null>(null);
   const [viewerLabel, setViewerLabel] = useState<string | null>(null);
   const [viewerAvatar, setViewerAvatar] = useState<string | null>(null);
-  const [isAnonymous, setIsAnonymous] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -282,18 +280,15 @@ export function HomeComposer() {
       if (!user) {
         setViewerLabel(null);
         setViewerAvatar(null);
-        setIsAnonymous(false);
         return;
       }
 
       if (user.is_anonymous) {
-        setIsAnonymous(true);
         setViewerLabel(null);
         setViewerAvatar(null);
         return;
       }
 
-      setIsAnonymous(false);
       const meta = user.user_metadata;
       setViewerLabel(
         String(
@@ -681,28 +676,6 @@ export function HomeComposer() {
       data-testid="composer-shell"
       className="-mx-5 -mt-10 flex h-[calc(100dvh-4rem)] min-h-0 flex-col overflow-hidden bg-background-alternative text-foreground lg:-mx-5 lg:-mt-16 xl:-mx-[calc((100vw-72rem)/2+1.25rem)]"
     >
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border bg-surface-100/95 px-5 py-3 backdrop-blur-sm">
-        <div className="flex min-w-0 items-center gap-3">
-          <div className="flex size-8 items-center justify-center rounded-md border border-brand/20 bg-brand-subtle font-mono text-xs text-brand-strong">
-            &lt;/&gt;
-          </div>
-          <div className="min-w-0">
-            <h1 className="truncate text-base font-semibold tracking-tight text-foreground">
-              Create a snippet
-            </h1>
-            <p className="truncate text-xs text-foreground-lighter">
-              Realtime code sharing, powered by Supabase
-            </p>
-          </div>
-        </div>
-        <div className="flex items-center gap-3 text-xs text-foreground-muted">
-          {hasEnvVars ? <HomePresence /> : null}
-          {!DEV_MODE && (isAnonymous || !viewerLabel) && isHydrated ? (
-            <span>Log in to save snippets.</span>
-          ) : null}
-        </div>
-      </div>
-
       <div
         data-testid="composer-main"
         className="grid min-h-0 flex-1 grid-rows-[clamp(13rem,34dvh,22rem)_minmax(0,1fr)] lg:grid-cols-[minmax(0,1fr)_28rem] lg:grid-rows-1"

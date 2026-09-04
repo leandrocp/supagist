@@ -146,7 +146,8 @@ export function HomePresence() {
 
   return (
     <div
-      className="flex items-center justify-center gap-2 pt-1 text-xs text-muted-foreground"
+      data-testid="home-presence"
+      className="flex min-w-0 items-center gap-2 text-xs text-muted-foreground"
       title={ordered.map((v) => v.name).join(", ")}
     >
       <div className="flex -space-x-1.5">
@@ -165,7 +166,9 @@ export function HomePresence() {
           </div>
         ) : null}
       </div>
-      <span className="truncate">{label}</span>
+      {/* Avatars carry the signal on their own; the sentence is the first
+          thing to go when the nav runs out of room on small screens. */}
+      <span className="hidden truncate md:inline">{label}</span>
     </div>
   );
 }

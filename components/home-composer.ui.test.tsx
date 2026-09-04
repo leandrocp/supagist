@@ -111,13 +111,26 @@ describe("HomeComposer controls", () => {
 
     expect(screen.getByTestId("composer-shell").className).toContain("bg-background-alternative");
     expect(screen.getByTestId("composer-workspace").className).toContain("bg-surface-100");
-    expect(screen.getByRole("heading", { name: "Create a snippet" })).toBeTruthy();
-    expect(screen.getByText("Realtime code sharing, powered by Supabase")).toBeTruthy();
     expect(screen.getByTestId("code-preview").getAttribute("data-show-gutter")).toBe("true");
     expect(screen.getByTestId("code-preview").getAttribute("data-show-line-numbers")).toBe("false");
     expect(screen.getByRole("button", { name: "Publish" }).getAttribute("data-variant")).toBe(
       "default",
     );
+  });
+
+  it("renders no header bar of its own — the app nav is the only one", () => {
+    const { container } = render(<HomeComposer />);
+
+    // The composer used to stack its own title/presence bar under the app nav.
+    // Its content now lives in the single nav in app/page.tsx.
+    expect(screen.queryByRole("heading", { name: "Create a snippet" })).toBeNull();
+    expect(screen.queryByText("Realtime code sharing, powered by Supabase")).toBeNull();
+    expect(screen.queryByText("Log in to save snippets.")).toBeNull();
+
+    // The shell's first child is the editor grid, not a chrome row.
+    const shell = screen.getByTestId("composer-shell");
+    expect(shell.firstElementChild?.getAttribute("data-testid")).toBe("composer-main");
+    expect(container.querySelector("nav")).toBeNull();
   });
 
   it("keeps the preview visible while customization scrolls independently", () => {
