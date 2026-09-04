@@ -31,7 +31,9 @@ describe("Home", () => {
   it("keeps Supabase attribution concise and credits ray.so as inspiration", () => {
     render(<Home />);
 
-    expect(screen.getByText("Built on Supabase")).toBeTruthy();
+    // The "Built on Supabase" badge is gone — the credit line says the same
+    // thing and names Lumis and ray.so besides.
+    expect(screen.queryByText("Built on Supabase")).toBeNull();
     expect(screen.queryByText("A Supabase-native collaboration demo")).toBeNull();
 
     const footer = screen.getByRole("contentinfo");

@@ -68,6 +68,18 @@ test("home page has exactly one header bar, flush with the composer", async ({ p
   expect(Math.abs((shellBox?.y ?? 0) - ((navBox?.y ?? 0) + (navBox?.height ?? 0)))).toBeLessThan(2);
 });
 
+test("home page footer divider spans the same width as the nav", async ({ page }) => {
+  await page.goto("/");
+
+  const nav = await page.getByTestId("app-nav").boundingBox();
+  const footer = await page.getByTestId("site-footer").boundingBox();
+
+  // Both are full-bleed on the home page; a footer confined to the centred
+  // column left the divider visibly stopping short at both ends.
+  expect(Math.abs((footer?.x ?? 0) - (nav?.x ?? 0))).toBeLessThan(2);
+  expect(Math.abs((footer?.width ?? 0) - (nav?.width ?? 0))).toBeLessThan(2);
+});
+
 test("snippets listing is reachable from the nav, not buried on the home page", async ({
   page,
 }) => {

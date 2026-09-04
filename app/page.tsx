@@ -19,9 +19,11 @@ export default function Home() {
         <section className="flex flex-1 flex-col gap-12 pt-10 pb-0 lg:gap-16 lg:pt-16 lg:pb-0">
           <HomeComposer />
         </section>
-
-        <SiteFooter />
       </div>
+
+      {/* Outside the centred column, like the nav — the divider has to reach
+          both viewport edges to line up with the full-bleed composer. */}
+      <SiteFooter fullBleed />
     </main>
   );
 }
