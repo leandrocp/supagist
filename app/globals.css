@@ -1,7 +1,76 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
+@plugin 'tailwindcss-animate';
+
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+  --color-background-200: hsl(var(--background-200));
+  --color-background: hsl(var(--background));
+  --color-background-alternative: hsl(var(--background-alternative));
+
+  --color-foreground: hsl(var(--foreground));
+  --color-foreground-light: hsl(var(--foreground-light));
+  --color-foreground-lighter: hsl(var(--foreground-lighter));
+  --color-foreground-muted: hsl(var(--foreground-muted));
+  --color-foreground-contrast: hsl(var(--foreground-contrast));
+
+  --color-surface-100: hsl(var(--surface-100));
+  --color-surface-200: hsl(var(--surface-200));
+  --color-surface-300: hsl(var(--surface-300));
+
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+
+  --color-border: hsl(var(--border));
+  --color-border-strong: hsl(var(--border-strong));
+  --color-border-control: hsl(var(--border-control));
+
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+
+  --color-chart-1: hsl(var(--chart-1));
+  --color-chart-2: hsl(var(--chart-2));
+  --color-chart-3: hsl(var(--chart-3));
+  --color-chart-4: hsl(var(--chart-4));
+  --color-chart-5: hsl(var(--chart-5));
+
+  --color-brand: hsl(var(--brand));
+  --color-brand-link: hsl(var(--brand-link));
+  --color-brand-subtle: hsl(var(--brand-subtle));
+  --color-brand-strong: hsl(var(--brand-strong));
+
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+
+  --font-mono: var(--font-source-code-pro), ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --tracking-code-label: 0.1em;
+}
+
+/* Export fonts. Kept at the top level rather than inside a `@layer`: the v4
+   upgrade wrapped these in `@layer utilities`, which is legal but pointless —
+   `@font-face` has no cascade to participate in, and nesting it makes the
+   declarations easy to lose track of. */
 @font-face {
   font-family: "JetBrains Mono";
   font-style: normal;
@@ -122,7 +191,15 @@
 }
 
 @layer base {
-  * {
+  /* v4 changed the default border colour to `currentcolor`. Pin it back to the
+     semantic `--border` token — including the pseudo-elements a bare `*` does
+     not match, which is what the upgrade's `--color-gray-200` fallback block
+     was covering (with the wrong colour, since this theme has no gray scale). */
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
     @apply border-border;
   }
 

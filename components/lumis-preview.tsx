@@ -55,7 +55,7 @@ export function LumisPreview({ filename, code, theme }: LumisPreviewProps) {
   const language = useMemo(() => inferLanguage(filename, code), [filename, code]);
 
   return (
-    <div className="overflow-x-auto rounded-[1.5rem] border border-black/10 bg-[#171717] p-6 shadow-2xl shadow-black/20 dark:border-white/10">
+    <div className="overflow-x-auto rounded-3xl border border-black/10 bg-[#171717] p-6 shadow-2xl shadow-black/20 dark:border-white/10">
       <div className="mb-5 flex items-center justify-between gap-4 text-xs uppercase tracking-[0.2em] text-white/50">
         <div className="flex items-center gap-2">
           <span className="size-3 rounded-full bg-[#ff5f57]" />

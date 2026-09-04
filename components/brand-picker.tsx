@@ -73,7 +73,7 @@ export function BrandPicker({ value, onChange, className }: Props) {
           aria-label="Brand"
           aria-expanded={open}
           className={cn(
-            "flex h-11 min-w-0 items-center gap-2 rounded-md border border-border-control bg-surface-200 px-3 text-sm text-foreground outline-none transition hover:border-border-strong focus-visible:ring-2 focus-visible:ring-ring/50",
+            "flex h-11 min-w-0 items-center gap-2 rounded-md border border-border-control bg-surface-200 px-3 text-sm text-foreground outline-hidden transition hover:border-border-strong focus-visible:ring-2 focus-visible:ring-ring/50",
             className,
           )}
         >
@@ -96,15 +96,15 @@ export function BrandPicker({ value, onChange, className }: Props) {
         align="start"
         sideOffset={6}
         collisionPadding={12}
-        className="max-h-[var(--radix-popover-content-available-height)] w-[min(92vw,380px)] overflow-hidden border-border bg-popover p-0 text-popover-foreground"
+        className="max-h-(--radix-popover-content-available-height) w-[min(92vw,380px)] overflow-hidden border-border bg-popover p-0 text-popover-foreground"
       >
         <Command>
           <CommandInput
             placeholder="Search brands…"
-            className="border-0 outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
+            className="border-0 outline-hidden focus:ring-0 focus-visible:outline-hidden focus-visible:ring-0"
           />
           <CommandList
-            className="p-1 [&_[cmdk-empty]]:col-span-2 [&_[cmdk-list-sizer]]:grid [&_[cmdk-list-sizer]]:grid-cols-2 [&_[cmdk-list-sizer]]:gap-1"
+            className="p-1 **:[[cmdk-empty]]:col-span-2 **:[[cmdk-list-sizer]]:grid **:[[cmdk-list-sizer]]:grid-cols-2 **:[[cmdk-list-sizer]]:gap-1"
             style={{
               maxHeight: "min(70vh, calc(var(--radix-popover-content-available-height) - 3rem))",
             }}
@@ -121,7 +121,7 @@ export function BrandPicker({ value, onChange, className }: Props) {
                 className="h-16 min-w-0 cursor-pointer gap-2 rounded-md border border-transparent px-2 data-[selected=true]:border-border data-[selected=true]:bg-surface-200"
               >
                 <span
-                  className="flex size-9 shrink-0 items-center justify-center rounded-md border border-white/10 shadow-sm"
+                  className="flex size-9 shrink-0 items-center justify-center rounded-md border border-white/10 shadow-xs"
                   style={brandPreviewStyle(preset)}
                 >
                   <BrandLogo preset={preset} />

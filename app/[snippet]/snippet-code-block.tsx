@@ -33,7 +33,7 @@ export async function SnippetCodeBlock({ code, language, theme: themeName, filen
   const lines = code.split("\n");
 
   return (
-    <div className="overflow-hidden rounded-[1.5rem] border border-white/10 bg-[#171717] shadow-2xl shadow-black/20">
+    <div className="overflow-hidden rounded-3xl border border-white/10 bg-[#171717] shadow-2xl shadow-black/20">
       <div className="flex items-center justify-between gap-4 border-b border-white/10 px-4 py-3 text-xs uppercase tracking-[0.25em] text-white/45">
         <div className="flex items-center gap-2">
           <span className="size-3 rounded-full bg-[#ff5f57]" />

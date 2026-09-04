@@ -912,7 +912,7 @@ export function SnippetAnnotationsView({
                   }}
                 >
                   <div
-                    className="whitespace-pre-wrap break-words"
+                    className="whitespace-pre-wrap wrap-break-word"
                     dangerouslySetInnerHTML={{ __html: lineHtml[index] || " " }}
                   />
 
@@ -985,7 +985,7 @@ export function SnippetAnnotationsView({
                     </time>
                   </div>
                   <p
-                    className="whitespace-pre-wrap break-words text-sm"
+                    className="whitespace-pre-wrap wrap-break-word text-sm"
                     style={{ color: c.buttonText }}
                   >
                     {cmt.body}
@@ -998,7 +998,7 @@ export function SnippetAnnotationsView({
             <textarea
               ref={commentInputRef}
               maxLength={2000}
-              className="themed-placeholder min-h-16 w-full resize-none rounded-md border px-3 py-2 font-sans text-sm outline-none transition-colors focus-visible:ring-2"
+              className="themed-placeholder min-h-16 w-full resize-none rounded-md border px-3 py-2 font-sans text-sm outline-hidden transition-colors focus-visible:ring-2"
               style={
                 {
                   backgroundColor: c.bg,

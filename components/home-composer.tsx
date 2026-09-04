@@ -622,7 +622,7 @@ export function HomeComposer() {
     "h-11 border-border-control bg-surface-200 text-foreground hover:bg-surface-300 hover:text-foreground";
   const panelLabelClass = "text-xs font-medium text-foreground-lighter";
   const panelControlClass =
-    "h-11 rounded-md border border-border-control bg-surface-200 px-3 text-sm text-foreground outline-none transition focus-visible:ring-2 focus-visible:ring-ring/50";
+    "h-11 rounded-md border border-border-control bg-surface-200 px-3 text-sm text-foreground outline-hidden transition focus-visible:ring-2 focus-visible:ring-ring/50";
   const menuItemClass =
     "h-11 justify-start text-foreground-light hover:bg-surface-300 hover:text-foreground";
   const selectedBackgroundStyle = selectedBackground
@@ -681,7 +681,7 @@ export function HomeComposer() {
       data-testid="composer-shell"
       className="-mx-5 -mt-10 flex h-[calc(100dvh-4rem)] min-h-0 flex-col overflow-hidden bg-background-alternative text-foreground lg:-mx-5 lg:-mt-16 xl:-mx-[calc((100vw-72rem)/2+1.25rem)]"
     >
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border bg-surface-100/95 px-5 py-3 backdrop-blur">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border bg-surface-100/95 px-5 py-3 backdrop-blur-sm">
         <div className="flex min-w-0 items-center gap-3">
           <div className="flex size-8 items-center justify-center rounded-md border border-brand/20 bg-brand-subtle font-mono text-xs text-brand-strong">
             &lt;/&gt;
@@ -833,7 +833,7 @@ export function HomeComposer() {
                       type="button"
                       title="Random theme"
                       aria-label="Random theme"
-                      className="flex h-full w-11 shrink-0 items-center justify-center text-foreground-lighter transition-colors hover:bg-surface-300 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring/50"
+                      className="flex h-full w-11 shrink-0 items-center justify-center text-foreground-lighter transition-colors hover:bg-surface-300 hover:text-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring/50"
                       onClick={() => {
                         const others = themes.filter((t) => t.name !== draft.theme);
                         const pick = others[Math.floor(Math.random() * others.length)];
@@ -862,7 +862,7 @@ export function HomeComposer() {
                     <PopoverTrigger asChild>
                       <button
                         type="button"
-                        className="flex h-11 min-w-0 items-center gap-2 rounded-md border border-border-control bg-surface-200 px-3 text-sm text-foreground transition hover:border-border-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+                        className="flex h-11 min-w-0 items-center gap-2 rounded-md border border-border-control bg-surface-200 px-3 text-sm text-foreground transition hover:border-border-strong focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring/50"
                       >
                         <span
                           className={cn(
@@ -1190,7 +1190,7 @@ export function HomeComposer() {
                                     setDraft((d) => ({ ...d, [key]: checked }))
                                   }
                                   aria-label={label}
-                                  className="h-6 w-11 shrink-0 data-[state=checked]:bg-brand data-[state=unchecked]:bg-surface-300 [&_[data-slot=switch-thumb]]:size-5 [&_[data-slot=switch-thumb]]:bg-white"
+                                  className="h-6 w-11 shrink-0 data-[state=checked]:bg-brand data-[state=unchecked]:bg-surface-300 **:data-[slot=switch-thumb]:size-5 **:data-[slot=switch-thumb]:bg-white"
                                 />
                               </label>
                             );
@@ -1220,7 +1220,7 @@ export function HomeComposer() {
                                 setDraft((d) => ({ ...d, header: { ...d.header, enabled } }))
                               }
                               aria-label="Show header"
-                              className="h-6 w-11 shrink-0 data-[state=checked]:bg-brand data-[state=unchecked]:bg-surface-300 [&_[data-slot=switch-thumb]]:size-5 [&_[data-slot=switch-thumb]]:bg-white"
+                              className="h-6 w-11 shrink-0 data-[state=checked]:bg-brand data-[state=unchecked]:bg-surface-300 **:data-[slot=switch-thumb]:size-5 **:data-[slot=switch-thumb]:bg-white"
                             />
                           </div>
                           <div
@@ -1308,7 +1308,7 @@ export function HomeComposer() {
                                 setDraft((d) => ({ ...d, footer: { ...d.footer, enabled } }))
                               }
                               aria-label="Show footer"
-                              className="h-6 w-11 shrink-0 data-[state=checked]:bg-brand data-[state=unchecked]:bg-surface-300 [&_[data-slot=switch-thumb]]:size-5 [&_[data-slot=switch-thumb]]:bg-white"
+                              className="h-6 w-11 shrink-0 data-[state=checked]:bg-brand data-[state=unchecked]:bg-surface-300 **:data-[slot=switch-thumb]:size-5 **:data-[slot=switch-thumb]:bg-white"
                             />
                           </div>
                           <div

@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function TermsPage() {
   return (
-    <main className="min-h-screen bg-gradient-to-b from-background via-background to-muted/30">
+    <main className="min-h-screen bg-linear-to-b from-background via-background to-muted/30">
       <div className="mx-auto max-w-2xl px-5 py-16 space-y-10">
         <div>
           <Link

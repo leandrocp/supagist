@@ -511,7 +511,7 @@ export function ExportModal({
             <select
               value={settings.language ?? ""}
               onChange={(e) => onSettingsChange({ ...settings, language: e.target.value || null })}
-              className="h-8 w-full rounded-md border border-input bg-background px-2 text-sm text-foreground outline-none transition focus-visible:ring-2 focus-visible:ring-ring"
+              className="h-8 w-full rounded-md border border-input bg-background px-2 text-sm text-foreground outline-hidden transition focus-visible:ring-2 focus-visible:ring-ring"
             >
               {LANGUAGES.map((l) => (
                 <option key={l.id} value={l.id}>
@@ -526,7 +526,7 @@ export function ExportModal({
             <select
               value={settings.fontId}
               onChange={(e) => onSettingsChange({ ...settings, fontId: e.target.value })}
-              className="h-8 w-full rounded-md border border-input bg-background px-2 text-sm text-foreground outline-none transition focus-visible:ring-2 focus-visible:ring-ring"
+              className="h-8 w-full rounded-md border border-input bg-background px-2 text-sm text-foreground outline-hidden transition focus-visible:ring-2 focus-visible:ring-ring"
               style={{ fontFamily: EXPORT_FONTS.find((f) => f.id === settings.fontId)?.family }}
             >
               {EXPORT_FONTS.map((f) => (
@@ -543,7 +543,7 @@ export function ExportModal({
               aria-label="Font size"
               value={String(normalizedFontSize)}
               onChange={(e) => onSettingsChange({ ...settings, fontSize: Number(e.target.value) })}
-              className="h-8 w-full rounded-md border border-input bg-background px-2 text-sm text-foreground outline-none transition focus-visible:ring-2 focus-visible:ring-ring"
+              className="h-8 w-full rounded-md border border-input bg-background px-2 text-sm text-foreground outline-hidden transition focus-visible:ring-2 focus-visible:ring-ring"
             >
               {EXPORT_FONT_SIZE_VALUES.map((size) => (
                 <option key={size} value={size}>

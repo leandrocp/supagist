@@ -26,7 +26,7 @@ describe("ThemePicker", () => {
     expect(list.style.maxHeight).toBe(
       "min(70vh, calc(var(--radix-popover-content-available-height) - 3rem))",
     );
-    expect(popover.className).toContain("max-h-[var(--radix-popover-content-available-height)]");
+    expect(popover.className).toContain("max-h-(--radix-popover-content-available-height)");
     expect(popover.className).toContain("overflow-hidden");
     expect(screen.getByPlaceholderText("Search themes…")).toBeTruthy();
     expect(screen.getByText("Lumis themes")).toBeTruthy();

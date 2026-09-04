@@ -67,13 +67,13 @@ export function ThemePicker({
   // both states.
   const itemStyle = popoverPalette ? { color: popoverPalette.text } : undefined;
   const headingClass = popoverPalette
-    ? "[&_[cmdk-group-heading]]:!text-[var(--cmd-heading-color)]"
+    ? "**:[[cmdk-group-heading]]:text-(--cmd-heading-color)!"
     : "";
   // Override the hover/selected bg and text — bg-accent (default light grey)
   // looks washed out on a dark editor popover. We pick the gutter colour for
   // hover bg since it's already a subtle variation of the editor bg.
   const itemHoverClass = popoverPalette
-    ? "data-[selected=true]:!bg-[var(--cmd-hover-bg)] data-[selected=true]:!text-[var(--cmd-hover-text)]"
+    ? "data-[selected=true]:bg-(--cmd-hover-bg)! data-[selected=true]:text-(--cmd-hover-text)!"
     : "";
   const listStyle = {
     ...(popoverPalette
@@ -98,7 +98,7 @@ export function ThemePicker({
           aria-label="Theme"
           aria-expanded={open}
           className={cn(
-            "flex h-full w-full items-center gap-2 bg-transparent pl-2 pr-2 text-sm outline-none",
+            "flex h-full w-full items-center gap-2 bg-transparent pl-2 pr-2 text-sm outline-hidden",
             triggerClassName,
           )}
           style={triggerStyle}
@@ -111,7 +111,7 @@ export function ThemePicker({
         </button>
       </PopoverTrigger>
       <PopoverContent
-        className="max-h-[var(--radix-popover-content-available-height)] w-[260px] overflow-hidden p-0"
+        className="max-h-(--radix-popover-content-available-height) w-[260px] overflow-hidden p-0"
         align="start"
         side="top"
         sideOffset={6}
@@ -138,7 +138,7 @@ export function ThemePicker({
               thick blue rounded outline. Override with explicit none. */}
           <CommandInput
             placeholder="Search themes…"
-            className="border-0 outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
+            className="border-0 outline-hidden focus:ring-0 focus-visible:outline-hidden focus-visible:ring-0"
             style={
               popoverPalette
                 ? {

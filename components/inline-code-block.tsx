@@ -649,7 +649,7 @@ export function InlineCodeBlock({
           cursor exits the editor altogether (gutter mouseLeave alone misses
           the case where the cursor crosses straight out through the code). */}
       <div
-        className={cn("grid overflow-hidden", !bodyHeight && "h-[47rem]")}
+        className={cn("grid overflow-hidden", !bodyHeight && "h-188")}
         style={{
           gridTemplateColumns: showLineNumberGutter ? `${gutterWidth}px 1fr` : "1fr",
           height: bodyHeight ? `${bodyHeight}px` : undefined,
@@ -767,7 +767,7 @@ export function InlineCodeBlock({
                 return (
                   <div
                     key={`comment-${ln}`}
-                    className="whitespace-pre-wrap break-words text-xs italic"
+                    className="whitespace-pre-wrap wrap-break-word text-xs italic"
                     style={{
                       color: c.headerText,
                       minHeight: codeLineHeight,
@@ -833,7 +833,7 @@ export function InlineCodeBlock({
             aria-label="Code"
             wrap="off"
             className={cn(
-              "relative z-10 block h-full w-full resize-none bg-transparent text-transparent outline-none [-webkit-text-fill-color:transparent] selection:bg-blue-400/15",
+              "relative z-10 block h-full w-full resize-none bg-transparent text-transparent outline-hidden [-webkit-text-fill-color:transparent] selection:bg-blue-400/15",
               showScrollbars ? "overflow-auto" : "overflow-hidden",
             )}
             style={{
