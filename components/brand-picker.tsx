@@ -26,14 +26,32 @@ type Props = {
 };
 
 function BrandLogo({ preset, className }: { preset: BrandPreset; className?: string }) {
+  // `BRAND_PRESETS` is a const tuple, so presets without a mark have no
+  // `logoUrl` key at all rather than an undefined one — same `in` narrowing
+  // the background's optional `patternUrl` needs below.
+  const logoUrl = "logoUrl" in preset ? preset.logoUrl : undefined;
+
+  // Not every brand has a mark we can source. Those fall back to a plain
+  // accent dot so the swatch still reads as branded.
+  if (!logoUrl) {
+    return (
+      <span
+        aria-hidden
+        data-testid="brand-logo-fallback"
+        className={cn("size-2 shrink-0 rounded-full", className)}
+        style={{ backgroundColor: preset.accent }}
+      />
+    );
+  }
+
   return (
     <span
       aria-hidden
       className={cn("size-4 shrink-0", className)}
       style={{
         backgroundColor: preset.accent,
-        maskImage: `url(${preset.logoUrl})`,
-        WebkitMaskImage: `url(${preset.logoUrl})`,
+        maskImage: `url(${logoUrl})`,
+        WebkitMaskImage: `url(${logoUrl})`,
         maskRepeat: "no-repeat",
         WebkitMaskRepeat: "no-repeat",
         maskSize: "contain",

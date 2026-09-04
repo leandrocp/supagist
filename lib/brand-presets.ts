@@ -38,7 +38,10 @@ export type BrandFramePreset = {
 export type BrandPresetShape = {
   id: string;
   name: string;
-  logoUrl: string;
+  /** Public path to the brand's official mark. Omitted for brands that have
+   *  no logo to source — the picker falls back to an accent dot rather than
+   *  us inventing a mark that could be mistaken for theirs. */
+  logoUrl?: string;
   accent: string;
   appearance: BrandSceneAppearance;
   scene?: BrandScenePreset;
@@ -855,7 +858,6 @@ export const BRAND_PRESETS = [
   {
     id: "plz",
     name: "plz",
-    logoUrl: "/brands/plz.svg",
     accent: "#2DD4BF",
     appearance: "dark",
     scene: PLZ_SCENE,

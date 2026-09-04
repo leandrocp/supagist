@@ -115,9 +115,28 @@ describe("BRAND_PRESETS", () => {
     );
 
     for (const preset of BRAND_PRESETS) {
+      expect(preset.background.brandId).toBe(preset.id);
+      // A logo is optional — brands with no sourceable mark omit it rather
+      // than pointing at a file we invented. But when one is declared it has
+      // to be a real asset at the conventional path.
+      if (!preset.logoUrl) continue;
       expect(preset.logoUrl).toBe(`/brands/${preset.id}.svg`);
       expect(existsSync(join(process.cwd(), "public", preset.logoUrl))).toBe(true);
-      expect(preset.background.brandId).toBe(preset.id);
+    }
+  });
+
+  it("ships no orphaned or invented brand marks", () => {
+    const declared = new Set(
+      BRAND_PRESETS.map((preset) => preset.logoUrl).filter((url): url is string => Boolean(url)),
+    );
+
+    // `plz` has no logo anywhere upstream, so it must not gain one by
+    // accident — an invented mark would read as the project's real identity.
+    expect(getBrandPreset("plz")?.logoUrl).toBeUndefined();
+    expect(existsSync(join(process.cwd(), "public/brands/plz.svg"))).toBe(false);
+
+    for (const id of ["flue", "files-sdk", "rivetkit"]) {
+      expect(declared.has(`/brands/${id}.svg`), id).toBe(true);
     }
   });
 });
