@@ -27,7 +27,7 @@ const BASE_APPEARANCE = {
 
 describe("BRAND_PRESETS", () => {
   it("ships the complete social-developer launch catalog", () => {
-    expect(BRAND_PRESETS).toHaveLength(25);
+    expect(BRAND_PRESETS).toHaveLength(29);
     expect(BRAND_PRESETS.map((preset) => preset.name)).toEqual(
       expect.arrayContaining([
         "Supabase",
@@ -41,6 +41,10 @@ describe("BRAND_PRESETS", () => {
         "Anthropic",
         "Perplexity",
         "Hugging Face",
+        "Flue",
+        "Files SDK",
+        "RivetKit",
+        "plz",
       ]),
     );
   });
@@ -114,6 +118,79 @@ describe("BRAND_PRESETS", () => {
       expect(preset.logoUrl).toBe(`/brands/${preset.id}.svg`);
       expect(existsSync(join(process.cwd(), "public", preset.logoUrl))).toBe(true);
       expect(preset.background.brandId).toBe(preset.id);
+    }
+  });
+});
+
+describe("social-screenshot brand reproductions", () => {
+  function preset(id: string) {
+    const found = getBrandPreset(id);
+    if (!found) throw new Error(`${id} preset is missing`);
+    return found;
+  }
+
+  it("gives Flue a chromeless white card with a left-aligned filename strip", () => {
+    const flue = preset("flue");
+
+    // No traffic lights, but still a divider under the header strip — that is
+    // exactly what `minimal` renders, and `none` would drop the divider.
+    expect(flue.settings.windowDecoration).toBe("minimal");
+    expect(flue.background.frame?.showDots).toBe(false);
+    expect(flue.background.frame?.cardFill).toBe("#FFFFFF");
+    expect(flue.background.frame?.headerStrip).toEqual({ showLanguage: false });
+    expect(flue.settings.header.filenamePosition).toBe("left");
+    expect(flue.settings.header.showLanguage).toBe(false);
+    expect(flue.settings.lineNumbers).toBe(false);
+    expect(resolveBrandScene(flue).guide).toBe("crosshair");
+  });
+
+  it("gives Files SDK grey traffic lights, a cream card, and line numbers", () => {
+    const filesSdk = preset("files-sdk");
+
+    // `macos-subtle` is the only decoration that paints monochrome dots; plain
+    // `macos` would paint the red/yellow/green set the original does not use.
+    expect(filesSdk.settings.windowDecoration).toBe("macos-subtle");
+    expect(filesSdk.background.frame?.showDots).toBe(true);
+    expect(filesSdk.background.frame?.cardFill).toBe("#FDFCF7");
+    expect(filesSdk.settings.lineNumbers).toBe(true);
+    expect(filesSdk.settings.header.filenamePosition).toBe("left");
+    expect(filesSdk.settings.header.languagePosition).toBe("right");
+    expect(filesSdk.settings.header.showLanguage).toBe(true);
+    expect(resolveBrandScene(filesSdk).guide).toBe("crosshair");
+  });
+
+  it("gives RivetKit a centred filename on a black canvas with a diagonal sheen", () => {
+    const rivetkit = preset("rivetkit");
+
+    expect(rivetkit.background.from).toBe("#000000");
+    expect(rivetkit.background.frame?.showCenteredFilename).toBe(true);
+    expect(rivetkit.settings.header.filenamePosition).toBe("center");
+    expect(rivetkit.settings.header.showLanguage).toBe(false);
+    expect(rivetkit.settings.lineNumbers).toBe(true);
+    expect(resolveBrandScene(rivetkit).guide).toBe("beam");
+  });
+
+  it("gives plz two concentric teal hairlines around the card", () => {
+    const plz = preset("plz");
+    const scene = resolveBrandScene(plz);
+
+    // The look is the canvas rim and the card border sitting a few pixels
+    // apart. A large outer padding would separate them into two unrelated
+    // shapes, and a guide would add noise between them.
+    expect(plz.settings.outerPadding).toBe(16);
+    expect(scene.guide).toBe("none");
+    expect(scene.canvasBorder).toContain("45,212,191");
+    expect(plz.background.frame?.cardBorder?.color).toContain("45,212,191");
+    // Concentric only holds while both rings share a radius.
+    expect(scene.canvasRadius - plz.settings.outerPadding).toBeLessThanOrEqual(
+      plz.background.frame?.cardRadius ?? 0,
+    );
+  });
+
+  it("keeps every reproduction's card radius in sync with its corner radius", () => {
+    for (const id of ["flue", "files-sdk", "rivetkit", "plz"]) {
+      const brand = preset(id);
+      expect(brand.background.frame?.cardRadius, id).toBe(brand.settings.cornerRadius);
     }
   });
 });

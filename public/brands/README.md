@@ -11,4 +11,9 @@ These marks identify third-party Brand presets and do not imply endorsement.
   [`simple-icons/simple-icons`](https://github.com/simple-icons/simple-icons)
   project.
 
+- Files SDK, Flue, RivetKit, and plz marks are **original abstract glyphs**
+  drawn for this repo, not the projects' real logos. They exist so the Brand
+  picker has a marker for each preset; swap them for licensed artwork before
+  presenting any of these as an official mark.
+
 All product names and logos remain trademarks of their respective owners.
