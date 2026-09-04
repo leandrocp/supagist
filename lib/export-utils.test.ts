@@ -680,7 +680,13 @@ describe("createHighlightedSvg", () => {
   });
 
   it("renders code at the default font size when none is given", async () => {
-    const svg = await createHighlightedSvg("const x = 1;", "test.ts", "github_light", 1200, undefined);
+    const svg = await createHighlightedSvg(
+      "const x = 1;",
+      "test.ts",
+      "github_light",
+      1200,
+      undefined,
+    );
 
     expect(svg).toContain(`font-size="${EXPORT_FONT_SIZE}" font-family=`);
   });

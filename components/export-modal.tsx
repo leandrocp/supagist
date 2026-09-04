@@ -542,9 +542,7 @@ export function ExportModal({
             <select
               aria-label="Font size"
               value={String(normalizedFontSize)}
-              onChange={(e) =>
-                onSettingsChange({ ...settings, fontSize: Number(e.target.value) })
-              }
+              onChange={(e) => onSettingsChange({ ...settings, fontSize: Number(e.target.value) })}
               className="h-8 w-full rounded-md border border-input bg-background px-2 text-sm text-foreground outline-none transition focus-visible:ring-2 focus-visible:ring-ring"
             >
               {EXPORT_FONT_SIZE_VALUES.map((size) => (

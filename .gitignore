@@ -51,6 +51,7 @@ next-env.d.ts
 
 # ai / local agent artifacts
 .mcp.json
+paseo.json
 .claude/settings.local.json
 .claude/skills/impeccable
 .agents/skills/impeccable/

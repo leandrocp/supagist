@@ -902,9 +902,7 @@ export async function createHighlightedSvg(
 
   const dotsY = outerPaddingPx + Math.round(EXPORT_WINDOW_CHROME_HEIGHT / 2);
   const firstLineY =
-    outerPaddingPx +
-    topPad +
-    Math.round((codeLineHeight - codeFontSize) / 2 + codeFontSize * 0.8);
+    outerPaddingPx + topPad + Math.round((codeLineHeight - codeFontSize) / 2 + codeFontSize * 0.8);
   // The line-number gutter is fixed chrome and never expands with inner
   // padding. The code body receives inner padding on all four sides after it.
   const lineNumX = outerPaddingPx + EXPORT_CHROME_PAD_X + EXPORT_LINE_NUM_WIDTH;

@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Github } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { GithubMark } from "@/components/github-mark";
 import { BrandDot } from "@/components/brand-dot";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -94,7 +94,7 @@ export function LoginForm({ className, next = "/" }: { className?: string; next?
           onClick={() => void handleGitHub()}
           disabled={loading}
         >
-          <Github className="size-4" />
+          <GithubMark className="size-4" />
           Continue with GitHub
         </Button>
 
