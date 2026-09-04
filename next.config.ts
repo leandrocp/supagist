@@ -44,22 +44,48 @@ export function buildCliAuthContentSecurityPolicy(environment: string | undefine
   );
 }
 
-const contentSecurityPolicy = buildContentSecurityPolicy(process.env.NODE_ENV);
-const cliAuthContentSecurityPolicy = buildCliAuthContentSecurityPolicy(process.env.NODE_ENV);
+export function securityHeadersFor(environment: string | undefined) {
+  return [
+    { key: "Content-Security-Policy", value: buildContentSecurityPolicy(environment) },
+    { key: "X-Content-Type-Options", value: "nosniff" },
+    { key: "X-Frame-Options", value: "DENY" },
+    { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+    {
+      key: "Permissions-Policy",
+      value: "camera=(), microphone=(), geolocation=(), payment=(), usb=()",
+    },
+    // HSTS: Vercel sets this automatically on prod domains, but specifying it
+    // here keeps behavior consistent across hosts.
+    { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
+  ];
+}
 
-export const securityHeaders = [
-  { key: "Content-Security-Policy", value: contentSecurityPolicy },
-  { key: "X-Content-Type-Options", value: "nosniff" },
-  { key: "X-Frame-Options", value: "DENY" },
-  { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-  {
-    key: "Permissions-Policy",
-    value: "camera=(), microphone=(), geolocation=(), payment=(), usb=()",
-  },
-  // HSTS: Vercel sets this automatically on prod domains, but specifying it
-  // here keeps behavior consistent across hosts.
-  { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
-];
+export const securityHeaders = securityHeadersFor(process.env.NODE_ENV);
+
+/**
+ * The full header table, as a pure function of the environment so it can be
+ * asserted for production without the process actually being in production.
+ *
+ * Next applies every matching entry in order and the LAST value for a given key
+ * wins, so the path-scoped `/auth/cli` override must come after the catch-all.
+ * With the specific entry first the baseline silently overwrote it and the CLI
+ * consent page could not reach its loopback listener.
+ */
+export function buildSecurityHeaderRules(environment: string | undefined) {
+  const baseline = securityHeadersFor(environment);
+  return [
+    { source: "/:path*", headers: baseline },
+    {
+      source: "/auth/cli",
+      headers: [
+        {
+          key: "Content-Security-Policy",
+          value: buildCliAuthContentSecurityPolicy(environment),
+        },
+      ],
+    },
+  ];
+}
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
@@ -80,17 +106,7 @@ const nextConfig: NextConfig = {
     "/api/cli/publish": ["./public/fonts/**", "./public/brands/**"],
   },
   async headers() {
-    return [
-      // More specific first: Next applies the first matching header set per key.
-      {
-        source: "/auth/cli",
-        headers: [
-          ...securityHeaders.filter((header) => header.key !== "Content-Security-Policy"),
-          { key: "Content-Security-Policy", value: cliAuthContentSecurityPolicy },
-        ],
-      },
-      { source: "/:path*", headers: securityHeaders },
-    ];
+    return buildSecurityHeaderRules(process.env.NODE_ENV);
   },
 };
 

@@ -2,7 +2,9 @@ import { describe, expect, it } from "vitest";
 import nextConfig, {
   buildContentSecurityPolicy,
   buildCliAuthContentSecurityPolicy,
+  buildSecurityHeaderRules,
   securityHeaders,
+  securityHeadersFor,
 } from "./next.config";
 
 describe("Next.js production security configuration", () => {
@@ -97,5 +99,46 @@ describe("output file tracing", () => {
     expect(nextConfig.outputFileTracingIncludes?.["/api/cli/publish"]).toEqual(
       expect.arrayContaining(["./public/fonts/**", "./public/brands/**"]),
     );
+  });
+});
+
+describe("header rule ordering", () => {
+  /**
+   * Mimics how Next resolves `headers()`: every matching entry is applied in
+   * order and the last value for a key wins.
+   *
+   * Built for "production" explicitly — under vitest `NODE_ENV` is "test",
+   * whose baseline policy already allows loopback, so an environment-dependent
+   * version of this test would pass no matter how the rules are ordered.
+   */
+  function effectiveHeaders(pathname: string) {
+    const resolved = new Map<string, string>();
+    for (const rule of buildSecurityHeaderRules("production")) {
+      if (rule.source !== "/:path*" && rule.source !== pathname) continue;
+      for (const header of rule.headers) resolved.set(header.key, header.value);
+    }
+    return resolved;
+  }
+
+  it("gives /auth/cli the loopback-capable policy", () => {
+    // Regression: with the path-scoped entry listed first, the catch-all
+    // overwrote it and `supagist auth login` was blocked by CSP in production.
+    expect(effectiveHeaders("/auth/cli").get("Content-Security-Policy")).toContain(
+      "http://127.0.0.1:*",
+    );
+  });
+
+  it("leaves every other route on the baseline policy", () => {
+    expect(effectiveHeaders("/").get("Content-Security-Policy")).toBe(
+      buildContentSecurityPolicy("production"),
+    );
+  });
+
+  it("keeps the other security headers on /auth/cli", () => {
+    const resolved = effectiveHeaders("/auth/cli");
+    for (const header of securityHeadersFor("production")) {
+      if (header.key === "Content-Security-Policy") continue;
+      expect(resolved.get(header.key)).toBe(header.value);
+    }
   });
 });
