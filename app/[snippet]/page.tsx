@@ -7,11 +7,8 @@ import { bundledLanguages } from "@lumis-sh/lumis/bundles/full";
 import { spanInline } from "@lumis-sh/lumis/formatters/html";
 import type { ThemeData } from "@lumis-sh/themes";
 import { createClient } from "@/lib/supabase/server";
-import { ThemeSwitcher } from "@/components/theme-switcher";
-import { AuthButton } from "@/components/auth-button";
-import { BrandDot } from "@/components/brand-dot";
+import { AppNav } from "@/components/app-nav";
 import { SnippetAnnotationsView } from "./snippet-annotations-view";
-import { hasEnvVars } from "@/lib/utils";
 import {
   parseSnippetParam,
   escapeHtml,
@@ -21,7 +18,6 @@ import {
 import { loadTheme } from "@/lib/theme-loader";
 import { UserAvatar } from "@/components/user-avatar";
 import { recordVisit } from "@/app/actions/record-visit";
-import { Suspense } from "react";
 import { buildAppUrl, getRequestOrigin } from "@/lib/utils";
 
 // Module-level singleton — safe because this is server-only code.
@@ -156,22 +152,7 @@ export default async function SnippetPage({ params }: Props) {
   return (
     <main className="min-h-screen bg-background">
       <div className="mx-auto flex min-h-screen w-full max-w-6xl flex-col px-5">
-        <nav className="flex h-16 items-center justify-between border-b border-border text-sm">
-          <div className="flex items-center gap-4">
-            <Link href="/" className="flex items-center gap-2 hover:opacity-80">
-              <BrandDot />
-              <p className="font-medium tracking-tight">Supagist</p>
-            </Link>
-          </div>
-          <div className="flex items-center gap-2">
-            {hasEnvVars ? (
-              <Suspense fallback={null}>
-                <AuthButton />
-              </Suspense>
-            ) : null}
-            <ThemeSwitcher />
-          </div>
-        </nav>
+        <AppNav />
 
         <section className="flex flex-1 flex-col gap-6 py-8 lg:py-10">
           {/* Header */}

@@ -68,6 +68,20 @@ test("home page has exactly one header bar, flush with the composer", async ({ p
   expect(Math.abs((shellBox?.y ?? 0) - ((navBox?.y ?? 0) + (navBox?.height ?? 0)))).toBeLessThan(2);
 });
 
+test("snippets listing is reachable from the nav, not buried on the home page", async ({
+  page,
+}) => {
+  await page.goto("/");
+
+  // The list used to sit below a viewport-height composer where nobody saw it.
+  await expect(page.getByRole("heading", { name: "Your snippets" })).toHaveCount(0);
+
+  await page.getByRole("link", { name: "Snippets" }).click();
+  await page.waitForURL("**/snippets");
+  await expect(page.getByRole("heading", { name: "Your snippets" })).toBeVisible();
+  await expect(page.getByTestId("app-nav")).toBeVisible();
+});
+
 test("composer remains usable at 375px with a stable overlay selector", async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 });
   await page.goto("/");
