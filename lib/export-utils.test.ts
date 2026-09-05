@@ -1351,6 +1351,68 @@ describe("createHighlightedSvg", () => {
     expect(yOf("why the gap?")).toBeLessThan(yOf("const y"));
   });
 
+  it("renders every row of a comment long enough to wrap", async () => {
+    // EXPORT_MAX_CHARS_PER_LINE wraps at 110; taking only the first wrapped row
+    // silently truncated the rest of the comment.
+    const body = `${"alpha ".repeat(30)}omega`;
+    const svg = await createHighlightedSvg(
+      "const x = 1;",
+      "test.ts",
+      "github_light",
+      1200,
+      undefined,
+      null,
+      undefined,
+      false,
+      undefined,
+      null,
+      null,
+      false,
+      true,
+      false,
+      null,
+      null,
+      { 1: { author: "dev", body } },
+      true,
+    );
+
+    expect(svg).toContain("omega");
+  });
+
+  it("counts every wrapped comment row when sizing the card", async () => {
+    const args = [
+      "const x = 1;",
+      "test.ts",
+      "github_light",
+      1200,
+      undefined,
+      null,
+      undefined,
+      false,
+      undefined,
+      "typescript",
+      null,
+      false,
+      false,
+      false,
+      null,
+      null,
+    ] as const;
+    const comments = { 1: { author: "dev", body: `${"alpha ".repeat(30)}omega` } };
+
+    const svg = await createHighlightedSvg(...args, comments, true);
+    const estimate = estimateExportDimensions({
+      code: "const x = 1;",
+      filename: "test.ts",
+      language: "typescript",
+      theme: "github_light",
+      comments,
+      showComments: true,
+    });
+
+    expect(estimate.height).toBe(Number(/height="(\d+)"/.exec(svg)![1]));
+  });
+
   it("leaves the comment out when showComments is off", async () => {
     const svg = await createHighlightedSvg(
       "const x = 1;",

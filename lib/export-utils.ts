@@ -586,7 +586,10 @@ export function estimateExportDimensions({
   // or the preview card comes out shorter than what createHighlightedSvg draws.
   const commentRowCount =
     showComments && comments
-      ? visibleRawLines.reduce((count, _line, index) => count + (comments[index + 1] ? 1 : 0), 0)
+      ? visibleRawLines.reduce((count, _line, index) => {
+          const comment = comments[index + 1];
+          return count + (comment ? wrapCommentText(comment.body).length : 0);
+        }, 0)
       : 0;
   const displayLineCount = visibleRawLines.length + commentRowCount + (sourceTruncated ? 1 : 0);
   const footerHeight = renderFooter ? 36 : 0;
@@ -632,6 +635,18 @@ export function escapeXml(value: string) {
 }
 
 export type SvgToken = { text: string; color: string; bold: boolean; italic: boolean };
+
+/** The lines a comment occupies under the code, prefix included and wrapped.
+ *
+ *  `createHighlightedSvg` renders these and `estimateExportDimensions` counts
+ *  them, so a long comment cannot render taller than the card sized for it. */
+export function wrapCommentText(body: string): string[] {
+  const text = `${EXPORT_COMMENT_PREFIX} ${body}`;
+  return wrapTokenLine(
+    [{ text, color: "", bold: false, italic: false }],
+    EXPORT_MAX_CHARS_PER_LINE,
+  ).map((row) => row.map((token) => token.text).join(""));
+}
 
 export function wrapTokenLine(tokens: SvgToken[], maxChars: number): SvgToken[][] {
   if (tokens.length === 0) return [[]];
@@ -869,15 +884,14 @@ export async function createHighlightedSvg(
     // is an extra row under the source rather than an overlay on it.
     const comment = lineFmt.lines[srcIdx]?.overlays[0];
     if (comment) {
-      allVisualRows.push({
-        tokens: wrapTokenLine(
-          [{ text: `${EXPORT_COMMENT_PREFIX} ${comment.body}`, ...commentTokenStyle }],
-          EXPORT_MAX_CHARS_PER_LINE,
-        )[0]!,
-        lineNum: null,
-        sourceLine: srcLine,
-        comment,
-      });
+      for (const text of wrapCommentText(comment.body)) {
+        allVisualRows.push({
+          tokens: [{ text, ...commentTokenStyle }],
+          lineNum: null,
+          sourceLine: srcLine,
+          comment,
+        });
+      }
     }
   });
 
