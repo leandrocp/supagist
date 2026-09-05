@@ -38,44 +38,36 @@ function scopeStyle(theme: ThemeData, scope: string): ThemeHighlight | undefined
 /**
  * Builds line-range annotations from a map keyed by 1-based line number.
  *
- * Lumis rejects an empty range, so a line with no characters cannot carry an
- * annotation of its own. Those are reported separately rather than dropped, so
- * a reaction on a blank line still reaches the renderer.
+ * A blank line produces an empty range, which Lumis composes as a point at that
+ * position — so a reaction or comment on a blank line needs no special case.
  */
 export function lineAnnotations<T>(
   code: string,
   overlaysByLine: Readonly<Record<number, T>>,
-): { annotations: Annotation<T>[]; blankLines: Map<number, T> } {
+): Annotation<T>[] {
   const encoder = new TextEncoder();
   const lines = code.split("\n");
   const annotations: Annotation<T>[] = [];
-  const blankLines = new Map<number, T>();
 
   for (const [key, properties] of Object.entries(overlaysByLine)) {
     const lineNumber = Number(key);
     const line = lines[lineNumber - 1];
     if (line === undefined) continue;
 
-    // A CRLF source keeps its \r on the line, and Lumis counts it, so measuring
-    // the split result rather than the raw line would land the end column one
-    // byte short and silently clip the last character.
-    const width = encoder.encode(line).length;
-    if (width === 0) {
-      blankLines.set(lineNumber, properties);
-      continue;
-    }
-
     annotations.push({
       range: {
         type: "position",
         start: { line: lineNumber - 1, column: 0 },
-        end: { line: lineNumber - 1, column: width },
+        // A CRLF source keeps its \r on the line and Lumis counts it, so
+        // measuring the split result rather than the raw line would land the
+        // end column one byte short and silently clip the last character.
+        end: { line: lineNumber - 1, column: encoder.encode(line).length },
       },
       properties,
     });
   }
 
-  return { annotations, blankLines };
+  return annotations;
 }
 
 /**
@@ -89,7 +81,6 @@ export function lineAnnotations<T>(
 export function lineFormatter<T>(
   language: string,
   theme: ThemeData,
-  blankLines?: ReadonlyMap<number, T>,
 ): Formatter<T> & { lines: HighlightedLine<T>[] } {
   const decoder = new TextDecoder();
 
@@ -151,12 +142,6 @@ export function lineFormatter<T>(
               for (const annotation of openAnnotations) noteOverlay(annotation);
             }
           });
-        }
-      }
-
-      if (blankLines) {
-        for (const [lineNumber, properties] of blankLines) {
-          lines[lineNumber - 1]?.overlays.push(properties);
         }
       }
 

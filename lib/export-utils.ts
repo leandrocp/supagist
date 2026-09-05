@@ -845,10 +845,8 @@ export async function createHighlightedSvg(
   // comment lands where Lumis resolved its line rather than at an index this
   // function counts separately from the one the highlighter walked.
   const renderComments = Boolean(showComments) && Boolean(comments);
-  const { annotations, blankLines } = renderComments
-    ? lineAnnotations(code, comments ?? {})
-    : { annotations: [], blankLines: new Map<number, ExportComment>() };
-  const lineFmt = lineFormatter<ExportComment>(language, themeData, blankLines);
+  const annotations = renderComments ? lineAnnotations(code, comments ?? {}) : [];
+  const lineFmt = lineFormatter<ExportComment>(language, themeData);
   highlighter.highlight(code, lineFmt, { annotations });
   const tokenLines: SvgToken[][] = sourceLines.map((_, index) =>
     (lineFmt.lines[index]?.tokens ?? []).map((token) => ({

@@ -23,8 +23,8 @@ async function highlight(
   overlaysByLine: Record<number, Overlay> = {},
 ): Promise<HighlightedLine<Overlay>[]> {
   const highlighter = await highlighterPromise;
-  const { annotations, blankLines } = lineAnnotations(code, overlaysByLine);
-  const formatter = lineFormatter<Overlay>("javascript", theme, blankLines);
+  const annotations = lineAnnotations(code, overlaysByLine);
+  const formatter = lineFormatter<Overlay>("javascript", theme);
   highlighter.highlight(code, formatter, { annotations });
   return formatter.lines;
 }
@@ -75,9 +75,7 @@ describe("lineFormatter", () => {
     expect(lines[1]!.overlays).toEqual([]);
   });
 
-  it("keeps an overlay on a blank line, which has no range to annotate", async () => {
-    // Lumis rejects an empty range, so a reaction on a blank line cannot be
-    // expressed as an annotation. It still has to reach the renderer.
+  it("keeps an overlay on a blank line, which Lumis composes as a point", async () => {
     const lines = await highlight("const a = 1;\n\nconst c = 3;", {
       2: { kind: "reaction", line: 2 },
     });
@@ -133,7 +131,7 @@ describe("lineFormatter", () => {
 describe("lineAnnotations", () => {
   it("measures the end column in UTF-8 bytes, not characters", async () => {
     const code = "const wave = '👋';";
-    const { annotations } = lineAnnotations(code, { 1: { kind: "r", line: 1 } });
+    const annotations = lineAnnotations(code, { 1: { kind: "r", line: 1 } });
 
     expect(annotations[0]!.range).toEqual({
       type: "position",
@@ -149,25 +147,26 @@ describe("lineAnnotations", () => {
   });
 
   it("counts the carriage return a CRLF line ends with", () => {
-    const { annotations } = lineAnnotations("const a = 1;\r\nx", { 1: { kind: "r", line: 1 } });
+    const annotations = lineAnnotations("const a = 1;\r\nx", { 1: { kind: "r", line: 1 } });
 
     expect(annotations[0]!.range).toMatchObject({ end: { line: 0, column: 13 } });
   });
 
-  it("separates blank lines rather than emitting an empty range", () => {
-    const { annotations, blankLines } = lineAnnotations("a\n\nb", {
+  it("gives a blank line an empty range, which Lumis reads as a point", () => {
+    const annotations = lineAnnotations("a\n\nb", {
       1: { kind: "r", line: 1 },
       2: { kind: "r", line: 2 },
     });
 
-    expect(annotations).toHaveLength(1);
-    expect(blankLines.get(2)).toEqual({ kind: "r", line: 2 });
+    expect(annotations).toHaveLength(2);
+    expect(annotations[1]!.range).toEqual({
+      type: "position",
+      start: { line: 1, column: 0 },
+      end: { line: 1, column: 0 },
+    });
   });
 
   it("ignores a line number past the end of the source", () => {
-    const { annotations, blankLines } = lineAnnotations("a\nb", { 99: { kind: "r", line: 99 } });
-
-    expect(annotations).toEqual([]);
-    expect(blankLines.size).toBe(0);
+    expect(lineAnnotations("a\nb", { 99: { kind: "r", line: 99 } })).toEqual([]);
   });
 });

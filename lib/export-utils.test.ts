@@ -1317,6 +1317,40 @@ describe("createHighlightedSvg", () => {
     expect(svg).toContain("\u21b3 check this branch");
   });
 
+  it("renders a comment left on a blank line", async () => {
+    // A blank line has no text to annotate, and review views comment on them
+    // all the same. Lumis composes the empty range as a point.
+    const svg = await createHighlightedSvg(
+      "const x = 1;\n\nconst y = 2;",
+      "test.ts",
+      "github_light",
+      1200,
+      undefined,
+      null,
+      undefined,
+      false,
+      undefined,
+      null,
+      null,
+      false,
+      true,
+      false,
+      null,
+      null,
+      { 2: { author: "dev", body: "why the gap?" } },
+      true,
+    );
+
+    expect(svg).toContain("\u21b3 why the gap?");
+
+    // And it sits between the two source lines, not appended at the end.
+    const rows = [...svg.matchAll(/<text x="\d+" y="(\d+)"[^>]*>([\s\S]*?)<\/text>/g)];
+    const yOf = (needle: string) => Number(rows.find((row) => row[2]!.includes(needle))![1]);
+
+    expect(yOf("why the gap?")).toBeGreaterThan(yOf("const x"));
+    expect(yOf("why the gap?")).toBeLessThan(yOf("const y"));
+  });
+
   it("leaves the comment out when showComments is off", async () => {
     const svg = await createHighlightedSvg(
       "const x = 1;",
