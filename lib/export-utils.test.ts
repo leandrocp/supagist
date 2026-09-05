@@ -8,6 +8,7 @@ const { mockHighlighter } = vi.hoisted(() => ({
   mockHighlighter: {
     loadLanguage: vi.fn(),
     highlightIter: vi.fn(),
+    highlight: vi.fn(),
   },
 }));
 
@@ -89,6 +90,14 @@ beforeEach(() => {
       // Emit the full code (with newlines) as one unstyled token so
       // createHighlightedSvg's line-splitting path is exercised.
       cb(code, "text", null, null);
+    },
+  );
+  mockHighlighter.highlight.mockImplementation(
+    (code: string, formatter: { render: (source: string, events: unknown[]) => string }) => {
+      // One `source` event spanning the whole document, which is what Lumis
+      // emits for text no capture matched. Byte offsets, not characters.
+      const endByte = new TextEncoder().encode(code).length;
+      return formatter.render(code, [{ type: "source", startByte: 0, endByte }]);
     },
   );
 });

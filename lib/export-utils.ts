@@ -5,6 +5,7 @@ import {
   type ExportReactionChip,
 } from "@/lib/snippet-utils";
 import { nameToColor, nameToInitials } from "@/lib/presence-utils";
+import { lineFormatter } from "@/lib/lumis-lines";
 import {
   BRAND_PRESETS,
   type BrandFramePreset,
@@ -828,27 +829,16 @@ export async function createHighlightedSvg(
   const actualWidth = height !== undefined ? width : Math.min(width, computedWidth);
 
   // Collect tokens per source line
-  const tokenLines: SvgToken[][] = sourceLines.map(() => []);
-  let lineIdx = 0;
-  highlighter.highlightIter(code, language, themeData, (text, _lang, _range, scope) => {
-    const chunks = text.split("\n");
-    chunks.forEach((chunk, ci) => {
-      if (lineIdx < tokenLines.length && chunk) {
-        const hl = scope
-          ? (themeData.highlights?.[scope] as
-              | { fg?: string; bold?: boolean; italic?: boolean }
-              | undefined)
-          : null;
-        tokenLines[lineIdx].push({
-          text: chunk,
-          color: hl?.fg ?? editorFg,
-          bold: !!hl?.bold,
-          italic: !!hl?.italic,
-        });
-      }
-      if (ci < chunks.length - 1) lineIdx += 1;
-    });
-  });
+  const lineFmt = lineFormatter(language, themeData);
+  highlighter.highlight(code, lineFmt);
+  const tokenLines: SvgToken[][] = sourceLines.map((_, index) =>
+    (lineFmt.lines[index]?.tokens ?? []).map((token) => ({
+      text: token.text,
+      color: token.color ?? editorFg,
+      bold: !!token.bold,
+      italic: !!token.italic,
+    })),
+  );
 
   // Wrap each source line and track source row metadata for reaction placement.
   const allVisualRows: ExportVisualRow[] = [];

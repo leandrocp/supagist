@@ -10,7 +10,21 @@ const { mockLoadLanguage } = vi.hoisted(() => ({
 vi.mock("@/lib/lumis-client", () => ({
   clientHighlighterPromise: Promise.resolve({
     loadLanguage: mockLoadLanguage,
-    highlightIter: vi.fn((code: string, _language: string, _theme: unknown, cb) => cb(code)),
+    // Two events, so a token carries a scope and the styled path is covered:
+    // the first word is a keyword, the rest is unscoped. Offsets are bytes.
+    highlight: vi.fn(
+      (code: string, formatter: { render: (source: string, events: unknown[]) => string }) => {
+        const split = Math.min(code.indexOf(" ") === -1 ? 0 : code.indexOf(" "), code.length);
+        const bytes = new TextEncoder().encode(code).length;
+        const head = new TextEncoder().encode(code.slice(0, split)).length;
+        return formatter.render(code, [
+          { type: "start", scope: "keyword", language: "javascript" },
+          { type: "source", startByte: 0, endByte: head },
+          { type: "end" },
+          { type: "source", startByte: head, endByte: bytes },
+        ]);
+      },
+    ),
   }),
 }));
 
@@ -20,6 +34,7 @@ vi.mock("@/lib/theme-loader", () => ({
       appearance: "dark",
       highlights: {
         normal: { bg: "#111111", fg: "#eeeeee" },
+        keyword: { fg: "#c678dd" },
       },
     },
   })),
@@ -151,6 +166,22 @@ describe("InlineCodeBlock preview mode", () => {
     render(<InlineCodeBlock {...baseProps} showGutter={false} />);
 
     expect(screen.getByTestId("highlight-layer").style.color).toBe("#222222");
+  });
+
+  it("applies the theme colour the highlighter reports for a scope", async () => {
+    // Without this the suite stayed green while the highlighter call was
+    // broken: the component catches a highlight failure and falls back to
+    // unstyled text, which every other assertion here accepts.
+    const { container } = render(
+      <InlineCodeBlock {...baseProps} code="const answer = 42;" showGutter={false} />,
+    );
+
+    await vi.waitFor(() => {
+      const keyword = Array.from(container.querySelectorAll("span")).find(
+        (span) => span.textContent === "const",
+      );
+      expect(keyword?.style.color).toBe("#c678dd");
+    });
   });
 
   it("renders highlighted source as text instead of injectable HTML", async () => {
