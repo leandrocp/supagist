@@ -5,6 +5,7 @@ import {
   type ExportReactionChip,
 } from "@/lib/snippet-utils";
 import { nameToColor, nameToInitials } from "@/lib/presence-utils";
+import { lineAnnotations, lineFormatter } from "@/lib/lumis-lines";
 import {
   BRAND_PRESETS,
   type BrandFramePreset,
@@ -121,6 +122,9 @@ type ExportVisualRow = {
   tokens: SvgToken[];
   lineNum: number | null;
   sourceLine: number | null;
+  /** Set on a row holding a comment rather than source, so the renderer can
+   *  style it and the gutter can leave its line number blank. */
+  comment?: ExportComment;
 };
 
 export type ExportFont = { id: string; label: string; family: string; file: string };
@@ -487,6 +491,8 @@ export function estimateExportDimensions({
   lineNumbers = false,
   reactions,
   showReactions = false,
+  comments,
+  showComments = false,
   showFooter = false,
   header,
   footer,
@@ -507,6 +513,8 @@ export function estimateExportDimensions({
   lineNumbers?: boolean;
   reactions?: Record<number, ExportReactionChip[]> | null;
   showReactions?: boolean;
+  comments?: Record<number, ExportComment> | null;
+  showComments?: boolean;
   showFooter?: boolean;
   header?: ExportHeaderSettings;
   footer?: ExportFooterSettings;
@@ -574,7 +582,16 @@ export function estimateExportDimensions({
     : EXPORT_MAX_LINES;
   const sourceTruncated = rawLines.length > maxLines;
   const visibleRawLines = rawLines.slice(0, maxLines);
-  const displayLineCount = visibleRawLines.length + (sourceTruncated ? 1 : 0);
+  // Each commented line adds a row under it, so the estimate has to count them
+  // or the preview card comes out shorter than what createHighlightedSvg draws.
+  const commentRowCount =
+    showComments && comments
+      ? visibleRawLines.reduce((count, _line, index) => {
+          const comment = comments[index + 1];
+          return count + (comment ? wrapCommentText(comment.body).length : 0);
+        }, 0)
+      : 0;
+  const displayLineCount = visibleRawLines.length + commentRowCount + (sourceTruncated ? 1 : 0);
   const footerHeight = renderFooter ? 36 : 0;
   const actualHeight =
     height ??
@@ -618,6 +635,18 @@ export function escapeXml(value: string) {
 }
 
 export type SvgToken = { text: string; color: string; bold: boolean; italic: boolean };
+
+/** The lines a comment occupies under the code, prefix included and wrapped.
+ *
+ *  `createHighlightedSvg` renders these and `estimateExportDimensions` counts
+ *  them, so a long comment cannot render taller than the card sized for it. */
+export function wrapCommentText(body: string): string[] {
+  const text = `${EXPORT_COMMENT_PREFIX} ${body}`;
+  return wrapTokenLine(
+    [{ text, color: "", bold: false, italic: false }],
+    EXPORT_MAX_CHARS_PER_LINE,
+  ).map((row) => row.map((token) => token.text).join(""));
+}
 
 export function wrapTokenLine(tokens: SvgToken[], maxChars: number): SvgToken[][] {
   if (tokens.length === 0) return [[]];
@@ -686,8 +715,6 @@ export async function createHighlightedSvg(
   footerSettings?: ExportFooterSettings,
   fontSize = EXPORT_FONT_SIZE,
 ): Promise<string> {
-  void comments;
-  void showComments;
   const language = languageOverride || inferLanguage(filename, code);
   const [{ clientHighlighterPromise }, { loadTheme }] = await Promise.all([
     import("@/lib/lumis-client"),
@@ -704,6 +731,8 @@ export async function createHighlightedSvg(
   const editorFg: string =
     (themeData.highlights?.["normal"] as { fg?: string } | undefined)?.fg ??
     (themeData.appearance === "dark" ? "#abb2bf" : "#383a42");
+
+  const commentTokenStyle = { color: editorFg, bold: false, italic: true };
 
   const exportFont = EXPORT_FONTS.find((f) => f.id === fontId) ?? EXPORT_FONTS[0]!;
   const fontFamily = exportFont.file
@@ -827,28 +856,21 @@ export async function createHighlightedSvg(
   const computedWidth = Math.max(EXPORT_MIN_WIDTH, naturalWidth);
   const actualWidth = height !== undefined ? width : Math.min(width, computedWidth);
 
-  // Collect tokens per source line
-  const tokenLines: SvgToken[][] = sourceLines.map(() => []);
-  let lineIdx = 0;
-  highlighter.highlightIter(code, language, themeData, (text, _lang, _range, scope) => {
-    const chunks = text.split("\n");
-    chunks.forEach((chunk, ci) => {
-      if (lineIdx < tokenLines.length && chunk) {
-        const hl = scope
-          ? (themeData.highlights?.[scope] as
-              | { fg?: string; bold?: boolean; italic?: boolean }
-              | undefined)
-          : null;
-        tokenLines[lineIdx].push({
-          text: chunk,
-          color: hl?.fg ?? editorFg,
-          bold: !!hl?.bold,
-          italic: !!hl?.italic,
-        });
-      }
-      if (ci < chunks.length - 1) lineIdx += 1;
-    });
-  });
+  // Collect tokens per source line. Comments ride along as annotations, so a
+  // comment lands where Lumis resolved its line rather than at an index this
+  // function counts separately from the one the highlighter walked.
+  const renderComments = Boolean(showComments) && Boolean(comments);
+  const annotations = renderComments ? lineAnnotations(code, comments ?? {}) : [];
+  const lineFmt = lineFormatter<ExportComment>(language, themeData);
+  highlighter.highlight(code, lineFmt, { annotations });
+  const tokenLines: SvgToken[][] = sourceLines.map((_, index) =>
+    (lineFmt.lines[index]?.tokens ?? []).map((token) => ({
+      text: token.text,
+      color: token.color ?? editorFg,
+      bold: !!token.bold,
+      italic: !!token.italic,
+    })),
+  );
 
   // Wrap each source line and track source row metadata for reaction placement.
   const allVisualRows: ExportVisualRow[] = [];
@@ -858,6 +880,19 @@ export async function createHighlightedSvg(
     wrapped.forEach((vl, wi) => {
       allVisualRows.push({ tokens: vl, lineNum: wi === 0 ? srcLine : null, sourceLine: srcLine });
     });
+    // A comment follows the whole wrapped line, matching the composer, where it
+    // is an extra row under the source rather than an overlay on it.
+    const comment = lineFmt.lines[srcIdx]?.overlays[0];
+    if (comment) {
+      for (const text of wrapCommentText(comment.body)) {
+        allVisualRows.push({
+          tokens: [{ text, ...commentTokenStyle }],
+          lineNum: null,
+          sourceLine: srcLine,
+          comment,
+        });
+      }
+    }
   });
 
   const maxVisualLines =
@@ -882,7 +917,7 @@ export async function createHighlightedSvg(
   // array, tracking the active source, and remember its largest visual idx.
   const lastVisualIdxBySrcLine = new Map<number, number>();
   displayRows.forEach((row, i) => {
-    if (row.sourceLine !== null) lastVisualIdxBySrcLine.set(row.sourceLine, i);
+    if (row.sourceLine !== null && !row.comment) lastVisualIdxBySrcLine.set(row.sourceLine, i);
   });
 
   // Footer strip mirrors the editor's status bar — language, line count,
@@ -943,7 +978,8 @@ export async function createHighlightedSvg(
           })
           .join("");
       }
-      const codeMarkup = `<text x="${codeX}" y="${y}" ${fontAttrs}>${tspans}</text>`;
+      const commentAttrs = row.comment ? ' fill-opacity="0.6"' : "";
+      const codeMarkup = `<text x="${codeX}" y="${y}" ${fontAttrs}${commentAttrs}>${tspans}</text>`;
 
       // Reactions sit AFTER the code as chip-style pills — rounded rect
       // background, emoji, and one avatar initial circle per chip — matching

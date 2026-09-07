@@ -6,6 +6,7 @@ import { Check, Copy, MessageSquarePlus, SmilePlus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { clientHighlighterPromise as highlighterPromise } from "@/lib/lumis-client";
+import { lineFormatter, plainLines, type LineToken } from "@/lib/lumis-lines";
 import { inferLanguage, languageDisplayName } from "@/lib/snippet-utils";
 import type { BrandFramePreset } from "@/lib/brand-presets";
 import { DEFAULT_HEADER_SETTINGS, type ExportHeaderSettings } from "@/lib/export-metadata";
@@ -251,9 +252,9 @@ export function InlineCodeBlock({
   codeActions,
   onPaletteChange,
 }: InlineCodeBlockProps) {
-  const [highlightedLines, setHighlightedLines] = useState<HighlightedToken[][]>([
-    [{ text: code }],
-  ]);
+  const [highlightedLines, setHighlightedLines] = useState<LineToken[][]>(() =>
+    plainLines(code, "plaintext"),
+  );
   const [copied, setCopied] = useState(false);
 
   const handleCopy = useCallback(() => {
@@ -385,7 +386,7 @@ export function InlineCodeBlock({
       } catch {
         if (isActive) {
           setThemeError(`Could not load the ${theme} theme.`);
-          setHighlightedLines(code.split("\n").map((text) => [{ text }]));
+          setHighlightedLines(plainLines(code, language));
         }
       }
     }
@@ -891,13 +892,6 @@ export function InlineCodeBlock({
   );
 }
 
-type HighlightedToken = {
-  text: string;
-  color?: string;
-  bold?: boolean;
-  italic?: boolean;
-};
-
 function renderHighlightedLines({
   code,
   language,
@@ -909,32 +903,7 @@ function renderHighlightedLines({
   theme: ThemeData;
   highlighter: Awaited<typeof highlighterPromise>;
 }) {
-  const lines: HighlightedToken[][] = code.split("\n").map(() => []);
-  let lineIndex = 0;
-
-  highlighter.highlightIter(code, language, theme, (text, _tokenLanguage, _range, scope) => {
-    // Split on either CRLF or LF — see app/[snippet]/page.tsx for the
-    // explanation; in short, leaving a trailing \r in chunks creates a
-    // visual line break under whitespace-pre-wrap and pushes any trailing
-    // inline content (e.g. a reaction chip) onto a fresh row.
-    const chunks = text.split(/\r?\n/);
-    chunks.forEach((chunk, chunkIndex) => {
-      if (chunk) {
-        const highlight = scope
-          ? (theme.highlights?.[scope] as
-              | { fg?: string; bold?: boolean; italic?: boolean }
-              | undefined)
-          : undefined;
-        lines[lineIndex]?.push({
-          text: chunk,
-          color: highlight?.fg,
-          bold: highlight?.bold,
-          italic: highlight?.italic,
-        });
-      }
-      if (chunkIndex < chunks.length - 1) lineIndex += 1;
-    });
-  });
-
-  return lines;
+  const formatter = lineFormatter(language, theme);
+  highlighter.highlight(code, formatter);
+  return formatter.lines.map((line) => line.tokens);
 }

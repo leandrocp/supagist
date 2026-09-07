@@ -34,6 +34,7 @@ import {
   renderToFile,
   toPngFilename,
   triggerDownload,
+  type ExportComment,
 } from "@/lib/export-utils";
 import { cn } from "@/lib/utils";
 import type { ExportReactionChip } from "@/lib/snippet-utils";
@@ -72,6 +73,7 @@ export type ExportSettings = {
   pixelRatio: number;
   lineNumbers: boolean;
   showReactions: boolean;
+  showComments: boolean;
   header: ExportHeaderSettings;
   footer: ExportFooterSettings;
   windowDecoration: WindowDecoration;
@@ -87,6 +89,7 @@ type Props = {
   filename: string;
   theme: string;
   reactions?: Record<number, ExportReactionChip[]>;
+  comments?: Record<number, ExportComment>;
   /** Author username displayed when the footer author item is on. */
   authorUsername?: string | null;
   /** Optional avatar URL for the footer chip — falls back to initial circle when missing. */
@@ -104,6 +107,7 @@ export function ExportModal({
   filename,
   theme,
   reactions,
+  comments,
   authorUsername,
   authorAvatarUrl,
   sourceUrl,
@@ -149,8 +153,8 @@ export function ExportModal({
       settings.footer.enabled,
       authorUsername ?? null,
       authorAvatarUrl ?? null,
-      undefined,
-      false,
+      comments,
+      settings.showComments,
       sourceUrl ?? null,
       settings.windowDecoration,
       normalizedCornerRadius,
@@ -223,8 +227,8 @@ export function ExportModal({
         settings.footer.enabled,
         authorUsername ?? null,
         authorAvatarUrl ?? null,
-        undefined,
-        false,
+        comments,
+        settings.showComments,
         sourceUrl ?? null,
         settings.windowDecoration,
         normalizedCornerRadius,
@@ -259,8 +263,8 @@ export function ExportModal({
         settings.footer.enabled,
         authorUsername ?? null,
         authorAvatarUrl ?? null,
-        undefined,
-        false,
+        comments,
+        settings.showComments,
         sourceUrl ?? null,
         settings.windowDecoration,
         normalizedCornerRadius,
@@ -598,6 +602,14 @@ export function ExportModal({
               checked={settings.showReactions}
               onCheckedChange={(showReactions) => onSettingsChange({ ...settings, showReactions })}
               aria-label="Show reactions"
+            />
+          </label>
+          <label className="flex min-h-11 items-center gap-3 text-sm font-medium">
+            Comments
+            <Switch
+              checked={settings.showComments}
+              onCheckedChange={(showComments) => onSettingsChange({ ...settings, showComments })}
+              aria-label="Show comments"
             />
           </label>
         </div>

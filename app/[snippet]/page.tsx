@@ -17,6 +17,7 @@ import {
   buildSnippetSocialAlt,
 } from "@/lib/snippet-utils";
 import { loadTheme } from "@/lib/theme-loader";
+import { lineFormatter } from "@/lib/lumis-lines";
 import { UserAvatar } from "@/components/user-avatar";
 import { recordVisit } from "@/app/actions/record-visit";
 import { buildAppUrl, getRequestOrigin } from "@/lib/utils";
@@ -223,25 +224,16 @@ function renderLines(
   theme: ThemeData,
   highlighter: Awaited<typeof highlighterPromise>,
 ): string[] {
-  const lines = code.split("\n").map(() => "");
-  let lineIndex = 0;
+  const formatter = lineFormatter(language, theme);
+  highlighter.highlight(code, formatter);
 
-  highlighter.highlightIter(code, language, theme, (text, tokenLanguage, _range, scope) => {
-    // Split on either CRLF or LF — when the snippet is saved with Windows
-    // line endings, splitting only on \n leaves a trailing \r on each chunk
-    // which `white-space: pre-wrap` treats as a segment break. That break
-    // pushed the trailing reaction chip (and any inline content after the
-    // line) onto a fresh visual row.
-    const chunks = text.split(/\r?\n/);
-    chunks.forEach((chunk, chunkIndex) => {
-      if (chunk) {
-        lines[lineIndex] += scope
-          ? spanInline(chunk, { language: tokenLanguage, scope, theme })
-          : escapeHtml(chunk);
-      }
-      if (chunkIndex < chunks.length - 1) lineIndex += 1;
-    });
-  });
-
-  return lines;
+  return formatter.lines.map((line) =>
+    line.tokens
+      .map((token) =>
+        token.scope
+          ? spanInline(token.text, { language: token.language, scope: token.scope, theme })
+          : escapeHtml(token.text),
+      )
+      .join(""),
+  );
 }
