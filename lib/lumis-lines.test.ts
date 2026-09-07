@@ -92,8 +92,8 @@ describe("lineFormatter", () => {
     const formatter = lineFormatter<Overlay>("javascript", theme);
     highlighter.highlight(code, formatter, {
       annotations: [
-        { range: { type: "offset", start: 6, end: 14 }, properties: { kind: "outer", line: 1 } },
-        { range: { type: "offset", start: 10, end: 20 }, properties: { kind: "inner", line: 1 } },
+        { range: { type: "offset", start: 6, end: 14 }, data: { kind: "outer", line: 1 } },
+        { range: { type: "offset", start: 10, end: 20 }, data: { kind: "inner", line: 1 } },
       ],
     });
 
@@ -115,7 +115,7 @@ describe("lineFormatter", () => {
             start: { line: 0, column: 0 },
             end: { line: 2, column: 1 },
           },
-          properties: { kind: "block", line: 1 },
+          data: { kind: "block", line: 1 },
         },
       ],
     });

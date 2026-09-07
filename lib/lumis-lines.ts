@@ -49,7 +49,7 @@ export function lineAnnotations<T>(
   const lines = code.split("\n");
   const annotations: Annotation<T>[] = [];
 
-  for (const [key, properties] of Object.entries(overlaysByLine)) {
+  for (const [key, data] of Object.entries(overlaysByLine)) {
     const lineNumber = Number(key);
     const line = lines[lineNumber - 1];
     if (line === undefined) continue;
@@ -63,7 +63,7 @@ export function lineAnnotations<T>(
         // end column one byte short and silently clip the last character.
         end: { line: lineNumber - 1, column: encoder.encode(line).length },
       },
-      properties,
+      data,
     });
   }
 
@@ -102,8 +102,8 @@ export function lineFormatter<T>(
 
       const noteOverlay = (annotation: ResolvedAnnotation<T>) => {
         const line = lines[lineIndex];
-        if (line && !line.overlays.includes(annotation.properties)) {
-          line.overlays.push(annotation.properties);
+        if (line && !line.overlays.includes(annotation.data)) {
+          line.overlays.push(annotation.data);
         }
       };
 
