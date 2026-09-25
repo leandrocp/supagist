@@ -482,6 +482,16 @@ export function SnippetAnnotationsView({
     return lineReactionsToExportChips(lineReactions);
   }, [lineReactions, snippetReactions]);
 
+  // The export shows one comment per line, so pick the earliest thread on each.
+  const exportComments = useMemo(() => {
+    const byLine: Record<number, { author?: string; body: string }> = {};
+    for (const [line, thread] of Object.entries(lineComments)) {
+      const first = thread[0];
+      if (first) byLine[Number(line)] = { author: first.authorUsername, body: first.body };
+    }
+    return byLine;
+  }, [lineComments]);
+
   // Combined HTML per line: Lumis-rendered tokens + chip pills appended as
   // plain HTML. Embedding the chips inside the same dangerouslySetInnerHTML
   // string guarantees they share a single inline flow with the code text —
@@ -708,6 +718,7 @@ export function SnippetAnnotationsView({
             authorUsername={author?.username ?? null}
             authorAvatarUrl={author?.avatar_url ?? null}
             reactions={exportReactions}
+            comments={exportComments}
             sourceUrl={snippetUrl}
             style={{ color: c.buttonText }}
           />

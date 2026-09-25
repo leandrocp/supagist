@@ -14,6 +14,7 @@ const DEFAULT_SETTINGS: ExportSettings = {
   pixelRatio: 4,
   lineNumbers: false,
   showReactions: false,
+  showComments: false,
   header: DEFAULT_HEADER_SETTINGS,
   footer: DEFAULT_FOOTER_SETTINGS,
   windowDecoration: "macos",
@@ -29,6 +30,7 @@ type Props = {
   authorUsername?: string | null;
   authorAvatarUrl?: string | null;
   reactions?: Record<number, import("@/lib/snippet-utils").ExportReactionChip[]>;
+  comments?: Record<number, import("@/lib/export-utils").ExportComment>;
   sourceUrl?: string | null;
   /** Inline style forwarded to the trigger so it can pick up the active syntax palette. */
   style?: React.CSSProperties;
@@ -41,6 +43,7 @@ export function SnippetExportModal({
   authorUsername,
   authorAvatarUrl,
   reactions,
+  comments,
   sourceUrl,
   style,
 }: Props) {
@@ -69,6 +72,7 @@ export function SnippetExportModal({
         authorUsername={authorUsername}
         authorAvatarUrl={authorAvatarUrl}
         reactions={reactions}
+        comments={comments}
         sourceUrl={sourceUrl}
         settings={settings}
         onSettingsChange={setSettings}

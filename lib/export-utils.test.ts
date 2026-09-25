@@ -25,9 +25,34 @@ vi.mock("@lumis-sh/lumis/client", () => ({
   ]),
 }));
 
-vi.mock("@/lib/lumis-client", () => ({
-  clientHighlighterPromise: Promise.resolve(mockHighlighter),
-}));
+// The export's comment placement goes through Lumis annotations, and resolving
+// a line range to byte offsets is Lumis's job — a hand-written fake would be
+// reimplementing the thing under test. Highlight for real, restricted to
+// plaintext so no parser has to be fetched, and let the fake cover the rest.
+vi.mock("@/lib/lumis-client", async () => {
+  const { createHighlighter } = await import("@lumis-sh/lumis");
+  const plaintext = (await import("@lumis-sh/lumis/langs/plaintext")).default;
+  const real = await createHighlighter({ languages: [plaintext] });
+
+  return {
+    clientHighlighterPromise: Promise.resolve({
+      loadLanguage: mockHighlighter.loadLanguage,
+      highlightIter: mockHighlighter.highlightIter,
+      highlight: (
+        code: string,
+        formatter: { render: (source: string, events: never[]) => string },
+        options?: object,
+      ) =>
+        real.highlight(
+          code,
+          // Keep `this` bound to the caller's formatter so it still collects
+          // its rows; only the language is swapped for one that is loaded.
+          { language: plaintext, render: (source, events) => formatter.render(source, events) },
+          options,
+        ),
+    }),
+  };
+});
 
 vi.mock("@lumis-sh/themes/github_light", () => ({
   default: {
@@ -1267,7 +1292,7 @@ describe("createHighlightedSvg", () => {
     expect(svg).toContain("🔥");
   });
 
-  it("does not render comments into generated SVG output", async () => {
+  it("renders a comment under the line it annotates", async () => {
     const svg = await createHighlightedSvg(
       "const x = 1;",
       "test.ts",
@@ -1289,8 +1314,227 @@ describe("createHighlightedSvg", () => {
       true,
     );
 
+    expect(svg).toContain("\u21b3 check this branch");
+  });
+
+  it("renders a comment left on a blank line", async () => {
+    // A blank line has no text to annotate, and review views comment on them
+    // all the same. Lumis composes the empty range as a point.
+    const svg = await createHighlightedSvg(
+      "const x = 1;\n\nconst y = 2;",
+      "test.ts",
+      "github_light",
+      1200,
+      undefined,
+      null,
+      undefined,
+      false,
+      undefined,
+      null,
+      null,
+      false,
+      true,
+      false,
+      null,
+      null,
+      { 2: { author: "dev", body: "why the gap?" } },
+      true,
+    );
+
+    expect(svg).toContain("\u21b3 why the gap?");
+
+    // And it sits between the two source lines, not appended at the end.
+    const rows = [...svg.matchAll(/<text x="\d+" y="(\d+)"[^>]*>([\s\S]*?)<\/text>/g)];
+    const yOf = (needle: string) => Number(rows.find((row) => row[2]!.includes(needle))![1]);
+
+    expect(yOf("why the gap?")).toBeGreaterThan(yOf("const x"));
+    expect(yOf("why the gap?")).toBeLessThan(yOf("const y"));
+  });
+
+  it("renders every row of a comment long enough to wrap", async () => {
+    // EXPORT_MAX_CHARS_PER_LINE wraps at 110; taking only the first wrapped row
+    // silently truncated the rest of the comment.
+    const body = `${"alpha ".repeat(30)}omega`;
+    const svg = await createHighlightedSvg(
+      "const x = 1;",
+      "test.ts",
+      "github_light",
+      1200,
+      undefined,
+      null,
+      undefined,
+      false,
+      undefined,
+      null,
+      null,
+      false,
+      true,
+      false,
+      null,
+      null,
+      { 1: { author: "dev", body } },
+      true,
+    );
+
+    expect(svg).toContain("omega");
+  });
+
+  it("counts every wrapped comment row when sizing the card", async () => {
+    const args = [
+      "const x = 1;",
+      "test.ts",
+      "github_light",
+      1200,
+      undefined,
+      null,
+      undefined,
+      false,
+      undefined,
+      "typescript",
+      null,
+      false,
+      false,
+      false,
+      null,
+      null,
+    ] as const;
+    const comments = { 1: { author: "dev", body: `${"alpha ".repeat(30)}omega` } };
+
+    const svg = await createHighlightedSvg(...args, comments, true);
+    const estimate = estimateExportDimensions({
+      code: "const x = 1;",
+      filename: "test.ts",
+      language: "typescript",
+      theme: "github_light",
+      comments,
+      showComments: true,
+    });
+
+    expect(estimate.height).toBe(Number(/height="(\d+)"/.exec(svg)![1]));
+  });
+
+  it("leaves the comment out when showComments is off", async () => {
+    const svg = await createHighlightedSvg(
+      "const x = 1;",
+      "test.ts",
+      "github_light",
+      1200,
+      undefined,
+      null,
+      undefined,
+      false,
+      undefined,
+      null,
+      null,
+      false,
+      true,
+      false,
+      null,
+      null,
+      { 1: { author: "dev", body: "check this branch" } },
+      false,
+    );
+
     expect(svg).not.toContain("check this branch");
-    expect(svg).not.toContain("↳");
+    expect(svg).not.toContain("\u21b3");
+  });
+
+  it("puts the comment after the whole of a wrapped line, not inside it", async () => {
+    // EXPORT_MAX_CHARS_PER_LINE wraps at 110, so this is two visual rows and
+    // the comment has to follow both.
+    const svg = await createHighlightedSvg(
+      "x".repeat(180),
+      "test.ts",
+      "github_light",
+      1200,
+      undefined,
+      null,
+      undefined,
+      false,
+      undefined,
+      null,
+      null,
+      false,
+      true,
+      false,
+      null,
+      null,
+      { 1: { author: "dev", body: "wrapped note" } },
+      true,
+    );
+
+    const rows = [...svg.matchAll(/<text x="\d+" y="(\d+)"[^>]*>([\s\S]*?)<\/text>/g)];
+    const commentY = rows.find((row) => row[2]!.includes("wrapped note"))?.[1];
+    const lastSourceY = rows.filter((row) => row[2]!.includes("xxx")).at(-1)?.[1];
+
+    expect(commentY).toBeDefined();
+    expect(lastSourceY).toBeDefined();
+    expect(Number(commentY)).toBeGreaterThan(Number(lastSourceY));
+  });
+
+  it("estimates the same height the rendered card uses when comments show", async () => {
+    // estimateExportDimensions duplicates the height math, so a comment row
+    // added to one and not the other silently shrinks the preview.
+    const code = "const x = 1;\nconst y = 2;";
+    const comments = { 1: { author: "dev", body: "note" } };
+    const estimate = estimateExportDimensions({
+      code,
+      filename: "test.ts",
+      language: "typescript",
+      theme: "github_light",
+      comments,
+      showComments: true,
+    });
+    const svg = await createHighlightedSvg(
+      code,
+      "test.ts",
+      "github_light",
+      1200,
+      undefined,
+      null,
+      undefined,
+      false,
+      undefined,
+      "typescript",
+      null,
+      false,
+      false,
+      false,
+      null,
+      null,
+      comments,
+      true,
+    );
+
+    expect(estimate.height).toBe(Number(/height="(\d+)"/.exec(svg)![1]));
+  });
+
+  it("counts the comment row when sizing the card", async () => {
+    const args = [
+      "const x = 1;",
+      "test.ts",
+      "github_light",
+      1200,
+      undefined,
+      null,
+      undefined,
+      false,
+      undefined,
+      null,
+      null,
+      false,
+      true,
+      false,
+      null,
+      null,
+      { 1: { author: "dev", body: "note" } },
+    ] as const;
+
+    const withComment = await createHighlightedSvg(...args, true);
+    const withoutComment = await createHighlightedSvg(...args, false);
+
+    const heightOf = (svg: string) => Number(/height="(\d+)"/.exec(svg)![1]);
+    expect(heightOf(withComment)).toBeGreaterThan(heightOf(withoutComment));
   });
 
   it("places the reaction chip on the LAST visual row of a wrapped source line", async () => {
