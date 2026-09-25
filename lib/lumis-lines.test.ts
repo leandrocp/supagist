@@ -126,6 +126,20 @@ describe("lineFormatter", () => {
       [{ kind: "block", line: 1 }],
     ]);
   });
+
+  it("ignores event kinds it does not render, such as decorations", async () => {
+    // Lumis adds event kinds as it grows and documents that a formatter must
+    // skip the ones it does not know. Rainbow brackets emit decorationStart /
+    // decorationEnd, which carry no source range: treating them as source
+    // events decodes the whole buffer and duplicates the file into the line.
+    const code = "const pair = [one, (two)];";
+    const highlighter = await highlighterPromise;
+    const formatter = lineFormatter<Overlay>("javascript", theme);
+    highlighter.highlight(code, formatter, { rainbowBrackets: true });
+
+    expect(formatter.lines).toHaveLength(1);
+    expect(textOf(formatter.lines[0]!)).toBe(code);
+  });
 });
 
 describe("lineAnnotations", () => {

@@ -19,9 +19,9 @@ vi.mock("@/lib/lumis-client", () => ({
         const head = new TextEncoder().encode(code.slice(0, split)).length;
         return formatter.render(code, [
           { type: "start", scope: "keyword", language: "javascript" },
-          { type: "source", startByte: 0, endByte: head },
+          { type: "source", start: 0, end: head },
           { type: "end" },
-          { type: "source", startByte: head, endByte: bytes },
+          { type: "source", start: head, end: bytes },
         ]);
       },
     ),

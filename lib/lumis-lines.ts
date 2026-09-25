@@ -1,4 +1,4 @@
-import type { Annotation, Formatter, HighlightEvent, ResolvedAnnotation } from "@lumis-sh/lumis";
+import type { Annotation, Formatter, HighlightEvent } from "@lumis-sh/lumis";
 import type { ThemeData } from "@lumis-sh/themes";
 
 /** One styled run of text within a single source line. */
@@ -95,15 +95,15 @@ export function lineFormatter<T>(
 
       const scopes: Array<{ scope: string; language: string }> = [];
       // An annotation that is still open when an outer one closes is closed and
-      // reopened, so the same resolved annotation can start more than once.
+      // reopened, so the same annotation's data can start more than once.
       // Track it by identity to record each one on a line only once.
-      const openAnnotations: ResolvedAnnotation<T>[] = [];
+      const openAnnotations: T[] = [];
       let lineIndex = 0;
 
-      const noteOverlay = (annotation: ResolvedAnnotation<T>) => {
+      const noteOverlay = (data: T) => {
         const line = lines[lineIndex];
-        if (line && !line.overlays.includes(annotation.data)) {
-          line.overlays.push(annotation.data);
+        if (line && !line.overlays.includes(data)) {
+          line.overlays.push(data);
         }
       };
 
@@ -113,12 +113,12 @@ export function lineFormatter<T>(
         } else if (event.type === "end") {
           scopes.pop();
         } else if (event.type === "annotationStart") {
-          openAnnotations.push(event.annotation);
-          noteOverlay(event.annotation);
+          openAnnotations.push(event.data);
+          noteOverlay(event.data);
         } else if (event.type === "annotationEnd") {
           openAnnotations.pop();
-        } else {
-          const text = decoder.decode(sourceBytes.subarray(event.startByte, event.endByte));
+        } else if (event.type === "source") {
+          const text = decoder.decode(sourceBytes.subarray(event.start, event.end));
           const active = scopes[scopes.length - 1];
           const scope = active?.scope ?? "";
           const style = scopeStyle(theme, scope);
@@ -139,7 +139,7 @@ export function lineFormatter<T>(
               lineIndex += 1;
               // A multi-line annotation covers the lines it crosses, not just
               // the one it opened on.
-              for (const annotation of openAnnotations) noteOverlay(annotation);
+              for (const data of openAnnotations) noteOverlay(data);
             }
           });
         }
