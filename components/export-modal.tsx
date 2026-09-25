@@ -190,6 +190,7 @@ export function ExportModal({
     normalizedFontSize,
     settings.language,
     settings.showReactions,
+    settings.showComments,
     settings.header,
     settings.footer,
     settings.windowDecoration,
@@ -197,6 +198,7 @@ export function ExportModal({
     authorAvatarUrl,
     sourceUrl,
     reactions,
+    comments,
   ]);
 
   useEffect(() => {
