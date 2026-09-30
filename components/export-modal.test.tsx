@@ -30,6 +30,7 @@ const settings: ExportSettings = {
   pixelRatio: 4,
   lineNumbers: false,
   showReactions: false,
+  showComments: false,
   header: DEFAULT_HEADER_SETTINGS,
   footer: DEFAULT_FOOTER_SETTINGS,
   windowDecoration: "macos",
@@ -201,6 +202,37 @@ describe("ExportModal", () => {
 
     await waitFor(() => {
       expect(vi.mocked(createHighlightedSvg).mock.calls.at(-1)?.at(-1)).toBe(20);
+    });
+  });
+
+  it("redraws the preview when the comments toggle changes", async () => {
+    // The toggle changes the exported file, so leaving it out of the preview
+    // effect's dependencies left an open preview showing the old card.
+    const { createHighlightedSvg } = await import("@/lib/export-utils");
+    vi.mocked(createHighlightedSvg).mockClear();
+    const showComments = (call: unknown[] | undefined) => call?.[17];
+
+    const props = {
+      onClose: vi.fn(),
+      code: "console.log('hello')",
+      filename: "snippet.ts",
+      theme: "github_dark",
+      comments: { 1: { author: "dev", body: "note" } },
+      onSettingsChange: vi.fn(),
+    };
+
+    const { rerender } = render(
+      <ExportModal open {...props} settings={{ ...settings, showComments: false }} />,
+    );
+
+    await waitFor(() => {
+      expect(showComments(vi.mocked(createHighlightedSvg).mock.calls.at(-1))).toBe(false);
+    });
+
+    rerender(<ExportModal open {...props} settings={{ ...settings, showComments: true }} />);
+
+    await waitFor(() => {
+      expect(showComments(vi.mocked(createHighlightedSvg).mock.calls.at(-1))).toBe(true);
     });
   });
 

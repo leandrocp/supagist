@@ -25,6 +25,7 @@ vi.mock("@/lib/theme-loader", () => ({
       appearance: "dark",
       highlights: {
         normal: { bg: "#111111", fg: "#eeeeee" },
+        keyword: { fg: "#c678dd" },
       },
     },
   })),

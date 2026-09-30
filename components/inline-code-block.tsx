@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { clientHighlighterPromise as highlighterPromise } from "@/lib/lumis-client";
 import {
+  plainLines,
   highlightTokenLines,
   loadLanguageOrPlaintext,
   tokenStyle,
@@ -256,9 +257,9 @@ export function InlineCodeBlock({
   codeActions,
   onPaletteChange,
 }: InlineCodeBlockProps) {
-  const [highlightedLines, setHighlightedLines] = useState<HighlightedToken[][]>([
-    [{ text: code }],
-  ]);
+  const [highlightedLines, setHighlightedLines] = useState<HighlightedToken[][]>(() =>
+    plainLines(code, "plaintext"),
+  );
   const [copied, setCopied] = useState(false);
 
   const handleCopy = useCallback(() => {
@@ -387,7 +388,7 @@ export function InlineCodeBlock({
       } catch {
         if (isActive) {
           setRenderError(`Could not load the ${theme} theme.`);
-          setHighlightedLines(code.split("\n").map((text) => [{ text }]));
+          setHighlightedLines(plainLines(code, language));
         }
       }
     }
