@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Source_Code_Pro } from "next/font/google";
 import { ThemeProvider } from "next-themes";
+import { Analytics } from "@vercel/analytics/next";
 import { Providers } from "./providers";
 import { NotificationsListener } from "@/components/notifications-listener";
 import { Toaster } from "@/components/ui/sonner";
@@ -39,6 +40,7 @@ export default function RootLayout({
           {hasEnvVars ? <NotificationsListener /> : null}
           <Toaster richColors closeButton position="bottom-right" />
         </ThemeProvider>
+        <Analytics />
       </body>
     </html>
   );
