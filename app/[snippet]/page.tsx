@@ -2,10 +2,8 @@ import { notFound } from "next/navigation";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { cache } from "react";
-import { createHighlighter } from "@lumis-sh/lumis/client";
+import { createHighlighter } from "@lumis-sh/lumis";
 import { bundledLanguages } from "@lumis-sh/lumis/bundles/full";
-import { spanInline } from "@lumis-sh/lumis/formatters/html";
-import type { ThemeData } from "@lumis-sh/themes";
 import { createClient } from "@/lib/supabase/server";
 import { AppNav } from "@/components/app-nav";
 import { SiteFooter } from "@/components/site-footer";
@@ -17,11 +15,14 @@ import {
   buildSnippetSocialAlt,
 } from "@/lib/snippet-utils";
 import { loadTheme } from "@/lib/theme-loader";
+import { highlightHtmlLines, loadLanguageOrPlaintext } from "@/lib/lumis-lines";
 import { UserAvatar } from "@/components/user-avatar";
 import { recordVisit } from "@/app/actions/record-visit";
 import { buildAppUrl, getRequestOrigin } from "@/lib/utils";
 
-// Module-level singleton — safe because this is server-only code.
+// Module-level singleton — safe because this is server-only code. The Node
+// entry reads parsers from the installed @lumis-sh/wasm-* packages, so
+// rendering never reaches the network.
 const highlighterPromise = createHighlighter({ languages: [bundledLanguages] });
 
 type Props = {
@@ -129,22 +130,29 @@ export default async function SnippetPage({ params }: Props) {
 
   // Server-side Lumis rendering
   const language = snippet.language ?? "text";
-  let preRenderedLines: string[] = snippet.code.split("\n").map(escapeHtml);
+  let preRenderedLines: string[] = snippet.code.split(/\r?\n/).map(escapeHtml);
   let themeIsDark = false;
   let themeBg: string | null = null;
   let themeFg: string | null = null;
 
   try {
     const [highlighter, loaded] = await Promise.all([highlighterPromise, loadTheme(snippet.theme)]);
-    await highlighter.loadLanguage(language);
+    const highlightedLanguage = await loadLanguageOrPlaintext(highlighter, language);
     const themeData = loaded.data;
     themeIsDark = themeData.appearance === "dark";
     const normal = themeData.highlights?.["normal"] as { bg?: string; fg?: string } | undefined;
     themeBg = normal?.bg ?? null;
     themeFg = normal?.fg ?? null;
-    preRenderedLines = renderLines(snippet.code, language, themeData, highlighter);
-  } catch {
-    // fall back to escaped plain text
+    preRenderedLines = highlightHtmlLines(
+      highlighter,
+      snippet.code,
+      highlightedLanguage,
+      themeData,
+    );
+  } catch (error) {
+    // Fall back to escaped plain text, but say why: a missing parser or theme
+    // otherwise degrades every snippet silently.
+    console.error(`Lumis could not highlight snippet ${snippet.id}`, error);
   }
 
   const requestHeaders = await headers();
@@ -213,35 +221,4 @@ export default async function SnippetPage({ params }: Props) {
       </div>
     </main>
   );
-}
-
-// ── Lumis server rendering ─────────────────────────────────────────────────
-
-function renderLines(
-  code: string,
-  language: string,
-  theme: ThemeData,
-  highlighter: Awaited<typeof highlighterPromise>,
-): string[] {
-  const lines = code.split("\n").map(() => "");
-  let lineIndex = 0;
-
-  highlighter.highlightIter(code, language, theme, (text, tokenLanguage, _range, scope) => {
-    // Split on either CRLF or LF — when the snippet is saved with Windows
-    // line endings, splitting only on \n leaves a trailing \r on each chunk
-    // which `white-space: pre-wrap` treats as a segment break. That break
-    // pushed the trailing reaction chip (and any inline content after the
-    // line) onto a fresh visual row.
-    const chunks = text.split(/\r?\n/);
-    chunks.forEach((chunk, chunkIndex) => {
-      if (chunk) {
-        lines[lineIndex] += scope
-          ? spanInline(chunk, { language: tokenLanguage, scope, theme })
-          : escapeHtml(chunk);
-      }
-      if (chunkIndex < chunks.length - 1) lineIndex += 1;
-    });
-  });
-
-  return lines;
 }

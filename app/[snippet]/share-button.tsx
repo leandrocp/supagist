@@ -31,7 +31,8 @@ export function ShareButton({ url, style }: { url: string; style?: React.CSSProp
       style={style}
     >
       {copied ? <Check className="size-3.5" /> : <Share2 className="size-3.5" />}
-      {copied ? "Copied" : "Share"}
+      {/* Icon-only below sm so the window toolbar fits a 375px viewport. */}
+      <span className="hidden sm:inline">{copied ? "Copied" : "Share"}</span>
     </button>
   );
 }

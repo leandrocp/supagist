@@ -1,11 +1,16 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { ThemeData } from "@lumis-sh/themes";
 import { Check, Copy, MessageSquarePlus, SmilePlus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { clientHighlighterPromise as highlighterPromise } from "@/lib/lumis-client";
+import {
+  highlightTokenLines,
+  loadLanguageOrPlaintext,
+  tokenStyle,
+  type HighlightedToken,
+} from "@/lib/lumis-lines";
 import { inferLanguage, languageDisplayName } from "@/lib/snippet-utils";
 import type { BrandFramePreset } from "@/lib/brand-presets";
 import { DEFAULT_HEADER_SETTINGS, type ExportHeaderSettings } from "@/lib/export-metadata";
@@ -262,7 +267,7 @@ export function InlineCodeBlock({
       setTimeout(() => setCopied(false), 2000);
     });
   }, [code]);
-  const [themeError, setThemeError] = useState<string | null>(null);
+  const [renderError, setRenderError] = useState<string | null>(null);
   const [_isReady, setIsReady] = useState(false);
   const [isDark, setIsDark] = useState(false);
   const [themeBg, setThemeBg] = useState<string | null>(null);
@@ -358,24 +363,21 @@ export function InlineCodeBlock({
 
     async function renderLines() {
       try {
-        setThemeError(null);
+        setRenderError(null);
         setIsReady(false);
 
         const [highlighter, loaded] = await Promise.all([highlighterPromise, loadTheme(theme)]);
 
-        await highlighter.loadLanguage(language);
-
-        const rendered = renderHighlightedLines({
-          code,
-          language,
-          theme: loaded.data,
-          highlighter,
-        });
+        const highlightedLanguage = await loadLanguageOrPlaintext(highlighter, language);
+        const rendered = highlightTokenLines(highlighter, code, highlightedLanguage, loaded.data);
         const normal = loaded.data.highlights?.["normal"] as
           | { bg?: string; fg?: string }
           | undefined;
 
         if (isActive) {
+          if (highlightedLanguage !== language) {
+            setRenderError(`Could not load ${languageDisplayName(language)} highlighting.`);
+          }
           setIsDark(loaded.data.appearance === "dark");
           setThemeBg(normal?.bg ?? null);
           setThemeFg(normal?.fg ?? null);
@@ -384,7 +386,7 @@ export function InlineCodeBlock({
         }
       } catch {
         if (isActive) {
-          setThemeError(`Could not load the ${theme} theme.`);
+          setRenderError(`Could not load the ${theme} theme.`);
           setHighlightedLines(code.split("\n").map((text) => [{ text }]));
         }
       }
@@ -793,14 +795,7 @@ export function InlineCodeBlock({
                   >
                     {line.length > 0
                       ? line.map((token, index) => (
-                          <span
-                            key={`${ln}-${index}`}
-                            style={{
-                              color: token.color,
-                              fontWeight: token.bold ? 700 : undefined,
-                              fontStyle: token.italic ? "italic" : undefined,
-                            }}
-                          >
+                          <span key={`${ln}-${index}`} style={tokenStyle(token.style)}>
                             {token.text}
                           </span>
                         ))
@@ -864,7 +859,7 @@ export function InlineCodeBlock({
             spellCheck={false}
           />
 
-          {themeError ? (
+          {renderError ? (
             <div
               className="pointer-events-none absolute rounded-md border border-red-500/20 bg-red-500/10 px-3 py-2 text-xs text-red-400"
               style={{
@@ -873,7 +868,7 @@ export function InlineCodeBlock({
                 right: innerPadding,
               }}
             >
-              {themeError}
+              {renderError}
             </div>
           ) : null}
         </div>
@@ -889,52 +884,4 @@ export function InlineCodeBlock({
       ) : null}
     </div>
   );
-}
-
-type HighlightedToken = {
-  text: string;
-  color?: string;
-  bold?: boolean;
-  italic?: boolean;
-};
-
-function renderHighlightedLines({
-  code,
-  language,
-  theme,
-  highlighter,
-}: {
-  code: string;
-  language: string;
-  theme: ThemeData;
-  highlighter: Awaited<typeof highlighterPromise>;
-}) {
-  const lines: HighlightedToken[][] = code.split("\n").map(() => []);
-  let lineIndex = 0;
-
-  highlighter.highlightIter(code, language, theme, (text, _tokenLanguage, _range, scope) => {
-    // Split on either CRLF or LF — see app/[snippet]/page.tsx for the
-    // explanation; in short, leaving a trailing \r in chunks creates a
-    // visual line break under whitespace-pre-wrap and pushes any trailing
-    // inline content (e.g. a reaction chip) onto a fresh row.
-    const chunks = text.split(/\r?\n/);
-    chunks.forEach((chunk, chunkIndex) => {
-      if (chunk) {
-        const highlight = scope
-          ? (theme.highlights?.[scope] as
-              | { fg?: string; bold?: boolean; italic?: boolean }
-              | undefined)
-          : undefined;
-        lines[lineIndex]?.push({
-          text: chunk,
-          color: highlight?.fg,
-          bold: highlight?.bold,
-          italic: highlight?.italic,
-        });
-      }
-      if (chunkIndex < chunks.length - 1) lineIndex += 1;
-    });
-  });
-
-  return lines;
 }

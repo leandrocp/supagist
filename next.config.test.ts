@@ -32,6 +32,15 @@ describe("Next.js production security configuration", () => {
     expect(production).toContain("https://cdn.jsdelivr.net");
   });
 
+  it("lets the snippet page load Lumis's native addon and installed parsers", () => {
+    // Bundling the Node entry fails the build, and file tracing cannot see the
+    // parsers Lumis resolves from the project directory at runtime.
+    expect(nextConfig.serverExternalPackages).toContain("@lumis-sh/lumis");
+    expect(nextConfig.outputFileTracingIncludes?.["/\\[snippet\\]"]).toEqual([
+      "./node_modules/@lumis-sh/wasm-*/**/*",
+    ]);
+  });
+
   it("keeps the existing defense-in-depth headers", () => {
     expect(securityHeaders).toEqual(
       expect.arrayContaining([

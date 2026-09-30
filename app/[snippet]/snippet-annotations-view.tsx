@@ -699,7 +699,7 @@ export function SnippetAnnotationsView({
             style={{ color: c.buttonText }}
           >
             {copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
-            {copied ? "Copied" : "Copy"}
+            <span className="hidden sm:inline">{copied ? "Copied" : "Copy"}</span>
           </button>
           <SnippetExportModal
             code={code}

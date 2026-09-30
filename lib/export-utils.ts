@@ -4,6 +4,7 @@ import {
   codePointLength,
   type ExportReactionChip,
 } from "@/lib/snippet-utils";
+import { highlightTokenLines, loadLanguageOrPlaintext } from "@/lib/lumis-lines";
 import { nameToColor, nameToInitials } from "@/lib/presence-utils";
 import {
   BRAND_PRESETS,
@@ -696,7 +697,7 @@ export async function createHighlightedSvg(
   const loaded = await loadTheme(theme);
   const themeData = loaded.data;
   const highlighter = await clientHighlighterPromise;
-  await highlighter.loadLanguage(language);
+  const highlightedLanguage = await loadLanguageOrPlaintext(highlighter, language);
 
   const editorBg: string =
     (themeData.highlights?.["normal"] as { bg?: string } | undefined)?.bg ??
@@ -735,7 +736,7 @@ export async function createHighlightedSvg(
       ? Math.max(1, Math.floor((height - topPad - innerPaddingPx) / codeLineHeight))
       : EXPORT_MAX_LINES;
 
-  const rawLines = code.split("\n");
+  const rawLines = code.split(/\r?\n/);
   const sourceLines = rawLines.slice(0, maxSourceLines);
   const sourceTruncated = rawLines.length > sourceLines.length;
 
@@ -828,27 +829,21 @@ export async function createHighlightedSvg(
   const actualWidth = height !== undefined ? width : Math.min(width, computedWidth);
 
   // Collect tokens per source line
-  const tokenLines: SvgToken[][] = sourceLines.map(() => []);
-  let lineIdx = 0;
-  highlighter.highlightIter(code, language, themeData, (text, _lang, _range, scope) => {
-    const chunks = text.split("\n");
-    chunks.forEach((chunk, ci) => {
-      if (lineIdx < tokenLines.length && chunk) {
-        const hl = scope
-          ? (themeData.highlights?.[scope] as
-              | { fg?: string; bold?: boolean; italic?: boolean }
-              | undefined)
-          : null;
-        tokenLines[lineIdx].push({
-          text: chunk,
-          color: hl?.fg ?? editorFg,
-          bold: !!hl?.bold,
-          italic: !!hl?.italic,
-        });
-      }
-      if (ci < chunks.length - 1) lineIdx += 1;
-    });
-  });
+  const tokenLines: SvgToken[][] = highlightTokenLines(
+    highlighter,
+    code,
+    highlightedLanguage,
+    themeData,
+  )
+    .slice(0, sourceLines.length)
+    .map((line) =>
+      line.map(({ text, style }) => ({
+        text,
+        color: style?.fg ?? editorFg,
+        bold: !!style?.bold,
+        italic: !!style?.italic,
+      })),
+    );
 
   // Wrap each source line and track source row metadata for reaction placement.
   const allVisualRows: ExportVisualRow[] = [];

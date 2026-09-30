@@ -11,7 +11,9 @@ const { mockHighlighter } = vi.hoisted(() => ({
   },
 }));
 
-vi.mock("@lumis-sh/lumis/client", () => ({
+vi.mock("@lumis-sh/lumis/client", async (importOriginal) => ({
+  // Language detection is a pure catalog lookup; only the catalog listing is stubbed.
+  guessLanguage: (await importOriginal<typeof import("@lumis-sh/lumis/client")>()).guessLanguage,
   availableLanguages: vi.fn(() => [
     { id: "javascript", extensions: ["*.js", "*.jsx", "*.mjs"] },
     { id: "typescript", extensions: ["*.ts", "*.tsx"] },
@@ -649,6 +651,76 @@ describe("createHighlightedSvg", () => {
     );
     expect(svg).toMatch(/^<svg /);
     expect(svg).toMatch(/<\/svg>$/);
+  });
+
+  it("paints a token with the style Lumis resolved, not a raw theme lookup", async () => {
+    // The mocked theme has no `keyword.import` entry; Lumis resolves the scope
+    // through language-specific and parent fallbacks and hands the result over.
+    mockHighlighter.highlightIter.mockImplementation(
+      (_code: string, _lang: string, _theme: object, cb: (...args: unknown[]) => void) => {
+        cb("import", "typescript", null, "keyword.import", { fg: "#d699b6", italic: true });
+        cb(" x", "typescript", null, "", undefined);
+      },
+    );
+
+    const svg = await createHighlightedSvg("import x", "test.ts", "github_light", 1200, undefined);
+
+    expect(svg).toContain('<tspan fill="#d699b6" font-style="italic">import</tspan>');
+    expect(svg).toContain('<tspan fill="#333333"> x</tspan>');
+  });
+
+  it("still renders, in plain text, when the language's parser cannot load", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    mockHighlighter.loadLanguage.mockRejectedValueOnce(
+      new Error("Invalid WASM size for tree-sitter-cmake@0.26.4: expected 79607, got 79574"),
+    );
+
+    const svg = await createHighlightedSvg(
+      "project(x)",
+      "CMakeLists.txt",
+      "github_light",
+      1200,
+      undefined,
+      null,
+      undefined,
+      false,
+      "system",
+      "cmake",
+    );
+
+    expect(svg).toMatch(/^<svg /);
+    expect(mockHighlighter.highlightIter).toHaveBeenCalledWith(
+      "project(x)",
+      "plaintext",
+      expect.anything(),
+      expect.any(Function),
+    );
+    warn.mockRestore();
+  });
+
+  it("keeps the CR of CRLF line endings out of the rendered text", async () => {
+    // Lumis preserves source line endings, so a CRLF snippet's tokens carry
+    // "\r\n" — sometimes with the CR and LF in different tokens.
+    mockHighlighter.highlightIter.mockImplementation(
+      (_code: string, _lang: string, _theme: object, cb: (...args: unknown[]) => void) => {
+        cb("a\r\n", "text", null, "", undefined);
+        cb("b\r", "text", null, "", undefined);
+        cb("\nc", "text", null, "", undefined);
+      },
+    );
+
+    const svg = await createHighlightedSvg(
+      "a\r\nb\r\nc",
+      "test.txt",
+      "github_light",
+      1200,
+      undefined,
+    );
+
+    expect(svg).not.toContain("\r");
+    expect(svg).toContain(">a</tspan>");
+    expect(svg).toContain(">b</tspan>");
+    expect(svg).toContain(">c</tspan>");
   });
 
   it("renders an explicit square editor card", async () => {

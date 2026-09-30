@@ -58,7 +58,7 @@ export function SnippetExportModal({
         style={style}
       >
         <Download className="size-3.5" />
-        Export
+        <span className="hidden sm:inline">Export</span>
       </button>
       <ExportModal
         open={open}

@@ -62,9 +62,14 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-sm: calc(var(--radius) - 4px);
 
-  --font-mono: var(--font-source-code-pro), ui-monospace, SFMono-Regular, Menlo, monospace;
-
   --tracking-code-label: 0.1em;
+}
+
+/* `inline` because next/font defines --font-source-code-pro on <body>: a plain
+   @theme variable resolves on :root, where it does not exist yet, and every
+   `font-mono` silently fell back to the inherited sans font. */
+@theme inline {
+  --font-mono: var(--font-source-code-pro), ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
 /* Export fonts. Kept at the top level rather than inside a `@layer`: the v4

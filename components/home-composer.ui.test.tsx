@@ -67,7 +67,8 @@ vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn() }),
 }));
 
-vi.mock("@lumis-sh/lumis/client", () => ({
+vi.mock("@lumis-sh/lumis/client", async (importOriginal) => ({
+  guessLanguage: (await importOriginal<typeof import("@lumis-sh/lumis/client")>()).guessLanguage,
   availableThemes: () => [{ name: "github_light" }, { name: "github_dark" }],
   availableLanguages: () => [
     { id: "tsx", extensions: ["*.tsx"] },

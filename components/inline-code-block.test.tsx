@@ -3,14 +3,19 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { InlineCodeBlock } from "./inline-code-block";
 
-const { mockLoadLanguage } = vi.hoisted(() => ({
-  mockLoadLanguage: vi.fn(async () => undefined),
-}));
+const { mockLoadLanguage, mockHighlightIter } = vi.hoisted(() => {
+  const emitWholeCode = (code: string, _language: string, _theme: unknown, cb: Function) =>
+    cb(code);
+  return {
+    mockLoadLanguage: vi.fn(async () => undefined),
+    mockHighlightIter: Object.assign(vi.fn(emitWholeCode), { emitWholeCode }),
+  };
+});
 
 vi.mock("@/lib/lumis-client", () => ({
   clientHighlighterPromise: Promise.resolve({
     loadLanguage: mockLoadLanguage,
-    highlightIter: vi.fn((code: string, _language: string, _theme: unknown, cb) => cb(code)),
+    highlightIter: mockHighlightIter,
   }),
 }));
 
@@ -28,6 +33,7 @@ vi.mock("@/lib/theme-loader", () => ({
 afterEach(() => {
   cleanup();
   mockLoadLanguage.mockClear();
+  mockHighlightIter.mockImplementation(mockHighlightIter.emitWholeCode);
 });
 
 const baseProps = {
@@ -151,6 +157,44 @@ describe("InlineCodeBlock preview mode", () => {
     render(<InlineCodeBlock {...baseProps} showGutter={false} />);
 
     expect(screen.getByTestId("highlight-layer").style.color).toBe("#222222");
+  });
+
+  it("paints tokens with the style Lumis resolved, matching the saved view", async () => {
+    // The mocked theme has no `keyword.import` entry: the color can only come
+    // from the style Lumis resolved through its scope fallbacks.
+    mockHighlightIter.mockImplementation((_code, _language, _theme, cb) => {
+      cb("import", "typescript", null, "keyword.import", {
+        fg: "#d699b6",
+        bg: "#2d353b",
+        italic: true,
+        underline: true,
+      });
+      cb(" x\r\n", "typescript", null, "", undefined);
+      cb("y", "typescript", null, "", undefined);
+    });
+    render(<InlineCodeBlock {...baseProps} code={"import x\r\ny"} showGutter={false} />);
+
+    const keyword = await vi.waitFor(() => screen.getByText("import"));
+    expect(keyword.style.color).toBe("#d699b6");
+    expect(keyword.style.backgroundColor).toBe("#2d353b");
+    expect(keyword.style.fontStyle).toBe("italic");
+    expect(keyword.style.textDecoration).toBe("underline");
+    expect(screen.getByTestId("source-line-1").textContent).toBe("import x");
+  });
+
+  it("names the language, not the theme, when a parser cannot load", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    mockLoadLanguage.mockRejectedValueOnce(new Error("Invalid WASM size"));
+    render(
+      <InlineCodeBlock {...baseProps} language="cmake" code="project(x)" showGutter={false} />,
+    );
+
+    await vi.waitFor(() =>
+      expect(screen.getByText("Could not load CMake highlighting.")).toBeTruthy(),
+    );
+    expect(screen.queryByText(/theme/)).toBeNull();
+    expect(screen.getByTestId("source-line-1").textContent).toBe("project(x)");
+    warn.mockRestore();
   });
 
   it("renders highlighted source as text instead of injectable HTML", async () => {

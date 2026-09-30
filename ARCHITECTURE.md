@@ -94,7 +94,6 @@ app/
   [snippet]/
     page.tsx                   Server component — fetches snippet + author, server-renders Lumis highlighting,
                                 builds og:image:alt + social description
-    snippet-code-block.tsx     Server-side Lumis highlighter (singleton, deduped via React cache())
     snippet-annotations-view.tsx   Live RLS-backed line reactions + comments (Postgres Changes)
     snippet-reactions.tsx      Snippet-level emoji reactions (Broadcast on snippet-reactions:<id>)
     snippet-presence.tsx       Code block footer — live visitor stack (Presence)
@@ -132,7 +131,9 @@ lib/
                                 generateShortId, line-reaction grouping helpers
   presence-utils.ts            generateGuestName, nameToColor (hex), nameToInitials
   auth-redirect.ts             safeNextPath — guards the post-auth redirect against open-redirect abuse
-  lumis-client.ts              Browser-side Lumis WASM singleton (loaded once, reused)
+  lumis-client.ts              Browser-side Lumis singleton with the full lazy parser bundle
+  lumis-lines.ts               Maps Lumis output onto the editors' per-line rows: tokens for the composer
+                                and export, inline HTML for the saved view, plain-text fallback
   supabase/client.ts           Browser Supabase client
   supabase/server.ts           Server Supabase client (cookie-based SSR)
   supabase/proxy.ts            updateSession — refreshes the auth cookie on every matched request
@@ -164,7 +165,7 @@ supabase/
 
 1. Server component fetches snippet + author in one round-trip (deduped via `cache()`).
 2. `recordVisit()` fires-and-forgets, calling the bounded `record_snippet_view` RPC.
-3. Lumis highlights the code server-side using `loadTheme(snippet.theme)`, which resolves brand themes from the local registry first and falls through to `@lumis-sh/themes/<name>`. `preRenderedLines` is passed to the client as a prop, so the browser doesn't load WASM just to view.
+3. Lumis highlights the code server-side using `loadTheme(snippet.theme)`, which resolves brand themes from the local registry first and falls through to `@lumis-sh/themes/<name>`. The page uses Lumis's Node entry, which reads parsers from the installed `@lumis-sh/wasm-*` packages through its native addon, so rendering never reaches a CDN; `next.config.ts` keeps `@lumis-sh/lumis` external and adds those packages to the route's file trace. `preRenderedLines` is passed to the client as a prop, so the browser doesn't load WASM just to view.
 4. `SnippetAnnotationsView` subscribes to RLS-backed Postgres Changes for live line reactions and comments; forgeable Broadcast payloads are not treated as persisted UI truth.
 5. `SnippetPresenceFooter` joins the Presence channel — the visitor stack updates in real time.
 6. `generateMetadata` produces a three-line social-card description (`<filename> by @<author>` / `<lang> | <theme> | <lines> lines | <chars> / 8,000` / `# Supagist. Comment, react, share, export.`) and an `og:image:alt` to match. Slack and X show it on link unfurl.

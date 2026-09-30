@@ -1,4 +1,6 @@
-import { availableLanguages } from "@lumis-sh/lumis/client";
+import { availableLanguages, guessLanguage } from "@lumis-sh/lumis/client";
+
+export { escape as escapeHtml } from "@lumis-sh/lumis/formatters/html";
 
 /** Returns the decoded slug + shortId from a URL segment like "my-file-abc123". */
 export function parseSnippetParam(param: string): { slug: string; shortId: string } | null {
@@ -9,15 +11,6 @@ export function parseSnippetParam(param: string): { slug: string; shortId: strin
   const slug = param.slice(0, -7);
   if (!slug) return null;
   return { slug, shortId: maybeShortId };
-}
-
-export function escapeHtml(value: string): string {
-  return value
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
 }
 
 /**
@@ -70,24 +63,16 @@ export function languageDisplayName(id: string): string {
 }
 
 export function inferLanguage(filename: string, code: string): string {
-  const norm = filename.trim().toLowerCase();
-  const languages = availableLanguages();
+  // Lumis matches the name against its catalog's extensions and globs
+  // (Dockerfile, CMakeLists.txt), then reads shebangs, Emacs mode lines and a
+  // few document markers from the code.
+  const guessed = guessLanguage(filename, code);
+  if (guessed !== "plaintext") return guessed;
 
-  const byExt = languages.find((language) =>
-    language.extensions.some((ext) => {
-      const suffix = ext.replace(/^\*/, "").toLowerCase();
-      return suffix ? norm.endsWith(suffix) : false;
-    }),
-  );
-  if (byExt) return byExt.id;
-
-  if (code.startsWith("#!")) {
-    if (code.includes("python")) return "python";
-    if (code.includes("node") || code.includes("bun")) return "javascript";
-    if (code.includes("bash") || code.includes("sh")) return "bash";
-  }
-  if (code.trimStart().startsWith("<!DOCTYPE html") || code.includes("<html")) return "html";
-  if (code.trimStart().startsWith("<?xml")) return "xml";
+  // The catalog lists no JavaScript interpreters yet (leandrocp/lumis#1594).
+  const shebang = code.startsWith("#!") ? code.split("\n", 1)[0]! : "";
+  if (shebang.includes("node") || shebang.includes("bun")) return "javascript";
+  if (code.includes("<html")) return "html";
   if (code.includes("interface ") || code.includes("type ")) return "typescript";
   if (code.includes("SELECT ") || code.includes("select ")) return "sql";
 

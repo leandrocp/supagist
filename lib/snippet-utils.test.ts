@@ -99,6 +99,10 @@ describe("codePointLength", () => {
 // ── escapeHtml ───────────────────────────────────────────────────────────────
 
 describe("escapeHtml", () => {
+  it("preserves Unicode and line endings while escaping existing entities once", () => {
+    expect(escapeHtml("🔥 &amp; <b>\r\n日本語")).toBe("🔥 &amp;amp; &lt;b&gt;\r\n日本語");
+  });
+
   it("escapes ampersands", () => {
     expect(escapeHtml("a & b")).toBe("a &amp; b");
   });
@@ -196,6 +200,26 @@ describe("inferLanguage", () => {
 
   it("falls back to text for unrecognised input", () => {
     expect(inferLanguage("file", "just some plain text content")).toBe("text");
+  });
+
+  it.each([
+    ["Dockerfile", "dockerfile"],
+    ["Makefile", "make"],
+    ["CMakeLists.txt", "cmake"],
+    [".bashrc", "bash"],
+    ["Gemfile", "ruby"],
+    [".gitignore", "gitignore"],
+    ["nginx.conf", "nginx"],
+  ])("detects %s by its file name", (filename, language) => {
+    expect(inferLanguage(filename, "")).toBe(language);
+  });
+
+  it.each([
+    ["#!/usr/bin/env ruby\nputs 1", "ruby"],
+    ["#!/bin/zsh\necho hi", "zsh"],
+    ["# -*- coding: utf-8; mode: ruby; -*-\nputs 1", "ruby"],
+  ])("detects %j by its interpreter line", (code, language) => {
+    expect(inferLanguage("script", code)).toBe(language);
   });
 });
 

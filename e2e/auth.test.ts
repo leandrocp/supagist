@@ -15,6 +15,8 @@ test("authenticated user can publish a snippet", async ({ page }) => {
   // Set a filename (aria-label="Filename", placeholder="snippet.tsx")
   const filenameInput = page.getByLabel("Filename");
   await filenameInput.fill("hello.ts");
+  const keyword = page.getByText("const", { exact: true });
+  await expect(keyword).toHaveCSS("color", "rgb(207, 34, 46)");
 
   // Publish button
   await page.getByRole("button", { name: /^publish$/i }).click();
@@ -23,6 +25,11 @@ test("authenticated user can publish a snippet", async ({ page }) => {
   await page.waitForURL(/\/[a-z0-9-]+-[a-z0-9]{6}$/);
   await expect(page.getByRole("heading", { name: "hello.ts" })).toBeVisible();
   await expect(page.getByText("const hello")).toBeVisible();
+  await expect(keyword).toHaveCSS("color", "rgb(207, 34, 46)");
+
+  // A full reload must keep native server highlighting, including its color.
+  await page.reload();
+  await expect(keyword).toHaveCSS("color", "rgb(207, 34, 46)");
 });
 
 test("published snippet page shows the code", async ({ page }) => {
@@ -59,4 +66,17 @@ test("authenticated user can add a reaction to a line", async ({ page }) => {
   await expect(fireOption).toBeVisible();
   await fireOption.click();
   await expect(page.getByRole("button", { name: /reacted with 🔥/i })).toBeVisible();
+});
+
+test("saved view window toolbar fits an iPhone SE viewport", async ({ page }) => {
+  await page.goto("/");
+  await page.locator("textarea").fill("const fits = true;");
+  await page.getByRole("button", { name: /^publish$/i }).click();
+  await page.waitForURL(/\/[a-z0-9-]+-[a-z0-9]{6}$/);
+
+  await page.setViewportSize({ width: 375, height: 812 });
+  const share = page.getByRole("button", { name: "Copy link" });
+  const card = share.locator("xpath=ancestor::div[contains(@class,'overflow-hidden')][1]");
+  const [shareBox, cardBox] = await Promise.all([share.boundingBox(), card.boundingBox()]);
+  expect(shareBox!.x + shareBox!.width).toBeLessThanOrEqual(cardBox!.x + cardBox!.width);
 });
