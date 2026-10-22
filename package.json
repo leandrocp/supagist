@@ -57,7 +57,7 @@
     "@vitejs/plugin-react": "^6.1.1",
     "@vitest/coverage-v8": "^5.0.0",
     "happy-dom": "^20.14.0",
-    "oxfmt": "^0.66.0",
+    "oxfmt": "^0.73.0",
     "oxlint": "^1.62.0",
     "postcss": "^8",
     "tailwindcss": "^4.3.3",
