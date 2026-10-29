@@ -6,13 +6,13 @@ import { CodeBlock } from "@lumis-sh/react";
 import { renderCodeBlock } from "@lumis-sh/react/server";
 import { createHighlighter, type Highlighter } from "@lumis-sh/lumis";
 import { htmlInline } from "@lumis-sh/lumis/formatters";
-import backend from "@lumis-sh/wasm-bundle-backend";
+import full from "@lumis-sh/wasm-bundle-full";
 import githubLight from "@lumis-sh/themes/github_light";
 import githubDark from "@lumis-sh/themes/github_dark";
 
 let highlighter: Highlighter;
 beforeAll(async () => {
-  highlighter = await createHighlighter({ languages: [backend] });
+  highlighter = await createHighlighter({ languages: [full] });
 });
 afterEach(cleanup);
 
