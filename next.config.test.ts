@@ -14,7 +14,7 @@ describe("Next.js production security configuration", () => {
     expect(csp).toContain("frame-ancestors 'none'");
     expect(csp).toContain("https://*.supabase.co");
     expect(csp).toContain("wss://*.supabase.co");
-    expect(csp).toContain("https://cdn.jsdelivr.net");
+    expect(csp).not.toContain("https://cdn.jsdelivr.net");
     expect(csp).toContain("'wasm-unsafe-eval'");
   });
 
@@ -25,11 +25,12 @@ describe("Next.js production security configuration", () => {
     expect(development).toContain("'unsafe-eval'");
     expect(development).toContain("http://localhost:*");
     expect(development).not.toContain("upgrade-insecure-requests");
+    expect(development).not.toContain("https://cdn.jsdelivr.net");
 
     expect(production).not.toContain("'unsafe-eval'");
     expect(production).not.toContain("localhost");
     expect(production).toContain("upgrade-insecure-requests");
-    expect(production).toContain("https://cdn.jsdelivr.net");
+    expect(production).not.toContain("https://cdn.jsdelivr.net");
   });
 
   it("lets the snippet page load Lumis's native addon and installed parsers", () => {

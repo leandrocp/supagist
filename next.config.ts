@@ -6,7 +6,6 @@ export function buildContentSecurityPolicy(environment: string | undefined): str
     "'self'",
     "https://*.supabase.co",
     "wss://*.supabase.co",
-    "https://cdn.jsdelivr.net",
     ...(!isProduction
       ? ["http://localhost:*", "http://127.0.0.1:*", "ws://localhost:*", "ws://127.0.0.1:*"]
       : []),
