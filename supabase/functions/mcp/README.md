@@ -1,5 +1,88 @@
 # M0 result: NO-GO for Edge rendering (option A)
 
+## Live endpoint and rate limits (2026-10-29)
+
+The function is live and intentionally stays live. Main pushes deploy it via
+Supabase's GitHub integration. The original spike conclusions below are retained
+as historical measurements, not instructions to remove the service.
+
+Every authenticated MCP HTTP request consumes user (30/minute, 1,000/day) and IP
+(60/minute, 2,000/day) quotas before the SDK dispatches anything. `render_snippet`
+also consumes a separate user quota (10/minute, 100/day). Constants live in
+`rate-limit.ts`. All checks call the existing `public.check_rate_limit` RPC using
+`ctx.supabaseAdmin`; no schema, function, or grant change is required.
+
+Denied attempts also count. The RPC uses first-request-relative windows and
+returns only a boolean, so `Retry-After` conservatively reports the full denied
+window: 60 seconds or 86,400 seconds (the longer when both fail). HTTP 429 tool
+responses contain a JSON-RPC result with `isError: true` and exactly
+`Rate limit reached. Need more? Contact supagist@leandro.io`. Some clients surface
+HTTP 429 before displaying the MCP body. RPC outages fail closed with 503.
+
+The IP key uses the first `x-forwarded-for` hop, then `cf-connecting-ip`, then
+`x-real-ip`; absent headers share an `unknown` bucket. This backstop depends on
+the gateway supplying trustworthy headers; verified user quotas remain the
+primary control. OAuth discovery, preflight, and rejected authentication never
+dispatch tools and do not consume signed-in quotas. Legacy JSON-RPC batches are
+rejected with 400 to prevent many renders bypassing the per-tool quota.
+
+### Connect now: bearer token, not automatic OAuth
+
+Production Auth discovery returned `404 feature_disabled: OAuth server is disabled`
+on 2026-10-29. URL-only MCP OAuth sign-in does **not** work yet. No OAuth settings
+were changed. Use a short-lived access token from an existing, signed-in,
+non-anonymous Supagist test account, not an anon/publishable/service-role key.
+Keep it out of chat, command history, and tracked config. In a private shell:
+
+```bash
+read -rsp 'Existing Supagist access token: ' MCP_TEST_ACCESS_TOKEN; echo
+export MCP_TEST_ACCESS_TOKEN
+claude mcp add --transport http --scope local supagist \
+  https://zivpihasridowvzrgiix.supabase.co/functions/v1/mcp \
+  --header "Authorization: Bearer $MCP_TEST_ACCESS_TOKEN"
+```
+
+Open `/mcp` in Claude Code and connect, then ask for a small SVG or PNG at
+`pixelRatio: 1`. This stores a token in local Claude configuration; remove or
+replace that header when the token expires. It does not enable refresh/OAuth.
+Bearer curl alternative (the endpoint is stateless):
+
+```bash
+curl -i https://zivpihasridowvzrgiix.supabase.co/functions/v1/mcp \
+  -H "Authorization: Bearer $MCP_TEST_ACCESS_TOKEN" \
+  -H 'Content-Type: application/json' \
+  -H 'Accept: application/json, text/event-stream' \
+  -H 'MCP-Protocol-Version: 2025-06-18' \
+  --data '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"render_snippet","arguments":{"code":"const answer = 42;","language":"javascript","theme":"github_dark","format":"svg","pixelRatio":1}}}'
+```
+
+Small SVG and small PNG at 1× pass on the real local Edge stack. The original
+30-line + avatars PNG fails the 2 s CPU cap at both 1× and 2×; heavy 2× PNGs are
+not supported reliably. Rate limiting does not fix rendering CPU limits. Always
+specify `pixelRatio: 1` for the demo: the unchanged default is 2.
+
+### Repeat the checks
+
+```bash
+mise exec deno@2.9.0 -- deno test --config supabase/functions/mcp/deno.json \
+  supabase/functions/mcp/input_test.ts supabase/functions/mcp/rate-limit_test.ts
+# Requires local Supabase + functions serve; creates only a disposable LOCAL user.
+node supabase/functions/mcp/verify/rate-limit.mjs
+# Requires existing hosted credentials; never creates hosted users or resets buckets.
+node supabase/functions/mcp/verify/rate-limit.mjs --production
+```
+
+Hosted mode accepts `MCP_TEST_ACCESS_TOKEN`, or `MCP_TEST_EMAIL`,
+`MCP_TEST_PASSWORD`, and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`. It stops without
+calling tools if credentials are absent. Start with an unused test-account
+minute quota; the test deliberately consumes 11 render attempts and checks the
+11th gets 429, while `tools/list` and `list_options` still work. Output, full
+redacted HTTP/MCP transcripts, and sample exports are saved separately under
+`.amp/in/artifacts/mcp-rate-limit/{local,production}/`. Auth secrets and cookies
+are never written there. Local evidence is not production proof.
+
+## Historical M0 recommendation
+
 **Recommendation: pursue the Vercel Node fallback (option C). Do not promote
 this spike to production.** Option C is a recommendation, not a benchmarked
 implementation. Nothing beyond M0 was built.
