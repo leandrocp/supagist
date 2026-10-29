@@ -19,6 +19,20 @@ describe("local Supabase configuration", () => {
     expect(config).toContain('"http://127.0.0.1:3000/**"');
   });
 
+  it("lets MCP OAuth discovery reach the function's own user auth gate", () => {
+    const mcp = config.split("[functions.mcp]")[1];
+    expect(mcp).toContain("verify_jwt = false");
+    expect(mcp).toContain('static_files = ["./functions/mcp/assets/*"]');
+  });
+
+  it("pins local and CI CLI versions with MCP function-slug injection", () => {
+    const mise = readFileSync("mise.toml", "utf8");
+    const ci = readFileSync(".github/workflows/ci.yml", "utf8");
+    expect(mise).toContain('supabase = "2.117.0"');
+    expect(ci.match(/version: 2\.117\.0/g)).toHaveLength(3);
+    expect(ci).not.toContain("2.109.1");
+  });
+
   it("keeps the public view RPC invoker-safe and its privileged implementation private", () => {
     expect(viewRpcMigration).toContain(
       "alter function public.record_snippet_view(uuid) set schema private",

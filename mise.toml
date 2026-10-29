@@ -1,6 +1,6 @@
 [tools]
 node = "22"
-supabase = "2.109.1"
+supabase = "2.117.0"
 gh = "latest"
 vercel = "latest"
 

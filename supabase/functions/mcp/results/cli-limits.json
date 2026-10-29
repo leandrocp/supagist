@@ -1,0 +1,100 @@
+[
+  {
+    "fixture": "plain",
+    "pixelRatio": 1,
+    "format": "svg",
+    "wallMs": 1373.3900910000002,
+    "status": 200,
+    "success": true
+  },
+  {
+    "fixture": "plain",
+    "pixelRatio": 1,
+    "format": "png",
+    "wallMs": 866.6499439999998,
+    "status": 200,
+    "success": true
+  },
+  {
+    "fixture": "plain",
+    "pixelRatio": 2,
+    "format": "svg",
+    "wallMs": 807.5587069999997,
+    "status": 200,
+    "success": true
+  },
+  {
+    "fixture": "plain",
+    "pixelRatio": 2,
+    "format": "png",
+    "wallMs": 865.0746340000005,
+    "status": 200,
+    "success": true
+  },
+  {
+    "fixture": "vercel",
+    "pixelRatio": 1,
+    "format": "svg",
+    "wallMs": 781.2361190000001,
+    "status": 200,
+    "success": true
+  },
+  {
+    "fixture": "vercel",
+    "pixelRatio": 1,
+    "format": "png",
+    "wallMs": 1111.2593930000003,
+    "status": 200,
+    "success": true
+  },
+  {
+    "fixture": "vercel",
+    "pixelRatio": 2,
+    "format": "svg",
+    "wallMs": 773.2317119999998,
+    "status": 200,
+    "success": true
+  },
+  {
+    "fixture": "vercel",
+    "pixelRatio": 2,
+    "format": "png",
+    "wallMs": 1745.1678550000006,
+    "status": 200,
+    "success": true
+  },
+  {
+    "fixture": "avatars",
+    "pixelRatio": 1,
+    "format": "svg",
+    "wallMs": 812.0837759999995,
+    "status": 200,
+    "success": true
+  },
+  {
+    "fixture": "avatars",
+    "pixelRatio": 1,
+    "format": "png",
+    "wallMs": 2618.8133159999998,
+    "success": false,
+    "error": "terminated",
+    "cause": "UND_ERR_SOCKET"
+  },
+  {
+    "fixture": "avatars",
+    "pixelRatio": 2,
+    "format": "svg",
+    "wallMs": 833.9623269999993,
+    "status": 200,
+    "success": true
+  },
+  {
+    "fixture": "avatars",
+    "pixelRatio": 2,
+    "format": "png",
+    "wallMs": 2615.474421000001,
+    "success": false,
+    "error": "terminated",
+    "cause": "UND_ERR_SOCKET"
+  }
+]

@@ -1,0 +1,175 @@
+// Build-time packaging only: never import this module from the Edge entrypoint.
+import { createHash } from "node:crypto";
+import { mkdir, readFile, writeFile, rm } from "node:fs/promises";
+import { fileURLToPath } from "node:url";
+import { rolldown } from "rolldown";
+
+const root = new URL("../../../../", import.meta.url);
+const vendor = new URL("./generated/vendor/", import.meta.url);
+const sha256 = (bytes) => createHash("sha256").update(bytes).digest("hex");
+const sourceHashes = {};
+const outputNames = [];
+const licensePackages = [
+  "@lumis-sh/lumis",
+  "@lumis-sh/themes",
+  "web-tree-sitter",
+  "@noble/hashes",
+  "pathe",
+  "semver",
+  "rolldown",
+];
+const banner =
+  "/* eslint-disable -- Generated third-party code; see vendor-licenses.txt and vendor-manifest.json. */\n";
+
+export async function prepareVendor(themeNames) {
+  await mkdir(new URL("themes/", vendor), { recursive: true });
+  // Remove only files named in our preceding output manifest (never other agents' files).
+  let previous;
+  try {
+    previous = JSON.parse(await readFile(new URL("vendor-manifest.json", vendor), "utf8"));
+  } catch (error) {
+    if (error.code !== "ENOENT") throw error;
+  }
+  const versions = {};
+  const licenses = [];
+  for (const name of licensePackages) {
+    const pkg = JSON.parse(
+      await readFile(new URL(`node_modules/${name}/package.json`, root), "utf8"),
+    );
+    versions[name] = pkg.version;
+    licenses.push(
+      `${name}@${pkg.version}\n${await readFile(new URL(`node_modules/${name}/LICENSE`, root), "utf8")}`,
+    );
+  }
+  const bundler = JSON.parse(
+    await readFile(new URL("node_modules/rolldown/package.json", root), "utf8"),
+  );
+  if (bundler.version !== "1.2.7")
+    throw new Error("M0 vendor reproduction requires installed rolldown@1.2.7");
+
+  const entry = "\0m0-lumis-browser";
+  const absolute = (file) =>
+    JSON.stringify(fileURLToPath(new URL(`node_modules/@lumis-sh/lumis/dist/${file}`, root)));
+  const build = await rolldown({
+    cwd: fileURLToPath(root),
+    input: { lumis: entry },
+    platform: "browser",
+    tsconfig: false,
+    external: ["node:fs/promises", "node:module", "fs", "path", "url"],
+    plugins: [
+      {
+        name: "m0-browser-entry",
+        resolveId(id) {
+          if (id === entry) return id;
+        },
+        load(id) {
+          if (id !== entry) return;
+          return (
+            `export {createHighlighter, availableLanguages, guessLanguage, runtimeKind} from ${absolute("index.browser.js")};\n` +
+            `export {htmlInline} from ${absolute("formatters.js")};\n` +
+            `export {getScopedThemeStyle, textDecoration, escape} from ${absolute("formatters/html.js")};\n`
+          );
+        },
+      },
+    ],
+  });
+  try {
+    const { output } = await build.generate({
+      format: "esm",
+      entryFileNames: "[name].js",
+      chunkFileNames: "[name]-[hash].js",
+      codeSplitting: true,
+      strictExecutionOrder: true,
+      minify: false,
+      sourcemap: false,
+      banner,
+    });
+    for (const chunk of output) {
+      if (chunk.type !== "chunk") throw new Error("Unexpected asset emitted by browser prebundle");
+      for (const id of chunk.moduleIds) {
+        if (id.startsWith("\0")) continue;
+        const relative = id.slice(fileURLToPath(root).length);
+        sourceHashes[relative] = sha256(await readFile(id));
+      }
+      await writeFile(new URL(chunk.fileName, vendor), chunk.code);
+      outputNames.push(chunk.fileName);
+    }
+  } finally {
+    await build.close();
+  }
+
+  // These upstream modules contain only theme data. Keep lazy import behavior and
+  // every theme, without npm's CSS/CJS/type/package directory payload.
+  for (const name of themeNames) {
+    const path = `node_modules/@lumis-sh/themes/dist/themes/${name}.js`;
+    const source = await readFile(new URL(path, root));
+    sourceHashes[path] = sha256(source);
+    const nameInVendor = `themes/${name}.js`;
+    await writeFile(new URL(nameInVendor, vendor), banner + source.toString());
+    outputNames.push(nameInVendor);
+  }
+
+  const url = "https://unpkg.com/@resvg/resvg-wasm@2.6.2/index.mjs";
+  const digest = "10170d02d816f02ec76f9bc095b01d9becf536e7b1e12e5aa616652c84b237a1";
+  const sourceFile = new URL("./vendor-sources/resvg-2.6.2.mjs.txt", import.meta.url);
+  let source;
+  try {
+    source = await readFile(sourceFile);
+  } catch (error) {
+    if (error.code !== "ENOENT") throw error;
+  }
+  if (!source) {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`resvg wrapper download: ${response.status}`);
+    source = Buffer.from(await response.arrayBuffer());
+  }
+  if (sha256(source) !== digest) throw new Error("resvg wrapper integrity mismatch");
+  await mkdir(new URL("./vendor-sources/", import.meta.url), { recursive: true });
+  await writeFile(sourceFile, source);
+  await writeFile(new URL("resvg.js", vendor), banner + source.toString());
+  outputNames.push("resvg.js");
+  versions["@resvg/resvg-wasm"] = "2.6.2";
+  licenses.push(
+    `@resvg/resvg-wasm@2.6.2\n${await readFile(new URL("../assets/resvg-LICENSE.txt", import.meta.url), "utf8")}`,
+  );
+  const notices = licenses.join("\n\n---\n\n");
+  await writeFile(new URL("vendor-licenses.txt", vendor), notices);
+  // Carry notices in the parent's existing static-files glob as well as the source tree.
+  await writeFile(new URL("../assets/vendor-licenses.txt", import.meta.url), notices);
+  const assetManifestUrl = new URL("../assets/manifest.json", import.meta.url);
+  const assetManifest = JSON.parse(await readFile(assetManifestUrl, "utf8"));
+  assetManifest["vendor-licenses.txt"] = {
+    sha256: sha256(notices),
+    bytes: Buffer.byteLength(notices),
+    provenance: "Exact npm package license texts; generated by prepare-vendor.mjs",
+  };
+  await writeFile(assetManifestUrl, JSON.stringify(assetManifest, null, 2) + "\n");
+  outputNames.push("vendor-licenses.txt");
+  for (const old of Object.keys(previous?.outputs ?? {})) {
+    if (!outputNames.includes(old)) await rm(new URL(old, vendor));
+  }
+  // Called after the repository formatter, so these are hashes of shipped bytes.
+  return async () => {
+    const outputs = {};
+    for (const name of outputNames.sort()) {
+      const bytes = await readFile(new URL(name, vendor));
+      outputs[name] = { bytes: bytes.length, sha256: sha256(bytes) };
+    }
+    await writeFile(
+      new URL("vendor-manifest.json", vendor),
+      JSON.stringify(
+        {
+          bundler: `rolldown@${bundler.version}`,
+          versions,
+          resvgSource: { url, sha256: digest },
+          sources: Object.fromEntries(
+            Object.entries(sourceHashes).sort(([a], [b]) => a.localeCompare(b)),
+          ),
+          outputs,
+        },
+        null,
+        2,
+      ) + "\n",
+    );
+  };
+}

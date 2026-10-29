@@ -1,0 +1,17 @@
+[test] $ npm test
+
+> test
+> vitest run
+
+
+ RUN  v5.0.0 /home/user/workspace/repo
+
+
+ Test Files  52 passed (52)
+      Tests  629 passed | 1 expected fail (630)
+   Start at  20:35:06
+   Duration  6.33s (tests 46%, import 23%, environment 19%, transform 10%, setup 1%, worker 1%)
+
+    Isolate  52 workers spawned · ~254ms startup each (spawn + environment, per file)
+             at least ~1.63s faster with isolate: false — reuses workers across files instead of one per file
+

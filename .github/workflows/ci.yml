@@ -99,7 +99,7 @@ jobs:
       - run: npm ci
       - uses: supabase/setup-cli@v3
         with:
-          version: 2.109.1
+          version: 2.117.0
       - name: Start local Supabase
         run: supabase start
       - name: Seed local buckets
@@ -141,7 +141,7 @@ jobs:
       - run: npm ci
       - uses: supabase/setup-cli@v3
         with:
-          version: 2.109.1
+          version: 2.117.0
       - name: Start local Supabase
         run: supabase start
       - name: Apply migrations
@@ -180,7 +180,7 @@ jobs:
       - run: npm ci
       - uses: supabase/setup-cli@v3
         with:
-          version: 2.109.1
+          version: 2.117.0
       - name: Start local Supabase
         run: supabase start
       - name: Seed local buckets
