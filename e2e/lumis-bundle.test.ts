@@ -113,3 +113,24 @@ for (const [language, [code, token]] of Object.entries(samples)) {
     }
   });
 }
+
+test("an unavailable extra parser does not disable other languages", async ({ page }) => {
+  await page.route(
+    (url) => url.pathname.includes("tree-sitter-xml") && url.pathname.endsWith(".wasm"),
+    (route) => route.abort(),
+  );
+  await page.goto("/");
+  await page.getByLabel("Filename", { exact: true }).fill("example.ts");
+  await page.getByLabel("Code", { exact: true }).fill("const answer = 42;");
+  const keyword = page.getByTestId("highlight-layer").getByText("const", { exact: true });
+  await expect(keyword).toHaveCSS("color", "rgb(207, 34, 46)");
+
+  await page.getByLabel("Filename", { exact: true }).fill("example.xml");
+  await page.getByLabel("Code", { exact: true }).fill("<example />");
+  await expect(page.getByText("Could not load XML highlighting.")).toBeVisible();
+
+  await page.getByLabel("Filename", { exact: true }).fill("example.ts");
+  await page.getByLabel("Code", { exact: true }).fill("const answer = 42;");
+  await expect(keyword).toHaveCSS("color", "rgb(207, 34, 46)");
+  await expect(page.getByText(/Could not load/)).toHaveCount(0);
+});

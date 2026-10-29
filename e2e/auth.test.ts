@@ -32,6 +32,18 @@ test("authenticated user can publish a snippet", async ({ page }) => {
   await expect(keyword).toHaveCSS("color", "rgb(207, 34, 46)");
 });
 
+test("saved snippets retain server parsers outside the browser bundles", async ({ page }) => {
+  await page.goto("/");
+  await page.getByLabel("Filename", { exact: true }).fill("answer.swift");
+  await page.getByLabel("Code", { exact: true }).fill("let answer = 42");
+  await page.getByRole("button", { name: /^publish$/i }).click();
+  await page.waitForURL(/\/[a-z0-9-]+-[a-z0-9]{6}$/);
+  await page.reload();
+
+  await expect(page.getByRole("heading", { name: "answer.swift" })).toBeVisible();
+  await expect(page.getByText("let", { exact: true })).toHaveCSS("color", "rgb(207, 34, 46)");
+});
+
 test("published snippet page shows the code", async ({ page }) => {
   await page.goto("/");
 
