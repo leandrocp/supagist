@@ -48,12 +48,12 @@ async function limited(response: Response | null, retry: number) {
 }
 
 for (const [key, cap, retry, tool] of [
-  ["mcp:user:alice:m", 30, 60, "list_options"],
-  ["mcp:user:alice:d", 1000, 86400, "list_options"],
-  ["mcp:ip:192.0.2.1:m", 60, 60, "list_options"],
-  ["mcp:ip:192.0.2.1:d", 2000, 86400, "list_options"],
-  ["mcp:render:alice:m", 10, 60, "render_snippet"],
-  ["mcp:render:alice:d", 100, 86400, "render_snippet"],
+  ["mcp:user:alice:m", 15, 60, "list_options"],
+  ["mcp:user:alice:d", 500, 86400, "list_options"],
+  ["mcp:ip:192.0.2.1:m", 30, 60, "list_options"],
+  ["mcp:ip:192.0.2.1:d", 1000, 86400, "list_options"],
+  ["mcp:render:alice:m", 5, 60, "render_snippet"],
+  ["mcp:render:alice:d", 50, 86400, "render_snippet"],
 ] as const) {
   Deno.test(`${key}: under/at cap allowed, next denied with HTTP and MCP error`, async () => {
     const db = fakeRpc();
@@ -69,7 +69,7 @@ for (const [key, cap, retry, tool] of [
 
 Deno.test("user quotas follow users across IPs; IP quotas aggregate different users", async () => {
   const db = fakeRpc();
-  db.seed("mcp:user:alice:m", 30);
+  db.seed("mcp:user:alice:m", 15);
   await limited(
     await enforceRateLimits(
       request("list_options", { "x-forwarded-for": "192.0.2.2" }),
@@ -79,7 +79,7 @@ Deno.test("user quotas follow users across IPs; IP quotas aggregate different us
     60,
   );
   assert.equal(await enforceRateLimits(request(), "bob", db), null);
-  db.seed("mcp:ip:192.0.2.1:m", 60);
+  db.seed("mcp:ip:192.0.2.1:m", 30);
   await limited(await enforceRateLimits(request(), "charlie", db), 60);
   assert.equal(
     await enforceRateLimits(
@@ -93,10 +93,10 @@ Deno.test("user quotas follow users across IPs; IP quotas aggregate different us
 
 Deno.test("render quota is tighter, does not block other tools, and still consumes global quotas", async () => {
   const db = fakeRpc();
-  for (let i = 0; i < 10; i++)
+  for (let i = 0; i < 5; i++)
     assert.equal(await enforceRateLimits(request("render_snippet"), "alice", db), null);
   await limited(await enforceRateLimits(request("render_snippet"), "alice", db), 60);
-  for (let i = 0; i < 19; i++) assert.equal(await enforceRateLimits(request(), "alice", db), null);
+  for (let i = 0; i < 9; i++) assert.equal(await enforceRateLimits(request(), "alice", db), null);
   await limited(await enforceRateLimits(request(), "alice", db), 60);
 });
 
@@ -112,7 +112,7 @@ Deno.test("first forwarded hop takes precedence, then Cloudflare, then real-IP, 
     {},
   ]) {
     const db = fakeRpc();
-    db.seed(`mcp:ip:${Object.keys(headers).length ? "192.0.2.1" : "unknown"}:m`, 60);
+    db.seed(`mcp:ip:${Object.keys(headers).length ? "192.0.2.1" : "unknown"}:m`, 30);
     await limited(
       await enforceRateLimits(
         new Request(request(), { headers: headers as HeadersInit }),
@@ -133,7 +133,7 @@ Deno.test("initialize, list, notifications, malformed bodies, and GET all consum
     undefined,
   ]) {
     const db = fakeRpc();
-    db.seed("mcp:user:alice:m", 30);
+    db.seed("mcp:user:alice:m", 15);
     const response = await enforceRateLimits(
       new Request("http://localhost/mcp", body ? { method: "POST", body } : {}),
       "alice",
@@ -146,8 +146,8 @@ Deno.test("initialize, list, notifications, malformed bodies, and GET all consum
 
 Deno.test("daily denial wins Retry-After when multiple windows are exhausted", async () => {
   const db = fakeRpc();
-  db.seed("mcp:user:alice:m", 30);
-  db.seed("mcp:ip:192.0.2.1:d", 2000);
+  db.seed("mcp:user:alice:m", 15);
+  db.seed("mcp:ip:192.0.2.1:d", 1000);
   await limited(await enforceRateLimits(request(), "alice", db), 86400);
 });
 
@@ -173,7 +173,7 @@ Deno.test("legacy batches cannot bypass per-render quotas", async () => {
   const req = new Request("http://localhost/mcp", {
     method: "POST",
     body: JSON.stringify(
-      Array.from({ length: 11 }, (_, id) => ({
+      Array.from({ length: 6 }, (_, id) => ({
         jsonrpc: "2.0",
         id,
         method: "tools/call",

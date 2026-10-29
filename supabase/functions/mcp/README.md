@@ -6,9 +6,9 @@ The function is live and intentionally stays live. Main pushes deploy it via
 Supabase's GitHub integration. The original spike conclusions below are retained
 as historical measurements, not instructions to remove the service.
 
-Every authenticated MCP HTTP request consumes user (30/minute, 1,000/day) and IP
-(60/minute, 2,000/day) quotas before the SDK dispatches anything. `render_snippet`
-also consumes a separate user quota (10/minute, 100/day). Constants live in
+Every authenticated MCP HTTP request consumes user (15/minute, 500/day) and IP
+(30/minute, 1,000/day) quotas before the SDK dispatches anything. `render_snippet`
+also consumes a separate user quota (5/minute, 50/day). Constants live in
 `rate-limit.ts`. All checks call the existing `public.check_rate_limit` RPC using
 `ctx.supabaseAdmin`; no schema, function, or grant change is required.
 
@@ -75,8 +75,8 @@ node supabase/functions/mcp/verify/rate-limit.mjs --production
 Hosted mode accepts `MCP_TEST_ACCESS_TOKEN`, or `MCP_TEST_EMAIL`,
 `MCP_TEST_PASSWORD`, and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`. It stops without
 calling tools if credentials are absent. Start with an unused test-account
-minute quota; the test deliberately consumes 11 render attempts and checks the
-11th gets 429, while `tools/list` and `list_options` still work. Output, full
+minute quota; the test deliberately consumes 6 render attempts and checks the
+6th gets 429, while `tools/list` and `list_options` still work. Output, full
 redacted HTTP/MCP transcripts, and sample exports are saved separately under
 `.amp/in/artifacts/mcp-rate-limit/{local,production}/`. Auth secrets and cookies
 are never written there. Local evidence is not production proof.

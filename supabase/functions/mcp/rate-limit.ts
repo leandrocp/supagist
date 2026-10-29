@@ -1,9 +1,9 @@
 export const RATE_LIMIT_MESSAGE = "Rate limit reached. Need more? Contact supagist@leandro.io";
 
 export const RATE_LIMITS = {
-  user: { minute: 30, day: 1000 },
-  render: { minute: 10, day: 100 },
-  ip: { minute: 60, day: 2000 },
+  user: { minute: 15, day: 500 },
+  render: { minute: 5, day: 50 },
+  ip: { minute: 30, day: 1000 },
   windows: { minute: 60, day: 86400 },
 } as const;
 

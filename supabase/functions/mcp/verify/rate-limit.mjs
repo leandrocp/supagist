@@ -107,7 +107,7 @@ try {
   const tools = await call("tools/list");
   success(tools);
   assert.ok(tools.data.result.tools.some((tool) => tool.name === "render_snippet"));
-  for (let i = 0; i < 10; i++) {
+  for (let i = 0; i < 5; i++) {
     const format = i === 1 ? "png" : "svg";
     const result = await call("tools/call", {
       name: "render_snippet",
@@ -143,7 +143,7 @@ try {
   success(await call("tools/list"));
   success(await call("tools/call", { name: "list_options", arguments: {} }));
   log(
-    "PASS: real signed-in initialize/list, small SVG + PNG at 1x, first 10 renders allowed, render 11 denied before validation, other tools still available.",
+    "PASS: real signed-in initialize/list, small SVG + PNG at 1x, first 5 renders allowed, render 6 denied before validation, other tools still available.",
   );
 } finally {
   await writeFile(`${directory}/transcript.json`, JSON.stringify(transcript, null, 2) + "\n");
