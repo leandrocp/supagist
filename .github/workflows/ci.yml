@@ -87,7 +87,7 @@ jobs:
           fi
 
   e2e-smoke:
-    name: E2E smoke
+    name: E2E production smoke + parser bundles
     runs-on: ubuntu-latest
     needs: [test]
     steps:
@@ -116,7 +116,7 @@ jobs:
               'NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY' "$PUBLISHABLE_KEY"
           } >> "$GITHUB_ENV"
       - run: npx playwright install --with-deps chromium
-      - run: npm run test:e2e
+      - run: npm run test:e2e:build
         env:
           PLAYWRIGHT_BASE_URL: http://localhost:3000
       - uses: actions/upload-artifact@v7

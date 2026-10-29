@@ -1,5 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 
+const production = process.env.PLAYWRIGHT_PRODUCTION === "1";
+
 export default defineConfig({
   testDir: "./e2e",
   fullyParallel: true,
@@ -36,9 +38,9 @@ export default defineConfig({
   ],
 
   webServer: {
-    command: "npm run dev",
+    command: production ? "npm start" : "npm run dev",
     url: "http://localhost:3000",
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: !process.env.CI && !production,
     timeout: 120_000,
   },
 });

@@ -1,5 +1,15 @@
 import { createHighlighter } from "@lumis-sh/lumis/client";
-import languages from "@lumis-sh/wasm-bundle-full";
+import web from "@lumis-sh/wasm-bundle-web";
+import system from "@lumis-sh/wasm-bundle-system";
+import backend from "@lumis-sh/wasm-bundle-backend";
+import xml from "@lumis-sh/wasm-xml";
+import yaml from "@lumis-sh/wasm-yaml";
+import markdown from "@lumis-sh/wasm-markdown";
+import markdownInline from "@lumis-sh/wasm-markdown_inline";
 
-// The bundle registers lazy loaders; only a requested language's parser is fetched.
-export const clientHighlighterPromise = createHighlighter({ languages: [languages] });
+// Bundles register lazy loaders. Extras carry their language handles, WASM URLs,
+// and matching package metadata together; no CDN manifest is needed. Plaintext
+// is built into Lumis and needs no parser.
+export const clientHighlighterPromise = createHighlighter({
+  languages: [web, system, backend, xml, yaml, markdown, markdownInline],
+});
