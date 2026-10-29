@@ -1,0 +1,4 @@
+Using CLI Edge Runtime image sha256:04332d354964b089d81eb872ce1604119a9cf62b54d3556338f3a46d81bfcc8e
+{"kind":"bench.bundle-assets","verified":10}
+30183890 /tmp/supagist-m0-eszip-final/mcp.eszip
+157685e4ffafe14ad72876ed1119ce62c749d3f8b488401c619711ef9ba4b252  /tmp/supagist-m0-eszip-final/mcp.eszip

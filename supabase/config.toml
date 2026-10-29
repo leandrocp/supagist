@@ -107,3 +107,10 @@ entrypoint = "./functions/cleanup/index.ts"
 # Specifies static files to be bundled with the function. Supports glob patterns.
 # For example, if you want to serve static HTML pages in your function:
 # static_files = [ "./functions/cleanup/*.html" ]
+
+# M0 spike only. Discovery is public; @supabase/server verifies user JWTs.
+[functions.mcp]
+enabled = true
+verify_jwt = false
+entrypoint = "./functions/mcp/index.ts"
+static_files = ["./functions/mcp/assets/*"]

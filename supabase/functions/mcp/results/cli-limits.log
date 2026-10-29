@@ -1,0 +1,94 @@
+2026-10-29T20:29:49.895763606Z serving the request with supabase/functions/mcp
+2026-10-29T20:29:50.953434451Z [Info] {"sequence":1,"event":"parser-fetch-requested","language":"javascript","url":"https://cdn.jsdelivr.net/npm/@lumis-sh/wasm-javascript@0.26.4/tree-sitter-javascript.wasm","version":"0.26.4","sha256":"08a820eb662cbdf14ffd71c66dee3169c3472feeb7b2e7c3a9ee156a06d337e5","atWallMs":312.366456}
+2026-10-29T20:29:50.953511214Z 
+2026-10-29T20:29:51.200788108Z [Info] {"event":"parser-preload-complete","language":"javascript","preloadWallMs":273.388538}
+2026-10-29T20:29:51.200830709Z 
+2026-10-29T20:29:51.248370029Z [Info] {"event":"render-complete","format":"svg","fixture":"plain","pixelRatio":1,"width":390,"height":120,"preloadWallMs":273.388538,"svgWallMs":47.21862199999998,"resvgInitWallMs":0,"rasterWallMs":0,"totalWallMs":320.924552}
+2026-10-29T20:29:51.248420416Z 
+2026-10-29T20:29:51.262348867Z serving the request with supabase/functions/mcp
+2026-10-29T20:29:51.751784107Z [Info] {"sequence":1,"event":"parser-fetch-requested","language":"javascript","url":"https://cdn.jsdelivr.net/npm/@lumis-sh/wasm-javascript@0.26.4/tree-sitter-javascript.wasm","version":"0.26.4","sha256":"08a820eb662cbdf14ffd71c66dee3169c3472feeb7b2e7c3a9ee156a06d337e5","atWallMs":268.982126}
+2026-10-29T20:29:51.751817983Z 
+2026-10-29T20:29:51.996293470Z [Info] {"event":"parser-preload-complete","language":"javascript","preloadWallMs":270.05410100000006}
+2026-10-29T20:29:51.996328226Z 
+2026-10-29T20:29:52.117234147Z [Info] {"event":"render-complete","format":"png","fixture":"plain","pixelRatio":1,"width":390,"height":120,"preloadWallMs":270.05410100000006,"svgWallMs":47.259342999999944,"resvgInitWallMs":6.500068000000056,"rasterWallMs":67.21711800000003,"totalWallMs":391.088207}
+2026-10-29T20:29:52.117295962Z 
+2026-10-29T20:29:52.128225072Z serving the request with supabase/functions/mcp
+2026-10-29T20:29:52.644823425Z [Info] {"sequence":1,"event":"parser-fetch-requested","language":"javascript","url":"https://cdn.jsdelivr.net/npm/@lumis-sh/wasm-javascript@0.26.4/tree-sitter-javascript.wasm","version":"0.26.4","sha256":"08a820eb662cbdf14ffd71c66dee3169c3472feeb7b2e7c3a9ee156a06d337e5","atWallMs":290.947696}
+2026-10-29T20:29:52.644883505Z 
+2026-10-29T20:29:52.877823831Z [Info] {"event":"parser-preload-complete","language":"javascript","preloadWallMs":258.50617}
+2026-10-29T20:29:52.877864222Z 
+2026-10-29T20:29:52.924582918Z [Info] {"event":"render-complete","format":"svg","fixture":"plain","pixelRatio":2,"width":780,"height":240,"preloadWallMs":258.50617,"svgWallMs":46.71931699999993,"resvgInitWallMs":0,"rasterWallMs":0,"totalWallMs":305.496359}
+2026-10-29T20:29:52.924619635Z 
+2026-10-29T20:29:52.936053506Z serving the request with supabase/functions/mcp
+2026-10-29T20:29:53.413873768Z [Info] {"sequence":1,"event":"parser-fetch-requested","language":"javascript","url":"https://cdn.jsdelivr.net/npm/@lumis-sh/wasm-javascript@0.26.4/tree-sitter-javascript.wasm","version":"0.26.4","sha256":"08a820eb662cbdf14ffd71c66dee3169c3472feeb7b2e7c3a9ee156a06d337e5","atWallMs":268.058949}
+2026-10-29T20:29:53.413914670Z 
+2026-10-29T20:29:53.661268468Z [Info] {"event":"parser-preload-complete","language":"javascript","preloadWallMs":271.643472}
+2026-10-29T20:29:53.661305337Z 
+2026-10-29T20:29:53.787644970Z [Info] {"event":"render-complete","format":"png","fixture":"plain","pixelRatio":2,"width":780,"height":240,"preloadWallMs":271.643472,"svgWallMs":47.59508600000004,"resvgInitWallMs":4.068162999999913,"rasterWallMs":74.71065700000008,"totalWallMs":398.08802000000003}
+2026-10-29T20:29:53.787697884Z 
+2026-10-29T20:29:53.800755458Z serving the request with supabase/functions/mcp
+2026-10-29T20:29:54.278774625Z [Info] {"sequence":1,"event":"parser-fetch-requested","language":"javascript","url":"https://cdn.jsdelivr.net/npm/@lumis-sh/wasm-javascript@0.26.4/tree-sitter-javascript.wasm","version":"0.26.4","sha256":"08a820eb662cbdf14ffd71c66dee3169c3472feeb7b2e7c3a9ee156a06d337e5","atWallMs":269.19596}
+2026-10-29T20:29:54.278806061Z 
+2026-10-29T20:29:54.516891981Z [Info] {"event":"parser-preload-complete","language":"javascript","preloadWallMs":262.14817400000004}
+2026-10-29T20:29:54.516929894Z 
+2026-10-29T20:29:54.569531633Z [Info] {"event":"render-complete","format":"svg","fixture":"vercel","pixelRatio":1,"width":628,"height":272,"preloadWallMs":262.14817400000004,"svgWallMs":52.149531999999965,"resvgInitWallMs":0,"rasterWallMs":0,"totalWallMs":314.598565}
+2026-10-29T20:29:54.569573188Z 
+2026-10-29T20:29:54.582292314Z serving the request with supabase/functions/mcp
+2026-10-29T20:29:55.074527971Z [Info] {"sequence":1,"event":"parser-fetch-requested","language":"javascript","url":"https://cdn.jsdelivr.net/npm/@lumis-sh/wasm-javascript@0.26.4/tree-sitter-javascript.wasm","version":"0.26.4","sha256":"08a820eb662cbdf14ffd71c66dee3169c3472feeb7b2e7c3a9ee156a06d337e5","atWallMs":280.656243}
+2026-10-29T20:29:55.074573287Z 
+2026-10-29T20:29:55.320574301Z [Info] {"event":"parser-preload-complete","language":"javascript","preloadWallMs":272.455681}
+2026-10-29T20:29:55.320611633Z 
+2026-10-29T20:29:55.681359588Z [Info] {"event":"render-complete","format":"png","fixture":"vercel","pixelRatio":1,"width":628,"height":272,"preloadWallMs":272.455681,"svgWallMs":48.23211099999992,"resvgInitWallMs":4.2911209999999755,"rasterWallMs":308.253682,"totalWallMs":633.29042}
+2026-10-29T20:29:55.681398789Z 
+2026-10-29T20:29:55.693618665Z serving the request with supabase/functions/mcp
+2026-10-29T20:29:56.184286376Z [Info] {"sequence":1,"event":"parser-fetch-requested","language":"javascript","url":"https://cdn.jsdelivr.net/npm/@lumis-sh/wasm-javascript@0.26.4/tree-sitter-javascript.wasm","version":"0.26.4","sha256":"08a820eb662cbdf14ffd71c66dee3169c3472feeb7b2e7c3a9ee156a06d337e5","atWallMs":272.179583}
+2026-10-29T20:29:56.184341859Z 
+2026-10-29T20:29:56.408843448Z [Info] {"event":"parser-preload-complete","language":"javascript","preloadWallMs":249.05583399999998}
+2026-10-29T20:29:56.408878628Z 
+2026-10-29T20:29:56.455565654Z [Info] {"event":"render-complete","format":"svg","fixture":"vercel","pixelRatio":2,"width":1256,"height":544,"preloadWallMs":249.05583399999998,"svgWallMs":46.424262,"resvgInitWallMs":0,"rasterWallMs":0,"totalWallMs":295.75931}
+2026-10-29T20:29:56.455603880Z 
+2026-10-29T20:29:56.467405097Z serving the request with supabase/functions/mcp
+2026-10-29T20:29:56.944267580Z [Info] {"sequence":1,"event":"parser-fetch-requested","language":"javascript","url":"https://cdn.jsdelivr.net/npm/@lumis-sh/wasm-javascript@0.26.4/tree-sitter-javascript.wasm","version":"0.26.4","sha256":"08a820eb662cbdf14ffd71c66dee3169c3472feeb7b2e7c3a9ee156a06d337e5","atWallMs":267.232797}
+2026-10-29T20:29:56.944308918Z 
+2026-10-29T20:29:57.174362673Z [Info] {"event":"parser-preload-complete","language":"javascript","preloadWallMs":256.023731}
+2026-10-29T20:29:57.174389952Z 
+2026-10-29T20:29:58.192461967Z [Info] {"event":"render-complete","format":"png","fixture":"vercel","pixelRatio":2,"width":1256,"height":544,"preloadWallMs":256.023731,"svgWallMs":48.55695900000006,"resvgInitWallMs":4.518066999999974,"rasterWallMs":964.885337,"totalWallMs":1274.041282}
+2026-10-29T20:29:58.192520963Z 
+2026-10-29T20:29:58.212588408Z serving the request with supabase/functions/mcp
+2026-10-29T20:29:58.694145948Z [Info] {"sequence":1,"event":"parser-fetch-requested","language":"javascript","url":"https://cdn.jsdelivr.net/npm/@lumis-sh/wasm-javascript@0.26.4/tree-sitter-javascript.wasm","version":"0.26.4","sha256":"08a820eb662cbdf14ffd71c66dee3169c3472feeb7b2e7c3a9ee156a06d337e5","atWallMs":273.146361}
+2026-10-29T20:29:58.694180157Z 
+2026-10-29T20:29:58.930212829Z [Info] {"event":"parser-preload-complete","language":"javascript","preloadWallMs":259.98478}
+2026-10-29T20:29:58.930260280Z 
+2026-10-29T20:29:59.011569989Z [Info] {"event":"render-complete","format":"svg","fixture":"avatars","pixelRatio":1,"width":883,"height":956,"preloadWallMs":259.98478,"svgWallMs":80.96121099999999,"resvgInitWallMs":0,"rasterWallMs":0,"totalWallMs":341.255296}
+2026-10-29T20:29:59.011611905Z 
+2026-10-29T20:29:59.024449710Z serving the request with supabase/functions/mcp
+2026-10-29T20:29:59.509034117Z [Info] {"sequence":1,"event":"parser-fetch-requested","language":"javascript","url":"https://cdn.jsdelivr.net/npm/@lumis-sh/wasm-javascript@0.26.4/tree-sitter-javascript.wasm","version":"0.26.4","sha256":"08a820eb662cbdf14ffd71c66dee3169c3472feeb7b2e7c3a9ee156a06d337e5","atWallMs":272.426901}
+2026-10-29T20:29:59.509068224Z 
+2026-10-29T20:29:59.743587488Z [Info] {"event":"parser-preload-complete","language":"javascript","preloadWallMs":258.45368499999995}
+2026-10-29T20:29:59.744147454Z 
+2026-10-29T20:30:01.601259213Z CPU time limit reached: isolate: 3f36e0bf-b2d7-4a45-b9e1-2e58cf5f7ae8
+2026-10-29T20:30:01.620154635Z runtime has escaped from the event loop unexpectedly: event loop error: Uncaught null
+2026-10-29T20:30:01.635902288Z TypeError: error reading a body from connection: unexpected EOF during chunk size line
+2026-10-29T20:30:01.635946906Z     at async Object.respondWith (ext:runtime/01_http.js:307:13)
+2026-10-29T20:30:01.635951690Z     at async Object.respondWith (ext:runtime/http.js:95:18)
+2026-10-29T20:30:01.635955009Z     at async mapped (ext:runtime/http.js:294:11)
+2026-10-29T20:30:01.636181476Z client connection error (hyper::Error(User(Body), hyper::Error(Body, hyper::Error(Body, Custom { kind: UnexpectedEof, error: "unexpected EOF during chunk size line" }))))
+2026-10-29T20:30:01.643672026Z serving the request with supabase/functions/mcp
+2026-10-29T20:30:02.118821392Z [Info] {"sequence":1,"event":"parser-fetch-requested","language":"javascript","url":"https://cdn.jsdelivr.net/npm/@lumis-sh/wasm-javascript@0.26.4/tree-sitter-javascript.wasm","version":"0.26.4","sha256":"08a820eb662cbdf14ffd71c66dee3169c3472feeb7b2e7c3a9ee156a06d337e5","atWallMs":277.984637}
+2026-10-29T20:30:02.118873002Z 
+2026-10-29T20:30:02.381037962Z [Info] {"event":"parser-preload-complete","language":"javascript","preloadWallMs":286.84746200000006}
+2026-10-29T20:30:02.381466565Z 
+2026-10-29T20:30:02.460535231Z [Info] {"event":"render-complete","format":"svg","fixture":"avatars","pixelRatio":2,"width":1766,"height":1912,"preloadWallMs":286.84746200000006,"svgWallMs":79.82986999999991,"resvgInitWallMs":0,"rasterWallMs":0,"totalWallMs":366.999363}
+2026-10-29T20:30:02.460600840Z 
+2026-10-29T20:30:02.478949246Z serving the request with supabase/functions/mcp
+2026-10-29T20:30:02.970277697Z [Info] {"sequence":1,"event":"parser-fetch-requested","language":"javascript","url":"https://cdn.jsdelivr.net/npm/@lumis-sh/wasm-javascript@0.26.4/tree-sitter-javascript.wasm","version":"0.26.4","sha256":"08a820eb662cbdf14ffd71c66dee3169c3472feeb7b2e7c3a9ee156a06d337e5","atWallMs":281.479207}
+2026-10-29T20:30:02.970311462Z 
+2026-10-29T20:30:03.196237805Z [Info] {"event":"parser-preload-complete","language":"javascript","preloadWallMs":253.43681400000003}
+2026-10-29T20:30:03.196291081Z 
+2026-10-29T20:30:05.065164216Z CPU time limit reached: isolate: 284dfb78-e649-4ae5-924d-80c8ce0f823c
+2026-10-29T20:30:05.077552514Z runtime has escaped from the event loop unexpectedly: event loop error: Uncaught null
+2026-10-29T20:30:05.089341903Z TypeError: error reading a body from connection: unexpected EOF during chunk size line
+2026-10-29T20:30:05.089375452Z     at async Object.respondWith (ext:runtime/01_http.js:307:13)
+2026-10-29T20:30:05.089379885Z     at async Object.respondWith (ext:runtime/http.js:95:18)
+2026-10-29T20:30:05.089383060Z     at async mapped (ext:runtime/http.js:294:11)
+2026-10-29T20:30:05.089406425Z client connection error (hyper::Error(User(Body), hyper::Error(Body, hyper::Error(Body, Custom { kind: UnexpectedEof, error: "unexpected EOF during chunk size line" }))))
