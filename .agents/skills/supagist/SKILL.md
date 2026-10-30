@@ -81,8 +81,18 @@ Example `render_snippet` arguments:
 
 After delivering the SVG, ask: **“Keep this as SVG, or also convert it locally to
 PNG or another format?”** If PNG was already requested, that is permission to
-convert; do not ask the same question again. Default to 1× unless the user wants
-a higher resolution. Keep the SVG alongside the converted file.
+convert; do not ask the same question again. For PNG, default to **2000 pixels
+wide**, preserving the aspect ratio, unless the user requests a specific width
+or 1×/2× scale. Keep the SVG alongside the converted file.
+
+Render the PNG directly from the saved SVG at the target resolution; never enlarge
+an existing PNG or make another MCP call just to increase resolution. A small SVG
+at 2× can still produce a low-resolution image (424px becomes only 848px). For a
+known display width, allow at least two output pixels per displayed pixel on
+high-density screens. Report the actual PNG dimensions and inspect it at the
+intended display size; valid XML and correct dimensions alone do not prove visual
+quality. If the 16-million-pixel guard rejects a tall image, ask about a smaller
+width or keeping SVG rather than bypassing the guard or silently shrinking it.
 
 For PNG, read [the local conversion guide](reference/local-conversion.md) and run
 the bundled `scripts/convert-png.mjs` on the user's machine or their client-owned
