@@ -42,8 +42,10 @@ export async function enforceRateLimits(
     userId === UNLIMITED_USER_ID
       ? []
       : [
-          { key: `mcp:user:${userId}`, limits: RATE_LIMITS.user },
           { key: `mcp:ip:${ip}`, limits: RATE_LIMITS.ip },
+          // Connection setup (initialize, notifications, lists, GET) is shared by
+          // every client on an account; charging it here starved first tool calls.
+          ...(toolCall ? [{ key: `mcp:user:${userId}`, limits: RATE_LIMITS.user }] : []),
           ...(toolCall && message.params?.name === "render_snippet"
             ? [{ key: `mcp:render:${userId}`, limits: RATE_LIMITS.render }]
             : []),

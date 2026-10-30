@@ -45,18 +45,21 @@ The function is live and intentionally stays live. Main pushes deploy it via
 Supabase's GitHub integration. The original spike conclusions below are retained
 as historical measurements, not instructions to remove the service.
 
-Every authenticated MCP HTTP request consumes user (15/minute, 500/day) and IP
-(30/minute, 1,000/day) quotas before the SDK dispatches anything. `render_snippet`
-also consumes a separate user quota (5/minute, 50/day). Constants live in
+Every authenticated MCP HTTP request consumes the IP quota (30/minute,
+1,000/day) before the SDK dispatches anything. Each `tools/call` also consumes the
+user quota (15/minute, 500/day); connection setup (initialize, notifications,
+lists, GET) does not, so many clients on one account cannot exhaust it before
+their first tool call. `render_snippet` also consumes a separate user quota
+(5/minute, 50/day). Constants live in
 `rate-limit.ts`. All checks call the existing `public.check_rate_limit` RPC using
 `ctx.supabaseAdmin`; no schema, function, or grant change is required.
 
 The sole exception is leandro@leandro.io, matched by its verified auth user ID
 in `rate-limit.ts`: that account bypasses all user, render, and IP quota checks
 and does not consume shared IP quota. Authentication, input validation, and
-batch rejection still apply. Everyone else's limits and accounting are unchanged.
-Connection setup counts toward non-owner quotas, which are shared across all
-connections for the same account, not reset when a new client connects.
+batch rejection still apply. Everyone else's limits are unchanged. User quotas
+are shared across all connections for the same account, not reset when a new
+client connects.
 
 Denied attempts also count. The RPC uses first-request-relative windows and
 returns only a boolean, so `Retry-After` conservatively reports the full denied

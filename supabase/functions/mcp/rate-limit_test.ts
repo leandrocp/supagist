@@ -125,24 +125,48 @@ Deno.test("first forwarded hop takes precedence, then Cloudflare, then real-IP, 
   }
 });
 
-Deno.test("initialize, list, notifications, malformed bodies, and GET all consume global quota", async () => {
-  for (const body of [
-    JSON.stringify({ jsonrpc: "2.0", id: 5, method: "initialize" }),
-    JSON.stringify({ jsonrpc: "2.0", id: 5, method: "tools/list" }),
-    JSON.stringify({ jsonrpc: "2.0", method: "notifications/initialized" }),
-    "not JSON",
-    undefined,
-  ]) {
+const setupBodies = [
+  JSON.stringify({ jsonrpc: "2.0", id: 5, method: "initialize" }),
+  JSON.stringify({ jsonrpc: "2.0", id: 5, method: "tools/list" }),
+  JSON.stringify({ jsonrpc: "2.0", method: "notifications/initialized" }),
+  "not JSON",
+  undefined,
+];
+const setupRequest = (body: string | undefined) =>
+  new Request("http://localhost/mcp", {
+    headers: { "x-forwarded-for": "192.0.2.1" },
+    ...(body ? { method: "POST", body } : {}),
+  });
+
+Deno.test("initialize, list, notifications, malformed bodies, and GET consume IP quota only", async () => {
+  for (const body of setupBodies) {
     const db = fakeRpc();
     db.seed("mcp:user:alice:m", 15);
-    const response = await enforceRateLimits(
-      new Request("http://localhost/mcp", body ? { method: "POST", body } : {}),
-      "alice",
-      db,
-    );
+    db.seed("mcp:user:alice:d", 500);
+    assert.equal(await enforceRateLimits(setupRequest(body), "alice", db), null);
+    db.seed("mcp:ip:192.0.2.1:m", 30);
+    const response = await enforceRateLimits(setupRequest(body), "alice", db);
     assert.equal(response?.status, 429);
     assert.equal((await response!.json()).error.message, message);
   }
+});
+
+Deno.test("many fresh connections on one account do not limit the first tool call", async () => {
+  const db = fakeRpc();
+  // Five clients connect from different egress IPs, each sending every setup message.
+  for (let client = 0; client < 5; client++)
+    for (const body of setupBodies)
+      assert.equal(
+        await enforceRateLimits(
+          new Request(setupRequest(body), { headers: { "x-forwarded-for": `192.0.2.${client}` } }),
+          "alice",
+          db,
+        ),
+        null,
+      );
+  // 25 setup requests exceed the 15/minute user cap if setup were charged to it.
+  for (let i = 0; i < 15; i++) assert.equal(await enforceRateLimits(request(), "alice", db), null);
+  await limited(await enforceRateLimits(request(), "alice", db), 60);
 });
 
 Deno.test("daily denial wins Retry-After when multiple windows are exhausted", async () => {
