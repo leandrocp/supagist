@@ -86,6 +86,60 @@ jobs:
             exit 1
           fi
 
+  mcp-deno:
+    name: MCP Deno tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: 2.9.0
+      # Includes the real-WASM renderer tests, which fetch pinned parsers.
+      - run: >-
+          deno test --config supabase/functions/mcp/deno.json
+          --allow-read --allow-net --allow-env
+          supabase/functions/mcp/input_test.ts
+          supabase/functions/mcp/rate-limit_test.ts
+          supabase/functions/mcp/spike/render.deno.ts
+
+  mcp-e2e:
+    name: MCP Edge Function e2e
+    runs-on: ubuntu-latest
+    needs: [mcp-deno]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - uses: supabase/setup-cli@v3
+        with:
+          version: 2.117.0
+      - name: Start local Supabase
+        run: supabase start
+      - name: Serve the MCP function
+        run: |
+          nohup supabase functions serve mcp > "$RUNNER_TEMP/functions.log" 2>&1 &
+          # Unauthenticated calls get 401 once the function answers.
+          for _ in $(seq 1 90); do
+            status="$(curl -s -o /dev/null -w '%{http_code}' -X POST \
+              http://127.0.0.1:54321/functions/v1/mcp || true)"
+            if [ "$status" = 401 ]; then exit 0; fi
+            sleep 2
+          done
+          cat "$RUNNER_TEMP/functions.log"
+          exit 1
+      # OAuth-protected HTTP, tool schema, catalog, skill examples, 16:9 and
+      # ligatures, each render as a disposable local user.
+      - run: node supabase/functions/mcp/verify/appearance.mjs
+      - name: Function logs
+        if: failure()
+        run: cat "$RUNNER_TEMP/functions.log"
+      - name: Stop Supabase
+        if: always()
+        run: supabase stop
+
   e2e-smoke:
     name: E2E production smoke + parser bundles
     runs-on: ubuntu-latest

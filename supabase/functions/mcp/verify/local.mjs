@@ -7,8 +7,12 @@ import { pathToFileURL } from "node:url";
 import { createClient } from "@supabase/supabase-js";
 
 export function localConfig() {
+  // CI installs the pinned CLI on PATH; local orbs pin it through mise.
+  const [command, ...prefix] = process.env.CI
+    ? ["supabase"]
+    : ["mise", "exec", "supabase", "--", "supabase"];
   const config = JSON.parse(
-    execFileSync("mise", ["exec", "supabase", "--", "supabase", "status", "-o", "json"], {
+    execFileSync(command, [...prefix, "status", "-o", "json"], {
       encoding: "utf8",
       stdio: ["ignore", "pipe", "pipe"],
     }),
