@@ -27,9 +27,12 @@ describe("Edge asset allowlist", () => {
     const embedded = new Set<string>();
     for (const [path, name] of Object.entries(fonts)) {
       const encoded = await loadFontBase64(path);
-      expect(Buffer.from(encoded, "base64")).toEqual(
-        readFileSync(new URL(`../assets/${name}`, import.meta.url)),
-      );
+      expect(
+        Buffer.from(encoded, "base64").equals(
+          readFileSync(new URL(`../assets/${name}`, import.meta.url)),
+        ),
+        name,
+      ).toBe(true);
       embedded.add(encoded);
       expect(await loadFontBase64(path)).toBe(encoded);
     }
@@ -142,9 +145,12 @@ describe("M0 generated renderer provenance", () => {
       ]);
     for (const name of ["tailwind-beams.png", "resend-dark.png"]) {
       expect(manifest[name].source).toBe(`public/brands/${name}`);
-      expect(readFileSync(new URL(name, assets))).toEqual(
-        readFileSync(new URL(`public/brands/${name}`, root)),
-      );
+      expect(
+        readFileSync(new URL(name, assets)).equals(
+          readFileSync(new URL(`public/brands/${name}`, root)),
+        ),
+        name,
+      ).toBe(true);
     }
     for (const [path, name] of Object.entries(fonts)) {
       expect([...readFileSync(new URL(name, assets)).subarray(0, 4)]).toEqual([0, 1, 0, 0]);
