@@ -8,6 +8,48 @@ test("home page loads and shows the supagist brand", async ({ page }) => {
   await expect(page.getByText("supagist").first()).toBeVisible();
 });
 
+test("agent skill callout stays discoverable and reachable across viewport sizes", async ({
+  page,
+}) => {
+  await page.goto("/");
+  const callout = page.getByRole("note", { name: "Supagist agent skill" });
+  const link = callout.getByRole("link", { name: /get the skill/i });
+  await expect(link).toHaveAttribute(
+    "href",
+    "https://github.com/leandrocp/supagist#supagist-agent-skill",
+  );
+  await expect(link).toHaveAttribute("target", "_blank");
+  for (const width of [375, 768, 1280]) {
+    await page.setViewportSize({ width, height: 812 });
+    await expect(callout).toBeInViewport();
+    await expect(link).toBeInViewport();
+    const box = (await link.boundingBox())!;
+    expect(box.height).toBeGreaterThanOrEqual(44);
+    expect(box.x).toBeGreaterThanOrEqual(0);
+    expect(box.x + box.width).toBeLessThanOrEqual(width);
+    await link.click({ trial: true });
+    const nav = (await page.getByTestId("app-nav").boundingBox())!;
+    const composer = (await page.getByTestId("composer-shell").boundingBox())!;
+    expect(Math.abs(composer.y - (nav.y + nav.height))).toBeLessThan(2);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
+      width,
+    );
+  }
+  await link.focus();
+  await expect(link).toBeFocused();
+  // Stub only the external destination; exercise the real link and new-tab behavior.
+  await page
+    .context()
+    .route("https://github.com/leandrocp/supagist**", (route) =>
+      route.fulfill({ contentType: "text/html", body: "Skill installation instructions" }),
+    );
+  const popupPromise = page.waitForEvent("popup");
+  await page.keyboard.press("Enter");
+  const popup = await popupPromise;
+  await expect(popup).toHaveURL("https://github.com/leandrocp/supagist#supagist-agent-skill");
+  await popup.close();
+});
+
 test("home page has a code editor area", async ({ page }) => {
   await page.goto("/");
   await expect(page.locator("textarea")).toBeVisible();
