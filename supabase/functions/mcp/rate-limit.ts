@@ -1,5 +1,8 @@
 export const RATE_LIMIT_MESSAGE = "Rate limit reached. Need more? Contact supagist@leandro.io";
 
+// Verified auth.users ID for leandro@leandro.io. Never match client-supplied identity.
+const UNLIMITED_USER_ID = "288417c7-4c03-4277-988f-24f3c2fc814b";
+
 export const RATE_LIMITS = {
   user: { minute: 15, day: 500 },
   render: { minute: 5, day: 50 },
@@ -35,13 +38,16 @@ export async function enforceRateLimits(
           .catch(() => null)
       : null;
   const toolCall = message?.method === "tools/call";
-  const buckets = [
-    { key: `mcp:user:${userId}`, limits: RATE_LIMITS.user },
-    { key: `mcp:ip:${ip}`, limits: RATE_LIMITS.ip },
-    ...(toolCall && message.params?.name === "render_snippet"
-      ? [{ key: `mcp:render:${userId}`, limits: RATE_LIMITS.render }]
-      : []),
-  ];
+  const buckets =
+    userId === UNLIMITED_USER_ID
+      ? []
+      : [
+          { key: `mcp:user:${userId}`, limits: RATE_LIMITS.user },
+          { key: `mcp:ip:${ip}`, limits: RATE_LIMITS.ip },
+          ...(toolCall && message.params?.name === "render_snippet"
+            ? [{ key: `mcp:render:${userId}`, limits: RATE_LIMITS.render }]
+            : []),
+        ];
 
   try {
     // Charge every applicable bucket, including denied attempts. Each RPC is
@@ -60,7 +66,7 @@ export async function enforceRateLimits(
         }),
       ),
     );
-    const retryAfter = Math.max(...checks);
+    const retryAfter = Math.max(0, ...checks);
     if (!retryAfter) {
       // The SDK's legacy transport accepts batches. Reject them explicitly so
       // one HTTP request cannot dispatch many renders for one quota charge.

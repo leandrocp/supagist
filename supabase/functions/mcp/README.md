@@ -51,6 +51,13 @@ also consumes a separate user quota (5/minute, 50/day). Constants live in
 `rate-limit.ts`. All checks call the existing `public.check_rate_limit` RPC using
 `ctx.supabaseAdmin`; no schema, function, or grant change is required.
 
+The sole exception is leandro@leandro.io, matched by its verified auth user ID
+in `rate-limit.ts`: that account bypasses all user, render, and IP quota checks
+and does not consume shared IP quota. Authentication, input validation, and
+batch rejection still apply. Everyone else's limits and accounting are unchanged.
+Connection setup counts toward non-owner quotas, which are shared across all
+connections for the same account, not reset when a new client connects.
+
 Denied attempts also count. The RPC uses first-request-relative windows and
 returns only a boolean, so `Retry-After` conservatively reports the full denied
 window: 60 seconds or 86,400 seconds (the longer when both fail). HTTP 429 tool

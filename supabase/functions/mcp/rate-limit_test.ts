@@ -2,6 +2,7 @@ import { strict as assert } from "node:assert";
 import { enforceRateLimits } from "./rate-limit.ts";
 
 const message = "Rate limit reached. Need more? Contact supagist@leandro.io";
+const ownerId = "288417c7-4c03-4277-988f-24f3c2fc814b";
 
 // Fake only the I/O boundary; model the existing RPC's first-use windows and
 // inclusive cap. No network, database, or renderer is needed for these tests.
@@ -169,6 +170,40 @@ Deno.test("allowed request body is preserved for MCP dispatch", async () => {
   assert.equal((await req.json()).params.name, "render_snippet");
 });
 
+Deno.test("owner bypasses exhausted user, render, and IP quotas without charging other users", async () => {
+  const db = fakeRpc();
+  for (const key of [`mcp:user:${ownerId}`, `mcp:render:${ownerId}`, "mcp:ip:192.0.2.1"])
+    for (const window of ["m", "d"]) db.seed(`${key}:${window}`, 1000);
+  for (const tool of ["list_options", "render_snippet"]) {
+    const req = request(tool);
+    assert.equal(await enforceRateLimits(req, ownerId, db), null);
+    assert.equal((await req.json()).params.name, tool);
+  }
+  await limited(await enforceRateLimits(request(), "alice", db), 86400);
+
+  const sharedIp = fakeRpc();
+  sharedIp.seed("mcp:ip:192.0.2.1:m", 29);
+  assert.equal(await enforceRateLimits(request(), ownerId, sharedIp), null);
+  assert.equal(await enforceRateLimits(request(), "alice", sharedIp), null);
+  await limited(await enforceRateLimits(request(), "bob", sharedIp), 60);
+});
+
+Deno.test("owner connection setup cannot limit its first tool call; fresh non-owner works under quota", async () => {
+  const db = fakeRpc();
+  // Several clients initialize under the same account before their first tool call.
+  for (let i = 0; i < 6; i++) {
+    for (const method of ["initialize", "notifications/initialized", "tools/list"]) {
+      const req = new Request("http://localhost/mcp", {
+        method: "POST",
+        body: JSON.stringify({ jsonrpc: "2.0", method }),
+      });
+      assert.equal(await enforceRateLimits(req, ownerId, db), null);
+    }
+  }
+  assert.equal(await enforceRateLimits(request(), ownerId, db), null);
+  assert.equal(await enforceRateLimits(request(), "alice", db), null);
+});
+
 Deno.test("legacy batches cannot bypass per-render quotas", async () => {
   const req = new Request("http://localhost/mcp", {
     method: "POST",
@@ -184,4 +219,7 @@ Deno.test("legacy batches cannot bypass per-render quotas", async () => {
   const response = await enforceRateLimits(req, "alice", fakeRpc());
   assert.equal(response?.status, 400);
   assert.equal((await response!.json()).error.code, -32600);
+  const ownerResponse = await enforceRateLimits(req, ownerId, fakeRpc());
+  assert.equal(ownerResponse?.status, 400);
+  assert.equal((await ownerResponse!.json()).error.code, -32600);
 });
