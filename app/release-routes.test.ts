@@ -2,6 +2,12 @@ import { existsSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 describe("release route surface", () => {
+  it("does not publish a provider-specific connection URL in the public agent skill", () => {
+    const skill = readFileSync(".agents/skills/supagist/SKILL.md", "utf8");
+    expect(skill).not.toContain(".supabase.co");
+    expect(skill).not.toContain("/functions/v1/mcp");
+  });
+
   it("does not ship the Supabase starter protected tutorial", () => {
     expect(existsSync("app/protected")).toBe(false);
     expect(existsSync("components/tutorial")).toBe(false);
