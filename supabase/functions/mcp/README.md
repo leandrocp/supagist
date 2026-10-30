@@ -26,26 +26,31 @@ primary control. OAuth discovery, preflight, and rejected authentication never
 dispatch tools and do not consume signed-in quotas. Legacy JSON-RPC batches are
 rejected with 400 to prevent many renders bypassing the per-tool quota.
 
-### Connect now: bearer token, not automatic OAuth
+### Connect with OAuth
 
-Production Auth discovery returned `404 feature_disabled: OAuth server is disabled`
-on 2026-10-29. URL-only MCP OAuth sign-in does **not** work yet. No OAuth settings
-were changed. Use a short-lived access token from an existing, signed-in,
-non-anonymous Supagist test account, not an anon/publishable/service-role key.
-Keep it out of chat, command history, and tracked config. In a private shell:
+Add the endpoint as a remote **Streamable HTTP** MCP server. The server supports
+JSON and SSE response bodies; this is not the legacy SSE transport. For Claude Code:
 
 ```bash
-read -rsp 'Existing Supagist access token: ' MCP_TEST_ACCESS_TOKEN; echo
-export MCP_TEST_ACCESS_TOKEN
 claude mcp add --transport http --scope local supagist \
-  https://zivpihasridowvzrgiix.supabase.co/functions/v1/mcp \
-  --header "Authorization: Bearer $MCP_TEST_ACCESS_TOKEN"
+  https://zivpihasridowvzrgiix.supabase.co/functions/v1/mcp
 ```
 
-Open `/mcp` in Claude Code and connect, then ask for a small SVG or PNG at
-`pixelRatio: 1`. This stores a token in local Claude configuration; remove or
-replace that header when the token expires. It does not enable refresh/OAuth.
-Bearer curl alternative (the endpoint is stateless):
+Open `/mcp`, authenticate with an existing Supagist account, and review the client,
+return address, and scopes at `https://supagist.app/oauth/consent` before approving.
+For another remote MCP client, add the same URL and choose OAuth authentication.
+Remove any old static Authorization header to allow OAuth discovery.
+
+Hosted Auth must have `oauth_server_enabled` and
+`oauth_server_allow_dynamic_registration` enabled, with
+`oauth_server_authorization_path` set to `/oauth/consent`. The Site URL stays
+`https://supagist.app`. These are Management API settings, not a database migration.
+The issuer is `https://zivpihasridowvzrgiix.supabase.co/auth/v1`; metadata lives at
+`https://zivpihasridowvzrgiix.supabase.co/.well-known/oauth-authorization-server/auth/v1`.
+
+For a bearer curl alternative, privately set `MCP_TEST_ACCESS_TOKEN` to an existing
+signed-in account's short-lived access token, not an anon/publishable/service-role
+key. Keep it out of chat, command history, and tracked config. The endpoint is stateless:
 
 ```bash
 curl -i https://zivpihasridowvzrgiix.supabase.co/functions/v1/mcp \
