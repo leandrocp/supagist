@@ -128,6 +128,18 @@ export const renderInput = z
       .optional(),
     showReactions: z.boolean().optional(),
     showComments: z.boolean().optional(),
+    aspectRatio: z
+      .enum(["16:9"])
+      .optional()
+      .describe(
+        "16:9 centers the card on a 1600x900 canvas (times pixelRatio) filled by the background. Omit to size the image to the card.",
+      ),
+    ligatures: z
+      .boolean()
+      .optional()
+      .describe(
+        "false draws operator sequences such as |> -> != as separate characters. Omit to keep the font's ligatures.",
+      ),
     format: z.literal("svg").default("svg"),
     pixelRatio: z
       .union([z.literal(1), z.literal(2)])

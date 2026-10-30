@@ -223,3 +223,121 @@ Deno.test("wordDiff highlights only the changed words of paired diff lines, and 
 
   assert.equal(appearanceOptions.wordDiff.default, false);
 });
+
+const elixir = [
+  "defmodule Lumis.Demo do",
+  "  def highlight(source, opts \\\\ []) do",
+  "    source",
+  "    |> Lumis.highlight(opts)",
+  "    |> case do",
+  "      {:ok, html} -> html",
+  '      {:error, reason} -> raise "failed: #{reason}"',
+  "    end",
+  "  end",
+].join("\n");
+const numbers = (text: string) => text.split(" ").map(Number);
+const cardRect = (svg: string) =>
+  numbers(
+    /<rect x="([\d.]+)" y="([\d.]+)" width="([\d.]+)" height="([\d.]+)" rx=/
+      .exec(svg)!
+      .slice(1)
+      .join(" "),
+  );
+const viewBox = (svg: string) => numbers(/<svg\b[^>]* viewBox="([^"]+)"/.exec(svg)![1]);
+
+Deno.test("16:9 centers the unchanged card on a background-filled 1600x900 canvas", async () => {
+  const base = {
+    code: elixir,
+    language: "elixir",
+    filename: "demo.ex",
+    theme: "catppuccin_mocha",
+    background: "Dusk",
+    fontId: "jetbrains",
+    windowDecoration: "macos",
+  } as const;
+  assert.deepEqual(appearanceOptions.aspectRatios, ["16:9"]);
+  assert.deepEqual(appearanceOptions.ligatures, [true, false]);
+  const card = await renderSnippet(base);
+  assert.ok(card.svg.includes(`viewBox="0 0 ${card.width} ${card.height}"`));
+  const [, , cardWidth, cardHeight] = cardRect(card.svg);
+  for (const pixelRatio of [1, 2] as const) {
+    const wide = await renderSnippet({ ...base, aspectRatio: "16:9", pixelRatio });
+    assert.deepEqual([wide.width, wide.height], [1600 * pixelRatio, 900 * pixelRatio]);
+    assert.ok(wide.svg.includes(`width="${wide.width}" height="${wide.height}" viewBox=`));
+    const [left, top, width, height] = viewBox(wide.svg);
+    assert.ok(Math.abs(width / height - 16 / 9) < 1e-9);
+    const [x, y, w, h] = cardRect(wide.svg);
+    assert.deepEqual([w, h], [cardWidth, cardHeight]);
+    assert.ok(Math.abs(x + w / 2 - (left + width / 2)) < 1e-6, "card is horizontally centered");
+    assert.ok(Math.abs(y + h / 2 - (top + height / 2)) < 1e-6, "card is vertically centered");
+    // The card is taller than 16:9, so the default 64px padding is the vertical margin.
+    assert.equal(y - top, 64);
+    const [, bgWidth, bgHeight] = /<rect width="([\d.]+)" height="([\d.]+)" fill="url\(#outerBg\)"/
+      .exec(wide.svg)!
+      .map(Number);
+    assert.ok(left >= 0 && top >= 0 && left + width <= bgWidth && top + height <= bgHeight);
+  }
+
+  const branded = await renderSnippet({ code: elixir, brand: "supabase", aspectRatio: "16:9" });
+  const [left, top, width, height] = viewBox(branded.svg);
+  assert.ok(
+    branded.svg.includes(
+      `data-scene-layer="canvas-rim" x="${left + 0.5}" y="${top + 0.5}" width="${width - 1}" height="${height - 1}"`,
+    ),
+  );
+  const bare = await renderSnippet({ ...base, background: null, aspectRatio: "16:9" });
+  assert.deepEqual([bare.width, bare.height], [1600, 900]);
+  assert.doesNotMatch(bare.svg, /outerBg/);
+});
+
+Deno.test("ligatures false draws each operator character in its own text chunk at its column", async () => {
+  const punctuation = "!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~";
+  const decode = (text: string) =>
+    text
+      .replaceAll("&lt;", "<")
+      .replaceAll("&gt;", ">")
+      .replaceAll("&quot;", '"')
+      .replaceAll("&apos;", "'")
+      .replaceAll("&amp;", "&");
+  const texts = (svg: string) =>
+    [...svg.matchAll(/<text\b[^>]*>(.*?)<\/text>/g)].map((match) =>
+      decode(match[1].replace(/<[^>]+>/g, "")),
+    );
+  // Advances measured from the bundled TTFs' hmtx tables (units per em 1000 and 2048).
+  for (const [fontId, advanceEm] of [
+    ["jetbrains", 600 / 1000],
+    ["hack", 1233 / 2048],
+  ] as const) {
+    const input = { code: elixir, language: "elixir", fontId, fontSize: 18 } as const;
+    const ligated = await renderSnippet(input);
+    const separate = await renderSnippet({ ...input, ligatures: false });
+    assert.match(ligated.svg, />\|&gt;<\/tspan>/);
+    assert.match(separate.svg, />\|<\/tspan><tspan fill="[^"]+" x="[\d.]+">&gt;<\/tspan>/);
+    assert.deepEqual([separate.width, separate.height], [ligated.width, ligated.height]);
+    assert.deepEqual(texts(separate.svg), texts(ligated.svg));
+    let lines = 0;
+    for (const [, x, body] of separate.svg.matchAll(
+      /<text x="([\d.]+)"[^>]*xml:space="preserve"[^>]*>(.*?)<\/text>/g,
+    )) {
+      let column = 0;
+      let previous = "";
+      for (const [, attrs, content] of body.matchAll(/<tspan([^>]*)>([^<]*)<\/tspan>/g)) {
+        const position = / x="([\d.]+)"/.exec(attrs);
+        if (position) {
+          assert.ok(Math.abs(Number(position[1]) - (Number(x) + column * 18 * advanceEm)) < 0.001);
+          previous = "";
+        }
+        for (const char of decode(content)) {
+          assert.ok(
+            !(punctuation.includes(previous) && previous && punctuation.includes(char)),
+            `${previous}${char} shares a text chunk`,
+          );
+          previous = char;
+          column++;
+        }
+      }
+      lines++;
+    }
+    assert.ok(lines >= 9);
+  }
+});

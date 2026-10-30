@@ -72,9 +72,22 @@ with its defaults; omitted flags do not reset the rest of a preset.
 | `reactions`                     | Line-keyed arrays of `{emoji, reactors: [{username}]}`; at most 5 chips/line, 10 reactors/chip, label 1–16 characters |
 | `comments`                      | Line-keyed `{body, author?}`; one rendered comment per source line, body 1–2000 characters                            |
 | `showReactions`, `showComments` | Booleans; default true when corresponding annotation data is supplied; false hides it                                 |
+| `aspectRatio`                   | Omit to fit the image to the card; `"16:9"` centers the card on a 1600×900 canvas filled by the background            |
+| `ligatures`                     | Omit or `true` keeps font ligatures; `false` draws operator sequences such as `\|>` and `->` as separate characters   |
 | `format`                        | Only `svg`                                                                                                            |
 | `pixelRatio`                    | Keep 1; legacy 2 is accepted but is not the local PNG scale setting                                                   |
 | `fixture`                       | Omit or `plain`; `vercel`/`avatars` are legacy benchmarks, incompatible with `brand`                                  |
+
+`aspectRatio: "16:9"` keeps the card's layout, frames it 16:9 and scales that
+frame to 1600×900 (3200×1800 with legacy `pixelRatio: 2`). `outerPadding` is
+the margin on the tighter axis. With `background: null` the card touches that
+axis and the rest of the canvas is transparent. Convert at that exact size with the converter's `1` scale or
+`--width 1600`; the 2000px default keeps 16:9 at 2000×1125.
+
+`ligatures: false` positions each punctuation character that follows another
+punctuation character at its own monospace column, so every renderer, including
+the resvg converter, shows `|>`, `->`, `!=` or `#{` as the typed characters.
+Letter ligatures such as Fira Code's `www` are unchanged.
 
 Header fields: `enabled`, `showFilename`, `showLanguage` (booleans),
 `filenamePosition`, `languagePosition` (`left`, `center`, `right`). Disabling

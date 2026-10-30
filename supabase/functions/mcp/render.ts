@@ -6,6 +6,7 @@ import {
   EXPORT_OUTER_PADDING_VALUES,
   EXPORT_INNER_PADDING_VALUES,
   EXPORT_CORNER_RADIUS_VALUES,
+  EXPORT_OUTER_PADDING,
   wrapTokenLine,
   wrapCommentText,
 } from "./spike/generated/export-utils.js";
@@ -60,9 +61,11 @@ export const appearanceOptions = {
     description:
       "Highlight only the changed words inside paired -/+ lines, like Lumis --word-diff.",
   },
+  aspectRatios: ["16:9"],
+  ligatures: [true, false],
   limits: { codePoints: 8000, visualRows: 30, wrapColumns: 110 },
   notes:
-    "brand selects a complete preset; explicit fields override it. background is only a canvas. system font uses portable JetBrains Mono. PNG conversion and 2x/4x/6x scale are local, not MCP. Reactions/comments are supplied render data, not published collaboration.",
+    "brand selects a complete preset; explicit fields override it. background is only a canvas. system font uses portable JetBrains Mono. PNG conversion and 2x/4x/6x scale are local, not MCP. Reactions/comments are supplied render data, not published collaboration. aspectRatio 16:9 outputs a 1600x900 canvas with the card centered; outerPadding is the minimum margin. ligatures false splits operator ligatures such as |> into separate characters.",
 };
 export type RenderResult = {
   svg: string;
@@ -79,6 +82,74 @@ export type RenderResult = {
   };
   parserEvents: ParserEvent[];
 };
+
+// The X/social card size Leandro posts at; the SVG scales the 16:9 frame to it.
+const CANVAS_16_9 = { width: 1600, height: 900 };
+// Advance widths (em) from each bundled TTF's hmtx table. Every glyph in these
+// monospace fonts shares one advance, so column × advance is the natural pen position.
+const FONT_ADVANCE_EM: Record<string, number> = {
+  jetbrains: 600 / 1000,
+  fira: 1200 / 2000,
+  geist: 600 / 1000,
+  hack: 1233 / 2048,
+};
+const ASCII_PUNCTUATION = "!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~";
+const XML_ENTITIES: Record<string, string> = {
+  "&amp;": "&",
+  "&lt;": "<",
+  "&gt;": ">",
+  "&quot;": '"',
+  "&apos;": "'",
+};
+
+function svgSize(svg: string): [number, number] {
+  const dimensions = /<svg\b[^>]* width="([\d.]+)" height="([\d.]+)"/.exec(svg);
+  if (!dimensions) throw new Error("App renderer did not emit SVG dimensions");
+  return [Number(dimensions[1]), Number(dimensions[2])];
+}
+
+/**
+ * Font ligatures (JetBrains Mono's `|>` → ▷, Fira's `->` → →) are contextual
+ * substitutions that renderers apply within one SVG text chunk. resvg ignores
+ * font-variant-ligatures, font-feature-settings and zero-width joiners, but an
+ * absolute x always starts a new chunk. Give each punctuation character that
+ * follows another punctuation character its own chunk at its monospace column.
+ */
+function separateLigatures(svg: string, fontSize: number, advanceEm: number): string {
+  const advance = fontSize * advanceEm;
+  return svg.replace(
+    /<text x="([\d.]+)"([^>]*xml:space="preserve"[^>]*)>(.*?)<\/text>/g,
+    (_text, x: string, attrs: string, body: string) => {
+      let column = 0;
+      let previous = "";
+      const spans = body.replace(
+        /<tspan([^>]*)>([^<]*)<\/tspan>/g,
+        (_span, spanAttrs: string, content: string) => {
+          const pieces: { text: string; position: string }[] = [];
+          for (const [unit] of content.matchAll(/&[a-z]+;|[^&]/gu)) {
+            const char = XML_ENTITIES[unit] ?? unit;
+            const split =
+              previous !== "" &&
+              ASCII_PUNCTUATION.includes(previous) &&
+              ASCII_PUNCTUATION.includes(char);
+            if (split || pieces.length === 0) {
+              const left = Number((Number(x) + column * advance).toFixed(3));
+              pieces.push({ text: "", position: split ? ` x="${left}"` : "" });
+            }
+            pieces[pieces.length - 1].text += unit;
+            previous = char;
+            column++;
+          }
+          if (pieces.length === 0) return _span;
+          return pieces
+            .map(({ text, position }) => `<tspan${spanAttrs}${position}>${text}</tspan>`)
+            .join("");
+        },
+      );
+      return `<text x="${x}"${attrs}>${spans}</text>`;
+    },
+  );
+}
 
 /** Timings are elapsed wall time, never CPU time. No user image URLs. */
 export async function renderSnippet(rawInput: RenderInput): Promise<RenderResult> {
@@ -149,34 +220,65 @@ export async function renderSnippet(rawInput: RenderInput): Promise<RenderResult
         30: [{ emoji: "+1", reactors: [{ username: "Ada", avatarUrl: "m0:avatar-1" }] }],
       }
     : undefined;
-  let svg = await createHighlightedSvg(
-    input.code,
-    input.filename,
-    theme,
-    1200,
-    undefined,
-    background,
-    input.outerPadding ?? settings?.outerPadding,
-    input.lineNumbers ?? settings?.lineNumbers ?? true,
-    fontId === "system" ? "jetbrains" : fontId,
-    language,
-    input.reactions ?? reactions,
-    input.showReactions ?? (Boolean(input.reactions) || avatars),
-    true,
-    avatars,
-    input.author ?? (avatars ? "Ada" : undefined),
-    avatars ? "m0:avatar-1" : undefined,
-    input.comments,
-    showComments,
-    undefined,
-    input.windowDecoration ?? settings?.windowDecoration ?? "macos",
-    input.cornerRadius ?? settings?.cornerRadius,
-    input.innerPadding ?? settings?.innerPadding ?? 16,
-    header,
-    footer,
-    input.fontSize ?? 14,
-    input.wordDiff ?? false,
-  );
+  const fontSize = input.fontSize ?? 14;
+  const draw = (outerPadding: number) =>
+    createHighlightedSvg(
+      input.code,
+      input.filename,
+      theme,
+      1200,
+      undefined,
+      background,
+      outerPadding,
+      input.lineNumbers ?? settings?.lineNumbers ?? true,
+      fontId === "system" ? "jetbrains" : fontId,
+      language,
+      input.reactions ?? reactions,
+      input.showReactions ?? (Boolean(input.reactions) || avatars),
+      true,
+      avatars,
+      input.author ?? (avatars ? "Ada" : undefined),
+      avatars ? "m0:avatar-1" : undefined,
+      input.comments,
+      showComments,
+      undefined,
+      input.windowDecoration ?? settings?.windowDecoration ?? "macos",
+      input.cornerRadius ?? settings?.cornerRadius,
+      input.innerPadding ?? settings?.innerPadding ?? 16,
+      header,
+      footer,
+      fontSize,
+      input.wordDiff ?? false,
+    );
+  const margin = background
+    ? (input.outerPadding ?? settings?.outerPadding ?? EXPORT_OUTER_PADDING)
+    : 0;
+  let svg = await draw(margin);
+  let frame: { left: number; top: number; width: number; height: number } | undefined;
+  if (input.aspectRatio === "16:9") {
+    // The app pads the card equally on all sides. Pad by the larger 16:9 slack so
+    // the background covers the frame, then crop the other axis with the viewBox.
+    const [drawnWidth, drawnHeight] = svgSize(svg);
+    const cardWidth = drawnWidth - 2 * margin;
+    const cardHeight = drawnHeight - 2 * margin;
+    const width = Math.max(drawnWidth, (drawnHeight * 16) / 9);
+    const height = (width * 9) / 16;
+    const padding = background
+      ? Math.ceil(Math.max(width - cardWidth, height - cardHeight) / 2)
+      : 0;
+    if (padding !== margin) svg = await draw(padding);
+    frame = {
+      left: padding - (width - cardWidth) / 2,
+      top: padding - (height - cardHeight) / 2,
+      width,
+      height,
+    };
+    // Brand scenes outline the whole canvas; move that rim to the cropped frame.
+    svg = svg.replace(
+      /data-scene-layer="canvas-rim" x="0\.5" y="0\.5" width="[\d.]+" height="[\d.]+"/,
+      `data-scene-layer="canvas-rim" x="${frame.left + 0.5}" y="${frame.top + 0.5}" width="${width - 1}" height="${height - 1}"`,
+    );
+  }
   // App font subsets rely on browser fallback for the comment arrow. Supply a
   // portable fallback too, so native conversion never turns it into a missing glyph.
   if (showComments && input.comments && fontId !== "hack") {
@@ -193,17 +295,26 @@ export async function renderSnippet(rawInput: RenderInput): Promise<RenderResult
       `font-family="&quot;${family}&quot;,&quot;Hack&quot;,ui-monospace`,
     );
   }
-  const dimensions = /<svg\b[^>]* width="([\d.]+)" height="([\d.]+)"/.exec(svg);
-  if (!dimensions) throw new Error("App renderer did not emit SVG dimensions");
-  const logicalWidth = Number(dimensions[1]);
-  const logicalHeight = Number(dimensions[2]);
+  if (input.ligatures === false) {
+    svg = separateLigatures(
+      svg,
+      fontSize,
+      FONT_ADVANCE_EM[fontId === "system" ? "jetbrains" : fontId],
+    );
+  }
+  const [drawnWidth, drawnHeight] = svgSize(svg);
+  const logicalWidth = frame ? CANVAS_16_9.width : drawnWidth;
+  const logicalHeight = frame ? CANVAS_16_9.height : drawnHeight;
   const width = Math.round(logicalWidth * input.pixelRatio);
   const height = Math.round(logicalHeight * input.pixelRatio);
   const svgEnd = performance.now();
   // Scale the viewport, not the viewBox; rasterization belongs to the client.
+  const viewBox = frame
+    ? `${frame.left} ${frame.top} ${frame.width} ${frame.height}`
+    : `0 0 ${drawnWidth} ${drawnHeight}`;
   svg = svg.replace(
-    `width="${logicalWidth}" height="${logicalHeight}"`,
-    `width="${width}" height="${height}"`,
+    `width="${drawnWidth}" height="${drawnHeight}" viewBox="0 0 ${drawnWidth} ${drawnHeight}"`,
+    `width="${width}" height="${height}" viewBox="${viewBox}"`,
   );
   const bytes = new TextEncoder().encode(svg);
   const timings = {

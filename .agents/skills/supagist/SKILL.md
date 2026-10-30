@@ -61,7 +61,9 @@ an alternate URL or asking the user to supply a deployment address.
 - Expose the advanced controls when relevant: `fontId`, `fontSize`, `background`,
   `outerPadding`, `innerPadding`, `cornerRadius`, `windowDecoration`, `lineNumbers`,
   `wordDiff` (diff input), partial `header`/`footer` settings and alignment, `author`, `reactions`,
-  `comments`, `showReactions`, `showComments`. See the guide for every field and
+  `comments`, `showReactions`, `showComments`, `aspectRatio: "16:9"` (1600×900
+  canvas for social posts) and `ligatures: false` (`|>` stays two characters).
+  See the guide for every field and
   examples. Do not force the user through a questionnaire when they specified a
   brand: apply its defaults and only requested overrides.
 - Input is limited to 8,000 Unicode code points and **30 visual rows**, including

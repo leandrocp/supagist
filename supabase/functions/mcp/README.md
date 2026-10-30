@@ -18,6 +18,9 @@ For Supabase style, send `brand: "supabase"`, **not** `theme: "supabase-dark"`.
 spacing, corners, window decorations and metadata defaults. Explicit fields
 override the selected preset; partial header/footer settings merge with it.
 `render_snippet` also accepts supplied reaction/comment data and author labels.
+`aspectRatio: "16:9"` centers the card on a 1600×900 background canvas, and
+`ligatures: false` splits operator ligatures such as `|>` into absolutely
+positioned characters (resvg ignores `font-variant-ligatures`). Both default off.
 See the skill's [complete parameter guide](../../../.agents/skills/supagist/reference/features.md).
 
 Named fonts and brand pattern images are embedded. `system` uses JetBrains Mono
