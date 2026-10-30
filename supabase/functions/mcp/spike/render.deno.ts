@@ -7,7 +7,7 @@ import { loadImageDataUrl } from "./assets.ts";
 // Deno runs. This affects only this test worker, not the public renderer.
 Reflect.deleteProperty(globalThis, "caches");
 
-Deno.test("public renderer: all fixtures, SVG/PNG, 1x/2x, real highlighting and assets", async () => {
+Deno.test("public renderer: all fixtures, SVG only, 1x/2x, real highlighting and assets", async () => {
   for (const fixture of ["plain", "vercel", "avatars"] as const) {
     let previousWidth = 0;
     let previousHeight = 0;
@@ -15,7 +15,7 @@ Deno.test("public renderer: all fixtures, SVG/PNG, 1x/2x, real highlighting and 
       const svg = await renderSnippet(renderFixture(fixture, "svg", pixelRatio));
       const text = new TextDecoder().decode(svg.bytes);
       assert.equal(svg.svg, text);
-      assert.equal(svg.png, undefined);
+      assert.equal(svg.contentType, "image/svg+xml");
       assert.match(text, /data:font\/ttf;base64,/);
       assert.match(text, /format\('truetype'\)/);
       assert.match(text, /<tspan fill="#[\da-f]+">export<\/tspan>/i);
@@ -29,14 +29,7 @@ Deno.test("public renderer: all fixtures, SVG/PNG, 1x/2x, real highlighting and 
         assert.match(text, /value30/);
         assert.match(text, /fill="url\(#avatar-/);
       }
-      const png = await renderSnippet(renderFixture(fixture, "png", pixelRatio));
-      assert.equal(png.png, png.bytes);
-      assert.deepEqual([...png.bytes.subarray(0, 8)], [137, 80, 78, 71, 13, 10, 26, 10]);
-      const view = new DataView(png.bytes.buffer, png.bytes.byteOffset);
-      assert.equal(view.getUint32(16), svg.width);
-      assert.equal(view.getUint32(20), svg.height);
-      assert.equal(png.width, svg.width);
-      assert.ok(png.bytes.length > 2000);
+      assert.ok(text.includes(`width="${svg.width}" height="${svg.height}"`));
       if (pixelRatio === 2) {
         assert.equal(svg.width, previousWidth * 2);
         assert.equal(svg.height, previousHeight * 2);
@@ -54,6 +47,10 @@ Deno.test("invalid parsers/themes/ratios and remote avatars fail rather than sil
   await assert.rejects(() => renderSnippet({ ...input, language: "m0-missing-parser" }));
   await assert.rejects(() => renderSnippet({ ...input, theme: "m0-missing-theme" }));
   await assert.rejects(() => renderSnippet({ ...input, pixelRatio: 3 as 1 }), /pixelRatio/);
+  await assert.rejects(
+    () => renderSnippet({ ...input, format: "png" as "svg" }),
+    /Only SVG is supported/,
+  );
   await assert.rejects(() => loadImageDataUrl("https://example.com/avatar.png"), /refuses remote/);
 });
 

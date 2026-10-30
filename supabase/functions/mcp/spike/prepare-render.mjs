@@ -113,16 +113,6 @@ const downloads = [
     "https://raw.githubusercontent.com/JetBrains/JetBrainsMono/v2.304/OFL.txt",
     "30f0c136e3c88e422d0791acd97238870f9054a9729bc34cf2ff0d4ed8cac4ad",
   ],
-  [
-    "resvg.wasm",
-    "https://unpkg.com/@resvg/resvg-wasm@2.6.2/index_bg.wasm",
-    "22bf6e9f9a100d972da0411a69c5ba504367fc1fa87b3b64e3f35e53926d2d70",
-  ],
-  [
-    "resvg-LICENSE.txt",
-    "https://raw.githubusercontent.com/thx/resvg-js/v2.6.2/LICENSE",
-    "4b89d4518bd135ab4ee154a7bce722246b57a98c3d7efc1a09409898160c2bd1",
-  ],
 ];
 const assetManifest = {};
 for (const [name, url, sha256] of downloads) {

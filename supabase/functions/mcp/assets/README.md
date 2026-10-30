@@ -4,9 +4,6 @@ Generated/reproduced by `../spike/prepare-render.mjs`. `manifest.json` records
 exact source URLs, SHA-256 digests and byte sizes. Downloads are checked before
 being written; existing assets are verified and reused offline.
 
-- `resvg.wasm`: unchanged `@resvg/resvg-wasm@2.6.2/index_bg.wasm`, MPL-2.0.
-  Full license in `resvg-LICENSE.txt`; corresponding source:
-  <https://github.com/thx/resvg-js/tree/v2.6.2>. Copyright 2021-present yisibl.
 - `JetBrainsMono-Regular.ttf`: unchanged JetBrains Mono **v2.304**, SIL Open Font
   License 1.1; full notice in `JetBrainsMono-OFL.txt`. Source:
   <https://github.com/JetBrains/JetBrainsMono/tree/v2.304>.
@@ -18,13 +15,14 @@ being written; existing assets are verified and reused offline.
   binaries themselves are **not** bundled and are fetched at runtime from pinned
   package URLs, with Lumis enforcing their SHA-256 metadata.
 - `vendor-licenses.txt`: notices for the local browser JS prebundle (Lumis,
-  themes, Tree-sitter and helpers, Rolldown runtime, and resvg). A duplicate is
+  themes, Tree-sitter and helpers, and Rolldown runtime). A duplicate is
   kept alongside the generated JS; this copy travels with the Edge static assets.
 
 Generated app renderer modules remain under the repository's MIT license.
 Lumis 0.9.0 and themes 0.4.0 are MIT-licensed; they are not upgraded by this spike.
 `../spike/generated/vendor/vendor-manifest.json` records package versions, input
-and output JS hashes, and the verified source URL/hash for resvg 2.6.2's wrapper.
+and output JS hashes. No resvg wrapper or rasterizer WASM is shipped: the MCP
+produces SVG only, and clients perform optional rasterization locally.
 Run `../spike/prepare-render.mjs` from Node to regenerate the assets and browser
 prebundle; it uses the repository's installed dependencies, not a new root
 dependency. Only one regular TTF face is shipped: full emoji coverage and

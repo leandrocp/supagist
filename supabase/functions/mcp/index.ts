@@ -40,21 +40,14 @@ Deno.serve(
           "render_snippet",
           {
             description:
-              "M0 spike: render code without saving it. Fixtures are benchmark-only presets.",
+              "Render code as SVG text without publishing it. Save the returned XML as a .svg file; convert to PNG locally if needed. Server-side PNG is not supported. Fixtures are benchmark-only presets.",
             inputSchema: renderInput,
             annotations: readOnly,
           },
           async (input) => {
             const { renderSnippet } = await import("./render.ts");
             const output = await renderSnippet(input);
-            if (input.format === "svg") {
-              return { content: [{ type: "text" as const, text: output.svg }] };
-            }
-            let binary = "";
-            for (const byte of output.png!) binary += String.fromCharCode(byte);
-            return {
-              content: [{ type: "image" as const, mimeType: "image/png", data: btoa(binary) }],
-            };
+            return { content: [{ type: "text" as const, text: output.svg }] };
           },
         );
         server.registerTool(

@@ -7,12 +7,7 @@
     "@noble/hashes": "2.3.0",
     "pathe": "2.0.3",
     "semver": "7.8.5",
-    "rolldown": "1.2.7",
-    "@resvg/resvg-wasm": "2.6.2"
-  },
-  "resvgSource": {
-    "url": "https://unpkg.com/@resvg/resvg-wasm@2.6.2/index.mjs",
-    "sha256": "10170d02d816f02ec76f9bc095b01d9becf536e7b1e12e5aa616652c84b237a1"
+    "rolldown": "1.2.7"
   },
   "sources": {
     "node_modules/@lumis-sh/lumis/dist/chunk-ORYAJCKX.js": "1bcdebfe8d4d7b5f931c5e8c7ad704a5411f3e68c1aa2e33709076eb9a5ec548",
@@ -775,10 +770,6 @@
     "regex-B6GUKTLO.js": {
       "bytes": 496,
       "sha256": "c9bbc320fa2922d8853c6202e9811d75ed2bc586adb92c25f05f171e15685216"
-    },
-    "resvg.js": {
-      "bytes": 17528,
-      "sha256": "47b57123b70eff68937f641de895a86d8d324e11ed14815c03eede787c40bb7b"
     },
     "rolldown-runtime-DE-cA3yr.js": {
       "bytes": 1602,
@@ -1885,8 +1876,8 @@
       "sha256": "94fdb5394569537458b4177c3afcc42eb94dee67784b875edda9ee0a5dd1c0db"
     },
     "vendor-licenses.txt": {
-      "bytes": 26681,
-      "sha256": "5634aa9cf70db4ddb3661683d1d8c74de9f6357787b7d744c7e399d9e37d15cc"
+      "bytes": 9926,
+      "sha256": "f972d620f465e8ab3e092d9b8a5e1a248193621828956b190e3fe23a6d280d77"
     },
     "vhdl-CNHFROvg.js": {
       "bytes": 487,

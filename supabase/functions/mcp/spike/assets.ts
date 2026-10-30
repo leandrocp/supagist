@@ -2,7 +2,7 @@ const cache = new Map<string, Promise<Uint8Array>>();
 let fontBase64: Promise<string> | undefined;
 
 export function assetBytes(name: string): Promise<Uint8Array> {
-  const allowed = ["resvg.wasm", "JetBrainsMono-Regular.ttf", "avatar-1.png", "avatar-2.png"];
+  const allowed = ["JetBrainsMono-Regular.ttf", "avatar-1.png", "avatar-2.png"];
   if (!allowed.includes(name)) throw new Error(`Unknown M0 asset: ${name}`);
   let pending = cache.get(name);
   if (!pending) {

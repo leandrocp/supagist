@@ -109,29 +109,6 @@ export async function prepareVendor(themeNames) {
     outputNames.push(nameInVendor);
   }
 
-  const url = "https://unpkg.com/@resvg/resvg-wasm@2.6.2/index.mjs";
-  const digest = "10170d02d816f02ec76f9bc095b01d9becf536e7b1e12e5aa616652c84b237a1";
-  const sourceFile = new URL("./vendor-sources/resvg-2.6.2.mjs.txt", import.meta.url);
-  let source;
-  try {
-    source = await readFile(sourceFile);
-  } catch (error) {
-    if (error.code !== "ENOENT") throw error;
-  }
-  if (!source) {
-    const response = await fetch(url);
-    if (!response.ok) throw new Error(`resvg wrapper download: ${response.status}`);
-    source = Buffer.from(await response.arrayBuffer());
-  }
-  if (sha256(source) !== digest) throw new Error("resvg wrapper integrity mismatch");
-  await mkdir(new URL("./vendor-sources/", import.meta.url), { recursive: true });
-  await writeFile(sourceFile, source);
-  await writeFile(new URL("resvg.js", vendor), banner + source.toString());
-  outputNames.push("resvg.js");
-  versions["@resvg/resvg-wasm"] = "2.6.2";
-  licenses.push(
-    `@resvg/resvg-wasm@2.6.2\n${await readFile(new URL("../assets/resvg-LICENSE.txt", import.meta.url), "utf8")}`,
-  );
   const notices = licenses.join("\n\n---\n\n");
   await writeFile(new URL("vendor-licenses.txt", vendor), notices);
   // Carry notices in the parent's existing static-files glob as well as the source tree.
@@ -161,7 +138,6 @@ export async function prepareVendor(themeNames) {
         {
           bundler: `rolldown@${bundler.version}`,
           versions,
-          resvgSource: { url, sha256: digest },
           sources: Object.fromEntries(
             Object.entries(sourceHashes).sort(([a], [b]) => a.localeCompare(b)),
           ),

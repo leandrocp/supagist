@@ -1,0 +1,11 @@
+{
+  "name": "supagist-local-png",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@resvg/resvg-js": "2.6.2"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

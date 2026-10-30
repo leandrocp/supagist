@@ -1,4 +1,15 @@
-# M0 result: NO-GO for Edge rendering (option A)
+# Supagist MCP: SVG rendering on Supabase
+
+`render_snippet` generates **SVG only**, defaulting to `format: "svg"` and
+`pixelRatio: 1`. Explicit `format: "png"` requests are rejected by validation;
+the PNG render path, resvg wrapper, and resvg WASM have been removed from the
+function. Reconnect MCP clients to refresh their cached tool schema.
+
+The [Supagist skill](../../../.agents/skills/rendering-supagist-snippets/SKILL.md)
+teaches clients to save the XML as `.svg` and offers optional local PNG conversion.
+MCP rendering stays on Supabase; no Vercel rendering fallback is needed or added.
+The web app's browser export behavior is unchanged. The original M0 measurements
+below describe the retired SVG+PNG implementation, not the SVG-only contract.
 
 ## Live endpoint and rate limits (2026-10-29)
 
@@ -61,10 +72,10 @@ curl -i https://zivpihasridowvzrgiix.supabase.co/functions/v1/mcp \
   --data '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"render_snippet","arguments":{"code":"const answer = 42;","language":"javascript","theme":"github_dark","format":"svg","pixelRatio":1}}}'
 ```
 
-Small SVG and small PNG at 1× pass on the real local Edge stack. The original
-30-line + avatars PNG fails the 2 s CPU cap at both 1× and 2×; heavy 2× PNGs are
-not supported reliably. Rate limiting does not fix rendering CPU limits. Always
-specify `pixelRatio: 1` for the demo: the unchanged default is 2.
+SVG is returned as MCP text, not a saved file or public URL. Extract the complete
+SVG text from the result and save it as `.svg`; renaming a JSON envelope is not
+enough. Use the skill's local converter for PNG. Original heavy PNG fixtures
+exceeded the 2 s Edge CPU cap; removing that stage avoids the known bottleneck.
 
 ### Repeat the checks
 
@@ -84,9 +95,16 @@ minute quota; the test deliberately consumes 6 render attempts and checks the
 6th gets 429, while `tools/list` and `list_options` still work. Output, full
 redacted HTTP/MCP transcripts, and sample exports are saved separately under
 `.amp/in/artifacts/mcp-rate-limit/{local,production}/`. Auth secrets and cookies
-are never written there. Local evidence is not production proof.
+are never written there. The script then waits 61 seconds, verifies PNG rejection,
+and confirms SVG recovery. Local evidence is not production proof.
 
 ## Historical M0 recommendation
+
+The following measurements and commands apply to the pre-SVG-only spike. To
+reproduce the PNG benchmarks (`verify/limits.mjs` and `verify/measure.mjs`), use
+the historical spike commit `823a631`, not the current SVG-only endpoint.
+The current `verify/local.mjs` validates all six SVG fixtures and PNG rejection,
+waiting for quota windows rather than bypassing the limiter.
 
 **Recommendation: pursue the Vercel Node fallback (option C). Do not promote
 this spike to production.** Option C is a recommendation, not a benchmarked

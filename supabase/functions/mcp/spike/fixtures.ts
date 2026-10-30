@@ -8,7 +8,7 @@ export const thirtyLines = Array.from(
 
 export function renderFixture(
   fixture: "plain" | "vercel" | "avatars",
-  format: "svg" | "png",
+  format: "svg",
   pixelRatio: 1 | 2,
 ): RenderInput {
   return {

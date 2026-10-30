@@ -13,7 +13,7 @@ export const renderInput = z.object({
     ),
   language: z.string().min(1).max(64).default("javascript"),
   theme: z.string().min(1).max(64).default("github_dark"),
-  format: z.enum(["svg", "png"]).default("png"),
-  pixelRatio: z.union([z.literal(1), z.literal(2)]).default(2),
+  format: z.literal("svg").default("svg"),
+  pixelRatio: z.union([z.literal(1), z.literal(2)]).default(1),
   fixture: z.enum(["plain", "vercel", "avatars"]).default("plain"),
 });

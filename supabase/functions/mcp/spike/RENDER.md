@@ -2,16 +2,17 @@
 
 `../render.ts` exports `renderSnippet({code, language, theme, format, pixelRatio,
 fixture?})`, `supportedLanguages`, `supportedThemes`, `RenderInput`, and
-`RenderResult`. `format` is `svg | png`, `pixelRatio` is `1 | 2`, and the optional
+`RenderResult`. `format` is `svg` only, `pixelRatio` is `1 | 2`, and the optional
 fixture is `plain | vercel | avatars` (default plain). The endpoint owns code
 length limits and newline normalization. Unsupported language/theme/format/ratio
 values reject rather than returning plaintext.
 
-The result contains `svg: string`, `png?: Uint8Array` (PNG requests only),
+The result contains `svg: string`,
 `width`, `height`, `logicalWidth`, `logicalHeight`, `bytes`, `contentType`,
 `timings`, and `parserEvents`. Width/height are physical output dimensions;
 logical dimensions are pre-pixel-ratio. SVG retains a logical viewBox and embeds
-the same JetBrains Mono TTF supplied to resvg as `fontBuffers`.
+JetBrains Mono TTF. PNG conversion belongs to the client; the Edge renderer has
+no rasterizer dependency.
 
 ## Reproduce
 
@@ -48,8 +49,8 @@ not a remote user's photograph and not the app's initial-circle fallback.
 
 The renderer's dependency graph uses local generated JavaScript, not npm imports.
 `prepare-vendor.mjs` prebundles the exact Lumis browser entrypoint and formatters,
-copies all 256 themes' exact data modules (retaining lazy imports), and copies the
-SHA-256-verified resvg **2.6.2** ESM wrapper. It does not modify rendering algorithms,
+and copies all 256 themes' exact data modules (retaining lazy imports).
+It does not modify rendering algorithms,
 minify code, replace runtime globals, or change Tree-sitter's conditional Node
 branches. Rolldown reports two existing upstream direct-eval warnings.
 
@@ -59,16 +60,15 @@ remove `@lumis-sh/lumis/client`, `@lumis-sh/lumis/`, `@lumis-sh/themes/`, and
 dependencies unchanged.
 
 This avoids Edge Runtime's whole-npm-package VFS inclusion of optional native
-Lumis binaries, unused theme formats, Tree-sitter debug/maps/types, and a duplicate
-resvg WASM. It is packaging only: actual render CPU work is unchanged. Source
+Lumis binaries, unused theme formats, and Tree-sitter debug/maps/types. Source
 hashes, generated output hashes/sizes and package versions are recorded in
 `generated/vendor/vendor-manifest.json`; notices are in `vendor-licenses.txt`
-there and in `../assets/`. The pristine resvg wrapper cache is
-`vendor-sources/resvg-2.6.2.mjs.txt`; deleting it triggers a verified redownload.
+there and in `../assets/`. The former resvg wrapper, WASM, and source cache have
+been removed along with the PNG render path.
 
 Include `./functions/mcp/assets/*` in `[functions.mcp].static_files` in
 `supabase/config.toml`. `Deno.readFile(new URL(..., import.meta.url))` reads the
-bundled resvg WASM, TTF, and fixed PNGs. The generated parser metadata JSON is an
+bundled TTF and fixed avatar PNGs. The generated parser metadata JSON is an
 import in the source graph, not a filesystem asset. No parser `.wasm` is shipped.
 
 The complete installed parser manifests (112 packages) are copied at preparation
@@ -84,9 +84,8 @@ test exercises TypeScript; it does not exhaustively certify every parser/theme.
 
 `preloadWallMs` includes highlighter readiness, parser download/integrity/compile
 and theme loading. `svgWallMs` includes app layout, highlight and assets.
-`resvgInitWallMs` includes WASM initialization/font read. `rasterWallMs` includes
-resvg construction, rendering, PNG encoding and cleanup. `totalWallMs` is the
-whole call. **None of these is CPU time.** Module import/startup before the call
+`totalWallMs` is the whole call. The former rasterization timings no longer apply
+to the SVG-only renderer. **None of these is CPU time.** Module import/startup before the call
 is outside these intervals; the endpoint/harness must measure that separately.
 
 JSON logs expose `parser-fetch-requested` (URL/version/digest),

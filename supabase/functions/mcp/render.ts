@@ -1,7 +1,5 @@
-import { initWasm, Resvg } from "./spike/generated/vendor/resvg.js";
 import { createHighlightedSvg, EXPORT_BRAND_BACKGROUNDS } from "./spike/generated/export-utils.js";
 import { BRAND_PRESETS } from "./spike/generated/brand-presets.js";
-import { assetBytes } from "./spike/assets.ts";
 import {
   clientHighlighterPromise,
   parserEventCursor,
@@ -26,15 +24,14 @@ export type RenderInput = {
   code: string;
   language: string;
   theme: string;
-  format: "svg" | "png";
+  format: "svg";
   pixelRatio: 1 | 2;
   fixture?: "plain" | "vercel" | "avatars";
 };
 export type RenderResult = {
   svg: string;
-  png?: Uint8Array;
   bytes: Uint8Array;
-  contentType: "image/svg+xml" | "image/png";
+  contentType: "image/svg+xml";
   width: number;
   height: number;
   logicalWidth: number;
@@ -42,14 +39,10 @@ export type RenderResult = {
   timings: {
     preloadWallMs: number;
     svgWallMs: number;
-    resvgInitWallMs: number;
-    rasterWallMs: number;
     totalWallMs: number;
   };
   parserEvents: ParserEvent[];
 };
-
-let resvgReady: Promise<void> | undefined;
 
 /** M0 only. Timings are elapsed wall time, never CPU time. No user image URLs. */
 export async function renderSnippet(input: RenderInput): Promise<RenderResult> {
@@ -59,8 +52,7 @@ export async function renderSnippet(input: RenderInput): Promise<RenderResult> {
   if (!supportedLanguages.includes(input.language))
     throw new Error(`Unsupported language: ${input.language}`);
   if (!supportedThemes.includes(input.theme)) throw new Error(`Unsupported theme: ${input.theme}`);
-  if (input.format !== "svg" && input.format !== "png")
-    throw new Error("format must be svg or png");
+  if (input.format !== "svg") throw new Error("Only SVG is supported; convert to PNG locally");
   if (input.pixelRatio !== 1 && input.pixelRatio !== 2)
     throw new Error("pixelRatio must be 1 or 2");
   const fixture = input.fixture ?? "plain";
@@ -135,50 +127,15 @@ export async function renderSnippet(input: RenderInput): Promise<RenderResult> {
   const width = Math.round(logicalWidth * input.pixelRatio);
   const height = Math.round(logicalHeight * input.pixelRatio);
   const svgEnd = performance.now();
-  let resvgInitWallMs = 0;
-  let rasterWallMs = 0;
-  let bytes: Uint8Array;
-  if (input.format === "png") {
-    const initStart = performance.now();
-    resvgReady ??= assetBytes("resvg.wasm").then((wasm) => initWasm(wasm));
-    await resvgReady;
-    const font = await assetBytes("JetBrainsMono-Regular.ttf");
-    const rasterStart = performance.now();
-    resvgInitWallMs = rasterStart - initStart;
-    const renderer = new Resvg(svg, {
-      fitTo: { mode: "zoom", value: input.pixelRatio },
-      font: {
-        fontBuffers: [font],
-        defaultFontFamily: "JetBrains Mono",
-        monospaceFamily: "JetBrains Mono",
-        sansSerifFamily: "JetBrains Mono",
-      },
-    });
-    try {
-      const image = renderer.render();
-      try {
-        if (image.width !== width || image.height !== height)
-          throw new Error("Raster dimensions differ from SVG");
-        bytes = image.asPng().slice();
-      } finally {
-        image.free();
-      }
-    } finally {
-      renderer.free();
-    }
-    rasterWallMs = performance.now() - rasterStart;
-  }
-  // Scale the viewport, not the viewBox: browser SVG and PNG have equal dimensions.
+  // Scale the viewport, not the viewBox; rasterization belongs to the client.
   svg = svg.replace(
     `width="${logicalWidth}" height="${logicalHeight}"`,
     `width="${width}" height="${height}"`,
   );
-  if (input.format === "svg") bytes = new TextEncoder().encode(svg);
+  const bytes = new TextEncoder().encode(svg);
   const timings = {
     preloadWallMs: preloadEnd - start,
     svgWallMs: svgEnd - preloadEnd,
-    resvgInitWallMs,
-    rasterWallMs,
     totalWallMs: performance.now() - start,
   };
   console.log(
@@ -194,9 +151,8 @@ export async function renderSnippet(input: RenderInput): Promise<RenderResult> {
   );
   return {
     svg,
-    png: input.format === "png" ? bytes! : undefined,
-    bytes: bytes!,
-    contentType: input.format === "png" ? "image/png" : "image/svg+xml",
+    bytes,
+    contentType: "image/svg+xml",
     width,
     height,
     logicalWidth,

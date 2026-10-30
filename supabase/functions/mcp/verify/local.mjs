@@ -113,6 +113,7 @@ async function main() {
   assert.ok(JSON.parse(options.data.result.content[0].text).languages.includes("javascript"));
   for (const input of [
     { code: "" },
+    { code: "x", format: "png" },
     { code: "x", pixelRatio: 3 },
     { code: "x", theme: "missing" },
     { code: "x", language: "missing" },
@@ -121,16 +122,24 @@ async function main() {
       name: "render_snippet",
       arguments: input,
     });
+    assert.equal(result.response.status, 200, "Validation must not be masked by a rate limit");
     assert.ok(result.data.error || result.data.result?.isError, "Invalid input must fail");
   }
   console.log(
     "PASS: discovery, missing/invalid/anonymous auth, signed-in tools, and input validation",
   );
-  const directory = process.argv[2] ?? ".amp/in/artifacts/mcp-m0";
+  const directory = process.argv[2] ?? ".amp/in/artifacts/mcp-svg";
   await mkdir(directory, { recursive: true });
+  let renderCount = 5;
   for (const fixture of fixtures) {
     for (const pixelRatio of [1, 2]) {
-      for (const format of ["svg", "png"]) {
+      for (const format of ["svg"]) {
+        if (renderCount === 5) {
+          console.log("Waiting for the render minute window...");
+          await new Promise((resolve) => setTimeout(resolve, 61_000));
+          renderCount = 0;
+        }
+        renderCount++;
         const result = await rpc(endpoint, token, "tools/call", {
           name: "render_snippet",
           arguments: {
@@ -144,13 +153,12 @@ async function main() {
         assert.equal(result.response.status, 200);
         assert.ok(!result.data.error && !result.data.result.isError, JSON.stringify(result.data));
         const item = result.data.result.content[0];
-        const bytes = format === "png" ? Buffer.from(item.data, "base64") : Buffer.from(item.text);
-        if (format === "png") assert.equal(bytes.subarray(1, 4).toString(), "PNG");
-        else
-          assert.ok(
-            item.text.includes("<svg") &&
-              (item.text.includes("const") || item.text.includes("export")),
-          );
+        const bytes = Buffer.from(item.text);
+        assert.equal(item.type, "text");
+        assert.ok(
+          item.text.includes("<svg") &&
+            (item.text.includes("const") || item.text.includes("export")),
+        );
         await writeFile(`${directory}/${fixture.fixture}-${pixelRatio}x.${format}`, bytes);
         console.log(
           `${fixture.fixture} ${pixelRatio}x ${format}: ${bytes.length} bytes, ${result.wallMs.toFixed(1)} ms wall`,
@@ -159,7 +167,7 @@ async function main() {
     }
   }
   console.log(
-    "PASS: discovery, missing/invalid/anonymous auth, signed-in tools, validation, and all 12 exports",
+    "PASS: discovery, missing/invalid/anonymous auth, signed-in tools, PNG rejection, and all 6 SVG exports",
   );
 }
 

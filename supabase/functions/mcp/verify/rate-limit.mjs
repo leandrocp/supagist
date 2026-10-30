@@ -108,26 +108,21 @@ try {
   success(tools);
   assert.ok(tools.data.result.tools.some((tool) => tool.name === "render_snippet"));
   for (let i = 0; i < 5; i++) {
-    const format = i === 1 ? "png" : "svg";
     const result = await call("tools/call", {
       name: "render_snippet",
       arguments: {
         code: "const answer = 42;",
         language: "javascript",
         theme: "github_dark",
-        format,
+        ...(i === 0 ? {} : { format: "svg" }),
         pixelRatio: 1,
       },
     });
     success(result);
     const item = result.data.result.content[0];
-    if (format === "svg") assert.ok(item.text.includes("<svg") && item.text.includes("answer"));
-    else assert.equal(Buffer.from(item.data, "base64").subarray(1, 4).toString(), "PNG");
-    if (i < 2)
-      await writeFile(
-        `${directory}/small.${format}`,
-        format === "png" ? Buffer.from(item.data, "base64") : item.text,
-      );
+    assert.equal(item.type, "text");
+    assert.ok(item.text.includes("<svg") && item.text.includes("answer"));
+    if (i === 0) await writeFile(`${directory}/small.svg`, item.text);
   }
   // Invalid code here also proves rate limiting precedes SDK validation/tool work.
   const denied = await call("tools/call", {
@@ -142,8 +137,22 @@ try {
   });
   success(await call("tools/list"));
   success(await call("tools/call", { name: "list_options", arguments: {} }));
+  log("Waiting for Retry-After before checking PNG rejection and recovery...");
+  await new Promise((resolve) => setTimeout(resolve, 61_000));
+  const png = await call("tools/call", {
+    name: "render_snippet",
+    arguments: { code: "const answer = 42;", format: "png" },
+  });
+  assert.equal(png.response.status, 200);
+  assert.equal(png.data.result?.isError, true, "PNG must be rejected by tool validation");
+  const recovered = await call("tools/call", {
+    name: "render_snippet",
+    arguments: { code: "const answer = 42;" },
+  });
+  success(recovered);
+  assert.ok(recovered.data.result.content[0].text.includes("<svg"));
   log(
-    "PASS: real signed-in initialize/list, small SVG + PNG at 1x, first 5 renders allowed, render 6 denied before validation, other tools still available.",
+    "PASS: real signed-in initialize/list, SVG by default, first 5 renders allowed, render 6 denied before validation, other tools available, PNG rejected, SVG recovers after Retry-After.",
   );
 } finally {
   await writeFile(`${directory}/transcript.json`, JSON.stringify(transcript, null, 2) + "\n");

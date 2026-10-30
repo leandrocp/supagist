@@ -11,7 +11,8 @@ describe("M0 generated renderer provenance", () => {
     const manifest = JSON.parse(readFileSync(new URL("vendor-manifest.json", vendor), "utf8"));
     expect(manifest.versions["@lumis-sh/lumis"]).toBe("0.9.0");
     expect(manifest.versions["@lumis-sh/themes"]).toBe("0.4.0");
-    expect(manifest.versions["@resvg/resvg-wasm"]).toBe("2.6.2");
+    expect(manifest.versions["@resvg/resvg-wasm"]).toBeUndefined();
+    expect(readdirSync(vendor)).not.toContain("resvg.js");
     for (const [name, metadata] of Object.entries(manifest.outputs)) {
       const bytes = readFileSync(new URL(name, vendor));
       expect(sha256(bytes), name).toBe((metadata as { sha256: string }).sha256);
@@ -54,7 +55,7 @@ describe("M0 generated renderer provenance", () => {
     for (const [file, digest] of Object.entries(sources))
       expect(sha256(readFileSync(new URL(file, root))), file).toBe(digest);
   });
-  it("ships digest-matched WASM, TTF and actual PNG avatars, but no parser binaries", () => {
+  it("ships digest-matched TTF and actual PNG avatars, but no rasterizer or parser binaries", () => {
     const assets = new URL("../assets/", import.meta.url);
     const manifest = JSON.parse(readFileSync(new URL("manifest.json", assets), "utf8"));
     for (const [name, metadata] of Object.entries(manifest)) {
@@ -62,7 +63,7 @@ describe("M0 generated renderer provenance", () => {
         (metadata as { sha256: string }).sha256,
       );
     }
-    expect(readdirSync(assets).filter((name) => name.endsWith(".wasm"))).toEqual(["resvg.wasm"]);
+    expect(readdirSync(assets).filter((name) => name.endsWith(".wasm"))).toEqual([]);
     for (const name of ["avatar-1.png", "avatar-2.png"])
       expect([...readFileSync(new URL(name, assets)).subarray(0, 8)]).toEqual([
         137, 80, 78, 71, 13, 10, 26, 10,
