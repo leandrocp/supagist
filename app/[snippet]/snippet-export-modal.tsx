@@ -21,6 +21,8 @@ const DEFAULT_SETTINGS: ExportSettings = {
   fontId: "system",
   fontSize: EXPORT_FONT_SIZE,
   language: null,
+  aspectRatio: null,
+  ligatures: true,
 };
 
 type Props = {

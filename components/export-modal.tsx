@@ -29,6 +29,7 @@ import {
   normalizeExportInnerPadding,
   normalizeExportOuterPadding,
   type ExportBackground,
+  type ExportAspectRatio,
   type WindowDecoration,
   createHighlightedSvg,
   renderToFile,
@@ -80,6 +81,8 @@ export type ExportSettings = {
   fontId: string;
   fontSize: number;
   language: string | null;
+  aspectRatio: ExportAspectRatio | null;
+  ligatures: boolean;
 };
 
 type Props = {
@@ -162,6 +165,9 @@ export function ExportModal({
       settings.header,
       settings.footer,
       normalizedFontSize,
+      false,
+      settings.aspectRatio,
+      settings.ligatures,
     ).then((svg) => {
       if (cancelled) return;
       const blob = new Blob([svg], { type: "image/svg+xml" });
@@ -194,6 +200,8 @@ export function ExportModal({
     settings.header,
     settings.footer,
     settings.windowDecoration,
+    settings.aspectRatio,
+    settings.ligatures,
     authorUsername,
     authorAvatarUrl,
     sourceUrl,
@@ -238,6 +246,8 @@ export function ExportModal({
         settings.header,
         settings.footer,
         normalizedFontSize,
+        settings.aspectRatio,
+        settings.ligatures,
       );
       triggerDownload(URL.createObjectURL(file), file.name, true);
     } finally {
@@ -274,6 +284,9 @@ export function ExportModal({
         settings.header,
         settings.footer,
         normalizedFontSize,
+        false,
+        settings.aspectRatio,
+        settings.ligatures,
       );
       const blob = new Blob([svg], { type: "image/svg+xml;charset=utf-8" });
       triggerDownload(
@@ -604,6 +617,24 @@ export function ExportModal({
               checked={settings.showReactions}
               onCheckedChange={(showReactions) => onSettingsChange({ ...settings, showReactions })}
               aria-label="Show reactions"
+            />
+          </label>
+          <label className="flex min-h-11 items-center gap-3 text-sm font-medium">
+            Ligatures
+            <Switch
+              checked={settings.ligatures}
+              onCheckedChange={(ligatures) => onSettingsChange({ ...settings, ligatures })}
+              aria-label="Font ligatures"
+            />
+          </label>
+          <label className="flex min-h-11 items-center gap-3 text-sm font-medium">
+            16:9
+            <Switch
+              checked={settings.aspectRatio === "16:9"}
+              onCheckedChange={(wide) =>
+                onSettingsChange({ ...settings, aspectRatio: wide ? "16:9" : null })
+              }
+              aria-label="16:9 canvas (1600×900)"
             />
           </label>
           <label className="flex min-h-11 items-center gap-3 text-sm font-medium">

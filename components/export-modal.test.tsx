@@ -37,6 +37,8 @@ const settings: ExportSettings = {
   fontId: "system",
   fontSize: 14,
   language: null,
+  aspectRatio: null,
+  ligatures: true,
 };
 
 describe("ExportModal", () => {
@@ -201,7 +203,36 @@ describe("ExportModal", () => {
     );
 
     await waitFor(() => {
-      expect(vi.mocked(createHighlightedSvg).mock.calls.at(-1)?.at(-1)).toBe(20);
+      expect(vi.mocked(createHighlightedSvg).mock.calls.at(-1)?.[24]).toBe(20);
+    });
+  });
+
+  it("toggles ligatures and the 16:9 canvas and renders the preview with them", async () => {
+    const { createHighlightedSvg } = await import("@/lib/export-utils");
+    const onSettingsChange = vi.fn();
+    const props = {
+      onClose: vi.fn(),
+      code: "x |> y",
+      filename: "demo.ex",
+      theme: "github_dark",
+      onSettingsChange,
+    };
+    const { rerender } = render(<ExportModal open {...props} settings={settings} />);
+
+    fireEvent.click(screen.getByRole("switch", { name: "Font ligatures" }));
+    expect(onSettingsChange).toHaveBeenLastCalledWith({ ...settings, ligatures: false });
+    fireEvent.click(screen.getByRole("switch", { name: "16:9 canvas (1600×900)" }));
+    expect(onSettingsChange).toHaveBeenLastCalledWith({ ...settings, aspectRatio: "16:9" });
+
+    rerender(
+      <ExportModal
+        open
+        {...props}
+        settings={{ ...settings, aspectRatio: "16:9", ligatures: false }}
+      />,
+    );
+    await waitFor(() => {
+      expect(vi.mocked(createHighlightedSvg).mock.calls.at(-1)?.slice(26)).toEqual(["16:9", false]);
     });
   });
 

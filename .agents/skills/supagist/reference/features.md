@@ -178,6 +178,8 @@ For an explicitly annotated custom image:
   storage survives login. Draft emoji reactions allow one emoji per line; draft
   comments are unavailable until published.
 - **Export:** PNG, SVG, raw source download and copy code are separate actions.
+  The composer Size control and the export dialog offer the same 16:9 canvas and
+  ligatures toggle as MCP.
   Web PNG scale is 2×/4×/6×. MCP uses SVG plus local conversion instead. Exports
   include Supagist source attribution. Desktop export is a dialog, mobile a drawer.
 - **Publish:** requires sign-in and at most 8000 code points; creates saved source,

@@ -70,6 +70,7 @@ import {
   wrapTokenLine,
   triggerDownload,
   createHighlightedSvg,
+  EXPORT_BACKGROUNDS,
   renderToFile,
   estimateExportDimensions,
   addPngTextMetadata,
@@ -2423,5 +2424,128 @@ describe("renderToFile", () => {
     const revokeSpy = vi.spyOn(URL, "revokeObjectURL").mockReturnValue(undefined);
     await renderToFile("x", "test.ts", "github_light", 1200, undefined, "out.png", 1);
     expect(revokeSpy).toHaveBeenCalledWith("blob:mock-svg");
+  });
+});
+
+describe("createHighlightedSvg 16:9 canvas and ligatures", () => {
+  // Positional arguments up to fontSize, so a test only names what it changes.
+  const render = (
+    code: string,
+    {
+      background = EXPORT_BACKGROUNDS.find((b) => b.label === "Dusk")!,
+      fontId = "jetbrains",
+      aspectRatio = null as "16:9" | null,
+      ligatures = true,
+    } = {},
+  ) =>
+    createHighlightedSvg(
+      code,
+      "demo.ex",
+      "github_light",
+      1200,
+      undefined,
+      background,
+      undefined,
+      true,
+      fontId,
+      "plaintext",
+      undefined,
+      false,
+      true,
+      false,
+      null,
+      null,
+      undefined,
+      false,
+      null,
+      "macos",
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      18,
+      false,
+      aspectRatio,
+      ligatures,
+    );
+  const numbers = (text: string) => text.split(" ").map(Number);
+  const svgTag = (svg: string) => /<svg\b[^>]*>/.exec(svg)![0];
+  const card = (svg: string) =>
+    numbers(
+      /<rect x="([\d.]+)" y="([\d.]+)" width="([\d.]+)" height="([\d.]+)" rx=/
+        .exec(svg)!
+        .slice(1)
+        .join(" "),
+    );
+  const viewBox = (svg: string) => numbers(/viewBox="([^"]+)"/.exec(svg)![1]);
+  const elixir = "source\n|> Enum.map(&(&1 * 2))\n{:ok, x} -> x";
+
+  it("leaves the default export unchanged when both options are off", async () => {
+    const plain = await render(elixir);
+    const [, , w, h] = card(plain);
+    expect(svgTag(plain)).toContain(
+      `width="${w + 128}" height="${h + 128}" viewBox="0 0 ${w + 128} ${h + 128}"`,
+    );
+    expect(plain).not.toContain("font-variant-ligatures");
+    expect(plain).toContain(">|&gt; Enum.map(&amp;(&amp;1 * 2))</tspan>");
+  });
+
+  it("centres the unchanged card in a 1600x900 frame the background fills", async () => {
+    const plain = await render(elixir);
+    const wide = await render(elixir, { aspectRatio: "16:9" });
+    expect(svgTag(wide)).toMatch(/ width="1600" height="900" /);
+    const [left, top, width, height] = viewBox(wide);
+    expect(width / height).toBeCloseTo(16 / 9, 9);
+    const [x, y, w, h] = card(wide);
+    expect([w, h]).toEqual(card(plain).slice(2));
+    expect(x + w / 2).toBeCloseTo(left + width / 2, 6);
+    expect(y + h / 2).toBeCloseTo(top + height / 2, 6);
+    // The default 64px padding is the margin on the tighter axis only.
+    expect(Math.min(x - left, y - top)).toBe(64);
+    expect(Math.max(x - left, y - top)).toBeGreaterThan(64);
+    const [, bgWidth, bgHeight] = /<rect width="([\d.]+)" height="([\d.]+)" fill="url\(#outerBg\)"/
+      .exec(wide)!
+      .map(Number);
+    expect(left >= 0 && top >= 0 && left + width <= bgWidth && top + height <= bgHeight).toBe(true);
+  });
+
+  it("keeps a 16:9 frame without a background, leaving the margin transparent", async () => {
+    const wide = await render(elixir, { background: null as never, aspectRatio: "16:9" });
+    expect(svgTag(wide)).toMatch(/ width="1600" height="900" /);
+    expect(wide).not.toContain("outerBg");
+    const [, , width, height] = viewBox(wide);
+    expect(width / height).toBeCloseTo(16 / 9, 9);
+  });
+
+  it("draws each operator character after punctuation at its own monospace column", async () => {
+    // Hack's 1233/2048 em advance differs from the layout's 0.602 em estimate,
+    // so a wrong advance shows up as a wrong x.
+    for (const [fontId, advanceEm] of [
+      ["jetbrains", 0.6],
+      ["hack", 1233 / 2048],
+    ] as const) {
+      const svg = await render(elixir, { fontId, ligatures: false });
+      const row = /<text x="([\d.]+)"[^>]*style="font-variant-ligatures:none"[^>]*>(.*?)<\/text>/g;
+      const rows = [...svg.matchAll(row)].filter((match) => match[2]!.includes("<tspan"));
+      expect(rows).toHaveLength(3);
+      const [, x, pipeRow] = rows[1]!;
+      const at = (column: number) => +(Number(x) + column * 18 * advanceEm).toFixed(3);
+      // "|>" splits at column 1; "(&(&" at 12, 13 and 14; "))" at 21.
+      expect(pipeRow).toBe(
+        `<tspan fill="#333333">|</tspan>` +
+          `<tspan fill="#333333" x="${at(1)}">&gt; Enum.map(</tspan>` +
+          `<tspan fill="#333333" x="${at(12)}">&amp;</tspan>` +
+          `<tspan fill="#333333" x="${at(13)}">(</tspan>` +
+          `<tspan fill="#333333" x="${at(14)}">&amp;1 * 2)</tspan>` +
+          `<tspan fill="#333333" x="${at(21)}">)</tspan>`,
+      );
+      expect(rows[2]![2]).toContain(`<tspan fill="#333333" x="${at(10)}">&gt; x</tspan>`);
+    }
+  });
+
+  it("relies on CSS alone for the system font, whose advance is unknown", async () => {
+    const svg = await render(elixir, { fontId: "system", ligatures: false });
+    expect(svg).toContain('style="font-variant-ligatures:none"');
+    expect(svg).toContain(">|&gt; Enum.map(&amp;(&amp;1 * 2))</tspan>");
   });
 });

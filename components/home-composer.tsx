@@ -32,6 +32,8 @@ import {
   triggerDownload,
   estimateExportDimensions,
   type ExportBackground,
+  EXPORT_CANVAS_16_9,
+  type ExportAspectRatio,
   type WindowDecoration,
 } from "@/lib/export-utils";
 import { languageDisplayName, codePointLength } from "@/lib/snippet-utils";
@@ -169,6 +171,8 @@ type Draft = {
   header: ExportHeaderSettings;
   footer: ExportFooterSettings;
   windowDecoration: WindowDecoration;
+  aspectRatio: ExportAspectRatio | null;
+  ligatures: boolean;
 };
 type DraftAnnotations = {
   reactions: Record<number, string>;
@@ -193,6 +197,8 @@ export function HomeComposer() {
     header: DEFAULT_HEADER_SETTINGS,
     footer: DEFAULT_FOOTER_SETTINGS,
     windowDecoration: "macos",
+    aspectRatio: null,
+    ligatures: true,
   });
   const [annotations, setAnnotations] = useState<DraftAnnotations>({ reactions: {} });
   const [isHydrated, setIsHydrated] = useState(false);
@@ -240,6 +246,8 @@ export function HomeComposer() {
             p.windowDecoration,
             p.windowDecorationSchema,
           ),
+          aspectRatio: p.aspectRatio === "16:9" ? "16:9" : null,
+          ligatures: p.ligatures ?? true,
         });
       } catch {
         window.localStorage.removeItem(DRAFT_KEY);
@@ -484,14 +492,6 @@ export function HomeComposer() {
         padding: previewCanvasPadding,
       }
     : { padding: 0 };
-  const previewFrameBorder = selectedBackground?.frame?.cardBorder;
-  const previewFrameShadow = selectedBackground?.scene
-    ? createBrandFrameShadow(selectedBackground.scene)
-    : selectedBackground?.frame
-      ? previewFrameBorder
-        ? `0 0 0 ${previewFrameBorder.width}px ${previewFrameBorder.color}, 0 25px 50px -12px rgba(0,0,0,0.42)`
-        : "0 25px 50px -12px rgba(0,0,0,0.42)"
-      : undefined;
   const exportDimensions = estimateExportDimensions({
     code: draft.code,
     filename: draft.filename,
@@ -511,6 +511,27 @@ export function HomeComposer() {
     fontSize: draft.fontSize,
     compactReactions: true,
   });
+  // Mirror the 16:9 export: the card keeps its size, the padding stays on the
+  // tighter axis, and the canvas widens or heightens to a centred 16:9 frame.
+  const previewAspectStyle: React.CSSProperties = draft.aspectRatio
+    ? {
+        width: Math.max(exportDimensions.width, (exportDimensions.height * 16) / 9),
+        aspectRatio: "16 / 9",
+        // On phones the card cannot fit a 16:9 box; grow rather than clip it.
+        minHeight: exportDimensions.height,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }
+    : {};
+  const previewFrameBorder = selectedBackground?.frame?.cardBorder;
+  const previewFrameShadow = selectedBackground?.scene
+    ? createBrandFrameShadow(selectedBackground.scene)
+    : selectedBackground?.frame
+      ? previewFrameBorder
+        ? `0 0 0 ${previewFrameBorder.width}px ${previewFrameBorder.color}, 0 25px 50px -12px rgba(0,0,0,0.42)`
+        : "0 25px 50px -12px rgba(0,0,0,0.42)"
+      : undefined;
   const previewFontFamily = EXPORT_FONTS.find((font) => font.id === draft.fontId)?.family;
   const previewCardWidth = exportDimensions.width - outerCanvasPadding * 2;
   const previewCardMaxWidth = selectedBackground ? "100%" : "calc(100vw - 4rem)";
@@ -547,6 +568,8 @@ export function HomeComposer() {
         draft.header,
         draft.footer,
         draft.fontSize,
+        draft.aspectRatio,
+        draft.ligatures,
       );
       triggerDownload(URL.createObjectURL(file), file.name, true);
     } catch (error: unknown) {
@@ -586,6 +609,9 @@ export function HomeComposer() {
         draft.header,
         draft.footer,
         draft.fontSize,
+        false,
+        draft.aspectRatio,
+        draft.ligatures,
       );
       const blob = new Blob([svg], { type: "image/svg+xml;charset=utf-8" });
       triggerDownload(
@@ -712,6 +738,7 @@ export function HomeComposer() {
             style={
               {
                 ...canvasStyle,
+                ...previewAspectStyle,
                 "--preview-outer-padding": previewCanvasPadding,
               } as React.CSSProperties & { "--preview-outer-padding": string | number }
             }
@@ -729,6 +756,7 @@ export function HomeComposer() {
                 maxWidth: previewCardMaxWidth,
                 borderRadius: draft.cornerRadius,
                 boxShadow: previewFrameShadow,
+                fontVariantLigatures: draft.ligatures ? undefined : "none",
               }}
               bodyHeight={previewHeight}
               innerPadding={draft.innerPadding}
@@ -1032,6 +1060,28 @@ export function HomeComposer() {
                             </Select>
                           </div>
                           <div className="flex min-w-0 flex-col gap-1">
+                            <span className={panelLabelClass}>Size</span>
+                            <Select
+                              value={draft.aspectRatio ?? "auto"}
+                              onValueChange={(size) =>
+                                setDraft((d) => ({
+                                  ...d,
+                                  aspectRatio: size === "16:9" ? "16:9" : null,
+                                }))
+                              }
+                            >
+                              <SelectTrigger aria-label="Size" className={panelControlClass}>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent side="top" position="popper">
+                                <SelectGroup>
+                                  <SelectItem value="auto">Fit to code</SelectItem>
+                                  <SelectItem value="16:9">16:9 (1600×900)</SelectItem>
+                                </SelectGroup>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="flex min-w-0 flex-col gap-1">
                             <span className={panelLabelClass}>Scale</span>
                             <Select
                               value={String(draft.pixelRatio)}
@@ -1150,8 +1200,11 @@ export function HomeComposer() {
                           {[
                             ["Line numbers", "lineNumbers"],
                             ["Reactions", "showReactions"],
+                            ["Ligatures", "ligatures"],
                           ].map(([label, key]) => {
-                            const enabled = Boolean(draft[key as "lineNumbers" | "showReactions"]);
+                            const enabled = Boolean(
+                              draft[key as "lineNumbers" | "showReactions" | "ligatures"],
+                            );
                             return (
                               <label
                                 key={key}
@@ -1377,7 +1430,10 @@ export function HomeComposer() {
               </span>
               <div className="flex min-w-0 flex-wrap gap-x-3 gap-y-1 text-xs text-foreground-muted sm:justify-end">
                 <span className="font-mono">
-                  {exportDimensions.width} × {exportDimensions.height}px
+                  {draft.aspectRatio
+                    ? `${EXPORT_CANVAS_16_9.width} × ${EXPORT_CANVAS_16_9.height}`
+                    : `${exportDimensions.width} × ${exportDimensions.height}`}
+                  px
                 </span>
                 <span className="font-mono">{lineCount} lines</span>
                 <span className={cn("font-mono", isOverLimit && "font-medium text-destructive")}>

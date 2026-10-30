@@ -102,6 +102,9 @@ export function exportCharWidthForFontSize(fontSize) {
   return (EXPORT_CHAR_WIDTH / EXPORT_FONT_SIZE) * normalizeExportFontSize(fontSize);
 }
 
+/** The X/social card size; a 16:9 export scales its frame to it. */
+export const EXPORT_CANVAS_16_9 = { width: 1600, height: 900 };
+const ASCII_PUNCTUATION = "!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~";
 export const EXPORT_FONTS = [
   {
     id: "system",
@@ -114,10 +117,23 @@ export const EXPORT_FONTS = [
     label: "JetBrains Mono",
     family: "JetBrains Mono",
     file: "/fonts/jetbrains-mono.woff2",
+    advanceEm: 600 / 1000,
   },
-  { id: "fira", label: "Fira Code", family: "Fira Code", file: "/fonts/fira-code.woff2" },
-  { id: "geist", label: "Geist Mono", family: "Geist Mono", file: "/fonts/geist-mono.woff2" },
-  { id: "hack", label: "Hack", family: "Hack", file: "/fonts/hack.woff2" },
+  {
+    id: "fira",
+    label: "Fira Code",
+    family: "Fira Code",
+    file: "/fonts/fira-code.woff2",
+    advanceEm: 1200 / 2000,
+  },
+  {
+    id: "geist",
+    label: "Geist Mono",
+    family: "Geist Mono",
+    file: "/fonts/geist-mono.woff2",
+    advanceEm: 600 / 1000,
+  },
+  { id: "hack", label: "Hack", family: "Hack", file: "/fonts/hack.woff2", advanceEm: 1233 / 2048 },
 ];
 
 import { loadFontBase64, loadImageDataUrl } from "../assets.ts";
@@ -581,6 +597,8 @@ export async function createHighlightedSvg(
   footerSettings,
   fontSize = EXPORT_FONT_SIZE,
   wordDiff = false,
+  aspectRatio,
+  ligatures = true,
 ) {
   const language = languageOverride || inferLanguage(filename, code);
   const [{ clientHighlighterPromise }, { loadTheme }] = await Promise.all([
@@ -809,7 +827,30 @@ export async function createHighlightedSvg(
       innerPaddingPx +
       (renderFooter ? FOOTER_HEIGHT : 0);
 
-  const outerPaddingPx = background ? (outerPadding ?? EXPORT_OUTER_PADDING) : 0;
+  const margin = background ? (outerPadding ?? EXPORT_OUTER_PADDING) : 0;
+  let outerPaddingPx = margin;
+  // The canvas area shown in the image. Normally the whole canvas; for 16:9 the
+  // card is padded by the larger 16:9 slack so the background covers a centred
+  // 16:9 frame, and the viewBox crops the other axis to it.
+  let viewport = {
+    left: 0,
+    top: 0,
+    width: actualWidth + margin * 2,
+    height: actualHeight + margin * 2,
+  };
+  if (aspectRatio === "16:9") {
+    const width = Math.max(viewport.width, (viewport.height * 16) / 9);
+    const height = (width * 9) / 16;
+    if (background) {
+      outerPaddingPx = Math.ceil(Math.max(width - actualWidth, height - actualHeight) / 2);
+    }
+    viewport = {
+      left: outerPaddingPx - (width - actualWidth) / 2,
+      top: outerPaddingPx - (height - actualHeight) / 2,
+      width,
+      height,
+    };
+  }
   const totalWidth = actualWidth + outerPaddingPx * 2;
   const totalHeight = actualHeight + outerPaddingPx * 2;
 
@@ -829,7 +870,14 @@ export async function createHighlightedSvg(
     ? `<line data-export-gutter-divider="true" x1="${gutterDividerX}" y1="${gutterDividerTop}" x2="${gutterDividerX}" y2="${gutterDividerBottom}" stroke="${escapeXml(editorFg)}" stroke-opacity="0.12" stroke-width="1"/>`
     : "";
 
-  const fontAttrs = `font-size="${codeFontSize}" font-family="${escapeXml(fontFamily)}" xml:space="preserve" text-rendering="geometricPrecision" letter-spacing="0"`;
+  const fontAttrs =
+    `font-size="${codeFontSize}" font-family="${escapeXml(fontFamily)}" xml:space="preserve" text-rendering="geometricPrecision" letter-spacing="0"` +
+    (ligatures ? "" : ` style="font-variant-ligatures:none"`);
+  // Browsers honour font-variant-ligatures, but resvg (local PNG conversion)
+  // ignores it. Neither shapes across text chunks, so with a known advance each
+  // punctuation character after another one starts a chunk at its own column.
+  const ligatureAdvance =
+    !ligatures && exportFont.advanceEm ? codeFontSize * exportFont.advanceEm : null;
 
   const lineMarkup = displayRows
     .map((row, i) => {
@@ -848,11 +896,35 @@ export async function createHighlightedSvg(
       if (tokens.length === 0) {
         tspans = `<tspan fill="${escapeXml(editorFg)}"> </tspan>`;
       } else {
+        let column = 0;
+        let previous = "";
         tspans = tokens
           .map(({ text, color, bold, italic }) => {
             const fw = bold ? ' font-weight="bold"' : "";
             const fs = italic ? ' font-style="italic"' : "";
-            return `<tspan fill="${escapeXml(color)}"${fw}${fs}>${escapeXml(text)}</tspan>`;
+            const pieces = [];
+            for (const char of ligatureAdvance === null ? [text] : text) {
+              const split =
+                ligatureAdvance !== null &&
+                previous !== "" &&
+                ASCII_PUNCTUATION.includes(previous) &&
+                ASCII_PUNCTUATION.includes(char);
+              if (split || pieces.length === 0) {
+                pieces.push({
+                  text: "",
+                  x: split ? +(codeX + column * ligatureAdvance).toFixed(3) : undefined,
+                });
+              }
+              pieces[pieces.length - 1].text += char;
+              previous = char;
+              column++;
+            }
+            return pieces
+              .map(
+                (piece) =>
+                  `<tspan fill="${escapeXml(color)}"${fw}${fs}${piece.x === undefined ? "" : ` x="${piece.x}"`}>${escapeXml(piece.text)}</tspan>`,
+              )
+              .join("");
           })
           .join("");
       }
@@ -1011,7 +1083,9 @@ export async function createHighlightedSvg(
     `<rect x="${outerPaddingPx}" y="${outerPaddingPx}" width="${actualWidth}" height="${actualHeight}" ` +
     `rx="${cardRadius}" ry="${cardRadius}" fill="${escapeXml(cardFill)}"${cardStrokeAttrs}${cardShadowAttr}/>`;
   const sceneDefs = scene ? renderBrandSceneDefs(scene) : "";
-  const sceneCanvasLayers = scene ? renderBrandCanvasLayers(scene, totalWidth, totalHeight) : "";
+  const sceneCanvasLayers = scene
+    ? renderBrandCanvasLayers(scene, totalWidth, totalHeight, viewport)
+    : "";
   const sceneFrame = scene
     ? renderBrandFrame(scene, outerPaddingPx, actualWidth, actualHeight, cardRadius)
     : "";
@@ -1219,7 +1293,7 @@ export async function createHighlightedSvg(
     `</metadata>`;
 
   return (
-    `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${totalWidth}" height="${totalHeight}" viewBox="0 0 ${totalWidth} ${totalHeight}">` +
+    `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${aspectRatio ? EXPORT_CANVAS_16_9.width : totalWidth}" height="${aspectRatio ? EXPORT_CANVAS_16_9.height : totalHeight}" viewBox="${viewport.left} ${viewport.top} ${viewport.width} ${viewport.height}">` +
     metadataMarkup +
     fontStyleBlock +
     avatarPatternsBlock +
@@ -1263,6 +1337,8 @@ export async function renderToFile(
   headerSettings,
   footerSettings,
   fontSize,
+  aspectRatio,
+  ligatures,
 ) {
   const svg = await createHighlightedSvg(
     code,
@@ -1290,6 +1366,9 @@ export async function renderToFile(
     headerSettings,
     footerSettings,
     fontSize,
+    false,
+    aspectRatio,
+    ligatures,
   );
   const svgW = parseInt(/\bwidth="(\d+)"/.exec(svg)?.[1] ?? String(width));
   const svgH = parseInt(/\bheight="(\d+)"/.exec(svg)?.[1] ?? "400");
@@ -1353,7 +1432,13 @@ function renderBrandSceneDefs(scene) {
   );
 }
 
-function renderBrandCanvasLayers(scene, totalWidth, totalHeight) {
+function renderBrandCanvasLayers(
+  scene,
+  totalWidth,
+  totalHeight,
+  /** Visible canvas area; the rim outlines it rather than the padded canvas. */
+  rim,
+) {
   const glowLayers = scene.glows
     .map(
       (_glow, index) =>
@@ -1363,7 +1448,7 @@ function renderBrandCanvasLayers(scene, totalWidth, totalHeight) {
   return (
     glowLayers +
     `<rect data-scene-layer="vignette" width="${totalWidth}" height="${totalHeight}" fill="url(#brand-vignette)"/>` +
-    `<rect data-scene-layer="canvas-rim" x="0.5" y="0.5" width="${Math.max(0, totalWidth - 1)}" height="${Math.max(0, totalHeight - 1)}" rx="${scene.canvasRadius}" ry="${scene.canvasRadius}" fill="none" stroke="${escapeXml(scene.canvasBorder)}" stroke-width="1"/>`
+    `<rect data-scene-layer="canvas-rim" x="${rim.left + 0.5}" y="${rim.top + 0.5}" width="${Math.max(0, rim.width - 1)}" height="${Math.max(0, rim.height - 1)}" rx="${scene.canvasRadius}" ry="${scene.canvasRadius}" fill="none" stroke="${escapeXml(scene.canvasBorder)}" stroke-width="1"/>`
   );
 }
 

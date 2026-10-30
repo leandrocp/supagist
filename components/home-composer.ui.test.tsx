@@ -268,6 +268,40 @@ describe("HomeComposer controls", () => {
     expect(screen.getByTestId("code-preview").getAttribute("data-font-size")).toBe("20");
   });
 
+  it("toggles ligatures and the 16:9 size, reflected in the live preview", () => {
+    render(<HomeComposer />);
+    const preview = () => screen.getByTestId("code-preview");
+    const canvas = () => preview().parentElement!;
+    expect(preview().style.fontVariantLigatures).toBe("");
+    expect(canvas().style.aspectRatio).toBe("");
+
+    fireEvent.click(screen.getByRole("button", { name: "Advanced settings" }));
+    fireEvent.click(screen.getByRole("switch", { name: "Ligatures" }));
+    expect(preview().style.fontVariantLigatures).toBe("none");
+
+    expect(screen.getByRole("combobox", { name: "Size" }).textContent).toBe("Fit to code");
+    fireEvent.click(screen.getByRole("combobox", { name: "Size" }));
+    fireEvent.click(screen.getByRole("option", { name: "16:9 (1600×900)" }));
+    expect(canvas().style.aspectRatio).toBe("16 / 9");
+    expect(screen.getByText(/1600 × 900/)).toBeTruthy();
+    expect(JSON.parse(window.localStorage.getItem("supagist:draft:v1")!)).toMatchObject({
+      aspectRatio: "16:9",
+      ligatures: false,
+    });
+  });
+
+  it("restores persisted 16:9 and ligatures-off settings", () => {
+    window.localStorage.setItem(
+      "supagist:draft:v1",
+      JSON.stringify({ aspectRatio: "16:9", ligatures: false }),
+    );
+
+    render(<HomeComposer />);
+
+    expect(screen.getByTestId("code-preview").style.fontVariantLigatures).toBe("none");
+    expect(screen.getByTestId("code-preview").parentElement!.style.aspectRatio).toBe("16 / 9");
+  });
+
   it("snaps an unsupported persisted font size to a supported one", () => {
     window.localStorage.setItem("supagist:draft:v1", JSON.stringify({ fontSize: 15 }));
 
