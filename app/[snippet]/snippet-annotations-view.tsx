@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Check, Copy, MessageSquarePlus, SmilePlus } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { EXPORT_FONTS } from "@/lib/export-utils";
 import { createClient } from "@/lib/supabase/client";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
@@ -188,6 +189,7 @@ type Props = {
   language: string;
   snippetUrl: string;
   snippetTheme: string;
+  fontId: string;
   snippetReactions: Record<number, import("@/lib/snippet-utils").ExportReactionChip[]>;
   preRenderedLines: string[];
   themeIsDark: boolean;
@@ -204,6 +206,7 @@ export function SnippetAnnotationsView({
   language,
   snippetUrl,
   snippetTheme,
+  fontId,
   snippetReactions,
   preRenderedLines,
   themeIsDark,
@@ -675,7 +678,10 @@ export function SnippetAnnotationsView({
   return (
     <div
       className="flex h-full min-h-0 flex-col overflow-hidden font-mono text-sm"
-      style={{ backgroundColor: c.bg }}
+      style={{
+        backgroundColor: c.bg,
+        fontFamily: (EXPORT_FONTS.find((font) => font.id === fontId) ?? EXPORT_FONTS[0]!).family,
+      }}
     >
       {/* Window chrome — three-column grid so the centred title doesn't
           shift when the right-side button changes width (Copy ↔ Copied). */}
@@ -715,6 +721,7 @@ export function SnippetAnnotationsView({
             code={code}
             filename={filename}
             theme={snippetTheme}
+            fontId={fontId}
             authorUsername={author?.username ?? null}
             authorAvatarUrl={author?.avatar_url ?? null}
             reactions={exportReactions}

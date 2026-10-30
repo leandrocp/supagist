@@ -206,6 +206,7 @@ export default async function SnippetPage({ params }: Props) {
               language={language}
               snippetUrl={snippetUrl}
               snippetTheme={snippet.theme}
+              fontId={snippet.font_id}
               snippetReactions={snippetReactions}
               preRenderedLines={preRenderedLines}
               themeIsDark={themeIsDark}

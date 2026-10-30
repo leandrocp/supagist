@@ -130,6 +130,13 @@ describe("publishSnippet — validation", () => {
     );
   });
 
+  it.each(["unknown", "", new Blob(["jetbrains"])])(
+    "rejects an invalid font ID: %s",
+    async (font) => {
+      expect((await publishSnippet(makeFormData({ font_id: font }))).error).toBe("Invalid font.");
+    },
+  );
+
   it("error result never has a path", async () => {
     const result = await publishSnippet(makeFormData({ code: "" }));
     expect("path" in result).toBe(false);
@@ -173,6 +180,19 @@ describe("publishSnippet — auth guard", () => {
 
 describe("publishSnippet — happy path", () => {
   beforeEach(() => vi.clearAllMocks());
+
+  it.each(["system", "jetbrains", "fira", "geist", "hack", undefined])(
+    "stores the selected font, defaulting omitted fonts to System: %s",
+    async (fontId) => {
+      const supabase = makeMockSupabase();
+      mockCreateClient.mockResolvedValue(supabase);
+      const result = await publishSnippet(makeFormData(fontId ? { font_id: fontId } : {}));
+      expect(result.error).toBeUndefined();
+      expect(supabase._.mockInsert).toHaveBeenCalledWith(
+        expect.objectContaining({ font_id: fontId ?? "system" }),
+      );
+    },
+  );
 
   it("returns a path on success", async () => {
     mockCreateClient.mockResolvedValue(makeMockSupabase());

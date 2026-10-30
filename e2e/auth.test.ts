@@ -32,6 +32,37 @@ test("authenticated user can publish a snippet", async ({ page }) => {
   await expect(keyword).toHaveCSS("color", "rgb(207, 34, 46)");
 });
 
+for (const font of [
+  {
+    id: "system",
+    label: "System",
+    family: "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace",
+  },
+  { id: "jetbrains", label: "JetBrains Mono", family: '"JetBrains Mono"' },
+]) {
+  test(`published snippets retain ${font.label} in the saved view and export`, async ({ page }) => {
+    await page.goto("/");
+    await page.locator("textarea").fill("const font = 'saved';\nconsole.log(font);");
+    await page.getByLabel("Filename").fill("font.ts");
+    await page.getByRole("button", { name: "Advanced settings" }).click();
+    await page.getByRole("combobox", { name: "Font", exact: true }).click();
+    await page.getByRole("option", { name: font.label, exact: true }).click();
+    await expect(page.locator("textarea")).toHaveCSS("font-family", font.family);
+
+    await page.getByRole("button", { name: /^publish$/i }).click();
+    await page.waitForURL(/\/[a-z0-9-]+-[a-z0-9]{6}$/);
+    await page.reload();
+    const code = page.getByText("const", { exact: true });
+    await expect(code).toHaveCSS("font-family", font.family);
+
+    await page.setViewportSize({ width: 375, height: 812 });
+    await expect(code).toHaveCSS("font-family", font.family);
+    await expect(code).toBeVisible();
+    await page.getByRole("button", { name: "Export", exact: true }).click();
+    await expect(page.locator('select:has(option[value="jetbrains"])')).toHaveValue(font.id);
+  });
+}
+
 test("published snippet page shows the code", async ({ page }) => {
   await page.goto("/");
 
