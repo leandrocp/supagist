@@ -17,6 +17,7 @@
  */
 import { test as setup } from "@playwright/test";
 import path from "path";
+import { ensureAuthUser } from "./auth-user";
 
 const AUTH_FILE = path.join(__dirname, ".auth/user.json");
 
@@ -41,21 +42,8 @@ setup("create test user and authenticate", async ({ page }) => {
     throw new Error("E2E_SUPABASE_URL must not point to a supabase.co (production) project.");
   }
 
-  // 1. Ensure test user exists (idempotent — ignores 422 conflict)
-  await fetch(`${supabaseUrl}/auth/v1/admin/users`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${serviceKey}`,
-      apikey: serviceKey,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      email,
-      password,
-      email_confirm: true,
-      user_metadata: { user_name: "e2e-test", avatar_url: "" },
-    }),
-  });
+  // 1. Ensure this email has its own profile; preserve an existing identity.
+  await ensureAuthUser(supabaseUrl, serviceKey, email, password);
 
   // 2. Smoke-check that password auth works
   const tokenRes = await fetch(`${supabaseUrl}/auth/v1/token?grant_type=password`, {
