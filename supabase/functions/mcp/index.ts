@@ -40,7 +40,7 @@ Deno.serve(
           "render_snippet",
           {
             description:
-              "Render code as SVG text without publishing it. Save the returned XML as a .svg file; convert to PNG locally if needed. Server-side PNG is not supported. Fixtures are benchmark-only presets.",
+              "Render code as SVG without publishing. For Supabase/Vercel/etc style use brand, not a theme alias. A brand applies the full app preset; explicit appearance fields override it. Supports filename, auto language (null), fonts/sizes, backgrounds, spacing/corners, window chrome, line numbers, header/footer alignment/details, supplied reactions/comments and author initials. Maximum 30 visual rows including wrapping/comments. Save returned XML as .svg; convert to PNG locally. Use list_options for presets and values. Fixtures are benchmark-only.",
             inputSchema: renderInput,
             annotations: readOnly,
           },
@@ -53,12 +53,14 @@ Deno.serve(
         server.registerTool(
           "list_options",
           {
-            description: "Supported languages and themes in this intentionally limited M0 spike.",
+            description:
+              "Discover supported languages, syntax themes, complete brand presets and all appearance controls. Brand is a full recipe; theme changes only syntax colors. No publishing or saved-snippet access.",
             inputSchema: z.object({}),
             annotations: readOnly,
           },
           async () => {
-            const { supportedLanguages, supportedThemes } = await import("./render.ts");
+            const { supportedLanguages, supportedThemes, appearanceOptions } =
+              await import("./render.ts");
             return {
               content: [
                 {
@@ -66,6 +68,7 @@ Deno.serve(
                   text: JSON.stringify({
                     languages: supportedLanguages,
                     themes: supportedThemes,
+                    ...appearanceOptions,
                   }),
                 },
               ],

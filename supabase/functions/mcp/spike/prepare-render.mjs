@@ -13,6 +13,17 @@ const generated = new URL("./generated/", import.meta.url);
 const assets = new URL("../assets/", import.meta.url);
 await Promise.all([mkdir(generated, { recursive: true }), mkdir(assets, { recursive: true })]);
 const digest = (bytes) => createHash("sha256").update(bytes).digest("hex");
+// Asset-only refresh avoids unrelated installed parser metadata drift (e.g. LLVM)
+// when no app/vendor regeneration is needed. The default still prepares everything.
+if (process.argv.includes("--assets-only")) {
+  const manifest = JSON.parse(await readFile(new URL("manifest.json", assets), "utf8"));
+  await prepareBrandAssets(manifest);
+  await writeFile(new URL("manifest.json", assets), JSON.stringify(manifest, null, 2) + "\n");
+  console.log(
+    "Prepared brand fonts, licenses and images only; app/vendor/parser outputs unchanged.",
+  );
+  process.exit(0);
+}
 for (const [pkg, version] of [
   ["lumis", "0.9.0"],
   ["themes", "0.4.0"],
@@ -181,6 +192,7 @@ for (let face = 0; face < 2; face++) {
     bytes: bytes.length,
   };
 }
+await prepareBrandAssets(assetManifest);
 await writeFile(new URL("manifest.json", assets), JSON.stringify(assetManifest, null, 2) + "\n");
 await writeFile(new URL("sources.json", generated), JSON.stringify(sources, null, 2) + "\n");
 const finishVendorManifest = await prepareVendor(themeNames);
@@ -192,3 +204,56 @@ await finishVendorManifest();
 console.log(
   `Prepared M0 app copy, ${Object.keys(packages).length} parser manifests, ${themeNames.length} theme imports, and assets.`,
 );
+
+async function prepareBrandAssets(manifest) {
+  // Full preparation appends vendor notices last; keep asset-only output identical.
+  const vendorNotices = manifest["vendor-licenses.txt"];
+  delete manifest["vendor-licenses.txt"];
+  // uv installs exact build-only packages in its cache, not node_modules or Edge.
+  execFileSync(
+    "uv",
+    [
+      "run",
+      "--no-project",
+      "--script",
+      fileURLToPath(new URL("prepare-fonts.py", import.meta.url)),
+      fileURLToPath(root),
+      fileURLToPath(assets),
+    ],
+    { stdio: "inherit" },
+  );
+  const record = async (name, source, extra = {}, copy = false) => {
+    const sourceBytes = await readFile(new URL(source, root));
+    if (copy) await writeFile(new URL(name, assets), sourceBytes);
+    const bytes = await readFile(new URL(name, assets));
+    manifest[name] = {
+      source,
+      sourceSha256: digest(sourceBytes),
+      sha256: digest(bytes),
+      bytes: bytes.length,
+      ...extra,
+    };
+  };
+  manifest["JetBrainsMono-Regular.ttf"].license = "JetBrainsMono-OFL.txt";
+  for (const [source, name, license] of [
+    ["geist-mono", "GeistMono.ttf", "GeistMono-OFL.txt"],
+    ["fira-code", "FiraCode.ttf", "FiraCode-OFL.txt"],
+    ["hack", "Hack.ttf", "Hack-LICENSE.txt"],
+  ]) {
+    await record(name, `public/fonts/${source}.woff2`, {
+      license,
+      conversion:
+        "fonttools==4.60.1, brotli==1.1.0; TTFont(flavor=None, recalcTimestamp=False, recalcBBoxes=False), save(reorderTables=True)",
+    });
+    if (source === "hack") {
+      await record(license, "public/fonts/hack.woff2", {
+        provenance: "Full MIT/Bitstream Vera notice extracted from font name table ID 13",
+      });
+    } else {
+      await record(license, `node_modules/@fontsource/${source}/LICENSE`, {}, true);
+    }
+  }
+  for (const name of ["tailwind-beams.png", "resend-dark.png"])
+    await record(name, `public/brands/${name}`, {}, true);
+  if (vendorNotices) manifest["vendor-licenses.txt"] = vendorNotices;
+}

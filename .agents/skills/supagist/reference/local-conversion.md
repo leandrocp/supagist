@@ -1,7 +1,8 @@
 # Local SVG → PNG
 
 The bundled converter uses native resvg 2.6.2 on the client machine, not a hosted
-service. It preserves Supagist's embedded JetBrains Mono TTF by supplying its bytes
+service. It preserves Supagist's embedded TTF (Geist Mono, JetBrains Mono, Fira Code
+or Hack) and uses the selected family for fallback text by supplying its bytes
 to resvg explicitly; resvg does not automatically load CSS `@font-face` data URLs.
 It is for SVGs returned by Supagist, not arbitrary downloaded SVGs.
 
@@ -23,8 +24,8 @@ node "$CONVERTER_DIR/convert-png.mjs" "/absolute/path/greeting.svg" "/absolute/p
 
 With no size argument, the PNG is **2000px wide**; height follows the SVG's aspect
 ratio, rounded to the nearest pixel. To choose a width, append `--width 2400`
-(or another positive whole-pixel width). Explicit trailing `1` and `2` still
-request the SVG's original dimensions or twice its width and height; use those
+(or another positive whole-pixel width). Explicit trailing `1`, `2`, `4` or `6`
+request the SVG's original dimensions or that multiple of width and height; use those
 only when the user asks for that scale. Width and scale cannot be combined.
 
 The MCP call should still use `pixelRatio: 1`. Reuse that saved SVG for every

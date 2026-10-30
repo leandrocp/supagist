@@ -8,8 +8,36 @@ function. Reconnect MCP clients to refresh their cached tool schema.
 The [Supagist skill](../../../.agents/skills/supagist/SKILL.md)
 teaches clients to save the XML as `.svg` and offers optional local PNG conversion.
 MCP rendering stays on Supabase; no Vercel rendering fallback is needed or added.
-The web app's browser export behavior is unchanged. The original M0 measurements
+The web app retains browser-side PNG/SVG exports. The original M0 measurements
 below describe the retired SVG+PNG implementation, not the SVG-only contract.
+
+## Brand presets and advanced controls
+
+For Supabase style, send `brand: "supabase"`, **not** `theme: "supabase-dark"`.
+`list_options` exposes all 29 app brand recipes plus backgrounds, fonts, sizes,
+spacing, corners, window decorations and metadata defaults. Explicit fields
+override the selected preset; partial header/footer settings merge with it.
+`render_snippet` also accepts supplied reaction/comment data and author labels.
+See the skill's [complete parameter guide](../../../.agents/skills/supagist/reference/features.md).
+
+Named fonts and brand pattern images are embedded. `system` uses JetBrains Mono
+for portability. Comments embed Hack as a missing-glyph fallback where needed.
+Remote avatar URLs and custom fonts are not accepted. Rendering does not publish
+or fetch saved collaboration. More than 30 visual rows (wrapping/comments
+included) is rejected rather than silently cropped. Unknown fields are rejected.
+
+Run the public examples through local Supabase with:
+
+```sh
+node supabase/functions/mcp/verify/appearance.mjs /tmp/supagist-appearance
+mise exec deno@2.9.0 -- deno test --config supabase/functions/mcp/deno.json \
+  --allow-read --allow-net --allow-env supabase/functions/mcp/spike/render.deno.ts
+```
+
+The converter defaults to 2000px width and supports explicit 1×/2×/4×/6× scales.
+These are local PNG choices, not new Edge rasterization modes. The original
+uncompressed-bundle caveat below still applies; adding fonts/patterns is not a
+claim that the local ESZIP satisfies a hosted size limit.
 
 ## Live endpoint and rate limits (2026-10-29)
 

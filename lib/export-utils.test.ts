@@ -1364,6 +1364,30 @@ describe("createHighlightedSvg", () => {
     expect(svg).toContain("🔥");
   });
 
+  it("renders supplied reaction labels as readable text, never SVG markup", async () => {
+    const svg = await createHighlightedSvg(
+      "const x = 1;",
+      "test.js",
+      "github_light",
+      1200,
+      undefined,
+      null,
+      undefined,
+      false,
+      "system",
+      "javascript",
+      { 1: [{ emoji: "<g>&", reactors: [{ username: "Ada" }] }] },
+      true,
+    );
+    const document = new DOMParser().parseFromString(svg, "image/svg+xml");
+    const label = [...document.querySelectorAll("text")].find(
+      (node) => node.textContent === "<g>&",
+    );
+    expect(label).toBeDefined();
+    expect(label?.getAttribute("fill")).toBe("#333333");
+    expect(svg).toContain("&lt;g&gt;&amp;");
+  });
+
   it("renders a comment under the line it annotates", async () => {
     const svg = await createHighlightedSvg(
       "const x = 1;",

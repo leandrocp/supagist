@@ -21,6 +21,8 @@ test("renders at 2000px by default, requested widths, or explicit scales without
       [["--width", "2600"], 2600, 1400],
       [["1"], 13, 7],
       [["2"], 26, 14],
+      [["4"], 52, 28],
+      [["6"], 78, 42],
     ]) {
       const output = join(dir, `${width}.png`);
       const result = spawnSync(process.execPath, [cli, input, output, ...args]);

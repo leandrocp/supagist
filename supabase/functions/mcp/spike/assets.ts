@@ -1,9 +1,21 @@
 const cache = new Map<string, Promise<Uint8Array>>();
-let fontBase64: Promise<string> | undefined;
+const fontBase64 = new Map<string, Promise<string>>();
+const fonts = new Map([
+  ["/fonts/jetbrains-mono.woff2", "JetBrainsMono-Regular.ttf"],
+  ["/fonts/geist-mono.woff2", "GeistMono.ttf"],
+  ["/fonts/fira-code.woff2", "FiraCode.ttf"],
+  ["/fonts/hack.woff2", "Hack.ttf"],
+]);
+const images = new Map([
+  ["m0:avatar-1", "avatar-1.png"],
+  ["m0:avatar-2", "avatar-2.png"],
+  ["/brands/tailwind-beams.png", "tailwind-beams.png"],
+  ["/brands/resend-dark.png", "resend-dark.png"],
+]);
+const allowed = new Set([...fonts.values(), ...images.values()]);
 
 export function assetBytes(name: string): Promise<Uint8Array> {
-  const allowed = ["JetBrainsMono-Regular.ttf", "avatar-1.png", "avatar-2.png"];
-  if (!allowed.includes(name)) throw new Error(`Unknown M0 asset: ${name}`);
+  if (!allowed.has(name)) throw new Error(`Unknown bundled asset: ${name}`);
   let pending = cache.get(name);
   if (!pending) {
     pending = Deno.readFile(new URL(`../assets/${name}`, import.meta.url));
@@ -19,12 +31,18 @@ export function base64(bytes: Uint8Array): string {
 }
 
 export async function loadFontBase64(file: string): Promise<string> {
-  if (file !== "/fonts/jetbrains-mono.woff2") throw new Error("M0 only bundles JetBrains Mono");
-  return (fontBase64 ??= assetBytes("JetBrainsMono-Regular.ttf").then(base64));
+  const name = fonts.get(file);
+  if (!name) throw new Error(`Unknown bundled font: ${file}`);
+  let pending = fontBase64.get(name);
+  if (!pending) {
+    pending = assetBytes(name).then(base64);
+    fontBase64.set(name, pending);
+  }
+  return pending;
 }
 
 export async function loadImageDataUrl(url: string): Promise<string> {
-  const name = { "m0:avatar-1": "avatar-1.png", "m0:avatar-2": "avatar-2.png" }[url];
-  if (!name) throw new Error("M0 refuses remote image URLs");
+  const name = images.get(url);
+  if (!name) throw new Error("Renderer only accepts bundled image paths");
   return `data:image/png;base64,${base64(await assetBytes(name))}`;
 }

@@ -8,7 +8,7 @@ const maxPixels = 16_000_000;
 let fontDirectory;
 try {
   let fitTo = { mode: "width", value: 2000 };
-  if (sizeArgs.length === 1 && ["1", "2"].includes(sizeArgs[0])) {
+  if (sizeArgs.length === 1 && ["1", "2", "4", "6"].includes(sizeArgs[0])) {
     fitTo = { mode: "zoom", value: Number(sizeArgs[0]) };
   } else if (
     sizeArgs.length === 2 &&
@@ -19,10 +19,14 @@ try {
   ) {
     fitTo.value = Number(sizeArgs[1]);
   } else if (sizeArgs.length) {
-    throw new Error("Usage: node convert-png.mjs INPUT.svg OUTPUT.png [--width PIXELS | 1 | 2]");
+    throw new Error(
+      "Usage: node convert-png.mjs INPUT.svg OUTPUT.png [--width PIXELS | 1 | 2 | 4 | 6]",
+    );
   }
   if (!input || !output) {
-    throw new Error("Usage: node convert-png.mjs INPUT.svg OUTPUT.png [--width PIXELS | 1 | 2]");
+    throw new Error(
+      "Usage: node convert-png.mjs INPUT.svg OUTPUT.png [--width PIXELS | 1 | 2 | 4 | 6]",
+    );
   }
   const svg = readFileSync(input, "utf8");
   const fontFiles = [];
@@ -31,6 +35,7 @@ try {
   // Search its style block only, not code text which can contain the same URL.
   const styleStart = svg.indexOf("<style>");
   const style = styleStart === -1 ? "" : svg.slice(styleStart, svg.indexOf("</style>", styleStart));
+  const fontFamily = /@font-face\{font-family:'([^']+)'/.exec(style)?.[1] ?? "JetBrains Mono";
   const marker = "data:font/ttf;base64,";
   let offset = style.indexOf(marker);
   while (offset !== -1) {
@@ -53,9 +58,9 @@ try {
     font: {
       fontFiles,
       loadSystemFonts: false,
-      defaultFontFamily: "JetBrains Mono",
-      monospaceFamily: "JetBrains Mono",
-      sansSerifFamily: "JetBrains Mono",
+      defaultFontFamily: fontFamily,
+      monospaceFamily: fontFamily,
+      sansSerifFamily: fontFamily,
     },
   });
   // These getters describe the SVG, not the scaled PNG. Check before rasterizing.

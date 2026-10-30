@@ -1,17 +1,20 @@
 # M0 renderer adapter (not M1 extraction)
 
-`../render.ts` exports `renderSnippet({code, language, theme, format, pixelRatio,
-fixture?})`, `supportedLanguages`, `supportedThemes`, `RenderInput`, and
-`RenderResult`. `format` is `svg` only, `pixelRatio` is `1 | 2`, and the optional
-fixture is `plain | vercel | avatars` (default plain). The endpoint owns code
-length limits and newline normalization. Unsupported language/theme/format/ratio
-values reject rather than returning plaintext.
+`../render.ts` exports `renderSnippet`, `supportedLanguages`, `supportedThemes`,
+`appearanceOptions`, `RenderInput`, and `RenderResult`. The public schema in
+`../input.ts` exposes the app's complete brand presets, explicit appearance and
+metadata overrides, and supplied reactions/comments. See the Supagist skill's
+`reference/features.md` for the public contract. `format` is SVG only and
+`pixelRatio` is `1 | 2`; raster resolution belongs to local conversion. Legacy
+`plain | vercel | avatars` fixtures remain for benchmarks. Input is validated at
+the tool and renderer boundaries; unknown fields and inputs that would truncate
+beyond 30 visual rows are rejected.
 
 The result contains `svg: string`,
 `width`, `height`, `logicalWidth`, `logicalHeight`, `bytes`, `contentType`,
 `timings`, and `parserEvents`. Width/height are physical output dimensions;
 logical dimensions are pre-pixel-ratio. SVG retains a logical viewBox and embeds
-JetBrains Mono TTF. PNG conversion belongs to the client; the Edge renderer has
+the selected font's TTF. PNG conversion belongs to the client; the Edge renderer has
 no rasterizer dependency.
 
 ## Reproduce
@@ -19,7 +22,7 @@ no rasterizer dependency.
 ```sh
 npm ci
 node supabase/functions/mcp/spike/prepare-render.mjs
-mise exec deno@2.9.0 -- deno test --no-config --no-lock --node-modules-dir=none \
+mise exec deno@2.9.0 -- deno test --config supabase/functions/mcp/deno.json \
   --allow-read --allow-net --allow-env supabase/functions/mcp/spike/render.deno.ts
 npm run lint
 npm test
@@ -36,9 +39,10 @@ helpers, but the only public execution path is `createHighlightedSvg`.
 Generation changes only imports, the two browser asset loaders, WOFF2 font MIME
 and format to TTF, and the app's load-or-plaintext helper to strict loading. The
 actual Vercel background, scene, registration guides, frame, and Gaussian
-`feDropShadow` come directly from the copied app presets/rendering. M0 uses
-JetBrains rather than the Vercel preset's Geist font because only one TTF is
-bundled. Reaction labels use ASCII `+1` because this spike has no emoji font.
+`feDropShadow` come directly from the copied app presets/rendering. Geist, Fira,
+Hack and JetBrains TTFs plus the two app pattern PNGs are bundled (see the assets
+README for provenance). `system` uses JetBrains for portable output. Benchmark
+reaction labels use ASCII `+1`; no color emoji font is bundled.
 
 `fixtures.ts` provides fixed short and 30-line TypeScript inputs. The avatars
 selector adds fixed PNG portraits to lines 3, 15 and 30 and the footer; it does
@@ -54,7 +58,7 @@ It does not modify rendering algorithms,
 minify code, replace runtime globals, or change Tree-sitter's conditional Node
 branches. Rolldown reports two existing upstream direct-eval warnings.
 
-No import-map aliases are needed for rendering. Parent-owned configuration can
+Only the input schema's existing `zod` alias is needed for rendering. Configuration can
 remove `@lumis-sh/lumis/client`, `@lumis-sh/lumis/`, `@lumis-sh/themes/`, and
 `@resvg/resvg-wasm` aliases if nothing else uses them. Keep the endpoint's other
 dependencies unchanged.

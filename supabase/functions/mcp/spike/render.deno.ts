@@ -1,5 +1,10 @@
 import { strict as assert } from "node:assert";
-import { renderSnippet, supportedLanguages, supportedThemes } from "../render.ts";
+import {
+  renderSnippet,
+  supportedLanguages,
+  supportedThemes,
+  appearanceOptions,
+} from "../render.ts";
 import { renderFixture } from "./fixtures.ts";
 import { loadImageDataUrl } from "./assets.ts";
 
@@ -47,11 +52,91 @@ Deno.test("invalid parsers/themes/ratios and remote avatars fail rather than sil
   await assert.rejects(() => renderSnippet({ ...input, language: "m0-missing-parser" }));
   await assert.rejects(() => renderSnippet({ ...input, theme: "m0-missing-theme" }));
   await assert.rejects(() => renderSnippet({ ...input, pixelRatio: 3 as 1 }), /pixelRatio/);
+  await assert.rejects(() => renderSnippet({ ...input, format: "png" as "svg" }), /svg/);
   await assert.rejects(
-    () => renderSnippet({ ...input, format: "png" as "svg" }),
-    /Only SVG is supported/,
+    () => loadImageDataUrl("https://example.com/avatar.png"),
+    /bundled image paths/,
   );
-  await assert.rejects(() => loadImageDataUrl("https://example.com/avatar.png"), /refuses remote/);
+});
+
+Deno.test("Supabase brand is a full scene, and explicit controls override preset defaults", async () => {
+  const code = 'const greeting = "Olá, Supagist!";\nconsole.log(greeting);';
+  const branded = await renderSnippet({ code, brand: "supabase", filename: "greeting.js" });
+  const syntaxOnly = await renderSnippet({ code, theme: "supabase-dark" });
+  assert.match(branded.svg, /#3ECF8E/);
+  assert.match(branded.svg, /brand-card-shadow/);
+  assert.match(branded.svg, /font-family:'Geist Mono'/);
+  assert.match(branded.svg, /greeting.js/);
+  assert.doesNotMatch(branded.svg, /#ff5f57/);
+  assert.doesNotMatch(syntaxOnly.svg, /brand-card-shadow/);
+  const custom = await renderSnippet({
+    code,
+    brand: "supabase",
+    background: null,
+    theme: "github_light",
+    fontId: "fira",
+    filename: "greeting.js",
+    language: null,
+    fontSize: 18,
+    lineNumbers: true,
+    innerPadding: 32,
+    cornerRadius: 16,
+    windowDecoration: "windows",
+    header: { showFilename: false, showLanguage: true, languagePosition: "left" },
+    footer: {
+      enabled: true,
+      showTheme: false,
+      showAuthor: true,
+      showCharCount: true,
+      alignment: "right",
+    },
+    author: "Leandro",
+    comments: { 2: { body: "Visible comment", author: "Ada" } },
+    reactions: { 1: [{ emoji: "+1", reactors: [{ username: "Grace" }] }] },
+  });
+  assert.doesNotMatch(custom.svg, /brand-card-shadow/);
+  assert.match(custom.svg, /font-family:'Fira Code'/);
+  assert.match(custom.svg, /font-family:'Hack'/);
+  assert.match(custom.svg, /&quot;Fira Code&quot;,&quot;Hack&quot;/);
+  assert.match(custom.svg, /font-size="18"/);
+  assert.match(custom.svg, /Leandro/);
+  assert.match(custom.svg, /Visible comment/);
+  assert.match(custom.svg, />\+1</);
+  assert.match(custom.svg, /rx="16"/);
+  assert.doesNotMatch(custom.svg, /greeting.js/);
+  assert.doesNotMatch(custom.svg, /github_light/);
+  const hidden = await renderSnippet({
+    code,
+    header: { enabled: false },
+    footer: { enabled: false },
+    comments: { 1: { body: "Hidden comment" } },
+    showComments: false,
+    reactions: { 1: [{ emoji: "+1", reactors: [{ username: "Grace" }] }] },
+    showReactions: false,
+  });
+  assert.doesNotMatch(hidden.svg, /Hidden comment|>\+1</);
+});
+
+Deno.test("every advertised brand embeds its font and required pattern; layout limits reject truncation", async () => {
+  for (const brand of appearanceOptions.brands) {
+    const result = await renderSnippet({ code: "const answer = 42;", brand: brand.id });
+    assert.match(result.svg, /data:font\/ttf;base64,/);
+    assert.match(result.svg, /brand-card-shadow/);
+    if (["tailwind", "resend"].includes(brand.id))
+      assert.match(result.svg, /data:image\/png;base64,/);
+  }
+  await assert.rejects(() => renderSnippet({ code: "x".repeat(3301) }), /30 visual rows/);
+  const code = Array(30).fill("x").join("\n");
+  await assert.rejects(
+    () => renderSnippet({ code, comments: { 1: { body: "one extra row" } } }),
+    /30 visual rows/,
+  );
+  const fits = await renderSnippet({
+    code,
+    comments: { 1: { body: "hidden" } },
+    showComments: false,
+  });
+  assert.doesNotMatch(fits.svg, /hidden|>…</);
 });
 
 Deno.test("runtime parser integrity and network failures are surfaced, never plaintext", async () => {

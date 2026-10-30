@@ -1076,7 +1076,7 @@ export async function createHighlightedSvg(
               `<g>` +
               `<rect x="${x}" y="${chipY}" width="${chipW}" height="${chipH}" rx="${chipR}" ry="${chipR}" ` +
               `fill="${escapeXml(editorBg)}" stroke="${escapeXml(editorFg)}" stroke-opacity="0.22" stroke-width="1"/>` +
-              `<text x="${emojiX}" y="${cy}" font-size="13" text-anchor="middle" dominant-baseline="central">${chip.emoji}</text>` +
+              `<text x="${emojiX}" y="${cy}" font-size="13" fill="${escapeXml(editorFg)}" text-anchor="middle" dominant-baseline="central">${escapeXml(chip.emoji)}</text>` +
               avatarsMarkup +
               overflowMarkup +
               `</g>`;
