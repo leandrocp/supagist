@@ -70,11 +70,15 @@ test("home page has exactly one header bar, flush with the composer", async ({ p
 });
 
 test("lobby presence leaves navigation readable on mobile and remains visible above sm", async ({
-  page,
-  context,
+  browser,
+  baseURL,
 }) => {
-  const otherVisitor = await context.newPage();
+  // Production CSP allows hosted Supabase, not the local HTTP/WebSocket stack.
+  // Bypass it only for this layout test; keep the app's security policy unchanged.
+  const context = await browser.newContext({ baseURL, bypassCSP: true });
   try {
+    const page = await context.newPage();
+    const otherVisitor = await context.newPage();
     await page.goto("/");
     await otherVisitor.goto("/");
 
@@ -102,7 +106,7 @@ test("lobby presence leaves navigation readable on mobile and remains visible ab
       await snippets.click({ trial: true, position: { x: snippetsBox.width - 1, y: 5 } });
     }
   } finally {
-    await otherVisitor.close();
+    await context.close();
   }
 });
 
