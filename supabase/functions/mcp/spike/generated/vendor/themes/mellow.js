@@ -4,6 +4,7 @@ var theme = {
   name: "mellow",
   appearance: "dark",
   revision: "6273b7f0ddf6ac2b75021b3bc0bd8b3305cfeef1",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#ea83a5" },
     "attribute.builtin": { fg: "#aca1cf" },
@@ -24,7 +25,9 @@ var theme = {
     "constructor.javascript": { fg: "#ea83a5" },
     "diff.delta": { fg: "#8cf8f7" },
     "diff.minus": { fg: "#ffc0b9" },
+    "diff.minus.word": { bg: "#422522" },
     "diff.plus": { fg: "#b3f6c0" },
+    "diff.plus.word": { bg: "#14361d" },
     function: { fg: "#c1c0d4" },
     "function.builtin": { fg: "#aca1cf" },
     "function.call": { fg: "#c1c0d4" },

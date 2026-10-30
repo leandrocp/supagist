@@ -32,7 +32,7 @@ verified and reused offline. Local sources are copied/decompressed afresh.
   kept alongside the generated JS; this copy travels with the Edge static assets.
 
 Generated app renderer modules remain under the repository's MIT license.
-Lumis 0.9.0 and themes 0.4.0 are MIT-licensed; they are not upgraded by this spike.
+Lumis 0.10.1 and themes 0.4.3 are MIT-licensed; they are not upgraded by this spike.
 `../spike/generated/vendor/vendor-manifest.json` records package versions, input
 and output JS hashes. No resvg wrapper or rasterizer WASM is shipped: the MCP
 produces SVG only, and clients perform optional rasterization locally.

@@ -4,6 +4,7 @@ var theme = {
   name: "mfd_amber",
   appearance: "dark",
   revision: "72ae627792960a7e490cb5242a78c570d02ba775",
+  license: "Apache-2.0",
   highlights: {
     attribute: { fg: "#cc9944" },
     "attribute.builtin": { fg: "#cc9944" },
@@ -23,7 +24,9 @@ var theme = {
     constructor: { fg: "#cc9944", bold: true },
     "diff.delta": { fg: "#8cf8f7" },
     "diff.minus": { fg: "#ffc0b9" },
+    "diff.minus.word": { bg: "#381916" },
     "diff.plus": { fg: "#b3f6c0" },
+    "diff.plus.word": { bg: "#082b13" },
     function: { fg: "#cc9944", bold: true },
     "function.builtin": { fg: "#cc9944", bold: true, italic: true },
     "function.call": { fg: "#cc9944" },

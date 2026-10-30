@@ -1,4 +1,5 @@
 import type { ThemeData } from "@lumis-sh/themes";
+import { REMOVED_THEME_MAP } from "@/lib/brand-presets";
 import { buildLumisThemeFromBrand, getBrandTheme, type BrandTheme } from "@/lib/brand-themes";
 
 type ThemeModule = { default: ThemeData };
@@ -23,6 +24,8 @@ export async function loadTheme(themeId: string): Promise<LoadedTheme> {
   if (brand) {
     return { data: buildLumisThemeFromBrand(brand), brand };
   }
-  const mod = (await import(`@lumis-sh/themes/${themeId}`)) as ThemeModule;
+  const mod = (await import(
+    `@lumis-sh/themes/${REMOVED_THEME_MAP[themeId] ?? themeId}`
+  )) as ThemeModule;
   return { data: mod.default, brand: null };
 }

@@ -4,6 +4,7 @@ var theme = {
   name: "embark",
   appearance: "dark",
   revision: "2331671b548abcade22b0197fde58e11744c99bb",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#a1efd3" },
     "attribute.builtin": { fg: "#abf8f7" },
@@ -23,7 +24,9 @@ var theme = {
     constructor: { fg: "#d4bfff" },
     "diff.delta": { fg: "#8cf8f7" },
     "diff.minus": { fg: "#ffc0b9" },
+    "diff.minus.word": { bg: "#5a2521" },
     "diff.plus": { fg: "#b3f6c0" },
+    "diff.plus.word": { bg: "#114320" },
     function: { fg: "#f48fb1" },
     "function.builtin": { fg: "#abf8f7" },
     "function.call": { fg: "#91ddff" },

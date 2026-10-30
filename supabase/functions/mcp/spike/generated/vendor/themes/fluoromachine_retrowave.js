@@ -4,6 +4,7 @@ var theme = {
   name: "fluoromachine_retrowave",
   appearance: "dark",
   revision: "a279f667168e742df059caf1f1f4daf1de24f4f8",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#72f1b8", bg: "#2a2d3c", bold: true },
     "attribute.builtin": { fg: "#ffcc00" },
@@ -24,7 +25,9 @@ var theme = {
     constructor: { fg: "#ff7edb" },
     "diff.delta": { fg: "#ff8b39" },
     "diff.minus": { fg: "#fe4450" },
+    "diff.minus.word": { bg: "#711b20" },
     "diff.plus": { fg: "#72f1b8" },
+    "diff.plus.word": { bg: "#004c31" },
     function: { fg: "#ffcc00", bg: "#312b32", bold: true },
     "function.builtin": { fg: "#ff7edb" },
     "function.call": { fg: "#ffcc00", bg: "#312b32", bold: true },

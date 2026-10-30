@@ -4,6 +4,7 @@ var theme = {
   name: "rosepine_dark",
   appearance: "dark",
   revision: "ff483051a47e27d84bdef47703538df1ed9f4a47",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#c4a7e7" },
     "attribute.builtin": { fg: "#c4a7e7", bold: true },
@@ -24,7 +25,9 @@ var theme = {
     constructor: { fg: "#9ccfd8" },
     "diff.delta": { bg: "#433842" },
     "diff.minus": { fg: "#eb6f92", bg: "#43293a" },
+    "diff.minus.word": { bg: "#763447" },
     "diff.plus": { fg: "#9ccfd8", bg: "#333c48" },
+    "diff.plus.word": { bg: "#21606a" },
     function: { fg: "#ebbcba" },
     "function.builtin": { fg: "#ebbcba", bold: true },
     "function.call": { fg: "#ebbcba" },

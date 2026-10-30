@@ -4,6 +4,7 @@ var theme = {
   name: "kanagawa_lotus",
   appearance: "light",
   revision: "bb85e4bfc8d89b0e62c8fa53ccdd13d12e2f77b3",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#cc6d00" },
     "attribute.builtin": { fg: "#6693bf" },
@@ -24,7 +25,9 @@ var theme = {
     "constructor.lua": { fg: "#624c83" },
     "diff.delta": { fg: "#de9800" },
     "diff.minus": { fg: "#d7474b" },
+    "diff.minus.word": { bg: "#ffada8" },
     "diff.plus": { fg: "#6e915f" },
+    "diff.plus.word": { bg: "#aad996" },
     function: { fg: "#4d699b" },
     "function.builtin": { fg: "#6693bf" },
     "function.call": { fg: "#4d699b" },

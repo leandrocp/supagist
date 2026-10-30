@@ -4,6 +4,7 @@ var theme = {
   name: "kanagawabones",
   appearance: "dark",
   revision: "8304d8df9b823ff11e103afa62f38c39f534abe6",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#ddd8bb", bold: true },
     "attribute.builtin": { fg: "#ada992", bold: true },
@@ -24,7 +25,9 @@ var theme = {
     "constructor.lua": { fg: "#7d7d8d" },
     "diff.delta": { bg: "#22333a" },
     "diff.minus": { bg: "#47272a" },
+    "diff.minus.word": { bg: "#74353d" },
     "diff.plus": { bg: "#2a331f" },
+    "diff.plus.word": { bg: "#3d5121" },
     function: { fg: "#ddd8bb" },
     "function.builtin": { fg: "#ada992", bold: true },
     "function.call": { fg: "#ddd8bb" },

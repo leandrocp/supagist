@@ -4,6 +4,7 @@ var theme = {
   name: "everblush",
   appearance: "dark",
   revision: "678f808d81801b983b6fb8296fb17ba1b2785d7c",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#67b0e8" },
     "attribute.builtin": { fg: "#6cbfbf" },
@@ -23,7 +24,9 @@ var theme = {
     constructor: { fg: "#67b0e8" },
     "diff.delta": { fg: "#8cf8f7" },
     "diff.minus": { fg: "#ffc0b9" },
+    "diff.minus.word": { bg: "#492724" },
     "diff.plus": { fg: "#b3f6c0" },
+    "diff.plus.word": { bg: "#193a21" },
     function: { fg: "#e57474" },
     "function.builtin": { fg: "#67cbe7" },
     "function.call": { fg: "#e57474" },

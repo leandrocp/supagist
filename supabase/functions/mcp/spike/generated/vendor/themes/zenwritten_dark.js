@@ -4,6 +4,7 @@ var theme = {
   name: "zenwritten_dark",
   appearance: "dark",
   revision: "8304d8df9b823ff11e103afa62f38c39f534abe6",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#bbbbbb", bold: true },
     "attribute.builtin": { fg: "#939393", bold: true },
@@ -24,7 +25,9 @@ var theme = {
     "constructor.lua": { fg: "#7c7c7c" },
     "diff.delta": { bg: "#1d2c36" },
     "diff.minus": { bg: "#3e2225" },
+    "diff.minus.word": { bg: "#6a3038" },
     "diff.plus": { bg: "#232d1a" },
+    "diff.plus.word": { bg: "#344b1d" },
     function: { fg: "#bbbbbb" },
     "function.builtin": { fg: "#939393", bold: true },
     "function.call": { fg: "#bbbbbb" },

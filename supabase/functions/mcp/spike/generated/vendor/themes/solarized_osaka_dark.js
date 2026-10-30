@@ -4,6 +4,7 @@ var theme = {
   name: "solarized_osaka_dark",
   appearance: "dark",
   revision: "a21176efde15fab21fabda0bf2ba123ed6d7332d",
+  license: "Apache-2.0",
   highlights: {
     attribute: { fg: "#db302d" },
     "attribute.builtin": { fg: "#c94c16" },
@@ -24,7 +25,9 @@ var theme = {
     "constructor.tsx": { fg: "#268bd3" },
     "diff.delta": { bg: "#3c1403" },
     "diff.minus": { bg: "#380605" },
+    "diff.minus.word": { bg: "#630d0c" },
     "diff.plus": { bg: "#103a3c" },
+    "diff.plus.word": { bg: "#005b5f" },
     function: { fg: "#268bd3" },
     "function.builtin": { fg: "#c94c16" },
     "function.call": { fg: "#268bd3" },

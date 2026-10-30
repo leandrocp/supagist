@@ -205,13 +205,10 @@ describe("highlightHtmlLines", () => {
     expect(htmlLines[1]).toContain("font-style: italic;");
   });
 
-  // Known Lumis gap: a scope the theme leaves unstyled, nested in one it styles,
-  // inherits the outer color in HTML (as Neovim's stacked highlights do), but
-  // highlightIter reports only the innermost scope's style. Here the `x` inside
-  // the f-string is string-green in the saved view and uncolored in the
-  // composer. Flips once highlightIter resolves the enclosing style
-  // (leandrocp/lumis#1592).
-  it.fails("colors an unstyled nested scope like its enclosing one", () => {
+  // A scope the theme leaves unstyled, nested in one it styles, inherits the outer
+  // color (as in Neovim): the `x` inside the f-string is string-colored.
+  // Fixed upstream in Lumis 0.10 (leandrocp/lumis#1592).
+  it("colors an unstyled nested scope like its enclosing one", () => {
     const [line] = highlightTokenLines(highlighter, 'y = f"{x}"', "python", doomOneDark);
     const inner = line!.find((token) => token.text === "x");
 

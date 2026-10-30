@@ -4,6 +4,7 @@ var theme = {
   name: "deepwhite",
   appearance: "light",
   revision: "ccad56bb5eb7d29258980cfc0a716eb87bcad69e",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#1a1918", bold: true },
     "attribute.builtin": { fg: "#0000a6" },
@@ -23,7 +24,9 @@ var theme = {
     constructor: { fg: "#1a1918" },
     "diff.delta": { fg: "#f27900" },
     "diff.minus": { fg: "#a60000" },
+    "diff.minus.word": { bg: "#ffb7a8" },
     "diff.plus": { fg: "#00a600" },
+    "diff.plus.word": { bg: "#a4e79e" },
     function: { fg: "#1a1918" },
     "function.builtin": { fg: "#0000a6" },
     "function.call": { fg: "#0000a6" },

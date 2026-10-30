@@ -4,6 +4,7 @@ var theme = {
   name: "mfd_scarlet",
   appearance: "dark",
   revision: "72ae627792960a7e490cb5242a78c570d02ba775",
+  license: "Apache-2.0",
   highlights: {
     attribute: { fg: "#cc5545" },
     "attribute.builtin": { fg: "#cc5545" },
@@ -23,7 +24,9 @@ var theme = {
     constructor: { fg: "#cc5545", bold: true },
     "diff.delta": { fg: "#8cf8f7" },
     "diff.minus": { fg: "#ffc0b9" },
+    "diff.minus.word": { bg: "#310e0c" },
     "diff.plus": { fg: "#b3f6c0" },
+    "diff.plus.word": { bg: "#01220b" },
     function: { fg: "#cc5545", bold: true },
     "function.builtin": { fg: "#cc5545", bold: true, italic: true },
     "function.call": { fg: "#cc5545" },

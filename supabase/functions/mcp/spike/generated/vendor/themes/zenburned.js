@@ -4,6 +4,7 @@ var theme = {
   name: "zenburned",
   appearance: "dark",
   revision: "8304d8df9b823ff11e103afa62f38c39f534abe6",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#ffcdab" },
     "attribute.builtin": { fg: "#f0f08f" },
@@ -24,7 +25,9 @@ var theme = {
     "constructor.lua": { fg: "#939393" },
     "diff.delta": { bg: "#3d5568" },
     "diff.minus": { bg: "#764544" },
+    "diff.minus.word": { bg: "#a75555" },
     "diff.plus": { bg: "#475737" },
+    "diff.plus.word": { bg: "#5b783b" },
     function: { fg: "#f0e4cf" },
     "function.builtin": { fg: "#f0f08f" },
     "function.call": { fg: "#f0e4cf" },

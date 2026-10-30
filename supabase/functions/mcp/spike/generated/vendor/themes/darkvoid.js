@@ -4,6 +4,7 @@ var theme = {
   name: "darkvoid",
   appearance: "dark",
   revision: "45be993a5617e05811b6b293c05e6aded7003cc9",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#b1b1b1" },
     "attribute.builtin": { fg: "#8cf8f7" },
@@ -24,7 +25,9 @@ var theme = {
     "constructor.lua": { fg: "#e6e6e6" },
     "diff.delta": { fg: "#8cf8f7" },
     "diff.minus": { fg: "#ffc0b9" },
+    "diff.minus.word": { bg: "#492b29" },
     "diff.plus": { fg: "#b3f6c0" },
+    "diff.plus.word": { bg: "#1b3d24" },
     function: { fg: "#e1e1e1" },
     "function.builtin": { fg: "#e1e1e1" },
     "function.call": { fg: "#e1e1e1" },

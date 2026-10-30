@@ -4,6 +4,7 @@ var theme = {
   name: "one_monokai",
   appearance: "dark",
   revision: "907cb55796037a9839d121b239237bbb9fe764e0",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#61afef" },
     "attribute.builtin": { fg: "#c678dd" },
@@ -23,7 +24,9 @@ var theme = {
     constructor: { fg: "#61afef" },
     "diff.delta": { fg: "#8cf8f7" },
     "diff.minus": { fg: "#ffc0b9" },
+    "diff.minus.word": { bg: "#603a36" },
     "diff.plus": { fg: "#b3f6c0" },
+    "diff.plus.word": { bg: "#2d4f34" },
     function: { fg: "#98c379" },
     "function.builtin": { fg: "#98c379" },
     "function.call": { fg: "#98c379" },

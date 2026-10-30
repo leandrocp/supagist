@@ -4,6 +4,7 @@ var theme = {
   name: "catppuccin_latte",
   appearance: "light",
   revision: "edefef779ab08ce1a4a404713e3012b0d202bd35",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#fe640b" },
     "attribute.builtin": { fg: "#ea76cb" },
@@ -29,7 +30,9 @@ var theme = {
     "constructor.python": { fg: "#04a5e5" },
     "diff.delta": { fg: "#1e66f5" },
     "diff.minus": { fg: "#d20f39" },
+    "diff.minus.word": { bg: "#ffb0b0" },
     "diff.plus": { fg: "#40a02b" },
+    "diff.plus.word": { bg: "#abe2a0" },
     error: { fg: "#d20f39" },
     function: { fg: "#1e66f5" },
     "function.builtin": { fg: "#fe640b" },

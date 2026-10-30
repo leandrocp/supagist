@@ -4,6 +4,7 @@ var theme = {
   name: "neomodern_moon_light",
   appearance: "light",
   revision: "d41469578922a23d75a0d9e8deef1e34837230a6",
+  license: "Apache-2.0",
   highlights: {
     attribute: { fg: "#6781ad" },
     "attribute.builtin": { fg: "#6778aa" },
@@ -24,7 +25,9 @@ var theme = {
     "constructor.lua": { fg: "#2d2d5c" },
     "diff.delta": { fg: "#7b97db" },
     "diff.minus": { fg: "#ce7670" },
+    "diff.minus.word": { bg: "#eeb5b0" },
     "diff.plus": { fg: "#64886a" },
+    "diff.plus.word": { bg: "#b4cdb8" },
     function: { fg: "#6781ad" },
     "function.builtin": { fg: "#6781ad" },
     "function.call": { fg: "#6781ad" },

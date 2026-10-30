@@ -4,6 +4,7 @@ var theme = {
   name: "catppuccin_mocha",
   appearance: "dark",
   revision: "edefef779ab08ce1a4a404713e3012b0d202bd35",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#fab387" },
     "attribute.builtin": { fg: "#f5c2e7" },
@@ -29,7 +30,9 @@ var theme = {
     "constructor.python": { fg: "#89dceb" },
     "diff.delta": { fg: "#89b4fa" },
     "diff.minus": { fg: "#f38ba8" },
+    "diff.minus.word": { bg: "#592535" },
     "diff.plus": { fg: "#a6e3a1" },
+    "diff.plus.word": { bg: "#21421f" },
     error: { fg: "#f38ba8" },
     function: { fg: "#89b4fa" },
     "function.builtin": { fg: "#fab387" },

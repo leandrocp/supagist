@@ -4,6 +4,7 @@ var theme = {
   name: "sonokai_shusia",
   appearance: "dark",
   revision: "b023c5280b16fe2366f5e779d8d2756b3e5ee9c3",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#7accd7" },
     "attribute.builtin": { fg: "#ab9df2" },
@@ -25,7 +26,9 @@ var theme = {
     "constructor.tsx": { fg: "#7accd7" },
     "diff.delta": { fg: "#7accd7" },
     "diff.minus": { fg: "#f85e84" },
+    "diff.minus.word": { bg: "#742439" },
     "diff.plus": { fg: "#9ecd6f" },
+    "diff.plus.word": { bg: "#364d1c" },
     error: { fg: "#f85e84" },
     function: { fg: "#9ecd6f" },
     "function.builtin": { fg: "#9ecd6f" },

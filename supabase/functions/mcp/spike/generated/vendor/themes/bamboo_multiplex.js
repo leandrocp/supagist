@@ -4,6 +4,7 @@ var theme = {
   name: "bamboo_multiplex",
   appearance: "dark",
   revision: "1309bc88bffcf1bedc3e84e7fa9004de93da774a",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#68baae" },
     "attribute.builtin": { fg: "#dc4f62" },
@@ -26,7 +27,9 @@ var theme = {
     "constructor.lua": { fg: "#ceba49" },
     "diff.delta": { bg: "#2a3a57" },
     "diff.minus": { bg: "#893f45" },
+    "diff.minus.word": { bg: "#ba4d58" },
     "diff.plus": { bg: "#40531b" },
+    "diff.plus.word": { bg: "#56730f" },
     error: { fg: "#dc4f62" },
     function: { fg: "#409cdc" },
     "function.builtin": { fg: "#ef9946" },

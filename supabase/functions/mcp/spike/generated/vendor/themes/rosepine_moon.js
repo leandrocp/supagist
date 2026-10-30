@@ -4,6 +4,7 @@ var theme = {
   name: "rosepine_moon",
   appearance: "dark",
   revision: "ff483051a47e27d84bdef47703538df1ed9f4a47",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#c4a7e7" },
     "attribute.builtin": { fg: "#c4a7e7", bold: true },
@@ -24,7 +25,9 @@ var theme = {
     constructor: { fg: "#9ccfd8" },
     "diff.delta": { bg: "#4b3949" },
     "diff.minus": { fg: "#eb6f92", bg: "#4b3148" },
+    "diff.minus.word": { bg: "#803e50" },
     "diff.plus": { fg: "#9ccfd8", bg: "#3b4456" },
+    "diff.plus.word": { bg: "#1f6a76" },
     function: { fg: "#ea9a97" },
     "function.builtin": { fg: "#ea9a97", bold: true },
     "function.call": { fg: "#ea9a97" },

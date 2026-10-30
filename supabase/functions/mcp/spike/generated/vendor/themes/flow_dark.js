@@ -4,6 +4,7 @@ var theme = {
   name: "flow_dark",
   appearance: "dark",
   revision: "4863b14263a77f8efb79068f7078b6261c9cbda2",
+  license: "Apache-2.0",
   highlights: {
     attribute: { fg: "#70dbc1" },
     "attribute.builtin": { fg: "#a670db" },
@@ -23,7 +24,9 @@ var theme = {
     constructor: { fg: "#a670db" },
     "diff.delta": { fg: "#70afdb", bg: "#253c41" },
     "diff.minus": { fg: "#db7079", bg: "#412528" },
+    "diff.minus.word": { bg: "#330009" },
     "diff.plus": { bg: "#284125" },
+    "diff.plus.word": { bg: "#32612d" },
     function: { fg: "#70afdb" },
     "function.builtin": { fg: "#a670db" },
     "function.call": { fg: "#70afdb" },

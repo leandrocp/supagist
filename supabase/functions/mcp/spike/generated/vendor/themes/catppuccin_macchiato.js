@@ -4,6 +4,7 @@ var theme = {
   name: "catppuccin_macchiato",
   appearance: "dark",
   revision: "edefef779ab08ce1a4a404713e3012b0d202bd35",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#f5a97f" },
     "attribute.builtin": { fg: "#f5bde6" },
@@ -29,7 +30,9 @@ var theme = {
     "constructor.python": { fg: "#91d7e3" },
     "diff.delta": { fg: "#8aadf4" },
     "diff.minus": { fg: "#ed8796" },
+    "diff.minus.word": { bg: "#643038" },
     "diff.plus": { fg: "#a6da95" },
+    "diff.plus.word": { bg: "#2d4b22" },
     error: { fg: "#ed8796" },
     function: { fg: "#8aadf4" },
     "function.builtin": { fg: "#f5a97f" },

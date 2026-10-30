@@ -4,6 +4,7 @@ var theme = {
   name: "kanagawa_dragon",
   appearance: "dark",
   revision: "bb85e4bfc8d89b0e62c8fa53ccdd13d12e2f77b3",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#b6927b" },
     "attribute.builtin": { fg: "#949fb5" },
@@ -24,7 +25,9 @@ var theme = {
     "constructor.lua": { fg: "#8992a7" },
     "diff.delta": { fg: "#dca561" },
     "diff.minus": { fg: "#c34043" },
+    "diff.minus.word": { bg: "#561115" },
     "diff.plus": { fg: "#76946a" },
+    "diff.plus.word": { bg: "#24341e" },
     function: { fg: "#8ba4b0" },
     "function.builtin": { fg: "#949fb5" },
     "function.call": { fg: "#8ba4b0" },

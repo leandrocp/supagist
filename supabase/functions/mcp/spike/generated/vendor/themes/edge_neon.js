@@ -4,6 +4,7 @@ var theme = {
   name: "edge_neon",
   appearance: "dark",
   revision: "7ec78c21bd8f0b2b0b47043bb1e730c561647c72",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#deb974" },
     "attribute.builtin": { fg: "#deb974" },
@@ -25,7 +26,9 @@ var theme = {
     "constructor.tsx": { fg: "#deb974" },
     "diff.delta": { fg: "#6cb6eb" },
     "diff.minus": { fg: "#ec7279" },
+    "diff.minus.word": { bg: "#713135" },
     "diff.plus": { fg: "#a0c980" },
+    "diff.plus.word": { bg: "#3a4f2a" },
     error: { fg: "#ec7279" },
     function: { fg: "#6cb6eb" },
     "function.builtin": { fg: "#6cb6eb" },

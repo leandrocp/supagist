@@ -4,6 +4,7 @@ var theme = {
   name: "nordfox",
   appearance: "dark",
   revision: "4dacd3f0185a2227bdf3b6c0975a8f0bf87cac9a",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#d89079" },
     "attribute.builtin": { fg: "#8cafd2" },
@@ -24,7 +25,9 @@ var theme = {
     "constructor.lua": { fg: "#abb1bb" },
     "diff.delta": { fg: "#ebcb8b" },
     "diff.minus": { fg: "#bf616a" },
+    "diff.minus.word": { bg: "#703d41" },
     "diff.plus": { fg: "#a3be8c" },
+    "diff.plus.word": { bg: "#425530" },
     function: { fg: "#8cafd2" },
     "function.builtin": { fg: "#bf616a" },
     "function.call": { fg: "#8cafd2" },

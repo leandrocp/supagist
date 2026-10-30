@@ -4,6 +4,7 @@ var theme = {
   name: "iceberg",
   appearance: "dark",
   revision: "23835d5ed696436f716cbfdb56a93a7850fe3b18",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#b4be82" },
     "attribute.builtin": { fg: "#b4be82" },
@@ -23,7 +24,9 @@ var theme = {
     constructor: { fg: "#c6c8d1" },
     "diff.delta": { fg: "#8cf8f7" },
     "diff.minus": { fg: "#ffc0b9" },
+    "diff.minus.word": { bg: "#4a2421" },
     "diff.plus": { fg: "#b3f6c0" },
+    "diff.plus.word": { bg: "#173920" },
     error: { fg: "#e27878", bg: "#161821" },
     function: { fg: "#a3adcb" },
     "function.builtin": { fg: "#a3adcb" },

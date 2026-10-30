@@ -4,6 +4,7 @@ var theme = {
   name: "oldworld_cooler",
   appearance: "dark",
   revision: "db072a0bd2c90035fc3a57a73014cb54d3902f1f",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#ea83bf" },
     "attribute.builtin": { fg: "#92b3d5" },
@@ -24,7 +25,9 @@ var theme = {
     "constructor.javascript": { fg: "#ea83bf" },
     "diff.delta": { fg: "#8cf8f7" },
     "diff.minus": { fg: "#ffc0b9" },
+    "diff.minus.word": { bg: "#422522" },
     "diff.plus": { fg: "#b3f6c0" },
+    "diff.plus.word": { bg: "#14361d" },
     function: { fg: "#92b3d5" },
     "function.builtin": { fg: "#92b3d5" },
     "function.call": { fg: "#92b3d5" },

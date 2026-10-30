@@ -4,6 +4,7 @@ var theme = {
   name: "github_light_colorblind",
   appearance: "light",
   revision: "c106c9472154d6b2c74b74565616b877ae8ed31d",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#0550ae" },
     "attribute.builtin": { fg: "#1b1f24" },
@@ -25,7 +26,9 @@ var theme = {
     "constructor.lua": { fg: "#1b1f24" },
     "diff.delta": { fg: "#9a6700", bg: "#d8cab3" },
     "diff.minus": { fg: "#d1242f", bg: "#dcc8b3" },
+    "diff.minus.word": { bg: "#ee8d86" },
     "diff.plus": { fg: "#0969da", bg: "#b4cbe7" },
+    "diff.plus.word": { bg: "#7aabf0" },
     function: { fg: "#6639ba" },
     "function.builtin.bash": { fg: "#b35900" },
     "function.builtin.lua": { fg: "#0550ae" },

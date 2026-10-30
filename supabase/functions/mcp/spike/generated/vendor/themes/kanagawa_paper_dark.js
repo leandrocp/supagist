@@ -4,6 +4,7 @@ var theme = {
   name: "kanagawa_paper_dark",
   appearance: "dark",
   revision: "ecf19801a2673054c19421d82b766f7641688320",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#c4b28a" },
     "attribute.builtin": { fg: "#c4b28a" },
@@ -23,7 +24,9 @@ var theme = {
     constructor: { fg: "#8ea49e" },
     "diff.delta": { fg: "#c4b28a" },
     "diff.minus": { fg: "#c4746e" },
+    "diff.minus.word": { bg: "#542b28" },
     "diff.plus": { fg: "#699469" },
+    "diff.plus.word": { bg: "#254126" },
     function: { fg: "#859fac" },
     "function.builtin": { fg: "#c4b28a" },
     "function.call": { fg: "#859fac" },

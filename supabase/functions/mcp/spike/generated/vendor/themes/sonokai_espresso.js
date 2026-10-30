@@ -4,6 +4,7 @@ var theme = {
   name: "sonokai_espresso",
   appearance: "dark",
   revision: "b023c5280b16fe2366f5e779d8d2756b3e5ee9c3",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#81d0c9" },
     "attribute.builtin": { fg: "#9fa0e1" },
@@ -25,7 +26,9 @@ var theme = {
     "constructor.tsx": { fg: "#81d0c9" },
     "diff.delta": { fg: "#81d0c9" },
     "diff.minus": { fg: "#f86882" },
+    "diff.minus.word": { bg: "#752a38" },
     "diff.plus": { fg: "#a6cd77" },
+    "diff.plus.word": { bg: "#3b4f22" },
     error: { fg: "#f86882" },
     function: { fg: "#a6cd77" },
     "function.builtin": { fg: "#a6cd77" },

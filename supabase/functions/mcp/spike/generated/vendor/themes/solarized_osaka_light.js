@@ -4,6 +4,7 @@ var theme = {
   name: "solarized_osaka_light",
   appearance: "light",
   revision: "a21176efde15fab21fabda0bf2ba123ed6d7332d",
+  license: "Apache-2.0",
   highlights: {
     attribute: { fg: "#db302d" },
     "attribute.builtin": { fg: "#c94c16" },
@@ -24,7 +25,9 @@ var theme = {
     "constructor.tsx": { fg: "#268bd3" },
     "diff.delta": { bg: "#feccb7" },
     "diff.minus": { bg: "#ffd2d1" },
+    "diff.minus.word": { bg: "#ffdddc" },
     "diff.plus": { bg: "#b7fefa" },
+    "diff.plus.word": { bg: "#69e5df" },
     function: { fg: "#268bd3" },
     "function.builtin": { fg: "#c94c16" },
     "function.call": { fg: "#268bd3" },

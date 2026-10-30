@@ -4,6 +4,7 @@ var theme = {
   name: "neomodern_hojicha_dark",
   appearance: "dark",
   revision: "d41469578922a23d75a0d9e8deef1e34837230a6",
+  license: "Apache-2.0",
   highlights: {
     attribute: { fg: "#6e665e" },
     "attribute.builtin": { fg: "#8a879c" },
@@ -24,7 +25,9 @@ var theme = {
     "constructor.lua": { fg: "#717d6e" },
     "diff.delta": { fg: "#859dde" },
     "diff.minus": { fg: "#d87878" },
+    "diff.minus.word": { bg: "#4c1d1e" },
     "diff.plus": { fg: "#67896d" },
+    "diff.plus.word": { bg: "#1d3422" },
     function: { fg: "#6e665e" },
     "function.builtin": { fg: "#6e665e" },
     "function.call": { fg: "#6e665e" },

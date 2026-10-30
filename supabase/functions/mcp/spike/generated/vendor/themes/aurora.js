@@ -4,6 +4,7 @@ var theme = {
   name: "aurora",
   appearance: "dark",
   revision: "c3879c696ba7298e35b01ec612aa32523b152778",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#7fdbca" },
     "attribute.builtin": { fg: "#7fdbca" },
@@ -23,7 +24,9 @@ var theme = {
     constructor: { fg: "#01d5f1" },
     "diff.delta": { fg: "#fbfcbf", bg: "#28143f" },
     "diff.minus": { fg: "#637077", bg: "#28143f", strikethrough: true },
+    "diff.minus.word": { bg: "#00406b" },
     "diff.plus": { bg: "#123314" },
+    "diff.plus.word": { bg: "#14521b" },
     function: { fg: "#66d9ef" },
     "function.builtin": { fg: "#0fb9e0" },
     "function.call": { fg: "#66d9ef" },

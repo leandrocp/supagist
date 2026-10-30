@@ -4,6 +4,7 @@ var theme = {
   name: "neomodern_hojicha_light",
   appearance: "light",
   revision: "d41469578922a23d75a0d9e8deef1e34837230a6",
+  license: "Apache-2.0",
   highlights: {
     attribute: { fg: "#9a836a" },
     "attribute.builtin": { fg: "#675d99" },
@@ -24,7 +25,9 @@ var theme = {
     "constructor.lua": { fg: "#617b5a" },
     "diff.delta": { fg: "#7d97db" },
     "diff.minus": { fg: "#de7977" },
+    "diff.minus.word": { bg: "#f1b1ae" },
     "diff.plus": { fg: "#648969" },
+    "diff.plus.word": { bg: "#afceb2" },
     function: { fg: "#9a836a" },
     "function.builtin": { fg: "#9a836a" },
     "function.call": { fg: "#9a836a" },

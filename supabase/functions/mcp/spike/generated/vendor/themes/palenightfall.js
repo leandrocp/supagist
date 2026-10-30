@@ -4,6 +4,7 @@ var theme = {
   name: "palenightfall",
   appearance: "dark",
   revision: "25a1e7d43256834a671174e5d83edb57f7bec1e0",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#89ddff" },
     "attribute.builtin": { fg: "#bb80b3" },
@@ -23,7 +24,9 @@ var theme = {
     constructor: { fg: "#ffcb6b" },
     "diff.delta": { fg: "#8cf8f7" },
     "diff.minus": { fg: "#ffc0b9" },
+    "diff.minus.word": { bg: "#62332f" },
     "diff.plus": { fg: "#b3f6c0" },
+    "diff.plus.word": { bg: "#254d2f" },
     function: { fg: "#82aaff" },
     "function.builtin": { fg: "#82aaff" },
     "function.call": { fg: "#82aaff" },

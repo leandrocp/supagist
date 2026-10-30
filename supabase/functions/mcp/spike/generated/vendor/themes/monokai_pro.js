@@ -3,7 +3,8 @@
 var theme = {
   name: "monokai_pro",
   appearance: "dark",
-  revision: "fca3943173f6026347f9ffc68baab39454446c3b",
+  revision: "759be78d722e306e4a3aac9cc0738f1be86a1ab8",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#a9dc76" },
     "attribute.builtin": { fg: "#fff1f3" },
@@ -23,7 +24,9 @@ var theme = {
     constructor: { fg: "#78dce8" },
     "diff.delta": { fg: "#8cf8f7" },
     "diff.minus": { fg: "#ffc0b9" },
+    "diff.minus.word": { bg: "#593835" },
     "diff.plus": { fg: "#b3f6c0" },
+    "diff.plus.word": { bg: "#294b31" },
     error: { fg: "#fd6883" },
     function: { fg: "#a9dc76", italic: true },
     "function.builtin": { fg: "#78dce8" },
@@ -98,6 +101,7 @@ var theme = {
     tag: { fg: "#ff6188" },
     "tag.attribute": { fg: "#a9dc76" },
     "tag.builtin": { fg: "#fff1f3" },
+    "tag.builtin.tsx": { fg: "#fd6883" },
     "tag.delimiter": { fg: "#fff1f3" },
     type: { fg: "#78dce8" },
     "type.builtin": { fg: "#78dce8" },

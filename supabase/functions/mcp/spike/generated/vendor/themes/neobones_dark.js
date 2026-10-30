@@ -4,6 +4,7 @@ var theme = {
   name: "neobones_dark",
   appearance: "dark",
   revision: "8304d8df9b823ff11e103afa62f38c39f534abe6",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#c6d5cf", bold: true },
     "attribute.builtin": { fg: "#9aa6a1", bold: true },
@@ -24,7 +25,9 @@ var theme = {
     "constructor.lua": { fg: "#5b7e94" },
     "diff.delta": { bg: "#1f2645" },
     "diff.minus": { bg: "#3b2023" },
+    "diff.minus.word": { bg: "#672e36" },
     "diff.plus": { bg: "#1c2c19" },
+    "diff.plus.word": { bg: "#274b20" },
     function: { fg: "#c6d5cf" },
     "function.builtin": { fg: "#9aa6a1", bold: true },
     "function.call": { fg: "#c6d5cf" },

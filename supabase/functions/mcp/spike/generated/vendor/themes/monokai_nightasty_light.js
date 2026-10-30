@@ -4,6 +4,7 @@ var theme = {
   name: "monokai_nightasty_light",
   appearance: "light",
   revision: "5731bc3c01e6c94a709021e5ee31070840e47584",
+  license: "Apache-2.0",
   highlights: {
     attribute: { fg: "#ff004b" },
     "attribute.builtin": { fg: "#ff004b", italic: true },
@@ -24,7 +25,9 @@ var theme = {
     "constructor.lua": { fg: "#ff004b" },
     "diff.delta": { bg: "#d9edff" },
     "diff.minus": { fg: "#ff004b", bg: "#ffd9e7" },
+    "diff.minus.word": { bg: "#ffa4a7" },
     "diff.plus": { fg: "#4fb000", bg: "#e5f3d9" },
+    "diff.plus.word": { bg: "#a7df91" },
     function: { fg: "#4fb000" },
     "function.builtin": { fg: "#4fb000" },
     "function.builtin.bash": { fg: "#00b3e3" },

@@ -4,6 +4,7 @@ var theme = {
   name: "onedark_light",
   appearance: "light",
   revision: "df4792accde9db0043121f32628bcf8e645d9aea",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#0184bc" },
     "attribute.builtin": { fg: "#4078f2" },
@@ -23,7 +24,9 @@ var theme = {
     constructor: { fg: "#986801", bold: true },
     "diff.delta": { fg: "#4078f2" },
     "diff.minus": { fg: "#e45649" },
+    "diff.minus.word": { bg: "#ffbeb1" },
     "diff.plus": { fg: "#50a14f" },
+    "diff.plus.word": { bg: "#b8e8b5" },
     function: { fg: "#4078f2" },
     "function.builtin": { fg: "#0184bc" },
     "function.call": { fg: "#4078f2" },

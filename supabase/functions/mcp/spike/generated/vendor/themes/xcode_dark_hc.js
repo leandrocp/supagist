@@ -4,6 +4,7 @@ var theme = {
   name: "xcode_dark_hc",
   appearance: "dark",
   revision: "c57b4df378952382eb0c8aa93614d1d70f35798a",
+  license: "ISC",
   highlights: {
     attribute: { fg: "#ffa14f" },
     "attribute.builtin": { fg: "#83c9bc" },
@@ -23,7 +24,9 @@ var theme = {
     constructor: { fg: "#83c9bc" },
     "diff.delta": { fg: "#8cf8f7" },
     "diff.minus": { fg: "#ffc0b9" },
+    "diff.minus.word": { bg: "#4f2e2b" },
     "diff.plus": { fg: "#b3f6c0" },
+    "diff.plus.word": { bg: "#1f4127" },
     function: { fg: "#cda1ff" },
     "function.builtin": { fg: "#83c9bc" },
     "function.call": { fg: "#cda1ff" },

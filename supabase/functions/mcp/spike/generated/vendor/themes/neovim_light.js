@@ -4,6 +4,7 @@ var theme = {
   name: "neovim_light",
   appearance: "light",
   revision: "306a05526ada86a7b30af95c5cc81ffba93fef97",
+  license: "Apache-2.0",
   highlights: {
     attribute: { fg: "#14161b" },
     "attribute.builtin": { fg: "#007373" },
@@ -23,7 +24,9 @@ var theme = {
     constructor: { fg: "#007373" },
     "diff.delta": { fg: "#007373" },
     "diff.minus": { fg: "#590008" },
+    "diff.minus.word": { bg: "#edb1ab" },
     "diff.plus": { fg: "#005523" },
+    "diff.plus.word": { bg: "#a5ceac" },
     function: { fg: "#007373" },
     "function.builtin": { fg: "#007373" },
     "function.call": { fg: "#007373" },

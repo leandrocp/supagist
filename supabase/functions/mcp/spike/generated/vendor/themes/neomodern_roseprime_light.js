@@ -4,6 +4,7 @@ var theme = {
   name: "neomodern_roseprime_light",
   appearance: "light",
   revision: "d41469578922a23d75a0d9e8deef1e34837230a6",
+  license: "Apache-2.0",
   highlights: {
     attribute: { fg: "#7f3947" },
     "attribute.builtin": { fg: "#2c423f" },
@@ -24,7 +25,9 @@ var theme = {
     "constructor.lua": { fg: "#2e4154" },
     "diff.delta": { fg: "#708fd9" },
     "diff.minus": { fg: "#d17075" },
+    "diff.minus.word": { bg: "#f2b3b4" },
     "diff.plus": { fg: "#5a7d64" },
+    "diff.plus.word": { bg: "#b1ceb9" },
     function: { fg: "#7f3947" },
     "function.builtin": { fg: "#7f3947" },
     "function.call": { fg: "#7f3947" },

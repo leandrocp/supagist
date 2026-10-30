@@ -4,6 +4,7 @@ var theme = {
   name: "mfd_lumon",
   appearance: "dark",
   revision: "72ae627792960a7e490cb5242a78c570d02ba775",
+  license: "Apache-2.0",
   highlights: {
     attribute: { fg: "#5ac8d8" },
     "attribute.builtin": { fg: "#5ac8d8" },
@@ -23,7 +24,9 @@ var theme = {
     constructor: { fg: "#90f0ff", bold: true },
     "diff.delta": { fg: "#8cf8f7" },
     "diff.minus": { fg: "#ffc0b9" },
+    "diff.minus.word": { bg: "#481c19" },
     "diff.plus": { fg: "#b3f6c0" },
+    "diff.plus.word": { bg: "#0c3518" },
     function: { fg: "#90f0ff", bold: true },
     "function.builtin": { fg: "#90f0ff", bold: true, italic: true },
     "function.call": { fg: "#5ac8d8" },

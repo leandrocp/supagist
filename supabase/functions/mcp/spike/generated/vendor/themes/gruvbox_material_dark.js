@@ -4,6 +4,7 @@ var theme = {
   name: "gruvbox_material_dark",
   appearance: "dark",
   revision: "11d779b26a9ab2b3db8c22c6ac9fb6e8ed4fea79",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#d3869b" },
     "attribute.builtin": { fg: "#d8a657" },
@@ -26,7 +27,9 @@ var theme = {
     "constructor.tsx": { fg: "#d8a657" },
     "diff.delta": { fg: "#7daea3" },
     "diff.minus": { fg: "#ea6962" },
+    "diff.minus.word": { bg: "#6c2926" },
     "diff.plus": { fg: "#a9b665" },
+    "diff.plus.word": { bg: "#3f461b" },
     error: { fg: "#ea6962" },
     function: { fg: "#a9b665" },
     "function.builtin": { fg: "#a9b665" },

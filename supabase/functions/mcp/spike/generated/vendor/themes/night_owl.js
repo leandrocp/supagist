@@ -4,6 +4,7 @@ var theme = {
   name: "night_owl",
   appearance: "dark",
   revision: "86ed124c2f7e118670649701288e024444bf91e5",
+  license: "BSD-3-Clause",
   highlights: {
     attribute: { fg: "#ff2c83" },
     "attribute.builtin": { fg: "#ffcb8b" },
@@ -28,7 +29,9 @@ var theme = {
     "constructor.typescript": { fg: "#82aaff" },
     "diff.delta": { fg: "#8cf8f7" },
     "diff.minus": { fg: "#ffc0b9" },
+    "diff.minus.word": { bg: "#4f1816" },
     "diff.plus": { fg: "#b3f6c0" },
+    "diff.plus.word": { bg: "#003814" },
     function: { fg: "#82aaff", italic: true },
     "function.builtin": { fg: "#ffcb8b" },
     "function.builtin.bash": { fg: "#c5e478", italic: true },

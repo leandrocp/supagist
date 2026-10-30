@@ -4,6 +4,7 @@ var theme = {
   name: "srcery",
   appearance: "dark",
   revision: "d4889a85c26702217838da941f921042c17b6397",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#ff8700" },
     "attribute.builtin": { fg: "#2c78bf" },
@@ -23,7 +24,9 @@ var theme = {
     constructor: { fg: "#fbb829" },
     "diff.delta": { fg: "#8cf8f7" },
     "diff.minus": { fg: "#ffc0b9" },
+    "diff.minus.word": { bg: "#3c201d" },
     "diff.plus": { fg: "#b3f6c0" },
+    "diff.plus.word": { bg: "#0e3018" },
     function: { fg: "#fbb829" },
     "function.builtin": { fg: "#fbb829" },
     "function.call": { fg: "#fbb829" },

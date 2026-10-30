@@ -25,8 +25,8 @@ if (process.argv.includes("--assets-only")) {
   process.exit(0);
 }
 for (const [pkg, version] of [
-  ["lumis", "0.9.0"],
-  ["themes", "0.4.0"],
+  ["lumis", "0.10.1"],
+  ["themes", "0.4.3"],
 ]) {
   const installed = JSON.parse(
     await readFile(new URL(`node_modules/@lumis-sh/${pkg}/package.json`, root)),
@@ -106,7 +106,7 @@ const themeNames = (await readdir(new URL("node_modules/@lumis-sh/themes/dist/js
   .sort();
 await writeFile(
   new URL("themes.js", generated),
-  "// Local copies of exact @lumis-sh/themes@0.4.0 data modules.\nexport const themes = {\n" +
+  "// Local copies of exact @lumis-sh/themes@0.4.3 data modules.\nexport const themes = {\n" +
     themeNames
       .map((name) => `  ${JSON.stringify(name)}: () => import("./vendor/themes/${name}.js"),`)
       .join("\n") +

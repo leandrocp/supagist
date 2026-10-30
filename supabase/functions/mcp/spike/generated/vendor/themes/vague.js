@@ -3,7 +3,8 @@
 var theme = {
   name: "vague",
   appearance: "dark",
-  revision: "f9060fdaf7b20f68575d6f8214da6f1cf0c72825",
+  revision: "73f8aaa866bf3d14dd0b0ab9e48c11794c1cb7ab",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#6e94b2" },
     "attribute.builtin": { fg: "#b4d4cf" },
@@ -24,7 +25,9 @@ var theme = {
     "constructor.lua": { fg: "#9bb4bc" },
     "diff.delta": { bg: "#41362a" },
     "diff.minus": { bg: "#3b242a" },
+    "diff.minus.word": { bg: "#663342" },
     "diff.plus": { bg: "#293125" },
+    "diff.plus.word": { bg: "#39502c" },
     function: { fg: "#c48282" },
     "function.builtin": { fg: "#c48282" },
     "function.call": { fg: "#bb9dbd" },
@@ -62,6 +65,7 @@ var theme = {
     "markup.heading.5": { fg: "#6e94b2", bold: true },
     "markup.heading.6": { fg: "#6e94b2", bold: true },
     "markup.italic": { italic: true },
+    "markup.link": { fg: "#cdcdcd" },
     "markup.link.label": { fg: "#e8b589", underline: "solid" },
     "markup.link.url": { fg: "#c48282" },
     "markup.list": { fg: "#c48282" },

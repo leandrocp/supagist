@@ -4,6 +4,7 @@ var theme = {
   name: "mfd_default",
   appearance: "light",
   revision: "72ae627792960a7e490cb5242a78c570d02ba775",
+  license: "Apache-2.0",
   highlights: {
     attribute: { fg: "#1e2d1e" },
     "attribute.builtin": { fg: "#1e2d1e" },
@@ -23,7 +24,9 @@ var theme = {
     constructor: { fg: "#1e2d1e", bold: true },
     "diff.delta": { fg: "#007373" },
     "diff.minus": { fg: "#590008" },
+    "diff.minus.word": { bg: "#d78c85" },
     "diff.plus": { fg: "#005523" },
+    "diff.plus.word": { bg: "#77b383" },
     function: { fg: "#1e2d1e", bold: true },
     "function.builtin": { fg: "#1e2d1e", bold: true, italic: true },
     "function.call": { fg: "#1e2d1e" },

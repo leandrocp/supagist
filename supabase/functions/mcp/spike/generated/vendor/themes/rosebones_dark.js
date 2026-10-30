@@ -4,6 +4,7 @@ var theme = {
   name: "rosebones_dark",
   appearance: "dark",
   revision: "8304d8df9b823ff11e103afa62f38c39f534abe6",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#317490" },
     "attribute.builtin": { fg: "#9ccfd8" },
@@ -24,7 +25,9 @@ var theme = {
     "constructor.lua": { fg: "#7d7997" },
     "diff.delta": { bg: "#1c2d2f" },
     "diff.minus": { bg: "#3d2229" },
+    "diff.minus.word": { bg: "#683040" },
     "diff.plus": { bg: "#1d2c34" },
+    "diff.plus.word": { bg: "#174960" },
     function: { fg: "#e1d4d4" },
     "function.builtin": { fg: "#9ccfd8" },
     "function.call": { fg: "#e1d4d4" },

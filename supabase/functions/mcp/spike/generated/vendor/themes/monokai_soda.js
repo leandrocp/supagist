@@ -3,7 +3,8 @@
 var theme = {
   name: "monokai_soda",
   appearance: "dark",
-  revision: "fca3943173f6026347f9ffc68baab39454446c3b",
+  revision: "759be78d722e306e4a3aac9cc0738f1be86a1ab8",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#97e023" },
     "attribute.builtin": { fg: "#f6f6ec" },
@@ -23,7 +24,9 @@ var theme = {
     constructor: { fg: "#78dce8" },
     "diff.delta": { fg: "#8cf8f7" },
     "diff.minus": { fg: "#ffc0b9" },
+    "diff.minus.word": { bg: "#593835" },
     "diff.plus": { fg: "#b3f6c0" },
+    "diff.plus.word": { bg: "#294b31" },
     error: { fg: "#f3005f" },
     function: { fg: "#97e023", italic: true },
     "function.builtin": { fg: "#78dce8" },
@@ -98,6 +101,7 @@ var theme = {
     tag: { fg: "#f3005f" },
     "tag.attribute": { fg: "#97e023" },
     "tag.builtin": { fg: "#f6f6ec" },
+    "tag.builtin.tsx": { fg: "#f3005f" },
     "tag.delimiter": { fg: "#f6f6ec" },
     type: { fg: "#78dce8" },
     "type.builtin": { fg: "#78dce8" },

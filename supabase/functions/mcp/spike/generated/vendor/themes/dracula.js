@@ -4,6 +4,7 @@ var theme = {
   name: "dracula",
   appearance: "dark",
   revision: "ae752c13e95fb7c5f58da4b5123cb804ea7568ee",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#8be9fd" },
     "attribute.builtin": { fg: "#50fa7b", italic: true },
@@ -23,7 +24,9 @@ var theme = {
     constructor: { fg: "#8be9fd" },
     "diff.delta": { fg: "#8cf8f7" },
     "diff.minus": { fg: "#ffc0b9" },
+    "diff.minus.word": { bg: "#623733" },
     "diff.plus": { fg: "#b3f6c0" },
+    "diff.plus.word": { bg: "#2a4e33" },
     error: { fg: "#ff6e6e" },
     function: { fg: "#50fa7b" },
     "function.builtin": { fg: "#8be9fd" },

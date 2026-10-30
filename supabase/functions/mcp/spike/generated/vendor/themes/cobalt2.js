@@ -4,6 +4,7 @@ var theme = {
   name: "cobalt2",
   appearance: "dark",
   revision: "0cc17f3491feba19ed62b2d9622577f7822a0113",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#ffff00" },
     "attribute.builtin": { fg: "#b300b3", bold: true },
@@ -23,7 +24,9 @@ var theme = {
     constructor: { fg: "#b300b3", bold: true },
     "diff.delta": { fg: "#8cf8f7" },
     "diff.minus": { fg: "#ffc0b9" },
+    "diff.minus.word": { bg: "#3b1f1d" },
     "diff.plus": { fg: "#b3f6c0" },
+    "diff.plus.word": { bg: "#0e3018" },
     function: { fg: "#ffff00" },
     "function.builtin": { fg: "#b300b3", bold: true },
     "function.call": { fg: "#ffff00" },

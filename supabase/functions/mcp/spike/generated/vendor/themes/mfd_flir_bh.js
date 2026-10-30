@@ -4,6 +4,7 @@ var theme = {
   name: "mfd_flir_bh",
   appearance: "light",
   revision: "72ae627792960a7e490cb5242a78c570d02ba775",
+  license: "Apache-2.0",
   highlights: {
     attribute: { fg: "#505050" },
     "attribute.builtin": { fg: "#505050" },
@@ -23,7 +24,9 @@ var theme = {
     constructor: { fg: "#505050", bold: true },
     "diff.delta": { fg: "#007373" },
     "diff.minus": { fg: "#590008" },
+    "diff.minus.word": { bg: "#ffc7c1" },
     "diff.plus": { fg: "#005523" },
+    "diff.plus.word": { bg: "#bbe5c2" },
     function: { fg: "#383838", bold: true },
     "function.builtin": { fg: "#383838", bold: true, italic: true },
     "function.call": { fg: "#383838" },

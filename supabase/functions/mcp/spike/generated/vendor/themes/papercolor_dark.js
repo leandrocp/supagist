@@ -4,6 +4,7 @@ var theme = {
   name: "papercolor_dark",
   appearance: "dark",
   revision: "0cfe64ffb24c21a6101b5f994ca342a74c977aef",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#00afaf" },
     "attribute.builtin": { fg: "#d0d0d0" },
@@ -23,7 +24,9 @@ var theme = {
     constructor: { fg: "#d0d0d0" },
     "diff.delta": { fg: "#8cf8f7" },
     "diff.minus": { fg: "#ffc0b9" },
+    "diff.minus.word": { bg: "#492b29" },
     "diff.plus": { fg: "#b3f6c0" },
+    "diff.plus.word": { bg: "#1b3d24" },
     function: { fg: "#d0d0d0" },
     "function.builtin": { fg: "#d0d0d0" },
     "function.call": { fg: "#d0d0d0" },

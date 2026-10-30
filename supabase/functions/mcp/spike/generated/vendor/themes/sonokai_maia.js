@@ -4,6 +4,7 @@ var theme = {
   name: "sonokai_maia",
   appearance: "dark",
   revision: "b023c5280b16fe2366f5e779d8d2756b3e5ee9c3",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#78cee9" },
     "attribute.builtin": { fg: "#baa0f8" },
@@ -25,7 +26,9 @@ var theme = {
     "constructor.tsx": { fg: "#78cee9" },
     "diff.delta": { fg: "#78cee9" },
     "diff.minus": { fg: "#f76c7c" },
+    "diff.minus.word": { bg: "#762e36" },
     "diff.plus": { fg: "#9cd57b" },
+    "diff.plus.word": { bg: "#365324" },
     error: { fg: "#f76c7c" },
     function: { fg: "#9cd57b" },
     "function.builtin": { fg: "#9cd57b" },

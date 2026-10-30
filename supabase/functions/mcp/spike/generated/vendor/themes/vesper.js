@@ -4,6 +4,7 @@ var theme = {
   name: "vesper",
   appearance: "dark",
   revision: "1717b1ad657c94bec3fc2bdebb0c55452d9fe46d",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#a0a0a0" },
     "attribute.builtin": { fg: "#65737e" },
@@ -23,7 +24,9 @@ var theme = {
     constructor: { fg: "#a0a0a0" },
     "diff.delta": { fg: "#8cf8f7" },
     "diff.minus": { fg: "#ffc0b9" },
+    "diff.minus.word": { bg: "#3a1e1c" },
     "diff.plus": { fg: "#b3f6c0" },
+    "diff.plus.word": { bg: "#0d2f17" },
     error: { fg: "#ff8080" },
     function: { fg: "#ffcfa8" },
     "function.builtin": { fg: "#ffcfa8" },

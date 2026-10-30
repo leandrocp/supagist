@@ -4,6 +4,7 @@ var theme = {
   name: "everforest_light",
   appearance: "light",
   revision: "a0e9edc57379e8feafc6ba207c26dbb12fc1b6d8",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#df69ba" },
     "attribute.builtin": { fg: "#dfa000" },
@@ -29,7 +30,9 @@ var theme = {
     "constructor.tsx": { fg: "#dfa000" },
     "diff.delta": { fg: "#3a94c5" },
     "diff.minus": { fg: "#f85552" },
+    "diff.minus.word": { bg: "#ffb6ad" },
     "diff.plus": { fg: "#8da101" },
+    "diff.plus.word": { bg: "#cfde98" },
     error: { fg: "#f85552" },
     function: { fg: "#8da101" },
     "function.builtin": { fg: "#8da101" },

@@ -4,6 +4,7 @@ var theme = {
   name: "zenwritten_light",
   appearance: "light",
   revision: "8304d8df9b823ff11e103afa62f38c39f534abe6",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#353535", bold: true },
     "attribute.builtin": { fg: "#5c5c5c", bold: true },
@@ -24,7 +25,9 @@ var theme = {
     "constructor.lua": { fg: "#848484" },
     "diff.delta": { bg: "#d4dee7" },
     "diff.minus": { bg: "#ebd8da" },
+    "diff.minus.word": { bg: "#e1adb4" },
     "diff.plus": { bg: "#cbe5b8" },
+    "diff.plus.word": { bg: "#a1ca82" },
     function: { fg: "#353535" },
     "function.builtin": { fg: "#5c5c5c", bold: true },
     "function.call": { fg: "#353535" },

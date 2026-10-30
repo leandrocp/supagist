@@ -4,6 +4,7 @@ var theme = {
   name: "flexoki_light",
   appearance: "light",
   revision: "c3e2251e813d29d885a7cbbe9808a7af234d845d",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#a02f6f" },
     "attribute.builtin": { fg: "#6f6e69" },
@@ -23,7 +24,9 @@ var theme = {
     constructor: { fg: "#6f6e69" },
     "diff.delta": { fg: "#bc5215" },
     "diff.minus": { fg: "#af3029" },
+    "diff.minus.word": { bg: "#ffc2b7" },
     "diff.plus": { fg: "#66800b" },
+    "diff.plus.word": { bg: "#d1e4a9" },
     function: { fg: "#bc5215" },
     "function.builtin": { fg: "#6f6e69" },
     "function.call": { fg: "#bc5215" },

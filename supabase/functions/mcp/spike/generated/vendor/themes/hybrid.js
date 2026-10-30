@@ -4,6 +4,7 @@ var theme = {
   name: "hybrid",
   appearance: "dark",
   revision: "0eafd5f0e1223073bdc7c02aedfd85bff029aa5c",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#b294bb" },
     "attribute.builtin": { fg: "#7aa6da" },
@@ -23,7 +24,9 @@ var theme = {
     constructor: { fg: "#b294bb" },
     "diff.delta": { fg: "#5f819d" },
     "diff.minus": { fg: "#a54242" },
+    "diff.minus.word": { bg: "#592424" },
     "diff.plus": { fg: "#8c9440" },
+    "diff.plus.word": { bg: "#373b0d" },
     function: { fg: "#81a2be" },
     "function.builtin": { fg: "#cc6666" },
     "function.call": { fg: "#81a2be" },

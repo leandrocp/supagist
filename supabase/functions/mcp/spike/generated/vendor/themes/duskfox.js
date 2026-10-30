@@ -4,6 +4,7 @@ var theme = {
   name: "duskfox",
   appearance: "dark",
   revision: "4dacd3f0185a2227bdf3b6c0975a8f0bf87cac9a",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#f0a4a2" },
     "attribute.builtin": { fg: "#65b1cd" },
@@ -24,7 +25,9 @@ var theme = {
     "constructor.lua": { fg: "#cdcbe0" },
     "diff.delta": { fg: "#f6c177" },
     "diff.minus": { fg: "#eb6f92" },
+    "diff.minus.word": { bg: "#642437" },
     "diff.plus": { fg: "#a3be8c" },
+    "diff.plus.word": { bg: "#2e4515" },
     function: { fg: "#65b1cd" },
     "function.builtin": { fg: "#eb6f92" },
     "function.call": { fg: "#65b1cd" },

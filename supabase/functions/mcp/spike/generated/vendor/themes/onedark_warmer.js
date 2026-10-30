@@ -4,6 +4,7 @@ var theme = {
   name: "onedark_warmer",
   appearance: "dark",
   revision: "df4792accde9db0043121f32628bcf8e645d9aea",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#51a8b3" },
     "attribute.builtin": { fg: "#57a5e5" },
@@ -23,7 +24,9 @@ var theme = {
     constructor: { fg: "#dbb671", bold: true },
     "diff.delta": { fg: "#57a5e5" },
     "diff.minus": { fg: "#de5d68" },
+    "diff.minus.word": { bg: "#662229" },
     "diff.plus": { fg: "#8fb573" },
+    "diff.plus.word": { bg: "#304321" },
     function: { fg: "#57a5e5" },
     "function.builtin": { fg: "#51a8b3" },
     "function.call": { fg: "#57a5e5" },

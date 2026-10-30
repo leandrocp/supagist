@@ -4,6 +4,7 @@ var theme = {
   name: "neovim_dark",
   appearance: "dark",
   revision: "306a05526ada86a7b30af95c5cc81ffba93fef97",
+  license: "Apache-2.0",
   highlights: {
     attribute: { fg: "#e0e2ea" },
     "attribute.builtin": { fg: "#8cf8f7" },
@@ -23,7 +24,9 @@ var theme = {
     constructor: { fg: "#8cf8f7" },
     "diff.delta": { fg: "#8cf8f7" },
     "diff.minus": { fg: "#ffc0b9" },
+    "diff.minus.word": { bg: "#442320" },
     "diff.plus": { fg: "#b3f6c0" },
+    "diff.plus.word": { bg: "#14361d" },
     function: { fg: "#8cf8f7" },
     "function.builtin": { fg: "#8cf8f7" },
     "function.call": { fg: "#8cf8f7" },

@@ -4,6 +4,7 @@ var theme = {
   name: "nordbones",
   appearance: "dark",
   revision: "8304d8df9b823ff11e103afa62f38c39f534abe6",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#81a1c1" },
     "attribute.builtin": { fg: "#abbad0", bold: true },
@@ -24,7 +25,9 @@ var theme = {
     "constructor.lua": { fg: "#818eab" },
     "diff.delta": { bg: "#324b4b" },
     "diff.minus": { bg: "#663a3e" },
+    "diff.minus.word": { bg: "#954952" },
     "diff.plus": { bg: "#3d4b2f" },
+    "diff.plus.word": { bg: "#506b32" },
     function: { fg: "#87bfce" },
     "function.builtin": { fg: "#abbad0", bold: true },
     "function.call": { fg: "#87bfce" },

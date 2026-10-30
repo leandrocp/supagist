@@ -4,6 +4,7 @@ var theme = {
   name: "kanagawa_wave",
   appearance: "dark",
   revision: "bb85e4bfc8d89b0e62c8fa53ccdd13d12e2f77b3",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#ffa066" },
     "attribute.builtin": { fg: "#7fb4ca" },
@@ -24,7 +25,9 @@ var theme = {
     "constructor.lua": { fg: "#957fb8" },
     "diff.delta": { fg: "#dca561" },
     "diff.minus": { fg: "#c34043" },
+    "diff.minus.word": { bg: "#631d1f" },
     "diff.plus": { fg: "#76946a" },
+    "diff.plus.word": { bg: "#2a4021" },
     function: { fg: "#7e9cd8" },
     "function.builtin": { fg: "#7fb4ca" },
     "function.call": { fg: "#7e9cd8" },

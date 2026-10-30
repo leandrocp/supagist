@@ -4,6 +4,7 @@ var theme = {
   name: "dracula_soft",
   appearance: "dark",
   revision: "ae752c13e95fb7c5f58da4b5123cb804ea7568ee",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#a7dfef" },
     "attribute.builtin": { fg: "#87e58e", italic: true },
@@ -23,7 +24,9 @@ var theme = {
     constructor: { fg: "#a7dfef" },
     "diff.delta": { fg: "#8cf8f7" },
     "diff.minus": { fg: "#ffc0b9" },
+    "diff.minus.word": { bg: "#613834" },
     "diff.plus": { fg: "#b3f6c0" },
+    "diff.plus.word": { bg: "#2c4e33" },
     error: { fg: "#e1837f" },
     function: { fg: "#87e58e" },
     "function.builtin": { fg: "#a7dfef" },

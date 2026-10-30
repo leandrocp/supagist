@@ -4,6 +4,7 @@ var theme = {
   name: "terafox",
   appearance: "dark",
   revision: "4dacd3f0185a2227bdf3b6c0975a8f0bf87cac9a",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#ff9664" },
     "attribute.builtin": { fg: "#73a3b7" },
@@ -24,7 +25,9 @@ var theme = {
     "constructor.lua": { fg: "#cbd9d8" },
     "diff.delta": { fg: "#fda47f" },
     "diff.minus": { fg: "#e85c51" },
+    "diff.minus.word": { bg: "#671e1a" },
     "diff.plus": { fg: "#7aa4a1" },
+    "diff.plus.word": { bg: "#004542" },
     function: { fg: "#73a3b7" },
     "function.builtin": { fg: "#e85c51" },
     "function.call": { fg: "#73a3b7" },

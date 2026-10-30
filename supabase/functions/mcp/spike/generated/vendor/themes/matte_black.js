@@ -4,6 +4,7 @@ var theme = {
   name: "matte_black",
   appearance: "dark",
   revision: "a8a039f5d6189b28d76fa0221e64965efec7e996",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#d97706", italic: true },
     "attribute.builtin": { fg: "#f59e0b" },
@@ -23,7 +24,9 @@ var theme = {
     constructor: { fg: "#fbbf24" },
     "diff.delta": { fg: "#f59e0b" },
     "diff.minus": { fg: "#dc2626" },
+    "diff.minus.word": { bg: "#560001" },
     "diff.plus": { fg: "#10b981" },
+    "diff.plus.word": { bg: "#00361b" },
     function: { fg: "#dc2626" },
     "function.builtin": { fg: "#d97706" },
     "function.call": { fg: "#f59e0b" },

@@ -4,6 +4,7 @@ var theme = {
   name: "doom_one_light",
   appearance: "light",
   revision: "beae92173315c7282f6897e666cfd67fbf0f3ac9",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#6a1868" },
     "attribute.builtin": { fg: "#b751b6" },
@@ -23,7 +24,9 @@ var theme = {
     constructor: { fg: "#e45649" },
     "diff.delta": { fg: "#007373" },
     "diff.minus": { fg: "#590008" },
+    "diff.minus.word": { bg: "#ffc8c2" },
     "diff.plus": { fg: "#005523" },
+    "diff.plus.word": { bg: "#bce6c3" },
     error: { fg: "#e45649" },
     function: { fg: "#a626a4" },
     "function.builtin": { fg: "#841e83", bold: true },

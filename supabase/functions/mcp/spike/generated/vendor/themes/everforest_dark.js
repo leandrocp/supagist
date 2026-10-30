@@ -4,6 +4,7 @@ var theme = {
   name: "everforest_dark",
   appearance: "dark",
   revision: "a0e9edc57379e8feafc6ba207c26dbb12fc1b6d8",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#d699b6" },
     "attribute.builtin": { fg: "#dbbc7f" },
@@ -29,7 +30,9 @@ var theme = {
     "constructor.tsx": { fg: "#dbbc7f" },
     "diff.delta": { fg: "#7fbbb3" },
     "diff.minus": { fg: "#e67e80" },
+    "diff.minus.word": { bg: "#723c3d" },
     "diff.plus": { fg: "#a7c080" },
+    "diff.plus.word": { bg: "#475432" },
     error: { fg: "#e67e80" },
     function: { fg: "#a7c080" },
     "function.builtin": { fg: "#a7c080" },

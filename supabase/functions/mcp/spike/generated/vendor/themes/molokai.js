@@ -4,6 +4,7 @@ var theme = {
   name: "molokai",
   appearance: "dark",
   revision: "720bacc534fa3b1566d75612986737088a4fb132",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#f92672" },
     "attribute.builtin": { fg: "#819aff" },
@@ -23,7 +24,9 @@ var theme = {
     constructor: { fg: "#819aff" },
     "diff.delta": { fg: "#8cf8f7" },
     "diff.minus": { fg: "#ffc0b9" },
+    "diff.minus.word": { bg: "#492c29" },
     "diff.plus": { fg: "#b3f6c0" },
+    "diff.plus.word": { bg: "#1c3e24" },
     function: { fg: "#a6e22e" },
     "function.builtin": { fg: "#819aff" },
     "function.call": { fg: "#a6e22e" },

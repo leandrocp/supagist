@@ -4,6 +4,7 @@ var theme = {
   name: "dayfox",
   appearance: "light",
   revision: "4dacd3f0185a2227bdf3b6c0975a8f0bf87cac9a",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#7f5152" },
     "attribute.builtin": { fg: "#223d90" },
@@ -24,7 +25,9 @@ var theme = {
     "constructor.lua": { fg: "#643f61" },
     "diff.delta": { fg: "#ac5402" },
     "diff.minus": { fg: "#a5222f" },
+    "diff.minus.word": { bg: "#ffb8b5" },
     "diff.plus": { fg: "#396847" },
+    "diff.plus.word": { bg: "#bcdbc3" },
     function: { fg: "#223d90" },
     "function.builtin": { fg: "#a5222f" },
     "function.call": { fg: "#223d90" },

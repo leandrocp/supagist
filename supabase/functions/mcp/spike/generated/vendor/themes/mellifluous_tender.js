@@ -4,6 +4,7 @@ var theme = {
   name: "mellifluous_tender",
   appearance: "dark",
   revision: "ec0575bdb63594c5e7fba6eb9607b009aa1fb74e",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#73cef4" },
     "attribute.builtin": { fg: "#73cef4" },
@@ -23,7 +24,9 @@ var theme = {
     constructor: { fg: "#b3deef" },
     "diff.delta": { bg: "#46391b" },
     "diff.minus": { bg: "#522f35" },
+    "diff.minus.word": { bg: "#803e4b" },
     "diff.plus": { bg: "#3d3e21" },
+    "diff.plus.word": { bg: "#5a5b19" },
     function: { fg: "#b3deef" },
     "function.builtin": { fg: "#b3deef" },
     "function.call": { fg: "#b3deef" },

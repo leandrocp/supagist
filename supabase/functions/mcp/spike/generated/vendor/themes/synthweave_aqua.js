@@ -4,6 +4,7 @@ var theme = {
   name: "synthweave_aqua",
   appearance: "dark",
   revision: "0520bc260674745cdd3b5465f322de5731217dc6",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#ffe347" },
     "attribute.builtin": { fg: "#8fffe0" },
@@ -27,7 +28,9 @@ var theme = {
     "constructor.lua": { fg: "#ffe347" },
     "diff.delta": { fg: "#8cf8f7" },
     "diff.minus": { fg: "#ffc0b9" },
+    "diff.minus.word": { bg: "#602e2a" },
     "diff.plus": { fg: "#b3f6c0" },
+    "diff.plus.word": { bg: "#1e4a2a" },
     function: { fg: "#7df9ff" },
     "function.builtin": { fg: "#8fffe0" },
     "function.call": { fg: "#7df9ff" },

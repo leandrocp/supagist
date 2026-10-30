@@ -4,6 +4,7 @@ var theme = {
   name: "neomodern_moon_dark",
   appearance: "dark",
   revision: "d41469578922a23d75a0d9e8deef1e34837230a6",
+  license: "Apache-2.0",
   highlights: {
     attribute: { fg: "#626e85" },
     "attribute.builtin": { fg: "#6d748c" },
@@ -24,7 +25,9 @@ var theme = {
     "constructor.lua": { fg: "#c3c3d0" },
     "diff.delta": { fg: "#849ee1" },
     "diff.minus": { fg: "#dc827b" },
+    "diff.minus.word": { bg: "#491d1b" },
     "diff.plus": { fg: "#69896f" },
+    "diff.plus.word": { bg: "#1e3222" },
     function: { fg: "#626e85" },
     "function.builtin": { fg: "#626e85" },
     "function.call": { fg: "#626e85" },

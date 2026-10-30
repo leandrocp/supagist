@@ -4,6 +4,7 @@ var theme = {
   name: "zephyr_dark",
   appearance: "dark",
   revision: "7fd86b7164442d3b5ec2c81b2694d040e716b5cf",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#36d0e0" },
     "attribute.builtin": { fg: "#f7bb3b" },
@@ -23,7 +24,9 @@ var theme = {
     constructor: { fg: "#f7bb3b" },
     "diff.delta": { fg: "#8cf8f7" },
     "diff.minus": { fg: "#ffc0b9" },
+    "diff.minus.word": { bg: "#5f3733" },
     "diff.plus": { fg: "#b3f6c0" },
+    "diff.plus.word": { bg: "#2b4d32" },
     function: { fg: "#36d0e0" },
     "function.builtin": { fg: "#f7bb3b" },
     "function.call": { fg: "#36d0e0" },

@@ -4,6 +4,7 @@ var theme = {
   name: "mfd_gbl_dark",
   appearance: "dark",
   revision: "72ae627792960a7e490cb5242a78c570d02ba775",
+  license: "Apache-2.0",
   highlights: {
     attribute: { fg: "#02b582" },
     "attribute.builtin": { fg: "#02b582" },
@@ -23,7 +24,9 @@ var theme = {
     constructor: { fg: "#02b582", bold: true },
     "diff.delta": { fg: "#8cf8f7" },
     "diff.minus": { fg: "#ffc0b9" },
+    "diff.minus.word": { bg: "#550004" },
     "diff.plus": { fg: "#b3f6c0" },
+    "diff.plus.word": { bg: "#003700" },
     function: { fg: "#02b582", bold: true },
     "function.builtin": { fg: "#02b582", bold: true, italic: true },
     "function.call": { fg: "#02b582" },

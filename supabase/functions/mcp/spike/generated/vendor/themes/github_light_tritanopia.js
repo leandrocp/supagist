@@ -4,6 +4,7 @@ var theme = {
   name: "github_light_tritanopia",
   appearance: "light",
   revision: "c106c9472154d6b2c74b74565616b877ae8ed31d",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#0550ae" },
     "attribute.builtin": { fg: "#1b1f24" },
@@ -25,7 +26,9 @@ var theme = {
     "constructor.lua": { fg: "#1b1f24" },
     "diff.delta": { fg: "#9a6700", bg: "#fef6d8" },
     "diff.minus": { fg: "#d1242f", bg: "#fff0ef" },
+    "diff.minus.word": { bg: "#ffb4ac" },
     "diff.plus": { fg: "#0969da", bg: "#e9f7ff" },
+    "diff.plus.word": { bg: "#a4d6ff" },
     function: { fg: "#6639ba" },
     "function.builtin.bash": { fg: "#cf222e" },
     "function.builtin.lua": { fg: "#0550ae" },

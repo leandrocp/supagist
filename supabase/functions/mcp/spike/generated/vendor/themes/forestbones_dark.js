@@ -4,6 +4,7 @@ var theme = {
   name: "forestbones_dark",
   appearance: "dark",
   revision: "8304d8df9b823ff11e103afa62f38c39f534abe6",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#83c193" },
     "attribute.builtin": { fg: "#b5aa92", bold: true },
@@ -24,7 +25,9 @@ var theme = {
     "constructor.lua": { fg: "#7b8e9d" },
     "diff.delta": { bg: "#304946" },
     "diff.minus": { bg: "#643839" },
+    "diff.minus.word": { bg: "#93474a" },
     "diff.plus": { bg: "#3e482d" },
+    "diff.plus.word": { bg: "#54672e" },
     function: { fg: "#e7dcc4" },
     "function.builtin": { fg: "#b5aa92", bold: true },
     "function.call": { fg: "#e7dcc4" },

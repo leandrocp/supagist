@@ -4,6 +4,7 @@ var theme = {
   name: "citruszest",
   appearance: "dark",
   revision: "e6fed9ec3d0ac190b1387379c138ba5e23a1f4f9",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#ff7431" },
     "attribute.builtin": { fg: "#ffaa54" },
@@ -26,7 +27,9 @@ var theme = {
     "constructor.typescript": { fg: "#1affa3" },
     "diff.delta": { fg: "#ffff00" },
     "diff.minus": { fg: "#ff5454" },
+    "diff.minus.word": { bg: "#560006" },
     "diff.plus": { fg: "#00cc7a" },
+    "diff.plus.word": { bg: "#00370f" },
     error: { fg: "#ff5454" },
     function: { fg: "#1affa3" },
     "function.builtin": { fg: "#00bfff" },

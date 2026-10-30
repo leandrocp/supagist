@@ -4,6 +4,7 @@ var theme = {
   name: "neofusion",
   appearance: "dark",
   revision: "c8ef24be527be37254bf8981fa3e6216dee4f8d8",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#e2d9c5" },
     "attribute.builtin": { fg: "#fd5e3a" },
@@ -23,7 +24,9 @@ var theme = {
     constructor: { fg: "#fd5e3a" },
     "diff.delta": { bg: "#06364b" },
     "diff.minus": { bg: "#722529" },
+    "diff.minus.word": { bg: "#a13038" },
     "diff.plus": { bg: "#5f6e29" },
+    "diff.plus.word": { bg: "#425300" },
     function: { fg: "#35b5ff", bold: true },
     "function.builtin": { fg: "#fd5e3a" },
     "function.call": { fg: "#35b5ff", bold: true },

@@ -4,6 +4,7 @@ var theme = {
   name: "aura_soft_dark_soft_text",
   appearance: "dark",
   revision: "20924aa0a43975420edd0e0b2f919e07a3eff9c9",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#8464c6" },
     "attribute.builtin": { fg: "#8464c6" },
@@ -23,7 +24,9 @@ var theme = {
     constructor: { fg: "#8464c6" },
     "diff.delta": { fg: "#8cf8f7" },
     "diff.minus": { fg: "#ffc0b9" },
+    "diff.minus.word": { bg: "#592c28" },
     "diff.plus": { fg: "#b3f6c0" },
+    "diff.plus.word": { bg: "#1e4428" },
     function: { fg: "#c7a06f" },
     "function.builtin": { fg: "#8464c6" },
     "function.call": { fg: "#c7a06f" },

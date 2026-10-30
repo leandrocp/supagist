@@ -4,6 +4,7 @@ var theme = {
   name: "obscure",
   appearance: "dark",
   revision: "6c2ee734099de2f95a79a1577cd231f7fe2d38a6",
+  license: "Apache-2.0",
   highlights: {
     attribute: { fg: "#c45570" },
     "attribute.builtin": { fg: "#6a8cbc" },
@@ -25,7 +26,9 @@ var theme = {
     "constructor.tsx": { fg: "#6a8cbc" },
     "diff.delta": { fg: "#8cf8f7" },
     "diff.minus": { fg: "#ffc0b9" },
+    "diff.minus.word": { bg: "#422522" },
     "diff.plus": { fg: "#b3f6c0" },
+    "diff.plus.word": { bg: "#14361d" },
     function: { fg: "#6a8cbc" },
     "function.builtin": { fg: "#6a8cbc" },
     "function.call": { fg: "#6a8cbc" },

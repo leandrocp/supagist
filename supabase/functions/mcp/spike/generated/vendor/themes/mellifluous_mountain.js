@@ -4,6 +4,7 @@ var theme = {
   name: "mellifluous_mountain",
   appearance: "dark",
   revision: "ec0575bdb63594c5e7fba6eb9607b009aa1fb74e",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#aca98a" },
     "attribute.builtin": { fg: "#aca98a" },
@@ -23,7 +24,9 @@ var theme = {
     constructor: { fg: "#8f8aac" },
     "diff.delta": { bg: "#261f13" },
     "diff.minus": { bg: "#2c1b1c" },
+    "diff.minus.word": { bg: "#57292d" },
     "diff.plus": { bg: "#182418" },
+    "diff.plus.word": { bg: "#214222" },
     function: { fg: "#8f8aac" },
     "function.builtin": { fg: "#8f8aac" },
     "function.call": { fg: "#8f8aac" },

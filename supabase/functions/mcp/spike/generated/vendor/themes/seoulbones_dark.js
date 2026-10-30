@@ -4,6 +4,7 @@ var theme = {
   name: "seoulbones_dark",
   appearance: "dark",
   revision: "8304d8df9b823ff11e103afa62f38c39f534abe6",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#d590a3" },
     "attribute.builtin": { fg: "#bcbcd3" },
@@ -24,7 +25,9 @@ var theme = {
     "constructor.lua": { fg: "#9b9b9b" },
     "diff.delta": { bg: "#466177" },
     "diff.minus": { bg: "#82505e" },
+    "diff.minus.word": { bg: "#b36079" },
     "diff.plus": { bg: "#406742" },
+    "diff.plus.word": { bg: "#488a4d" },
     function: { fg: "#dfdfc1" },
     "function.builtin": { fg: "#bcbcd3" },
     "function.call": { fg: "#dfdfc1" },

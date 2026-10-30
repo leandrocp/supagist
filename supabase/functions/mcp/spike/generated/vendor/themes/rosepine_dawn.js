@@ -4,6 +4,7 @@ var theme = {
   name: "rosepine_dawn",
   appearance: "light",
   revision: "ff483051a47e27d84bdef47703538df1ed9f4a47",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#907aa9" },
     "attribute.builtin": { fg: "#907aa9", bold: true },
@@ -24,7 +25,9 @@ var theme = {
     constructor: { fg: "#56949f" },
     "diff.delta": { bg: "#f3ddd7" },
     "diff.minus": { fg: "#b4637a", bg: "#ecd7d6" },
+    "diff.minus.word": { bg: "#e1acb9" },
     "diff.plus": { fg: "#56949f", bg: "#d9e1dd" },
+    "diff.plus.word": { bg: "#99c8d0" },
     function: { fg: "#d7827e" },
     "function.builtin": { fg: "#d7827e", bold: true },
     "function.call": { fg: "#d7827e" },

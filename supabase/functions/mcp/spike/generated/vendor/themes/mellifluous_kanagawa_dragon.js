@@ -4,6 +4,7 @@ var theme = {
   name: "mellifluous_kanagawa_dragon",
   appearance: "dark",
   revision: "ec0575bdb63594c5e7fba6eb9607b009aa1fb74e",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#8992a7" },
     "attribute.builtin": { fg: "#8992a7" },
@@ -23,7 +24,9 @@ var theme = {
     constructor: { fg: "#8ba4b0" },
     "diff.delta": { bg: "#34221b" },
     "diff.minus": { bg: "#391e1d" },
+    "diff.minus.word": { bg: "#652c2b" },
     "diff.plus": { bg: "#28271d" },
+    "diff.plus.word": { bg: "#46411a" },
     function: { fg: "#8ba4b0" },
     "function.builtin": { fg: "#8ba4b0" },
     "function.call": { fg: "#8ba4b0" },

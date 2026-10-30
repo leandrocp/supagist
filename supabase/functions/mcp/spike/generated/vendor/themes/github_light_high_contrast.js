@@ -4,6 +4,7 @@ var theme = {
   name: "github_light_high_contrast",
   appearance: "light",
   revision: "c106c9472154d6b2c74b74565616b877ae8ed31d",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#023b95" },
     "attribute.builtin": { fg: "#010409" },
@@ -26,7 +27,9 @@ var theme = {
     "constructor.lua": { fg: "#010409" },
     "diff.delta": { fg: "#744500", bg: "#fbf0cb" },
     "diff.minus": { fg: "#d1242f", bg: "#ffeceb" },
+    "diff.minus.word": { bg: "#ffb1a9" },
     "diff.plus": { fg: "#055d20", bg: "#daf7e0" },
+    "diff.plus.word": { bg: "#aaddae" },
     function: { fg: "#512598" },
     "function.builtin.bash": { fg: "#a0111f" },
     "function.builtin.lua": { fg: "#023b95" },

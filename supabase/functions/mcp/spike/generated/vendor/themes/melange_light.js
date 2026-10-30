@@ -4,6 +4,7 @@ var theme = {
   name: "melange_light",
   appearance: "light",
   revision: "ce42f6b629beeaa00591ba73a77d3eeac4cf28ce",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#3a684a" },
     "attribute.builtin": { fg: "#a06d00" },
@@ -23,7 +24,9 @@ var theme = {
     constructor: { fg: "#a06d00" },
     "diff.delta": { bg: "#e8e0e8" },
     "diff.minus": { fg: "#7d6658", bg: "#f1dedf" },
+    "diff.minus.word": { bg: "#e3b99f" },
     "diff.plus": { bg: "#d0e9d1" },
+    "diff.plus.word": { bg: "#9fcfa2" },
     function: { fg: "#a06d00" },
     "function.builtin": { fg: "#a06d00" },
     "function.call": { fg: "#a06d00" },

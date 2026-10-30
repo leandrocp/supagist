@@ -4,6 +4,7 @@ var theme = {
   name: "neosolarized2_light",
   appearance: "light",
   revision: "3c55ad358c062aa4879950c4f83b4deeac6b72df",
+  license: "Apache-2.0",
   highlights: {
     attribute: { fg: "#d33682", italic: true },
     "attribute.builtin": { fg: "#d33682" },
@@ -22,7 +23,9 @@ var theme = {
     constructor: { fg: "#d33682" },
     "diff.delta": { fg: "#007373" },
     "diff.minus": { fg: "#590008" },
+    "diff.minus.word": { bg: "#ffccc6" },
     "diff.plus": { fg: "#005523" },
+    "diff.plus.word": { bg: "#c0ebc7" },
     function: { fg: "#b58900", bold: true },
     "function.builtin": { fg: "#d33682" },
     "function.call": { fg: "#b58900", bold: true },

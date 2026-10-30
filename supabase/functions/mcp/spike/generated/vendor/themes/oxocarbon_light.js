@@ -4,6 +4,7 @@ var theme = {
   name: "oxocarbon_light",
   appearance: "light",
   revision: "cd6523a0836d6e8ee823d343149fd06c7b71fdde",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#ffab91" },
     "attribute.builtin": { fg: "#37474f" },
@@ -23,7 +24,9 @@ var theme = {
     constructor: { fg: "#ee5396" },
     "diff.delta": { fg: "#007373" },
     "diff.minus": { fg: "#590008" },
+    "diff.minus.word": { bg: "#ffccc6" },
     "diff.plus": { fg: "#005523" },
+    "diff.plus.word": { bg: "#c0ebc7" },
     error: { fg: "#0f62fe" },
     function: { fg: "#673ab7", bold: true },
     "function.builtin": { fg: "#673ab7" },

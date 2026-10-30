@@ -4,6 +4,7 @@ var theme = {
   name: "flow_light",
   appearance: "light",
   revision: "4863b14263a77f8efb79068f7078b6261c9cbda2",
+  license: "Apache-2.0",
   highlights: {
     attribute: { fg: "#5ebaa3" },
     "attribute.builtin": { fg: "#8c5eba" },
@@ -23,7 +24,9 @@ var theme = {
     constructor: { fg: "#8c5eba" },
     "diff.delta": { fg: "#5e94ba", bg: "#c6dcec" },
     "diff.minus": { fg: "#ba5e66", bg: "#ecc6c9" },
+    "diff.minus.word": { bg: "#e19c9f" },
     "diff.plus": { bg: "#c9ecc6" },
+    "diff.plus.word": { bg: "#99d295" },
     function: { fg: "#5e94ba" },
     "function.builtin": { fg: "#8c5eba" },
     "function.call": { fg: "#5e94ba" },

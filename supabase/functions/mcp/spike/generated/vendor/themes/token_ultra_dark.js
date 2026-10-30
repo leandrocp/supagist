@@ -4,6 +4,7 @@ var theme = {
   name: "token_ultra_dark",
   appearance: "dark",
   revision: "1538e1eadcbc9eb465b33bab71eec48c8bed0b76",
+  license: "BSD-3-Clause",
   highlights: {
     attribute: { fg: "#a7a299" },
     "attribute.builtin": { fg: "#a7a299" },
@@ -23,7 +24,9 @@ var theme = {
     constructor: { fg: "#a7a299" },
     "diff.delta": { bg: "#2b2b29" },
     "diff.minus": { bg: "#3c2024" },
+    "diff.minus.word": { bg: "#682e38" },
     "diff.plus": { bg: "#1e3524" },
+    "diff.plus.word": { bg: "#205531" },
     error: { fg: "#dd8384" },
     function: { fg: "#ed9574" },
     "function.builtin": { fg: "#a7a299" },

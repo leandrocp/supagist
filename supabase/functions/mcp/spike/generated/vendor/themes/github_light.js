@@ -4,6 +4,7 @@ var theme = {
   name: "github_light",
   appearance: "light",
   revision: "c106c9472154d6b2c74b74565616b877ae8ed31d",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#0550ae" },
     "attribute.builtin": { fg: "#1f2328" },
@@ -26,7 +27,9 @@ var theme = {
     "constructor.lua": { fg: "#1f2328" },
     "diff.delta": { fg: "#9a6700", bg: "#d8cab3" },
     "diff.minus": { fg: "#d1242f", bg: "#e4b7be" },
+    "diff.minus.word": { bg: "#e7867f" },
     "diff.plus": { fg: "#1a7f37", bg: "#b8d0bf" },
+    "diff.plus.word": { bg: "#85b88b" },
     function: { fg: "#6639ba" },
     "function.builtin.bash": { fg: "#cf222e" },
     "function.builtin.lua": { fg: "#0550ae" },

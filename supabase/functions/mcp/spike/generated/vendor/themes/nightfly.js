@@ -4,6 +4,7 @@ var theme = {
   name: "nightfly",
   appearance: "dark",
   revision: "2c31d07ce05efa92bcb7f893f9c74a846226c898",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#82aaff" },
     "attribute.builtin": { fg: "#ff5874" },
@@ -25,7 +26,9 @@ var theme = {
     constructor: { fg: "#21c7a8" },
     "diff.delta": { fg: "#87bcff" },
     "diff.minus": { fg: "#fc514e" },
+    "diff.minus.word": { bg: "#5a0007" },
     "diff.plus": { fg: "#a1cd5e" },
+    "diff.plus.word": { bg: "#1f3300" },
     function: { fg: "#82aaff" },
     "function.builtin": { fg: "#82aaff" },
     "function.call": { fg: "#82aaff" },

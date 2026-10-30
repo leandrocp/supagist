@@ -4,6 +4,7 @@ var theme = {
   name: "bamboo_light",
   appearance: "light",
   revision: "1309bc88bffcf1bedc3e84e7fa9004de93da774a",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#188a9e" },
     "attribute.builtin": { fg: "#c72a3c" },
@@ -26,7 +27,9 @@ var theme = {
     "constructor.lua": { fg: "#a77b00" },
     "diff.delta": { bg: "#d2dceb" },
     "diff.minus": { bg: "#f9afb5" },
+    "diff.minus.word": { bg: "#ea838e" },
     "diff.plus": { bg: "#c0e3ab" },
+    "diff.plus.word": { bg: "#95c875" },
     error: { fg: "#c72a3c" },
     function: { fg: "#1745d5" },
     "function.builtin": { fg: "#df5926" },

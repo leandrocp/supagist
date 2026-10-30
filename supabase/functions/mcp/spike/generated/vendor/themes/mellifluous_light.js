@@ -4,6 +4,7 @@ var theme = {
   name: "mellifluous_light",
   appearance: "light",
   revision: "ec0575bdb63594c5e7fba6eb9607b009aa1fb74e",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#a16927" },
     "attribute.builtin": { fg: "#a16927" },
@@ -23,7 +24,9 @@ var theme = {
     constructor: { fg: "#5a418a" },
     "diff.delta": { bg: "#e6d2bc" },
     "diff.minus": { bg: "#edc9cd" },
+    "diff.minus.word": { bg: "#e29ea7" },
     "diff.plus": { bg: "#dad9b3" },
+    "diff.plus.word": { bg: "#bdba75" },
     function: { fg: "#5a418a" },
     "function.builtin": { fg: "#5a418a" },
     "function.call": { fg: "#5a418a" },

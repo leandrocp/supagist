@@ -4,6 +4,7 @@ var theme = {
   name: "midnight",
   appearance: "dark",
   revision: "fe062a6f2e5bd77cd8a260f61e6e12789eaf4f13",
+  license: "Apache-2.0",
   highlights: {
     attribute: { fg: "#ff7279" },
     "attribute.builtin": { fg: "#ca7050" },
@@ -28,7 +29,9 @@ var theme = {
     "constructor.python": { fg: "#0ab6ba" },
     "diff.delta": { bg: "#261d00" },
     "diff.minus": { bg: "#2d0709" },
+    "diff.minus.word": { bg: "#570f16" },
     "diff.plus": { bg: "#04230a" },
+    "diff.plus.word": { bg: "#004111" },
     function: { fg: "#c8b670" },
     "function.builtin": { fg: "#c8b670" },
     "function.builtin.cpp": { fg: "#ff7279" },

@@ -439,7 +439,7 @@ export const BRAND_PRESETS = [
         cardFill: "#0C2E4E",
       },
     },
-    settings: defaults("material_oceanic", { windowDecoration: "minimal", fontId: "fira" }),
+    settings: defaults("oceanic_next", { windowDecoration: "minimal", fontId: "fira" }),
   },
   {
     id: "github",
@@ -489,7 +489,7 @@ export const BRAND_PRESETS = [
       brandId: "cloudflare",
       frame: darkFrame("#151515", "#6B3A16", 8),
     },
-    settings: defaults("darkplus", { windowDecoration: "minimal", fontId: "system" }),
+    settings: defaults("vscode_dark", { windowDecoration: "minimal", fontId: "system" }),
   },
   {
     id: "linear",
@@ -555,7 +555,7 @@ export const BRAND_PRESETS = [
       brandId: "gemini",
       frame: darkFrame("#171A21", "#405A91", 12),
     },
-    settings: defaults("poimandres", { cornerRadius: 12, fontId: "geist" }),
+    settings: defaults("nightfly", { cornerRadius: 12, fontId: "geist" }),
   },
   {
     id: "perplexity",
@@ -630,7 +630,7 @@ export const BRAND_PRESETS = [
       brandId: "prisma",
       frame: darkFrame("#0D1B2A", "#24465A", 8),
     },
-    settings: defaults("poimandres", { windowDecoration: "minimal", fontId: "fira" }),
+    settings: defaults("nightfly", { windowDecoration: "minimal", fontId: "fira" }),
   },
   {
     id: "aws",
@@ -645,7 +645,7 @@ export const BRAND_PRESETS = [
       brandId: "aws",
       frame: darkFrame("#111820", "#5B4930", 8),
     },
-    settings: defaults("darkplus", { windowDecoration: "minimal", fontId: "system" }),
+    settings: defaults("vscode_dark", { windowDecoration: "minimal", fontId: "system" }),
   },
   {
     id: "mintlify",
@@ -675,7 +675,7 @@ export const BRAND_PRESETS = [
       brandId: "nuxt",
       frame: darkFrame("#101827", "#166B52", 8),
     },
-    settings: defaults("material_oceanic", { windowDecoration: "minimal", fontId: "fira" }),
+    settings: defaults("oceanic_next", { windowDecoration: "minimal", fontId: "fira" }),
   },
   {
     id: "auth0",
@@ -739,7 +739,7 @@ export const BRAND_PRESETS = [
       brandId: "browserbase",
       frame: darkFrame("#111111", "#783018", 4),
     },
-    settings: defaults("darkplus", { cornerRadius: 4, fontId: "system" }),
+    settings: defaults("vscode_dark", { cornerRadius: 4, fontId: "system" }),
   },
   {
     id: "triggerdev",
@@ -906,11 +906,44 @@ export const LEGACY_BRAND_THEME_MAP: Readonly<Record<string, string>> = {
   "tailwind-light": "github_light",
   "resend-dark": "github_dark",
   "resend-light": "github_light",
-  "stripe-dark": "material_oceanic",
+  "stripe-dark": "oceanic_next",
+};
+
+/**
+ * Themes dropped in @lumis-sh/themes 0.10.0 (copyleft/unlicensed) mapped to a
+ * close remaining theme, so saved snippets that still name them keep rendering.
+ */
+export const REMOVED_THEME_MAP: Readonly<Record<string, string>> = {
+  astrodark: "github_dark_dimmed",
+  astrojupiter: "gruvbox_dark",
+  astrolight: "github_light",
+  astromars: "gruvbox_dark_hard",
+  ayu_dark: "onedark_darker",
+  ayu_light: "github_light",
+  ayu_mirage: "onedark",
+  bluloco_dark: "tokyonight_night",
+  bluloco_light: "onelight",
+  darkplus: "vscode_dark",
+  material_darker: "onedark_darker",
+  material_deep_ocean: "oceanic_next",
+  material_lighter: "onelight",
+  material_oceanic: "oceanic_next",
+  material_palenight: "palenightfall",
+  modus_operandi: "github_light_high_contrast",
+  modus_vivendi: "github_dark_high_contrast",
+  moonlight: "tokyonight_moon",
+  neon_dark: "edge_neon",
+  neon_default: "edge_neon",
+  neon_doom: "doom_one_dark",
+  neon_light: "edge_light",
+  no_clown_fiesta: "lackluster",
+  poimandres: "nightfly",
+  tokyodark: "tokyonight_night",
+  yorumi: "kanagawa_wave",
 };
 
 export function normalizeLegacyBrandTheme(themeId: string): string {
-  return LEGACY_BRAND_THEME_MAP[themeId] ?? themeId;
+  return LEGACY_BRAND_THEME_MAP[themeId] ?? REMOVED_THEME_MAP[themeId] ?? themeId;
 }
 
 export type BrandAppearance = {

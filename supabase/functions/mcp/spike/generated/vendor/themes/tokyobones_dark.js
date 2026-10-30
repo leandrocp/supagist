@@ -4,6 +4,7 @@ var theme = {
   name: "tokyobones_dark",
   appearance: "dark",
   revision: "8304d8df9b823ff11e103afa62f38c39f534abe6",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#bb9bf7" },
     "attribute.builtin": { fg: "#7ba2f7" },
@@ -24,7 +25,9 @@ var theme = {
     "constructor.lua": { fg: "#787a94" },
     "diff.delta": { bg: "#212c44" },
     "diff.minus": { bg: "#412428" },
+    "diff.minus.word": { bg: "#6d323c" },
     "diff.plus": { bg: "#1d2f2c" },
+    "diff.plus.word": { bg: "#0d5048" },
     function: { fg: "#c0caf5" },
     "function.builtin": { fg: "#7ba2f7" },
     "function.call": { fg: "#c0caf5" },

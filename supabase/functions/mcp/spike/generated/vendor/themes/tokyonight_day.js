@@ -4,6 +4,7 @@ var theme = {
   name: "tokyonight_day",
   appearance: "light",
   revision: "cdc07ac78467a233fd62c493de29a17e0cf2b2b6",
+  license: "Apache-2.0",
   highlights: {
     attribute: { fg: "#007197" },
     "attribute.builtin": { fg: "#188092" },
@@ -24,7 +25,9 @@ var theme = {
     "constructor.tsx": { fg: "#188092" },
     "diff.delta": { bg: "#d5d9e4" },
     "diff.minus": { bg: "#dababe" },
+    "diff.minus.word": { bg: "#ffcfd9" },
     "diff.plus": { bg: "#b7ced5" },
+    "diff.plus.word": { bg: "#b8f6ff" },
     function: { fg: "#2e7de9" },
     "function.builtin": { fg: "#188092" },
     "function.call": { fg: "#2e7de9" },

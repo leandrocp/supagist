@@ -4,6 +4,7 @@ var theme = {
   name: "horizon_dark",
   appearance: "dark",
   revision: "b4d7b1e7c3aa77aea31b9ced8960e49fd8682c47",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#e95678" },
     "attribute.builtin": { fg: "#f09483" },
@@ -23,7 +24,9 @@ var theme = {
     constructor: { fg: "#fac29a" },
     "diff.delta": { fg: "#8cf8f7" },
     "diff.minus": { fg: "#ffc0b9" },
+    "diff.minus.word": { bg: "#502b28" },
     "diff.plus": { fg: "#b3f6c0" },
+    "diff.plus.word": { bg: "#1e4026" },
     error: { fg: "#f43e5c" },
     function: { fg: "#24a1ad" },
     "function.builtin": { fg: "#24a1ad" },

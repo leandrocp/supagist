@@ -8,6 +8,7 @@ import {
   applyBrandPreset,
   findMatchingBrandPreset,
   getBrandPreset,
+  REMOVED_THEME_MAP,
   normalizeLegacyBrandTheme,
   resolveBrandScene,
 } from "./brand-presets";
@@ -85,6 +86,15 @@ describe("BRAND_PRESETS", () => {
     expect(normalizeLegacyBrandTheme("supabase-dark")).toBe("github_dark");
     expect(normalizeLegacyBrandTheme("tailwind-light")).toBe("github_light");
     expect(normalizeLegacyBrandTheme("github_dark")).toBe("github_dark");
+  });
+
+  it("maps themes removed in Lumis themes 0.10 onto themes that still exist", () => {
+    const officialThemes = new Set(availableThemes().map((theme) => theme.name));
+    for (const [removed, replacement] of Object.entries(REMOVED_THEME_MAP)) {
+      expect(officialThemes.has(removed), removed).toBe(false);
+      expect(officialThemes.has(replacement), replacement).toBe(true);
+    }
+    expect(normalizeLegacyBrandTheme("darkplus")).toBe("vscode_dark");
   });
 
   it("gives every brand a premium scene and six signature brands bespoke geometry", () => {

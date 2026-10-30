@@ -4,6 +4,7 @@ var theme = {
   name: "dawnfox",
   appearance: "light",
   revision: "4dacd3f0185a2227bdf3b6c0975a8f0bf87cac9a",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#ca6e69" },
     "attribute.builtin": { fg: "#295e73" },
@@ -24,7 +25,9 @@ var theme = {
     "constructor.lua": { fg: "#625c87" },
     "diff.delta": { fg: "#ea9d34" },
     "diff.minus": { fg: "#b4637a" },
+    "diff.minus.word": { bg: "#fac3d0" },
     "diff.plus": { fg: "#618774" },
+    "diff.plus.word": { bg: "#b7dfca" },
     function: { fg: "#295e73" },
     "function.builtin": { fg: "#b4637a" },
     "function.call": { fg: "#295e73" },

@@ -4,6 +4,7 @@ var theme = {
   name: "edge_light",
   appearance: "light",
   revision: "7ec78c21bd8f0b2b0b47043bb1e730c561647c72",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#be7e05" },
     "attribute.builtin": { fg: "#be7e05" },
@@ -25,7 +26,9 @@ var theme = {
     "constructor.tsx": { fg: "#be7e05" },
     "diff.delta": { fg: "#5079be" },
     "diff.minus": { fg: "#d05858" },
+    "diff.minus.word": { bg: "#ffc2bd" },
     "diff.plus": { fg: "#608e32" },
+    "diff.plus.word": { bg: "#c6e5ae" },
     error: { fg: "#d05858" },
     function: { fg: "#5079be" },
     "function.builtin": { fg: "#5079be" },

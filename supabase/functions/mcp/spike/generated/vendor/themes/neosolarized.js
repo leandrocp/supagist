@@ -4,6 +4,7 @@ var theme = {
   name: "neosolarized",
   appearance: "dark",
   revision: "0c01fd2ac2ab33918073f57c63bcb2ae5a31d8de",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#268bd2" },
     "attribute.builtin": { fg: "#cb4b16" },
@@ -23,7 +24,9 @@ var theme = {
     constructor: { fg: "#cb4b16" },
     "diff.delta": { fg: "#8cf8f7" },
     "diff.minus": { fg: "#ffc0b9" },
+    "diff.minus.word": { bg: "#4b2e2b" },
     "diff.plus": { fg: "#b3f6c0" },
+    "diff.plus.word": { bg: "#1e3f26" },
     error: { fg: "#dc322f" },
     function: { fg: "#268bd2" },
     "function.builtin": { fg: "#268bd2" },

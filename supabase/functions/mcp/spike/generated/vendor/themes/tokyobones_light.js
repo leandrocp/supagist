@@ -4,6 +4,7 @@ var theme = {
   name: "tokyobones_light",
   appearance: "light",
   revision: "8304d8df9b823ff11e103afa62f38c39f534abe6",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#5a4a79" },
     "attribute.builtin": { fg: "#34548c" },
@@ -24,7 +25,9 @@ var theme = {
     "constructor.lua": { fg: "#737686" },
     "diff.delta": { bg: "#c0c6d8" },
     "diff.minus": { bg: "#dfbec3" },
+    "diff.minus.word": { bg: "#d4949f" },
     "diff.plus": { bg: "#a9cec7" },
+    "diff.plus.word": { bg: "#67b6aa" },
     function: { fg: "#333a57" },
     "function.builtin": { fg: "#34548c" },
     "function.call": { fg: "#333a57" },

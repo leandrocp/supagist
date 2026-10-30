@@ -4,6 +4,7 @@ var theme = {
   name: "horizon_light",
   appearance: "light",
   revision: "b4d7b1e7c3aa77aea31b9ced8960e49fd8682c47",
+  license: "MIT",
   highlights: {
     "attribute.builtin": { fg: "#f77d26" },
     boolean: { fg: "#f77d26" },
@@ -20,7 +21,9 @@ var theme = {
     "constant.macro": { fg: "#dc3318" },
     "diff.delta": { fg: "#007373" },
     "diff.minus": { fg: "#590008" },
+    "diff.minus.word": { bg: "#fec1bb" },
     "diff.plus": { fg: "#005523" },
+    "diff.plus.word": { bg: "#b5dfbc" },
     error: { fg: "#f43e5c" },
     function: { fg: "#1d8991" },
     "function.builtin": { fg: "#1d8991" },

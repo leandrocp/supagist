@@ -4,6 +4,7 @@ var theme = {
   name: "catppuccin_frappe",
   appearance: "dark",
   revision: "edefef779ab08ce1a4a404713e3012b0d202bd35",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#ef9f76" },
     "attribute.builtin": { fg: "#f4b8e4" },
@@ -29,7 +30,9 @@ var theme = {
     "constructor.python": { fg: "#99d1db" },
     "diff.delta": { fg: "#8caaee" },
     "diff.minus": { fg: "#e78284" },
+    "diff.minus.word": { bg: "#733e3f" },
     "diff.plus": { fg: "#a6d189" },
+    "diff.plus.word": { bg: "#3f582e" },
     error: { fg: "#e78284" },
     function: { fg: "#8caaee" },
     "function.builtin": { fg: "#ef9f76" },

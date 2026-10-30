@@ -4,6 +4,7 @@ var theme = {
   name: "solarized_summer_light",
   appearance: "light",
   revision: "a8085e29883ddcfb39bd46197eb32ef00df05368",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#859900" },
     "attribute.builtin": { fg: "#6c71c4" },
@@ -24,7 +25,9 @@ var theme = {
     constructor: { fg: "#dc322f" },
     "diff.delta": { fg: "#b58900" },
     "diff.minus": { fg: "#dc322f" },
+    "diff.minus.word": { bg: "#ffd6c9" },
     "diff.plus": { fg: "#859900" },
+    "diff.plus.word": { bg: "#cfde9a" },
     function: { fg: "#b58900" },
     "function.builtin": { fg: "#b58900" },
     "function.call": { fg: "#b58900" },

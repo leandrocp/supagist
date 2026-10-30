@@ -4,6 +4,7 @@ var theme = {
   name: "seoulbones_light",
   appearance: "light",
   revision: "8304d8df9b823ff11e103afa62f38c39f534abe6",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#be6a84" },
     "attribute.builtin": { fg: "#755f74" },
@@ -24,7 +25,9 @@ var theme = {
     "constructor.lua": { fg: "#7c7c7c" },
     "diff.delta": { bg: "#c0d5e0" },
     "diff.minus": { bg: "#e5cbd1" },
+    "diff.minus.word": { bg: "#daa1af" },
     "diff.plus": { bg: "#aedeae" },
+    "diff.plus.word": { bg: "#7cc47e" },
     function: { fg: "#6c6b20" },
     "function.builtin": { fg: "#755f74" },
     "function.call": { fg: "#6c6b20" },

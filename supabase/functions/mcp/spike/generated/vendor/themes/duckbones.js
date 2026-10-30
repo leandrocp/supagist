@@ -4,6 +4,7 @@ var theme = {
   name: "duckbones",
   appearance: "dark",
   revision: "8304d8df9b823ff11e103afa62f38c39f534abe6",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#00a3cb" },
     "attribute.builtin": { fg: "#5dcd97" },
@@ -24,7 +25,9 @@ var theme = {
     "constructor.lua": { fg: "#6d759d" },
     "diff.delta": { bg: "#17232a" },
     "diff.minus": { bg: "#311c1a" },
+    "diff.minus.word": { bg: "#5c2a27" },
     "diff.plus": { bg: "#15251c" },
+    "diff.plus.word": { bg: "#12442c" },
     function: { fg: "#ebefc0" },
     "function.builtin": { fg: "#5dcd97" },
     "function.call": { fg: "#ebefc0" },

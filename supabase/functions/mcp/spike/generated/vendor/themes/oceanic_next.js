@@ -4,6 +4,7 @@ var theme = {
   name: "oceanic_next",
   appearance: "dark",
   revision: "09833f72d5ba23de2e8bcae18f479f326f5f677a",
+  license: "Apache-2.0",
   highlights: {
     attribute: { fg: "#ec5f67" },
     "attribute.builtin": { fg: "#62b3b2" },
@@ -23,7 +24,9 @@ var theme = {
     constructor: { fg: "#d8dee9" },
     "diff.delta": { fg: "#8cf8f7" },
     "diff.minus": { fg: "#ffc0b9" },
+    "diff.minus.word": { bg: "#61332f" },
     "diff.plus": { fg: "#b3f6c0" },
+    "diff.plus.word": { bg: "#254c2f" },
     function: { fg: "#6699cc" },
     "function.builtin": { fg: "#62b3b2" },
     "function.call": { fg: "#6699cc" },

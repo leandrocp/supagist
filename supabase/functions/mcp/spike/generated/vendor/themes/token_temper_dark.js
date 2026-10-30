@@ -4,6 +4,7 @@ var theme = {
   name: "token_temper_dark",
   appearance: "dark",
   revision: "1538e1eadcbc9eb465b33bab71eec48c8bed0b76",
+  license: "BSD-3-Clause",
   highlights: {
     attribute: { fg: "#a2a9af" },
     "attribute.builtin": { fg: "#a2a9af" },
@@ -23,7 +24,9 @@ var theme = {
     constructor: { fg: "#a2a9af" },
     "diff.delta": { bg: "#363229" },
     "diff.minus": { bg: "#39282c" },
+    "diff.minus.word": { bg: "#653744" },
     "diff.plus": { bg: "#2b332b" },
+    "diff.plus.word": { bg: "#365337" },
     error: { fg: "#e3888c" },
     function: { fg: "#5cc1b3" },
     "function.builtin": { fg: "#a2a9af" },

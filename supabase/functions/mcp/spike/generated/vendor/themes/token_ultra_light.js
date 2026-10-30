@@ -4,6 +4,7 @@ var theme = {
   name: "token_ultra_light",
   appearance: "light",
   revision: "1538e1eadcbc9eb465b33bab71eec48c8bed0b76",
+  license: "BSD-3-Clause",
   highlights: {
     attribute: { fg: "#565141" },
     "attribute.builtin": { fg: "#565141" },
@@ -23,7 +24,9 @@ var theme = {
     constructor: { fg: "#565141" },
     "diff.delta": { bg: "#eee4c6" },
     "diff.minus": { bg: "#ffdada" },
+    "diff.minus.word": { bg: "#f4afb0" },
     "diff.plus": { bg: "#daf6d5" },
+    "diff.plus.word": { bg: "#abdba2" },
     error: { fg: "#ae5158" },
     function: { fg: "#893517" },
     "function.builtin": { fg: "#565141" },

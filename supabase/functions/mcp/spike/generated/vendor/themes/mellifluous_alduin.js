@@ -4,6 +4,7 @@ var theme = {
   name: "mellifluous_alduin",
   appearance: "dark",
   revision: "ec0575bdb63594c5e7fba6eb9607b009aa1fb74e",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#878787" },
     "attribute.builtin": { fg: "#878787" },
@@ -23,7 +24,9 @@ var theme = {
     constructor: { fg: "#875f5f" },
     "diff.delta": { bg: "#34271b" },
     "diff.minus": { bg: "#3b2122" },
+    "diff.minus.word": { bg: "#672f33" },
     "diff.plus": { bg: "#2b2a1d" },
+    "diff.plus.word": { bg: "#484419" },
     function: { fg: "#875f5f" },
     "function.builtin": { fg: "#875f5f" },
     "function.call": { fg: "#875f5f" },

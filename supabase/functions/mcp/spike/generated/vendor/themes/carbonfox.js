@@ -4,6 +4,7 @@ var theme = {
   name: "carbonfox",
   appearance: "dark",
   revision: "4dacd3f0185a2227bdf3b6c0975a8f0bf87cac9a",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#5ae0df" },
     "attribute.builtin": { fg: "#8cb6ff" },
@@ -24,7 +25,9 @@ var theme = {
     "constructor.lua": { fg: "#b6b8bb" },
     "diff.delta": { fg: "#08bdba" },
     "diff.minus": { fg: "#ee5396" },
+    "diff.minus.word": { bg: "#57022e" },
     "diff.plus": { fg: "#25be6a" },
+    "diff.plus.word": { bg: "#003b11" },
     function: { fg: "#8cb6ff" },
     "function.builtin": { fg: "#ee5396" },
     "function.call": { fg: "#8cb6ff" },

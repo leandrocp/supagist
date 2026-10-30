@@ -4,6 +4,7 @@ var theme = {
   name: "arctic",
   appearance: "dark",
   revision: "46da33aeb3a8ee48533f41911b3aaf4f1541dd6f",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#4ec9b0" },
     "attribute.builtin": { fg: "#4ec9b0" },
@@ -23,7 +24,9 @@ var theme = {
     constructor: { fg: "#4ec9b0" },
     "diff.delta": { bg: "#0000ff" },
     "diff.minus": { bg: "#781212" },
+    "diff.minus.word": { bg: "#a81a1b" },
     "diff.plus": { bg: "#386229" },
+    "diff.plus.word": { bg: "#44842c" },
     function: { fg: "#dcdcaa" },
     "function.builtin": { fg: "#dcdcaa" },
     "function.call": { fg: "#dcdcaa" },

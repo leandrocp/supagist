@@ -4,6 +4,7 @@ var theme = {
   name: "jellybeans",
   appearance: "dark",
   revision: "d5989265b5256cb296b5772c73e57490e84f69b1",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#8297c0" },
     "attribute.builtin": { fg: "#8bc1aa" },
@@ -23,7 +24,9 @@ var theme = {
     constructor: { fg: "#8bc1aa" },
     "diff.delta": { fg: "#8cf8f7" },
     "diff.minus": { fg: "#ffc0b9" },
+    "diff.minus.word": { bg: "#3f2320" },
     "diff.plus": { fg: "#b3f6c0" },
+    "diff.plus.word": { bg: "#12341b" },
     function: { fg: "#facf7a" },
     "function.builtin": { fg: "#8bc1aa" },
     "function.call": { fg: "#facf7a" },

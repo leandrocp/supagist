@@ -4,6 +4,7 @@ var theme = {
   name: "mfd_paper",
   appearance: "light",
   revision: "72ae627792960a7e490cb5242a78c570d02ba775",
+  license: "Apache-2.0",
   highlights: {
     attribute: { fg: "#002611" },
     "attribute.builtin": { fg: "#002611" },
@@ -23,7 +24,9 @@ var theme = {
     constructor: { fg: "#002611", bold: true },
     "diff.delta": { fg: "#007373" },
     "diff.minus": { fg: "#590008" },
+    "diff.minus.word": { bg: "#cb918c" },
     "diff.plus": { fg: "#005523" },
+    "diff.plus.word": { bg: "#85ae8d" },
     function: { fg: "#002611", bold: true },
     "function.builtin": { fg: "#002611", bold: true, italic: true },
     "function.call": { fg: "#002611" },

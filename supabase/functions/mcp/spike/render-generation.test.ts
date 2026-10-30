@@ -74,8 +74,8 @@ describe("M0 generated renderer provenance", () => {
   it("ships a local browser-only vendor graph with exact versions and output integrity", async () => {
     const vendor = new URL("./generated/vendor/", import.meta.url);
     const manifest = JSON.parse(readFileSync(new URL("vendor-manifest.json", vendor), "utf8"));
-    expect(manifest.versions["@lumis-sh/lumis"]).toBe("0.9.0");
-    expect(manifest.versions["@lumis-sh/themes"]).toBe("0.4.0");
+    expect(manifest.versions["@lumis-sh/lumis"]).toBe("0.10.1");
+    expect(manifest.versions["@lumis-sh/themes"]).toBe("0.4.3");
     expect(manifest.versions["@resvg/resvg-wasm"]).toBeUndefined();
     expect(readdirSync(vendor)).not.toContain("resvg.js");
     for (const [name, metadata] of Object.entries(manifest.outputs)) {
@@ -95,7 +95,7 @@ describe("M0 generated renderer provenance", () => {
     expect(runtimeKind()).toBe("wasm");
   });
 
-  it("keeps every lazy theme's public data identical to themes 0.4.0", async () => {
+  it("keeps every lazy theme's public data identical to themes 0.4.3", async () => {
     const { themes } = await import("./generated/themes.js");
     const names = readdirSync(new URL("node_modules/@lumis-sh/themes/dist/json/", root))
       .filter((name) => name.endsWith(".json"))

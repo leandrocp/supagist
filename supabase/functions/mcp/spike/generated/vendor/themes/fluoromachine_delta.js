@@ -4,6 +4,7 @@ var theme = {
   name: "fluoromachine_delta",
   appearance: "dark",
   revision: "a279f667168e742df059caf1f1f4daf1de24f4f8",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#ff67d4", bg: "#36253b", bold: true },
     "attribute.builtin": { fg: "#edff98" },
@@ -24,7 +25,9 @@ var theme = {
     constructor: { fg: "#c0ff98" },
     "diff.delta": { fg: "#ffd298" },
     "diff.minus": { fg: "#ff98b3" },
+    "diff.minus.word": { bg: "#602d3b" },
     "diff.plus": { fg: "#c0ff98" },
+    "diff.plus.word": { bg: "#2b4914" },
     function: { fg: "#edff98", bg: "#352d38", bold: true },
     "function.builtin": { fg: "#c0ff98" },
     "function.call": { fg: "#edff98", bg: "#352d38", bold: true },

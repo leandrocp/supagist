@@ -4,6 +4,7 @@ var theme = {
   name: "nightfox",
   appearance: "dark",
   revision: "4dacd3f0185a2227bdf3b6c0975a8f0bf87cac9a",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#f6b079" },
     "attribute.builtin": { fg: "#86abdc" },
@@ -24,7 +25,9 @@ var theme = {
     "constructor.lua": { fg: "#aeafb0" },
     "diff.delta": { fg: "#dbc074" },
     "diff.minus": { fg: "#c94f6d" },
+    "diff.minus.word": { bg: "#622232" },
     "diff.plus": { fg: "#81b29a" },
+    "diff.plus.word": { bg: "#0d4631" },
     function: { fg: "#86abdc" },
     "function.builtin": { fg: "#c94f6d" },
     "function.call": { fg: "#86abdc" },

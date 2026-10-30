@@ -4,6 +4,7 @@ var theme = {
   name: "neomodern_gyokuro_light",
   appearance: "light",
   revision: "d41469578922a23d75a0d9e8deef1e34837230a6",
+  license: "Apache-2.0",
   highlights: {
     attribute: { fg: "#61875a" },
     "attribute.builtin": { fg: "#2f3e2c" },
@@ -24,7 +25,9 @@ var theme = {
     "constructor.lua": { fg: "#3d533a" },
     "diff.delta": { fg: "#7a97d9" },
     "diff.minus": { fg: "#cd6d72" },
+    "diff.minus.word": { bg: "#e7aaaa" },
     "diff.plus": { fg: "#608565" },
+    "diff.plus.word": { bg: "#aac4ad" },
     function: { fg: "#61875a" },
     "function.builtin": { fg: "#61875a" },
     "function.call": { fg: "#61875a" },

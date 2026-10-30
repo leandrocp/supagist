@@ -4,6 +4,7 @@ var theme = {
   name: "solarized_spring_dark",
   appearance: "dark",
   revision: "a8085e29883ddcfb39bd46197eb32ef00df05368",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#859900" },
     "attribute.builtin": { fg: "#6c71c4" },
@@ -25,7 +26,9 @@ var theme = {
     "constructor.lua": { fg: "#586e75" },
     "diff.delta": { fg: "#b58900" },
     "diff.minus": { fg: "#dc322f" },
+    "diff.minus.word": { bg: "#711c18" },
     "diff.plus": { fg: "#268bd2" },
+    "diff.plus.word": { bg: "#06426a" },
     function: { fg: "#268bd2" },
     "function.builtin": { fg: "#268bd2" },
     "function.call": { fg: "#268bd2" },

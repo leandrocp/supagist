@@ -4,6 +4,7 @@ var theme = {
   name: "papercolor_light",
   appearance: "light",
   revision: "0cfe64ffb24c21a6101b5f994ca342a74c977aef",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#005faf" },
     "attribute.builtin": { fg: "#444444" },
@@ -23,7 +24,9 @@ var theme = {
     constructor: { fg: "#444444" },
     "diff.delta": { fg: "#007373" },
     "diff.minus": { fg: "#590008" },
+    "diff.minus.word": { bg: "#f9bcb6" },
     "diff.plus": { fg: "#005523" },
+    "diff.plus.word": { bg: "#b0dab7" },
     function: { fg: "#444444" },
     "function.builtin": { fg: "#444444" },
     "function.call": { fg: "#444444" },

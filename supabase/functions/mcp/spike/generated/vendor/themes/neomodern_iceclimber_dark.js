@@ -4,6 +4,7 @@ var theme = {
   name: "neomodern_iceclimber_dark",
   appearance: "dark",
   revision: "d41469578922a23d75a0d9e8deef1e34837230a6",
+  license: "Apache-2.0",
   highlights: {
     attribute: { fg: "#87a1e6" },
     "attribute.builtin": { fg: "#b9b8e3" },
@@ -24,7 +25,9 @@ var theme = {
     "constructor.lua": { fg: "#abbdee" },
     "diff.delta": { fg: "#86a3ee" },
     "diff.minus": { fg: "#e1848c" },
+    "diff.minus.word": { bg: "#4c1f24" },
     "diff.plus": { fg: "#6e9277" },
+    "diff.plus.word": { bg: "#1d3624" },
     function: { fg: "#87a1e6" },
     "function.builtin": { fg: "#87a1e6" },
     "function.call": { fg: "#87a1e6" },

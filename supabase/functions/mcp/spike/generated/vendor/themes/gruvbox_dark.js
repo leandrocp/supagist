@@ -4,6 +4,7 @@ var theme = {
   name: "gruvbox_dark",
   appearance: "dark",
   revision: "154eb5ff5b96d0641307113fa385eaf0d36d9796",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#8ec07c" },
     "attribute.builtin": { fg: "#fe8019" },
@@ -23,7 +24,9 @@ var theme = {
     constructor: { fg: "#fe8019" },
     "diff.delta": { bg: "#49503b" },
     "diff.minus": { bg: "#722529" },
+    "diff.minus.word": { bg: "#a13038" },
     "diff.plus": { bg: "#62693e" },
+    "diff.plus.word": { bg: "#464f00" },
     function: { fg: "#b8bb26", bold: true },
     "function.builtin": { fg: "#fe8019" },
     "function.call": { fg: "#b8bb26", bold: true },

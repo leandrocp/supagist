@@ -4,6 +4,7 @@ var theme = {
   name: "gruber_darker",
   appearance: "dark",
   revision: "50fa4e583099729fcaaadc73a5afb74f7a91a625",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#95a99f" },
     "attribute.builtin": { fg: "#ffdd33" },
@@ -23,7 +24,9 @@ var theme = {
     constructor: { fg: "#96a6c8" },
     "diff.delta": { fg: "#8cf8f7" },
     "diff.minus": { fg: "#ffc0b9" },
+    "diff.minus.word": { bg: "#442724" },
     "diff.plus": { fg: "#b3f6c0" },
+    "diff.plus.word": { bg: "#17381f" },
     function: { fg: "#96a6c8" },
     "function.builtin": { fg: "#ffdd33" },
     "function.call": { fg: "#96a6c8" },

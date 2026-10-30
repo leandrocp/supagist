@@ -4,6 +4,7 @@ var theme = {
   name: "nordic",
   appearance: "dark",
   revision: "9fb62116b891184049c50ca6ffb0d3bc100a1a6e",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#bf616a" },
     "attribute.builtin": { fg: "#81a1c1" },
@@ -23,7 +24,9 @@ var theme = {
     "constructor.tsx": { fg: "#81a1c1" },
     "diff.delta": { bg: "#292f3a" },
     "diff.minus": { bg: "#43343e", bold: true },
+    "diff.minus.word": { bg: "#6c4560" },
     "diff.plus": { bg: "#3d4745", bold: true },
+    "diff.plus.word": { bg: "#3b6a62" },
     function: { fg: "#88c0d0" },
     "function.builtin": { fg: "#88c0d0" },
     "function.call": { fg: "#88c0d0" },

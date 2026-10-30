@@ -149,7 +149,7 @@ Date: 2026-10-29. Base: `42d5cf5527412764ff8eb95fc57c1c39dc37498c`.
 Local orb: Linux x86_64, 8 logical CPUs, Intel Xeon 2.60 GHz.
 CLI **2.117.0**, Edge Runtime **1.74.3** (Deno-compatible 2.1.4), image ID
 `sha256:04332d354964b089d81eb872ce1604119a9cf62b54d3556338f3a46d81bfcc8e`.
-Lumis **0.9.0**, themes **0.4.0**, resvg-wasm **2.6.2**. No version upgrade of Lumis/themes.
+Lumis **0.9.0**, themes **0.4.0**, resvg-wasm **2.6.2** (historical; the function now ships Lumis 0.10.1 / themes 0.4.3).
 
 ## What failed under actual local Edge limits
 

@@ -4,6 +4,7 @@ var theme = {
   name: "ofirkai",
   appearance: "dark",
   revision: "f51d56db89a36674b39395efce5dc431778ef343",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#f92672" },
     "attribute.builtin": { fg: "#f8f8f0" },
@@ -26,7 +27,9 @@ var theme = {
     constructor: { fg: "#66d9ef" },
     "diff.delta": { fg: "#8cf8f7" },
     "diff.minus": { fg: "#ffc0b9" },
+    "diff.minus.word": { bg: "#4e2c29" },
     "diff.plus": { fg: "#b3f6c0" },
+    "diff.plus.word": { bg: "#1e4026" },
     function: { fg: "#66d9ef" },
     "function.builtin": { fg: "#66d9ef" },
     "function.call": { fg: "#66d9ef" },

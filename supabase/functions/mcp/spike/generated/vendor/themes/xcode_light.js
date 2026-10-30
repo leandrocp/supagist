@@ -4,6 +4,7 @@ var theme = {
   name: "xcode_light",
   appearance: "light",
   revision: "c57b4df378952382eb0c8aa93614d1d70f35798a",
+  license: "ISC",
   highlights: {
     attribute: { fg: "#78492a" },
     "attribute.builtin": { fg: "#23575c" },
@@ -23,7 +24,9 @@ var theme = {
     constructor: { fg: "#23575c" },
     "diff.delta": { fg: "#007373" },
     "diff.minus": { fg: "#590008" },
+    "diff.minus.word": { bg: "#ffccc6" },
     "diff.plus": { fg: "#005523" },
+    "diff.plus.word": { bg: "#c0ebc7" },
     function: { fg: "#804fb8" },
     "function.builtin": { fg: "#23575c" },
     "function.call": { fg: "#804fb8" },

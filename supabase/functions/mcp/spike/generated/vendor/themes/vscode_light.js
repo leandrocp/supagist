@@ -4,6 +4,7 @@ var theme = {
   name: "vscode_light",
   appearance: "light",
   revision: "6439ed89d0e10193f07e92268a321d7c6f6e93ee",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#795e26" },
     "attribute.builtin": { fg: "#16825d" },
@@ -24,7 +25,9 @@ var theme = {
     "constructor.python": { fg: "#16825d" },
     "diff.delta": { bg: "#ffcccc" },
     "diff.minus": { bg: "#ffa3a3" },
+    "diff.minus.word": { bg: "#ef767a" },
     "diff.plus": { bg: "#ebf1dd" },
+    "diff.plus.word": { bg: "#c7d4a3" },
     error: { fg: "#ff0000" },
     function: { fg: "#795e26" },
     "function.builtin": { fg: "#795e26" },

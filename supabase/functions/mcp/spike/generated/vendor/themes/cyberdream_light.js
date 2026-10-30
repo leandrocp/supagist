@@ -4,6 +4,7 @@ var theme = {
   name: "cyberdream_light",
   appearance: "light",
   revision: "39e1fda12c0704e01029b286a4c7e77e33a0c5cd",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#008c99" },
     "attribute.builtin": { fg: "#f40064" },
@@ -23,7 +24,9 @@ var theme = {
     constructor: { fg: "#f40064" },
     "diff.delta": { fg: "#007373" },
     "diff.minus": { fg: "#d11500" },
+    "diff.minus.word": { bg: "#ffc0ae" },
     "diff.plus": { fg: "#008b0c" },
+    "diff.plus.word": { bg: "#b2f1ae" },
     function: { fg: "#0057d1" },
     "function.builtin": { fg: "#0057d1" },
     "function.call": { fg: "#0057d1" },

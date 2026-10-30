@@ -4,6 +4,7 @@ var theme = {
   name: "bamboo_vulgaris",
   appearance: "dark",
   revision: "1309bc88bffcf1bedc3e84e7fa9004de93da774a",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#70c2be" },
     "attribute.builtin": { fg: "#e75a7c" },
@@ -26,7 +27,9 @@ var theme = {
     "constructor.lua": { fg: "#dbb651" },
     "diff.delta": { bg: "#2a3a57" },
     "diff.minus": { bg: "#893f45" },
+    "diff.minus.word": { bg: "#ba4d58" },
     "diff.plus": { bg: "#40531b" },
+    "diff.plus.word": { bg: "#56730f" },
     error: { fg: "#e75a7c" },
     function: { fg: "#57a5e5" },
     "function.builtin": { fg: "#ff9966" },

@@ -4,6 +4,7 @@ var theme = {
   name: "lackluster_mint",
   appearance: "dark",
   revision: "70dd682e564784893b984deb51dd5ddd263c8cc7",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#666666" },
     "attribute.builtin": { fg: "#708090" },
@@ -23,7 +24,9 @@ var theme = {
     constructor: { fg: "#7a7a7a" },
     "diff.delta": { fg: "#7a7a7a" },
     "diff.minus": { fg: "#ffaa88" },
+    "diff.minus.word": { bg: "#411a09" },
     "diff.plus": { fg: "#789978" },
+    "diff.plus.word": { bg: "#1a2c1b" },
     function: { fg: "#deeeed" },
     "function.builtin": { fg: "#555555" },
     "function.call": { fg: "#7a7a7a" },

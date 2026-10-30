@@ -4,6 +4,7 @@ var theme = {
   name: "melange_dark",
   appearance: "dark",
   revision: "ce42f6b629beeaa00591ba73a77d3eeac4cf28ce",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#85b695" },
     "attribute.builtin": { fg: "#ebc06d" },
@@ -23,7 +24,9 @@ var theme = {
     constructor: { fg: "#ebc06d" },
     "diff.delta": { bg: "#422741" },
     "diff.minus": { fg: "#c1a78e", bg: "#7d2a2f" },
+    "diff.minus.word": { bg: "#9f4d00" },
     "diff.plus": { bg: "#233524" },
+    "diff.plus.word": { bg: "#2b552f" },
     function: { fg: "#ebc06d" },
     "function.builtin": { fg: "#ebc06d" },
     "function.call": { fg: "#ebc06d" },

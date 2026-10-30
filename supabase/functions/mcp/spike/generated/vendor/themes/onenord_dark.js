@@ -4,6 +4,7 @@ var theme = {
   name: "onenord_dark",
   appearance: "dark",
   revision: "5240bfb79bcab7e03508626c5283cfc417b79169",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#b988b0" },
     "attribute.builtin": { fg: "#de878f" },
@@ -23,7 +24,9 @@ var theme = {
     constructor: { fg: "#ebcb8b" },
     "diff.delta": { fg: "#8cf8f7" },
     "diff.minus": { fg: "#d57780" },
+    "diff.minus.word": { bg: "#703d42" },
     "diff.plus": { fg: "#a3be8c" },
+    "diff.plus.word": { bg: "#425530" },
     error: { fg: "#bf616a" },
     function: { fg: "#81a1c1" },
     "function.builtin": { fg: "#88c0d0" },

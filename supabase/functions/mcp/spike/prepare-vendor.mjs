@@ -12,7 +12,6 @@ const outputNames = [];
 const licensePackages = [
   "@lumis-sh/lumis",
   "@lumis-sh/themes",
-  "web-tree-sitter",
   "@noble/hashes",
   "pathe",
   "semver",
@@ -44,8 +43,8 @@ export async function prepareVendor(themeNames) {
   const bundler = JSON.parse(
     await readFile(new URL("node_modules/rolldown/package.json", root), "utf8"),
   );
-  if (bundler.version !== "1.2.7")
-    throw new Error("M0 vendor reproduction requires installed rolldown@1.2.7");
+  if (bundler.version !== "1.2.16")
+    throw new Error("M0 vendor reproduction requires installed rolldown@1.2.16");
 
   const entry = "\0m0-lumis-browser";
   const absolute = (file) =>

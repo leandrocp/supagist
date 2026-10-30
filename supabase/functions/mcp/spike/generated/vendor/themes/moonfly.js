@@ -4,6 +4,7 @@ var theme = {
   name: "moonfly",
   appearance: "dark",
   revision: "2c883835f5b7b380a0a9e80695c420f7efebdfe4",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#74b2ff" },
     "attribute.builtin": { fg: "#e65e72" },
@@ -25,7 +26,9 @@ var theme = {
     constructor: { fg: "#36c692" },
     "diff.delta": { fg: "#74b2ff" },
     "diff.minus": { fg: "#ff5d5d" },
+    "diff.minus.word": { bg: "#470000" },
     "diff.plus": { fg: "#8cc85f" },
+    "diff.plus.word": { bg: "#092600" },
     function: { fg: "#74b2ff" },
     "function.builtin": { fg: "#74b2ff" },
     "function.call": { fg: "#74b2ff" },

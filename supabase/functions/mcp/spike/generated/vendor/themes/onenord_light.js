@@ -4,6 +4,7 @@ var theme = {
   name: "onenord_light",
   appearance: "light",
   revision: "5240bfb79bcab7e03508626c5283cfc417b79169",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#9f4aca" },
     "attribute.builtin": { fg: "#d16366" },
@@ -23,7 +24,9 @@ var theme = {
     constructor: { fg: "#ba793e" },
     "diff.delta": { fg: "#007373" },
     "diff.minus": { fg: "#cb4f53" },
+    "diff.minus.word": { bg: "#ffbfbc" },
     "diff.plus": { fg: "#48a53d" },
+    "diff.plus.word": { bg: "#b2e8ab" },
     error: { fg: "#c53b40" },
     function: { fg: "#3879c5" },
     "function.builtin": { fg: "#3ea1ad" },

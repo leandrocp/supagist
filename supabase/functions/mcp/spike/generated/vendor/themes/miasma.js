@@ -4,6 +4,7 @@ var theme = {
   name: "miasma",
   appearance: "dark",
   revision: "627f2e1cac91de0d1d4dd7472b506a30f41b2b7d",
+  license: "CC0-1.0",
   highlights: {
     attribute: { fg: "#5f875f" },
     "attribute.builtin": { fg: "#bb7744" },
@@ -23,7 +24,9 @@ var theme = {
     constructor: { fg: "#bb7744" },
     "diff.delta": { fg: "#8cf8f7" },
     "diff.minus": { fg: "#ffc0b9" },
+    "diff.minus.word": { bg: "#50322f" },
     "diff.plus": { fg: "#b3f6c0" },
+    "diff.plus.word": { bg: "#22442a" },
     function: { fg: "#78834b" },
     "function.builtin": { fg: "#bb7744" },
     "function.call": { fg: "#78834b" },

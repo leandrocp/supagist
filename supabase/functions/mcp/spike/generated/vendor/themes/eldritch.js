@@ -4,6 +4,7 @@ var theme = {
   name: "eldritch",
   appearance: "dark",
   revision: "c9131a5a11f00a2f428f563a4eb2c4aeb680d963",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#10a1bd" },
     "attribute.builtin": { fg: "#04d1f9" },
@@ -24,7 +25,9 @@ var theme = {
     "constructor.tsx": { fg: "#04d1f9" },
     "diff.delta": { bg: "#404441" },
     "diff.minus": { bg: "#402e40" },
+    "diff.minus.word": { bg: "#663f67" },
     "diff.plus": { bg: "#244246" },
+    "diff.plus.word": { bg: "#07636d" },
     function: { fg: "#f265b5" },
     "function.builtin": { fg: "#04d1f9" },
     "function.builtin.python": { fg: "#f265b5" },

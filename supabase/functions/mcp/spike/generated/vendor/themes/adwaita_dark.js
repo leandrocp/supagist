@@ -4,6 +4,7 @@ var theme = {
   name: "adwaita_dark",
   appearance: "dark",
   revision: "c607954f7b2cf56b24e921db0dab4749f3430a22",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#e66100" },
     "attribute.builtin": { fg: "#62a0ea" },
@@ -23,7 +24,9 @@ var theme = {
     constructor: { fg: "#deddda" },
     "diff.delta": { fg: "#ff7800", bg: "#1d1d20" },
     "diff.minus": { fg: "#f66151", bg: "#1d1d20" },
+    "diff.minus.word": { bg: "#63150f" },
     "diff.plus": { fg: "#33b2a4", bg: "#1d1d20" },
+    "diff.plus.word": { bg: "#00403a" },
     error: { fg: "#e01b24" },
     function: { fg: "#4e9a06" },
     "function.builtin": { fg: "#4e9a06" },

@@ -4,6 +4,7 @@ var theme = {
   name: "onelight",
   appearance: "light",
   revision: "24c806cb85c1f84d9faaff457cf7aa87c685a070",
+  license: "MIT",
   highlights: {
     attribute: { fg: "#9a77cf" },
     "attribute.builtin": { fg: "#118dc3" },
@@ -30,7 +31,9 @@ var theme = {
     constructor: { fg: "#eea825" },
     "diff.delta": { fg: "#007373" },
     "diff.minus": { fg: "#590008" },
+    "diff.minus.word": { bg: "#ffc8c2" },
     "diff.plus": { fg: "#1da912" },
+    "diff.plus.word": { bg: "#abeea4" },
     function: { fg: "#118dc3" },
     "function.builtin": { fg: "#eea825" },
     "function.builtin.c": { fg: "#56b6c2" },
