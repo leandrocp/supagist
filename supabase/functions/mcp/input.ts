@@ -74,6 +74,12 @@ export const renderInput = z
     cornerRadius: z.literal(EXPORT_CORNER_RADIUS_VALUES).optional(),
     windowDecoration: z.enum(["macos", "macos-subtle", "windows", "minimal", "none"]).optional(),
     lineNumbers: z.boolean().optional(),
+    wordDiff: z
+      .boolean()
+      .optional()
+      .describe(
+        "Word-level diff (like Lumis --word-diff): with language diff, highlight only the changed words inside paired -/+ lines. Default false.",
+      ),
     header: z
       .strictObject({
         enabled: z.boolean().optional(),

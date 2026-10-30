@@ -40,7 +40,7 @@ Deno.serve(
           "render_snippet",
           {
             description:
-              "Render code as SVG without publishing. For Supabase/Vercel/etc style use brand, not a theme alias. A brand applies the full app preset; explicit appearance fields override it. Supports filename, auto language (null), fonts/sizes, backgrounds, spacing/corners, window chrome, line numbers, header/footer alignment/details, supplied reactions/comments and author initials. Maximum 30 visual rows including wrapping/comments. Save returned XML as .svg; convert to PNG locally. Use list_options for presets and values. Fixtures are benchmark-only.",
+              "Render code as SVG without publishing. For Supabase/Vercel/etc style use brand, not a theme alias. A brand applies the full app preset; explicit appearance fields override it. Supports filename, auto language (null), fonts/sizes, backgrounds, spacing/corners, window chrome, line numbers, word-level diff (wordDiff with language diff), header/footer alignment/details, supplied reactions/comments and author initials. Maximum 30 visual rows including wrapping/comments. Save returned XML as .svg; convert to PNG locally. Use list_options for presets and values. Fixtures are benchmark-only.",
             inputSchema: renderInput,
             annotations: readOnly,
           },

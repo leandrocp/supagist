@@ -639,7 +639,21 @@ export function escapeXml(value: string) {
     .replace(/'/g, "&apos;");
 }
 
-export type SvgToken = { text: string; color: string; bold: boolean; italic: boolean };
+export type SvgToken = {
+  text: string;
+  color: string;
+  bold: boolean;
+  italic: boolean;
+  /** Word-diff highlight painted behind the token. */
+  highlight?: { fill: string; opacity: number };
+};
+
+/** Fallback word-diff highlights for themes without `diff.*.word` colours
+ *  (the brand themes), translucent so they sit on any editor background. */
+const DIFF_WORD_FALLBACK: Record<string, { fill: string; opacity: number } | undefined> = {
+  "diff.minus.word": { fill: "#f85149", opacity: 0.3 },
+  "diff.plus.word": { fill: "#3fb950", opacity: 0.3 },
+};
 
 /** The lines a comment occupies under the code, prefix included and wrapped.
  *
@@ -719,6 +733,7 @@ export async function createHighlightedSvg(
   headerSettings?: ExportHeaderSettings,
   footerSettings?: ExportFooterSettings,
   fontSize = EXPORT_FONT_SIZE,
+  wordDiff = false,
 ): Promise<string> {
   const language = languageOverride || inferLanguage(filename, code);
   const [{ clientHighlighterPromise }, { loadTheme }] = await Promise.all([
@@ -875,15 +890,21 @@ export async function createHighlightedSvg(
     code,
     highlightedLanguage,
     themeData,
+    { wordDiff },
   )
     .slice(0, sourceLines.length)
     .map((line) =>
-      line.map(({ text, style }) => ({
-        text,
-        color: style?.fg ?? editorFg,
-        bold: !!style?.bold,
-        italic: !!style?.italic,
-      })),
+      line.map(({ text, scope, style }) => {
+        const token: SvgToken = {
+          text,
+          color: style?.fg ?? editorFg,
+          bold: !!style?.bold,
+          italic: !!style?.italic,
+        };
+        const fallback = wordDiff ? DIFF_WORD_FALLBACK[scope] : undefined;
+        if (fallback) token.highlight = style?.bg ? { fill: style.bg, opacity: 1 } : fallback;
+        return token;
+      }),
     );
 
   // Wrap each source line and track source row metadata for reaction placement.
@@ -995,6 +1016,19 @@ export async function createHighlightedSvg(
       const commentAttrs = row.comment ? ' fill-opacity="0.6"' : "";
       const codeMarkup = `<text x="${codeX}" y="${y}" ${fontAttrs}${commentAttrs}>${tspans}</text>`;
 
+      // SVG text has no background, so word-diff highlights are rects laid on
+      // the same monospace grid the layout already sizes the card with.
+      let highlightMarkup = "";
+      let column = 0;
+      const rowTop = outerPaddingPx + topPad + i * codeLineHeight;
+      for (const { text, highlight } of tokens) {
+        if (highlight) {
+          const opacity = highlight.opacity < 1 ? ` fill-opacity="${highlight.opacity}"` : "";
+          highlightMarkup += `<rect data-word-diff="true" x="${+(codeX + column * codeCharWidth).toFixed(2)}" y="${rowTop}" width="${+(text.length * codeCharWidth).toFixed(2)}" height="${codeLineHeight}" rx="2" fill="${escapeXml(highlight.fill)}"${opacity}/>`;
+        }
+        column += text.length;
+      }
+
       // Reactions sit AFTER the code as chip-style pills — rounded rect
       // background, emoji, and one avatar initial circle per chip — matching
       // the editor's inline reaction layout. Emitted on the LAST visual row
@@ -1086,7 +1120,7 @@ export async function createHighlightedSvg(
           .join("");
       }
 
-      return numMarkup + codeMarkup + reactionMarkup;
+      return numMarkup + highlightMarkup + codeMarkup + reactionMarkup;
     })
     .join("");
 

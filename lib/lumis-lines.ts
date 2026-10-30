@@ -11,7 +11,7 @@ import { getScopedThemeStyle, textDecoration } from "@lumis-sh/lumis/formatters/
 import type { ThemeData } from "@lumis-sh/themes";
 
 /** A run of text on one source line, styled the way Lumis resolved it. */
-export type HighlightedToken = { text: string; style?: HighlightStyle };
+export type HighlightedToken = { text: string; scope: string; style?: HighlightStyle };
 
 type LineHighlighter = Pick<Highlighter, "highlight" | "highlightIter">;
 
@@ -43,12 +43,16 @@ export async function loadLanguageOrPlaintext(
  * The style is the one `highlightIter` resolves, which applies the theme's
  * language-specific scopes (`keyword.import.typescript`) and parent-scope
  * fallbacks. Looking `theme.highlights[scope]` up directly skips both.
+ *
+ * `wordDiff` asks Lumis to mark the changed words of paired -/+ lines in a
+ * `diff` document with the `diff.minus.word` / `diff.plus.word` scopes.
  */
 export function highlightTokenLines(
   highlighter: LineHighlighter,
   code: string,
   language: string,
   theme: ThemeData,
+  options?: { wordDiff?: boolean },
 ): HighlightedToken[][] {
   const lines: HighlightedToken[][] = code.split("\n").map(() => []);
   let lineIndex = 0;
@@ -63,13 +67,19 @@ export function highlightTokenLines(
     lineIndex += 1;
   };
 
-  highlighter.highlightIter(code, language, theme, (text, _language, _range, _scope, style) => {
-    const chunks = text.split("\n");
-    chunks.forEach((chunk, index) => {
-      if (chunk) lines[lineIndex]?.push({ text: chunk, style });
-      if (index < chunks.length - 1) endLine();
-    });
-  });
+  highlighter.highlightIter(
+    code,
+    language,
+    theme,
+    (text, _language, _range, scope, style) => {
+      const chunks = text.split("\n");
+      chunks.forEach((chunk, index) => {
+        if (chunk) lines[lineIndex]?.push({ text: chunk, scope, style });
+        if (index < chunks.length - 1) endLine();
+      });
+    },
+    options,
+  );
 
   return lines;
 }

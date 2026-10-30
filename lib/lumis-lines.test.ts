@@ -25,6 +25,7 @@ beforeAll(async () => {
   highlighter = await createHighlighter({ languages: [] });
   await highlighter.loadLanguage("typescript");
   await highlighter.loadLanguage("python");
+  await highlighter.loadLanguage("diff");
 });
 
 const lineText = (tokens: HighlightedToken[]) => tokens.map((token) => token.text).join("");
@@ -48,6 +49,35 @@ describe("loadLanguageOrPlaintext", () => {
 });
 
 describe("highlightTokenLines", () => {
+  it("marks only the changed words of paired -/+ lines when wordDiff is on", () => {
+    const code = [
+      "@@ -12,4 +12,4 @@",
+      "   def export(order) do",
+      "-    Jason.encode!(order)",
+      "-    |> tap(&Logger.debug/1)",
+      "+    JSON.encode!(order)",
+      "+    |> tap(&Logger.info/1)",
+      "   end",
+    ].join("\n");
+    const changed = (wordDiff: boolean) =>
+      highlightTokenLines(highlighter, code, "diff", everforestDark, { wordDiff }).map((line) =>
+        line
+          .filter(({ scope }) => scope === "diff.minus.word" || scope === "diff.plus.word")
+          .map(({ text, scope }) => `${scope}:${text}`),
+      );
+
+    expect(changed(true)).toEqual([
+      [],
+      [],
+      ["diff.minus.word:Jason"],
+      ["diff.minus.word:debug"],
+      ["diff.plus.word:JSON"],
+      ["diff.plus.word:info"],
+      [],
+    ]);
+    expect(changed(false).flat()).toEqual([]);
+  });
+
   it("returns one row per code.split('\\n') entry, including a trailing empty row", () => {
     const code = "const a = 1;\n\nconst b = 2;\n";
     const lines = highlightTokenLines(highlighter, code, "typescript", everforestDark);

@@ -60,7 +60,7 @@ an alternate URL or asking the user to supply a deployment address.
   the design API; never use them for a user's brand request.
 - Expose the advanced controls when relevant: `fontId`, `fontSize`, `background`,
   `outerPadding`, `innerPadding`, `cornerRadius`, `windowDecoration`, `lineNumbers`,
-  partial `header`/`footer` settings and alignment, `author`, `reactions`,
+  `wordDiff` (diff input), partial `header`/`footer` settings and alignment, `author`, `reactions`,
   `comments`, `showReactions`, `showComments`. See the guide for every field and
   examples. Do not force the user through a questionnaire when they specified a
   brand: apply its defaults and only requested overrides.

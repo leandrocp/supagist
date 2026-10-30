@@ -54,6 +54,12 @@ export const appearanceOptions = {
   header: DEFAULT_HEADER_SETTINGS,
   footer: DEFAULT_FOOTER_SETTINGS,
   alignments: ["left", "center", "right"],
+  wordDiff: {
+    default: false,
+    language: "diff",
+    description:
+      "Highlight only the changed words inside paired -/+ lines, like Lumis --word-diff.",
+  },
   limits: { codePoints: 8000, visualRows: 30, wrapColumns: 110 },
   notes:
     "brand selects a complete preset; explicit fields override it. background is only a canvas. system font uses portable JetBrains Mono. PNG conversion and 2x/4x/6x scale are local, not MCP. Reactions/comments are supplied render data, not published collaboration.",
@@ -169,6 +175,7 @@ export async function renderSnippet(rawInput: RenderInput): Promise<RenderResult
     header,
     footer,
     input.fontSize ?? 14,
+    input.wordDiff ?? false,
   );
   // App font subsets rely on browser fallback for the comment arrow. Supply a
   // portable fallback too, so native conversion never turns it into a missing glyph.

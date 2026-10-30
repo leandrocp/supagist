@@ -65,6 +65,7 @@ with its defaults; omitted flags do not reset the rest of a preset.
 | `innerPadding`                  | 8, 12, 16, 24, 32, 48                                                                                                 |
 | `cornerRadius`                  | 0, 4, 8, 12, 16                                                                                                       |
 | `lineNumbers`                   | Boolean; default from brand, otherwise true                                                                           |
+| `wordDiff`                      | Boolean, default false; with `language: "diff"`, highlights only the changed words in paired `-`/`+` lines            |
 | `header`                        | Partial object detailed below                                                                                         |
 | `footer`                        | Partial object detailed below                                                                                         |
 | `author`                        | Author label (1–64 characters) for footer attribution; requires enabled footer with `showAuthor`                      |

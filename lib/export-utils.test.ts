@@ -719,6 +719,7 @@ describe("createHighlightedSvg", () => {
       "plaintext",
       expect.anything(),
       expect.any(Function),
+      { wordDiff: false },
     );
     warn.mockRestore();
   });

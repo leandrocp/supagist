@@ -169,3 +169,57 @@ Deno.test("runtime parser integrity and network failures are surfaced, never pla
     globalThis.fetch = originalFetch;
   }
 });
+
+Deno.test("wordDiff highlights only the changed words of paired diff lines, and is off by default", async () => {
+  const code = [
+    "--- a/lib/shop/orders.ex",
+    "+++ b/lib/shop/orders.ex",
+    "@@ -12,4 +12,4 @@",
+    "   def export(order) do",
+    "-    Jason.encode!(order)",
+    "-    |> tap(&Logger.debug/1)",
+    "+    JSON.encode!(order)",
+    "+    |> tap(&Logger.info/1)",
+    "   end",
+  ].join("\n");
+  const base = { code, language: "diff", filename: "orders.ex" };
+  const rects = (svg: string) =>
+    [
+      ...svg.matchAll(
+        /<rect data-word-diff="true" x="([\d.]+)" y="([\d.]+)" width="([\d.]+)"[^>]* fill="([^"]+)"([^>]*)\/>/g,
+      ),
+    ].map(([, x, y, width, fill, rest]) => ({ x: +x, y: +y, width: +width, fill, rest }));
+
+  const omitted = (await renderSnippet(base)).svg;
+  assert.equal((await renderSnippet({ ...base, wordDiff: false })).svg, omitted);
+  assert.equal(rects(omitted).length, 0);
+
+  const on = rects((await renderSnippet({ ...base, wordDiff: true })).svg);
+  // Jason/debug on the removed lines, JSON/info on the added ones, each over
+  // its own source column on the shared monospace grid.
+  const words = [
+    ["Jason", 4, "#671010"],
+    ["debug", 5, "#671010"],
+    ["JSON", 6, "#00450c"],
+    ["info", 7, "#00450c"],
+  ] as const;
+  assert.equal(on.length, words.length);
+  const charWidth = on[0].width / "Jason".length;
+  const codeX = on[0].x - code.split("\n")[4].indexOf("Jason") * charWidth;
+  words.forEach(([word, row, fill], index) => {
+    const column = code.split("\n")[row].indexOf(word);
+    assert.ok(Math.abs(on[index].x - (codeX + column * charWidth)) < 0.02, word);
+    assert.ok(Math.abs(on[index].width - word.length * charWidth) < 0.02, word);
+    assert.equal(on[index].fill, fill);
+    assert.equal(on[index].y - on[0].y, (row - 4) * (on[1].y - on[0].y));
+  });
+
+  // Brand themes have no diff word colours; the fallback stays translucent.
+  const brand = rects(
+    (await renderSnippet({ ...base, theme: "supabase-dark", wordDiff: true })).svg,
+  );
+  assert.equal(brand.length, 4);
+  assert.ok(brand.every(({ rest }) => rest.includes('fill-opacity="0.3"')));
+
+  assert.equal(appearanceOptions.wordDiff.default, false);
+});
