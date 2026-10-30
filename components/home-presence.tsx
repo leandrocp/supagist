@@ -147,7 +147,7 @@ export function HomePresence() {
   return (
     <div
       data-testid="home-presence"
-      className="flex min-w-0 items-center gap-2 text-xs text-muted-foreground"
+      className="hidden min-w-0 items-center gap-2 text-xs text-muted-foreground sm:flex"
       title={ordered.map((v) => v.name).join(", ")}
     >
       <div className="flex -space-x-1.5">
@@ -166,8 +166,8 @@ export function HomePresence() {
           </div>
         ) : null}
       </div>
-      {/* Avatars carry the signal on their own; the sentence is the first
-          thing to go when the nav runs out of room on small screens. */}
+      {/* Below sm, reserve the nav for links and account controls. Between
+          sm and md, avatars carry the presence signal without the sentence. */}
       <span className="hidden truncate md:inline">{label}</span>
     </div>
   );

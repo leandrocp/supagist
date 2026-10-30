@@ -69,6 +69,43 @@ test("home page has exactly one header bar, flush with the composer", async ({ p
   expect(Math.abs((shellBox?.y ?? 0) - ((navBox?.y ?? 0) + (navBox?.height ?? 0)))).toBeLessThan(2);
 });
 
+test("lobby presence leaves navigation readable on mobile and remains visible above sm", async ({
+  page,
+  context,
+}) => {
+  const otherVisitor = await context.newPage();
+  try {
+    await page.goto("/");
+    await otherVisitor.goto("/");
+
+    const nav = page.getByTestId("app-nav");
+    const presence = nav.getByTestId("home-presence");
+    // Exercise real populated presence, not the empty state before Realtime syncs.
+    await expect
+      .poll(() => presence.locator('[data-slot="avatar"]').count())
+      .toBeGreaterThanOrEqual(2);
+
+    for (const width of [375, 639, 640, 768, 1280]) {
+      await page.setViewportSize({ width, height: 812 });
+      if (width < 640) await expect(presence).toBeHidden();
+      else await expect(presence).toBeVisible();
+
+      const snippets = nav.getByRole("link", { name: "Snippets", exact: true });
+      const login = nav.getByRole("link", { name: "Log in", exact: true });
+      await expect(snippets).toBeVisible();
+      await expect(login).toBeVisible();
+      const snippetsBox = (await snippets.boundingBox())!;
+      const accountBox = (await nav.locator(":scope > div").last().boundingBox())!;
+      expect(snippetsBox.x + snippetsBox.width).toBeLessThanOrEqual(accountBox.x);
+      expect(accountBox.x + accountBox.width).toBeLessThanOrEqual(width);
+      // Visibility alone does not detect another element covering the link.
+      await snippets.click({ trial: true, position: { x: snippetsBox.width - 1, y: 5 } });
+    }
+  } finally {
+    await otherVisitor.close();
+  }
+});
+
 test("home page footer divider spans the same width as the nav", async ({ page }) => {
   await page.goto("/");
 
