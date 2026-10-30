@@ -34,7 +34,7 @@ describe("local Supabase configuration", () => {
     const ci = readFileSync(".github/workflows/ci.yml", "utf8");
     expect(mise).toContain('supabase = "2.117.0"');
     // Every job that installs the CLI pins the same version as mise.
-    const installs = ci.match(/supabase\/setup-cli@v\d+\n\s+with:\n\s+version: \S+/g) ?? [];
+    const installs = ci.match(/supabase\/setup-cli@v\d+(?:\.\d+)*\n\s+with:\n\s+version: \S+/g) ?? [];
     expect(installs.length).toBe(ci.match(/supabase\/setup-cli@/g)?.length);
     expect(installs.length).toBeGreaterThanOrEqual(4);
     for (const install of installs) expect(install).toMatch(/version: 2\.117\.0$/);
