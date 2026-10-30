@@ -6,6 +6,10 @@ describe("release route surface", () => {
     const skill = readFileSync(".agents/skills/supagist/SKILL.md", "utf8");
     expect(skill).not.toContain(".supabase.co");
     expect(skill).not.toContain("/functions/v1/mcp");
+    expect(skill).toContain(
+      "claude mcp add --transport http --scope local supagist https://supagist.app/mcp",
+    );
+    expect(skill).not.toContain("SUPAGIST_MCP_URL");
   });
 
   it("does not ship the Supabase starter protected tutorial", () => {

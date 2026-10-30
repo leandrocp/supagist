@@ -20,16 +20,13 @@ Never silently substitute one for another. Explicit settings override the brand.
 ## Connect once
 
 Reuse an existing authenticated Supagist MCP connection when available. New
-connections use **Streamable HTTP** and OAuth, but the branded public endpoint is
-not configured yet. If no connection exists, explain that setup is blocked until
-Supagist publishes its branded endpoint. Do not discover or disclose the underlying
-infrastructure URL, and do not guess a working URL such as `supagist.app/mcp`.
+connections use **Streamable HTTP** and OAuth at **https://supagist.app/mcp**.
+No environment variable or API key is needed.
 
-Once Supagist publishes the endpoint, set `SUPAGIST_MCP_URL` to that approved public
-URL. For Claude Code, run in the user's project directory:
+For Claude Code, run in the user's project directory:
 
 ```sh
-claude mcp add --transport http --scope local supagist "${SUPAGIST_MCP_URL:?Set the approved public Supagist MCP URL first}"
+claude mcp add --transport http --scope local supagist https://supagist.app/mcp
 ```
 
 Then have the user open `/mcp`, select Supagist, authenticate with their existing
@@ -37,6 +34,11 @@ account, and approve the consent page on `supagist.app`. Other clients should ad
 the same URL and select OAuth. Skill installation does not automatically configure
 MCP in every client. Do not ask for tokens, copy credentials, create accounts, or
 substitute an admin key.
+
+Use the branded URL in setup instructions; let the client discover the authorization
+server through OAuth metadata. The identity provider's hostname can still appear
+during sign-in. If the endpoint is unavailable, report the error rather than inventing
+an alternate URL or asking the user to supply a deployment address.
 
 ## Choose input and call the tools
 

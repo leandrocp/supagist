@@ -23,6 +23,10 @@ describe("local Supabase configuration", () => {
     const mcp = config.split("[functions.mcp]")[1];
     expect(mcp).toContain("verify_jwt = false");
     expect(mcp).toContain('static_files = ["./functions/mcp/assets/*"]');
+    const oauth = config.split("[auth.oauth_server]")[1]?.split("[")[0];
+    expect(oauth).toContain("enabled = true");
+    expect(oauth).toContain('authorization_url_path = "/oauth/consent"');
+    expect(oauth).toContain("allow_dynamic_registration = true");
   });
 
   it("pins local and CI CLI versions with MCP function-slug injection", () => {

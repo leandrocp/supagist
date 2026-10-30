@@ -60,6 +60,11 @@ refresh_token_reuse_interval = 10
 enable_signup = true
 enable_anonymous_sign_ins = true
 
+[auth.oauth_server]
+enabled = true
+authorization_url_path = "/oauth/consent"
+allow_dynamic_registration = true
+
 [auth.email]
 enable_signup = true
 double_confirm_changes = true
