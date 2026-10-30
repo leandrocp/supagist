@@ -14,7 +14,7 @@ npm; npm downloads the converter dependency only.
 On macOS/Linux, substitute the absolute installed skill directory for `SKILL_DIR`:
 
 ```sh
-SKILL_DIR="/absolute/path/to/rendering-supagist-snippets"
+SKILL_DIR="/absolute/path/to/supagist"
 CONVERTER_DIR="$(mktemp -d)"
 cp "$SKILL_DIR/scripts/package.json" "$SKILL_DIR/scripts/convert-png.mjs" "$CONVERTER_DIR/"
 npm install --prefix "$CONVERTER_DIR" --package-lock=false --no-audit --no-fund

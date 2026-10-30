@@ -19,7 +19,7 @@ Live at **[supagist.app](https://supagist.app)**
 
 ## Supagist agent skill
 
-The [rendering-supagist-snippets skill](./.agents/skills/rendering-supagist-snippets/SKILL.md)
+The [Supagist skill](./.agents/skills/supagist/SKILL.md)
 teaches coding agents to connect to Supagist over OAuth, save SVG exports as real
 `.svg` files, and offer optional PNG conversion on the client machine. The skill
 and MCP use SVG exclusively; PNG conversion runs locally, not in an Edge Function
@@ -28,7 +28,7 @@ or a separate hosted rendering service. The web app's export options are unchang
 Install the skill from this repository:
 
 ```bash
-npx skills add leandrocp/supagist --skill rendering-supagist-snippets
+npx skills add leandrocp/supagist --skill supagist
 ```
 
 Installing the skill and connecting/authenticating the MCP server are separate
@@ -39,7 +39,7 @@ It never adds dependencies to the user's application or uploads SVGs for convers
 For maintainers, validate discovery before publishing:
 
 ```bash
-DISABLE_TELEMETRY=1 npx skills add . --list --skill rendering-supagist-snippets
+DISABLE_TELEMETRY=1 npx skills add . --list --skill supagist
 ```
 
 The skill follows the [skills.sh GitHub distribution format](https://github.com/vercel-labs/skills/blob/main/docs/creating-skills.md).

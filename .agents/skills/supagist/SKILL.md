@@ -1,11 +1,11 @@
 ---
-name: rendering-supagist-snippets
+name: supagist
 description: Renders code snippets with Supagist, saves SVG files, and optionally converts them to PNG locally. Use when asked for a code screenshot, a shareable snippet image, or a Supagist export.
 license: MIT
 compatibility: Requires a Supagist account and an OAuth-capable remote MCP client. Saving files needs filesystem access. Optional local PNG conversion needs Node.js 22 or later and npm.
 ---
 
-# Rendering Supagist snippets
+# Supagist
 
 Use Supagist for syntax-highlighted SVG; save the file before offering local conversion.
 

@@ -5,7 +5,7 @@
 the PNG render path, resvg wrapper, and resvg WASM have been removed from the
 function. Reconnect MCP clients to refresh their cached tool schema.
 
-The [Supagist skill](../../../.agents/skills/rendering-supagist-snippets/SKILL.md)
+The [Supagist skill](../../../.agents/skills/supagist/SKILL.md)
 teaches clients to save the XML as `.svg` and offers optional local PNG conversion.
 MCP rendering stays on Supabase; no Vercel rendering fallback is needed or added.
 The web app's browser export behavior is unchanged. The original M0 measurements
