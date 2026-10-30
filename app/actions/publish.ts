@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { EXPORT_FONTS } from "@/lib/export-utils";
 import {
   generateShortId,
   toSlug,
@@ -28,6 +29,7 @@ export async function publishSnippet(formData: FormData): Promise<PublishResult>
   const filename = formData.get("filename");
   const theme = formData.get("theme");
   const language = formData.get("language");
+  const fontId = formData.get("font_id") ?? "system";
   const canonicalImage = formData.get("canonical_image");
   const ogImage = formData.get("og_image");
   const svgBlob = formData.get("svg");
@@ -44,6 +46,10 @@ export async function publishSnippet(formData: FormData): Promise<PublishResult>
     !(svgBlob instanceof Blob)
   ) {
     return { error: "Invalid publish data." };
+  }
+
+  if (!EXPORT_FONTS.some((font) => font.id === fontId)) {
+    return { error: "Invalid font." };
   }
 
   const reactions = parseDraftObject(reactionsJson) as Record<number, string>;
@@ -157,6 +163,7 @@ export async function publishSnippet(formData: FormData): Promise<PublishResult>
     filename,
     language,
     theme,
+    font_id: fontId,
     code: normalizedCode,
     code_char_count: codeLength,
     line_count: normalizedCode.split("\n").length,

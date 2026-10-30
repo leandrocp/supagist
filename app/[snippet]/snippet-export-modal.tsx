@@ -27,6 +27,7 @@ type Props = {
   code: string;
   filename: string;
   theme: string;
+  fontId: string;
   authorUsername?: string | null;
   authorAvatarUrl?: string | null;
   reactions?: Record<number, import("@/lib/snippet-utils").ExportReactionChip[]>;
@@ -40,6 +41,7 @@ export function SnippetExportModal({
   code,
   filename,
   theme,
+  fontId,
   authorUsername,
   authorAvatarUrl,
   reactions,
@@ -48,7 +50,7 @@ export function SnippetExportModal({
   style,
 }: Props) {
   const [open, setOpen] = useState(false);
-  const [settings, setSettings] = useState<ExportSettings>(DEFAULT_SETTINGS);
+  const [settings, setSettings] = useState<ExportSettings>({ ...DEFAULT_SETTINGS, fontId });
 
   return (
     <>

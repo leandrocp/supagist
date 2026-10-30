@@ -425,6 +425,7 @@ export function HomeComposer() {
       formData.set("filename", draft.filename);
       formData.set("theme", draft.theme);
       formData.set("language", language);
+      formData.set("font_id", draft.fontId);
       formData.set("canonical_image", canonicalFile);
       formData.set("og_image", ogFile);
       formData.set("svg", svgBlob);
