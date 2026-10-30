@@ -107,7 +107,7 @@ try {
   const tools = await call("tools/list");
   success(tools);
   assert.ok(tools.data.result.tools.some((tool) => tool.name === "render_snippet"));
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < 3; i++) {
     const result = await call("tools/call", {
       name: "render_snippet",
       arguments: {
@@ -152,7 +152,7 @@ try {
   success(recovered);
   assert.ok(recovered.data.result.content[0].text.includes("<svg"));
   log(
-    "PASS: real signed-in initialize/list, SVG by default, first 5 renders allowed, render 6 denied before validation, other tools available, PNG rejected, SVG recovers after Retry-After.",
+    "PASS: real signed-in initialize/list, SVG by default, first 3 renders allowed, render 4 denied before validation, other tools available, PNG rejected, SVG recovers after Retry-After.",
   );
 } finally {
   await writeFile(`${directory}/transcript.json`, JSON.stringify(transcript, null, 2) + "\n");

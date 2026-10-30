@@ -48,12 +48,12 @@ The function is live and intentionally stays live. Main pushes deploy it via
 Supabase's GitHub integration. The original spike conclusions below are retained
 as historical measurements, not instructions to remove the service.
 
-Every authenticated MCP HTTP request consumes the IP quota (30/minute,
-1,000/day) before the SDK dispatches anything. Each `tools/call` also consumes the
-user quota (15/minute, 500/day); connection setup (initialize, notifications,
+Every authenticated MCP HTTP request consumes the IP quota (20/minute,
+300/day) before the SDK dispatches anything. Each `tools/call` also consumes the
+user quota (5/minute, 100/day); connection setup (initialize, notifications,
 lists, GET) does not, so many clients on one account cannot exhaust it before
 their first tool call. `render_snippet` also consumes a separate user quota
-(5/minute, 50/day). Constants live in
+(3/minute, 20/day). Constants live in
 `rate-limit.ts`. All checks call the existing `public.check_rate_limit` RPC using
 `ctx.supabaseAdmin`; no schema, function, or grant change is required.
 

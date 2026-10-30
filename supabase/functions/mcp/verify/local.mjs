@@ -111,13 +111,17 @@ async function main() {
   assert.ok(tools.data.result.tools.every((tool) => tool.annotations.readOnlyHint));
   const options = await rpc(endpoint, token, "tools/call", { name: "list_options", arguments: {} });
   assert.ok(JSON.parse(options.data.result.content[0].text).languages.includes("javascript"));
-  for (const input of [
+  for (const [index, input] of [
     { code: "" },
     { code: "x", format: "png" },
     { code: "x", pixelRatio: 3 },
     { code: "x", theme: "missing" },
     { code: "x", language: "missing" },
-  ]) {
+  ].entries()) {
+    if (index === 3) {
+      console.log("Waiting for the render minute window...");
+      await new Promise((resolve) => setTimeout(resolve, 61_000));
+    }
     const result = await rpc(endpoint, token, "tools/call", {
       name: "render_snippet",
       arguments: input,
@@ -130,11 +134,11 @@ async function main() {
   );
   const directory = process.argv[2] ?? ".amp/in/artifacts/mcp-svg";
   await mkdir(directory, { recursive: true });
-  let renderCount = 5;
+  let renderCount = 3;
   for (const fixture of fixtures) {
     for (const pixelRatio of [1, 2]) {
       for (const format of ["svg"]) {
-        if (renderCount === 5) {
+        if (renderCount === 3) {
           console.log("Waiting for the render minute window...");
           await new Promise((resolve) => setTimeout(resolve, 61_000));
           renderCount = 0;

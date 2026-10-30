@@ -4,9 +4,9 @@ export const RATE_LIMIT_MESSAGE = "Rate limit reached. Need more? Contact supagi
 const UNLIMITED_USER_ID = "288417c7-4c03-4277-988f-24f3c2fc814b";
 
 export const RATE_LIMITS = {
-  user: { minute: 15, day: 500 },
-  render: { minute: 5, day: 50 },
-  ip: { minute: 30, day: 1000 },
+  user: { minute: 5, day: 100 },
+  render: { minute: 3, day: 20 },
+  ip: { minute: 20, day: 300 },
   windows: { minute: 60, day: 86400 },
 } as const;
 
