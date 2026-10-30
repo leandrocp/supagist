@@ -2,6 +2,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { unstable_doesMiddlewareMatch } from "next/experimental/testing/server";
 import { config } from "@/proxy";
 import { DELETE, GET, OPTIONS, POST } from "./route";
+import {
+  GET as wellKnown,
+  OPTIONS as wellKnownOptions,
+} from "@/app/.well-known/oauth-protected-resource/[[...path]]/route";
 
 const endpoint = "https://supagist.app/mcp";
 const context = (path?: string[]) => ({ params: Promise.resolve({ path }) });
@@ -44,6 +48,37 @@ describe("branded MCP endpoint", () => {
       authorization_servers: ["https://provider.example/auth/v1"],
       bearer_methods_supported: ["header"],
     });
+    expect(upstream).not.toHaveBeenCalled();
+  });
+
+  it("serves the same metadata at the RFC 9728 well-known URLs used for token refresh", async () => {
+    const metadata = {
+      resource: endpoint,
+      authorization_servers: ["https://provider.example/auth/v1"],
+      bearer_methods_supported: ["header"],
+    };
+    // Path-inserted form first, then the root form, matching MCP SDK discovery order.
+    for (const path of [["mcp"], undefined]) {
+      const url = `https://supagist.app/.well-known/oauth-protected-resource${path ? "/mcp" : ""}`;
+      const response = await wellKnown(new Request(url), context(path));
+      expect(response.status).toBe(200);
+      expect(response.headers.get("access-control-allow-origin")).toBe("*");
+      expect(await response.json()).toEqual(metadata);
+    }
+    const preflight = await wellKnownOptions(
+      new Request("https://supagist.app/.well-known/oauth-protected-resource/mcp", {
+        method: "OPTIONS",
+      }),
+      context(["mcp"]),
+    );
+    expect(preflight.status).toBe(204);
+    for (const path of [["other"], ["mcp", "extra"]]) {
+      const missing = await wellKnown(
+        new Request(`https://supagist.app/.well-known/oauth-protected-resource/${path.join("/")}`),
+        context(path),
+      );
+      expect(missing.status).toBe(404);
+    }
     expect(upstream).not.toHaveBeenCalled();
   });
 

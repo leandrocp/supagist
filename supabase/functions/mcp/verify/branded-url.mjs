@@ -14,6 +14,13 @@ assert.equal(
 );
 const resource = await (await fetch(`${endpoint}/oauth-protected-resource`)).json();
 assert.equal(resource.resource, endpoint);
+// Token refresh without a 401 in hand discovers through RFC 9728 well-known URLs.
+for (const path of [
+  "/.well-known/oauth-protected-resource/mcp",
+  "/.well-known/oauth-protected-resource",
+]) {
+  assert.deepEqual(await (await fetch(new URL(path, endpoint))).json(), resource);
+}
 assert.equal(resource.authorization_servers[0], "http://127.0.0.1:54321/auth/v1");
 const discovery = await (
   await fetch(`${resource.authorization_servers[0]}/.well-known/oauth-authorization-server`)
@@ -76,7 +83,28 @@ const exchange = await fetch(discovery.token_endpoint, {
   }),
 });
 assert.equal(exchange.status, 200);
-const { access_token: token } = await exchange.json();
+const granted = await exchange.json();
+assert.ok(granted.access_token);
+
+// Refresh as a client with no 401 in hand: discovery starts at the well-known URL.
+const refreshDiscovery = await (
+  await fetch(new URL("/.well-known/oauth-protected-resource/mcp", endpoint))
+).json();
+const refreshIssuer = await (
+  await fetch(`${refreshDiscovery.authorization_servers[0]}/.well-known/oauth-authorization-server`)
+).json();
+const refresh = await fetch(refreshIssuer.token_endpoint, {
+  method: "POST",
+  headers: { "content-type": "application/x-www-form-urlencoded" },
+  body: new URLSearchParams({
+    grant_type: "refresh_token",
+    refresh_token: granted.refresh_token,
+    client_id: registered.client_id,
+    resource: endpoint,
+  }),
+});
+assert.equal(refresh.status, 200);
+const { access_token: token } = await refresh.json();
 assert.ok(token);
 
 result = await rpc(endpoint, token, "initialize", {
@@ -105,7 +133,9 @@ result = await rpc(endpoint, token, "tools/call", {
 assert.equal(result.response.status, 200);
 assert.ok(!result.data.result.isError);
 assert.ok(result.data.result.content[0].text.includes("<svg"));
-console.log("PASS: branded discovery → registration → PKCE/consent → OAuth token → tools → SVG");
+console.log(
+  "PASS: branded discovery → registration → PKCE/consent → OAuth token → well-known refresh → tools → SVG",
+);
 
 result = await rpc(endpoint, "invalid", "tools/list");
 assert.equal(result.response.status, 401);
@@ -114,7 +144,10 @@ const anonymous = await client.auth.signInAnonymously();
 assert.equal(anonymous.error, null);
 result = await rpc(endpoint, anonymous.data.session.access_token, "tools/list");
 assert.equal(result.response.status, 403);
-for (let i = 0; i < 13; i++) result = await rpc(endpoint, token, "tools/list");
+// Only tool calls are charged to the user quota; connection setup is not.
+for (let i = 0; i < 13; i++) {
+  result = await rpc(endpoint, token, "tools/call", { name: "list_options", arguments: {} });
+}
 assert.equal(result.response.status, 429);
 assert.ok(Number(result.response.headers.get("retry-after")) > 0);
 console.log("PASS: invalid bearer 401, anonymous 403, rate limit 429 + Retry-After through proxy");
