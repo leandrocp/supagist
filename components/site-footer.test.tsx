@@ -20,6 +20,8 @@ describe("SiteFooter", () => {
     render(<SiteFooter />);
 
     expect(screen.getByRole("link", { name: "Terms" }).getAttribute("href")).toBe("/terms");
+    expect(screen.getByRole("link", { name: "Privacy" }).getAttribute("href")).toBe("/privacy");
+    expect(screen.getByRole("link", { name: "Your data" }).getAttribute("href")).toBe("/help/data");
     expect(screen.getByRole("link", { name: "GitHub" }).getAttribute("href")).toBe(
       "https://github.com/leandrocp/supagist",
     );

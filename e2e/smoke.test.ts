@@ -68,6 +68,20 @@ test("terms page loads", async ({ page }) => {
   await expect(page.getByText(/supagist is open source/i)).toBeVisible();
 });
 
+test("privacy and data help pages load", async ({ page }) => {
+  await page.goto("/privacy");
+  await expect(page.getByRole("heading", { name: "Privacy Policy" })).toBeVisible();
+  await page.goto("/help/data");
+  await expect(page.getByRole("heading", { name: "Managing your data" })).toBeVisible();
+});
+
+test("Google Connected Apps verification path 404s until a token is committed", async ({
+  request,
+}) => {
+  const response = await request.get("/.well-known/google-connected-apps", { maxRedirects: 0 });
+  expect(response.status()).toBe(404);
+});
+
 test("404 for a path that is too short to be a snippet", async ({ page }) => {
   const response = await page.goto("/x");
   expect(response?.status()).toBe(404);

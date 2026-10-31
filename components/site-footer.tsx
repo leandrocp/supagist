@@ -9,6 +9,8 @@ const LINKS = [
   },
   { href: "https://github.com/leandrocp/supagist", label: "GitHub", external: true },
   { href: "/terms", label: "Terms", external: false },
+  { href: "/privacy", label: "Privacy", external: false },
+  { href: "/help/data", label: "Your data", external: false },
 ] as const;
 
 const linkClass = "underline-offset-2 hover:text-foreground hover:underline";
@@ -65,7 +67,7 @@ export function SiteFooter({ fullBleed = false }: { fullBleed?: boolean }) {
         </p>
       </div>
 
-      <div className="flex items-center gap-5 font-mono uppercase tracking-code-label">
+      <div className="flex flex-wrap items-center gap-x-5 gap-y-2 font-mono uppercase tracking-code-label">
         {LINKS.map(({ href, label, external }) => (
           <Link
             key={href}
