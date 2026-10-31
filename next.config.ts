@@ -57,6 +57,8 @@ const nextConfig: NextConfig = {
   // deployed saved view would fall back to plain text for every snippet.
   outputFileTracingIncludes: {
     "/\\[snippet\\]": ["./node_modules/@lumis-sh/wasm-*/**/*"],
+    // Read at request time; see lib/google-connected-apps.ts.
+    "/.well-known/google-connected-apps": ["./google-connected-apps.json"],
   },
   experimental: {
     serverActions: {

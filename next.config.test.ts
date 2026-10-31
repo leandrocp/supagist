@@ -42,6 +42,12 @@ describe("Next.js production security configuration", () => {
     ]);
   });
 
+  it("bundles the Google Connected Apps token with the route that reads it", () => {
+    expect(nextConfig.outputFileTracingIncludes?.["/.well-known/google-connected-apps"]).toEqual([
+      "./google-connected-apps.json",
+    ]);
+  });
+
   it("keeps the existing defense-in-depth headers", () => {
     expect(securityHeaders).toEqual(
       expect.arrayContaining([
