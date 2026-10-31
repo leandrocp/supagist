@@ -1,0 +1,34 @@
+{
+  "name": "supagist",
+  "version": "0.1.0",
+  "description": "Turn code into polished Supagist images from the terminal",
+  "keywords": [
+    "cli",
+    "code",
+    "png",
+    "screenshot",
+    "svg",
+    "syntax-highlighting"
+  ],
+  "homepage": "https://supagist.app",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/leandrocp/supagist.git",
+    "directory": "packages/cli"
+  },
+  "bin": {
+    "supagist": "bin/supagist.js"
+  },
+  "files": [
+    "bin",
+    "src/*.js",
+    "!src/*.test.*",
+    "README.md"
+  ],
+  "type": "module",
+  "main": "bin/supagist.js",
+  "engines": {
+    "node": ">=22"
+  }
+}

@@ -47,6 +47,16 @@ Preparing these files does not publish a directory listing or install the skill
 for anyone. After release, verify the remote installation command above; do not
 claim a skills.sh listing until it is visible there.
 
+## CLI
+
+[`packages/cli`](./packages/cli/README.md) renders a file or stdin to SVG or PNG
+from the terminal, with every export option as a flag. It calls the public
+render API at `supagist.app/api/render` and creates nothing on the server.
+
+```bash
+node packages/cli src/lib/auth.ts --lines 12-40 --brand supabase --out auth.png
+```
+
 ## Run locally
 
 ```bash
