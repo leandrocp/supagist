@@ -112,6 +112,7 @@ jobs:
           --allow-read --allow-net --allow-env
           supabase/functions/mcp/input_test.ts
           supabase/functions/mcp/rate-limit_test.ts
+          supabase/functions/mcp/server_test.ts
           supabase/functions/mcp/spike/render.deno.ts
 
   mcp-e2e:
