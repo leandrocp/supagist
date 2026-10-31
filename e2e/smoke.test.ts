@@ -280,3 +280,57 @@ for (const width of [375, 768, 1280]) {
     await page.screenshot({ path: test.info().outputPath(`lumis-${width}.png`) });
   });
 }
+
+test("Copy as rich text puts highlighted, editable HTML and plain text on the clipboard", async ({
+  page,
+  context,
+}) => {
+  await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+  await page.goto("/");
+  await page.getByLabel("Filename", { exact: true }).fill("hello.py");
+  const code = 'def greet():\n    return "<hello>"\n\nprint(greet())';
+  await page.getByLabel("Code", { exact: true }).fill(code);
+  await expect(
+    page.getByTestId("source-line-1").locator("span").filter({ hasText: /^def$/ }),
+  ).toHaveCSS("color", "rgb(207, 34, 46)");
+
+  await page.getByRole("button", { name: "Export", exact: true }).click();
+  await page.getByRole("button", { name: "Copy as rich text", exact: true }).click();
+  await expect(page.getByText("Copied as rich text")).toBeVisible();
+
+  const clipboard = await page.evaluate(async () => {
+    const [item] = await navigator.clipboard.read();
+    return {
+      types: item!.types,
+      html: await (await item!.getType("text/html")).text(),
+      text: await (await item!.getType("text/plain")).text(),
+    };
+  });
+  expect(clipboard.types).toEqual(expect.arrayContaining(["text/html", "text/plain"]));
+  expect(clipboard.text).toBe(code);
+  expect(clipboard.html).not.toContain("<svg");
+  expect(clipboard.html).not.toContain("<img");
+
+  // Paste into a contenteditable the way Slides or Docs receive it: the
+  // result must be text the user can edit, still coloured by the theme.
+  const pasted = await page.evaluate((html) => {
+    const target = document.createElement("div");
+    target.contentEditable = "true";
+    document.body.append(target);
+    target.focus();
+    document.execCommand("insertHTML", false, html);
+    const keyword = Array.from(target.querySelectorAll("span")).find(
+      (span) => span.textContent === "def",
+    );
+    const result = {
+      text: target.innerText,
+      keywordColor: keyword ? getComputedStyle(keyword).color : null,
+      background: getComputedStyle(target.querySelector("div[style]")!).backgroundColor,
+    };
+    target.remove();
+    return result;
+  }, clipboard.html);
+  expect(pasted.text.replace(/\n+/g, "\n").trim()).toBe(code.replace(/\n+/g, "\n"));
+  expect(pasted.keywordColor).toBe("rgb(207, 34, 46)");
+  expect(pasted.background).toBe("rgb(255, 255, 255)");
+});

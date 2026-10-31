@@ -18,8 +18,17 @@ vi.mock("@/lib/export-utils", async (importOriginal) => {
   };
 });
 
+vi.mock("@/lib/rich-text-export", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../lib/rich-text-export")>();
+  return {
+    ...actual,
+    createRichTextClipboard: vi.fn(async () => ({ html: "<div>rich</div>", text: "plain" })),
+  };
+});
+
 afterEach(() => {
   cleanup();
+  vi.unstubAllGlobals();
 });
 
 const settings: ExportSettings = {
@@ -42,6 +51,42 @@ const settings: ExportSettings = {
 };
 
 describe("ExportModal", () => {
+  it("copies the snippet as rich text with the current theme and font settings", async () => {
+    const { createRichTextClipboard } = await import("@/lib/rich-text-export");
+    const write = vi.fn().mockResolvedValue(undefined);
+    vi.stubGlobal(
+      "ClipboardItem",
+      class {
+        constructor(public items: Record<string, Promise<Blob>>) {}
+      },
+    );
+    Object.defineProperty(navigator, "clipboard", { value: { write }, configurable: true });
+
+    render(
+      <ExportModal
+        open
+        onClose={vi.fn()}
+        code="fn main() {}"
+        filename="main.rs"
+        theme="dracula"
+        settings={{ ...settings, fontId: "fira", fontSize: 18, language: "rust" }}
+        onSettingsChange={vi.fn()}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Copy as rich text" }));
+
+    await screen.findByRole("button", { name: "Copied" });
+    expect(createRichTextClipboard).toHaveBeenCalledWith("fn main() {}", "main.rs", "dracula", {
+      fontId: "fira",
+      fontSize: 18,
+      language: "rust",
+    });
+    const [[[item]]] = write.mock.calls as [[[{ items: Record<string, Promise<Blob>> }]]];
+    expect(await (await item.items["text/html"]!).text()).toBe("<div>rich</div>");
+    expect(await (await item.items["text/plain"]!).text()).toBe("plain");
+  });
+
   it("supports zero outer padding through the slider", async () => {
     const onSettingsChange = vi.fn();
     const settingsWithBackground = { ...settings, background: "Forest" };

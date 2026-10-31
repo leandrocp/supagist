@@ -8,7 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { FileImage, FileText, ImageIcon } from "lucide-react";
+import { Check, ClipboardType, FileImage, FileText, ImageIcon } from "lucide-react";
 import { availableLanguages } from "@lumis-sh/lumis/client";
 import {
   EXPORT_WIDTH,
@@ -37,6 +37,8 @@ import {
   triggerDownload,
   type ExportComment,
 } from "@/lib/export-utils";
+import { toast } from "sonner";
+import { copyRichText, createRichTextClipboard } from "@/lib/rich-text-export";
 import { cn } from "@/lib/utils";
 import type { ExportReactionChip } from "@/lib/snippet-utils";
 import { Spinner } from "@/components/ui/spinner";
@@ -64,6 +66,7 @@ const EXPORT_ACTIONS = [
   { key: "png", label: "Save as PNG", Icon: ImageIcon, isAsync: true },
   { key: "svg", label: "Save as SVG", Icon: FileImage, isAsync: true },
   { key: "raw", label: "Download", Icon: FileText, isAsync: false },
+  { key: "rich", label: "Copy as rich text", Icon: ClipboardType, isAsync: false },
 ] as const;
 
 export type ExportSettings = {
@@ -120,6 +123,7 @@ export function ExportModal({
   const [previewSrc, setPreviewSrc] = useState<string | null>(null);
   const [previewLoading, setPreviewLoading] = useState(false);
   const [exporting, setExporting] = useState(false);
+  const [richCopied, setRichCopied] = useState(false);
   const prevPreviewUrl = useRef<string | null>(null);
 
   const bg: ExportBackground | null =
@@ -302,6 +306,23 @@ export function ExportModal({
   const handleRaw = () => {
     const blob = new Blob([code], { type: "text/plain;charset=utf-8" });
     triggerDownload(URL.createObjectURL(blob), filename || "snippet.txt", true);
+  };
+
+  const handleRichText = async () => {
+    try {
+      await copyRichText(
+        createRichTextClipboard(code, filename, theme, {
+          fontId: settings.fontId,
+          fontSize: normalizedFontSize,
+          language: settings.language,
+        }),
+      );
+    } catch {
+      toast.error("Could not copy to the clipboard.");
+      return;
+    }
+    setRichCopied(true);
+    setTimeout(() => setRichCopied(false), 2000);
   };
 
   // Use a Drawer on phone-sized viewports and a Dialog above the md
@@ -820,8 +841,17 @@ export function ExportModal({
       {/* Export actions */}
       <div className="border-t border-border pt-1">
         {EXPORT_ACTIONS.map(({ key, label, Icon, isAsync }) => {
-          const handleClick = key === "png" ? handlePng : key === "svg" ? handleSvg : handleRaw;
-          const displayLabel = key === "raw" ? `${label} ${filename || "snippet"}` : label;
+          const handleClick =
+            key === "png"
+              ? handlePng
+              : key === "svg"
+                ? handleSvg
+                : key === "rich"
+                  ? handleRichText
+                  : handleRaw;
+          const copied = key === "rich" && richCopied;
+          const displayLabel =
+            key === "raw" ? `${label} ${filename || "snippet"}` : copied ? "Copied" : label;
           const isWaiting = exporting && isAsync;
           return (
             <button
@@ -833,6 +863,8 @@ export function ExportModal({
             >
               {isWaiting ? (
                 <Spinner className="size-4 shrink-0 text-muted-foreground" />
+              ) : copied ? (
+                <Check className="size-4 shrink-0 text-muted-foreground" />
               ) : (
                 <Icon className="size-4 shrink-0 text-muted-foreground" />
               )}

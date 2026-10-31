@@ -79,7 +79,8 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { publishSnippet } from "@/app/actions/publish";
 import { toast } from "sonner";
-import { FileImage, FileText } from "lucide-react";
+import { ClipboardType, FileImage, FileText } from "lucide-react";
+import { copyRichText, createRichTextClipboard } from "@/lib/rich-text-export";
 
 const DRAFT_KEY = "supagist:draft:v1";
 const ANNOTATIONS_KEY = "supagist:annotations:v1";
@@ -637,6 +638,20 @@ export function HomeComposer() {
     setExportMenuOpen(false);
     const blob = new Blob([draft.code], { type: "text/plain;charset=utf-8" });
     triggerDownload(URL.createObjectURL(blob), draft.filename || "snippet.txt", true);
+  };
+
+  const handleCopyRichText = () => {
+    setExportMenuOpen(false);
+    copyRichText(
+      createRichTextClipboard(draft.code, draft.filename, draft.theme, {
+        fontId: draft.fontId,
+        fontSize: draft.fontSize,
+        language: draft.languageOverride,
+      }),
+    ).then(
+      () => toast.success("Copied as rich text"),
+      () => toast.error("Could not copy to the clipboard."),
+    );
   };
 
   const handleCopy = () => {
@@ -1517,6 +1532,15 @@ export function HomeComposer() {
                     >
                       <FileText data-icon="inline-start" />
                       Source file
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      disabled={busy}
+                      onClick={handleCopyRichText}
+                      className={menuItemClass}
+                    >
+                      <ClipboardType data-icon="inline-start" />
+                      Copy as rich text
                     </Button>
                   </div>
                 </PopoverContent>
