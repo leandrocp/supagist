@@ -39,7 +39,7 @@ import {
 import { languageDisplayName, codePointLength } from "@/lib/snippet-utils";
 import { ThemePicker } from "@/components/theme-picker";
 import { BrandPicker } from "@/components/brand-picker";
-import { BrandSceneDecoration } from "@/components/brand-scene-decoration";
+import { BrandDecorationLayers, BrandSceneDecoration } from "@/components/brand-scene-decoration";
 import {
   applyBrandPreset,
   findMatchingBrandPreset,
@@ -90,6 +90,8 @@ const WINDOW_DECORATIONS: WindowDecoration[] = [
   "windows",
   "minimal",
   "none",
+  "lumis",
+  "markdown",
 ];
 const DEV_MODE = process.env.NODE_ENV !== "production";
 
@@ -529,9 +531,14 @@ export function HomeComposer() {
     ? createBrandFrameShadow(selectedBackground.scene)
     : selectedBackground?.frame
       ? previewFrameBorder
-        ? `0 0 0 ${previewFrameBorder.width}px ${previewFrameBorder.color}, 0 25px 50px -12px rgba(0,0,0,0.42)`
+        ? `0 0 0 ${previewFrameBorder.width}px ${previewFrameBorder.color}` +
+          // Layered brand canvases draw a flat card, as the export does.
+          (selectedBackground.decoration ? "" : ", 0 25px 50px -12px rgba(0,0,0,0.42)")
         : "0 25px 50px -12px rgba(0,0,0,0.42)"
       : undefined;
+  const previewCanvasWidth = draft.aspectRatio
+    ? Math.max(exportDimensions.width, (exportDimensions.height * 16) / 9)
+    : exportDimensions.width;
   const previewFontFamily = EXPORT_FONTS.find((font) => font.id === draft.fontId)?.family;
   const previewCardWidth = exportDimensions.width - outerCanvasPadding * 2;
   const previewCardMaxWidth = selectedBackground ? "100%" : "calc(100vw - 4rem)";
@@ -745,6 +752,14 @@ export function HomeComposer() {
           >
             {selectedBackground?.scene ? (
               <BrandSceneDecoration scene={selectedBackground.scene} />
+            ) : null}
+            {selectedBackground?.decoration ? (
+              <BrandDecorationLayers
+                layers={selectedBackground.decoration.layers}
+                width={previewCanvasWidth}
+                height={draft.aspectRatio ? (previewCanvasWidth * 9) / 16 : exportDimensions.height}
+                fontFamily={previewFontFamily}
+              />
             ) : null}
             <InlineCodeBlock
               className={cn(
@@ -1055,6 +1070,8 @@ export function HomeComposer() {
                                   <SelectItem value="windows">Windows</SelectItem>
                                   <SelectItem value="minimal">Minimal</SelectItem>
                                   <SelectItem value="none">None</SelectItem>
+                                  <SelectItem value="lumis">Lumis</SelectItem>
+                                  <SelectItem value="markdown">Markdown</SelectItem>
                                 </SelectGroup>
                               </SelectContent>
                             </Select>

@@ -50,33 +50,33 @@ approximated with plain gradients.
 Explicit fields override the chosen brand. Partial header/footer objects merge
 with its defaults; omitted flags do not reset the rest of a preset.
 
-| Field                           | Accepted values / behavior                                                                                            |
-| ------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| `code`                          | Required, 1–8000 Unicode code points, normalized LF newlines                                                          |
-| `filename`                      | 1–120 characters, default `snippet`; set an actual filename for visible metadata and auto language                    |
-| `language`                      | Exact ID from catalog; default `javascript`; `null` auto-detects using filename/code                                  |
-| `brand`                         | Exact full preset ID above; optional                                                                                  |
-| `theme`                         | Exact syntax theme ID; default brand theme, otherwise `github_dark`                                                   |
-| `background`                    | Exact catalog label, `null`, or omitted                                                                               |
-| `fontId`                        | `system`, `jetbrains`, `fira`, `geist`, `hack`                                                                        |
-| `fontSize`                      | 12, 13, 14, 16, 18, 20 (default 14)                                                                                   |
-| `windowDecoration`              | `macos`, `macos-subtle`, `windows`, `minimal`, `none`                                                                 |
-| `outerPadding`                  | 0, 16, 32, 64, 96, 128; no visible outer padding without a background                                                 |
-| `innerPadding`                  | 8, 12, 16, 24, 32, 48                                                                                                 |
-| `cornerRadius`                  | 0, 4, 8, 12, 16                                                                                                       |
-| `lineNumbers`                   | Boolean; default from brand, otherwise true                                                                           |
-| `wordDiff`                      | Boolean, default false; with `language: "diff"`, highlights only the changed words in paired `-`/`+` lines            |
-| `header`                        | Partial object detailed below                                                                                         |
-| `footer`                        | Partial object detailed below                                                                                         |
-| `author`                        | Author label (1–64 characters) for footer attribution; requires enabled footer with `showAuthor`                      |
-| `reactions`                     | Line-keyed arrays of `{emoji, reactors: [{username}]}`; at most 5 chips/line, 10 reactors/chip, label 1–16 characters |
-| `comments`                      | Line-keyed `{body, author?}`; one rendered comment per source line, body 1–2000 characters                            |
-| `showReactions`, `showComments` | Booleans; default true when corresponding annotation data is supplied; false hides it                                 |
-| `aspectRatio`                   | Omit to fit the image to the card; `"16:9"` centers the card on a 1600×900 canvas filled by the background            |
-| `ligatures`                     | Omit or `true` keeps font ligatures; `false` draws operator sequences such as `\|>` and `->` as separate characters   |
-| `format`                        | Only `svg`                                                                                                            |
-| `pixelRatio`                    | Keep 1; legacy 2 is accepted but is not the local PNG scale setting                                                   |
-| `fixture`                       | Omit or `plain`; `vercel`/`avatars` are legacy benchmarks, incompatible with `brand`                                  |
+| Field                           | Accepted values / behavior                                                                                             |
+| ------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `code`                          | Required, 1–8000 Unicode code points, normalized LF newlines                                                           |
+| `filename`                      | 1–120 characters, default `snippet`; set an actual filename for visible metadata and auto language                     |
+| `language`                      | Exact ID from catalog; default `javascript`; `null` auto-detects using filename/code                                   |
+| `brand`                         | Exact full preset ID above; optional                                                                                   |
+| `theme`                         | Exact syntax theme ID; default brand theme, otherwise `github_dark`                                                    |
+| `background`                    | Exact catalog label, `null`, or omitted                                                                                |
+| `fontId`                        | `system`, `jetbrains`, `fira`, `geist`, `hack`                                                                         |
+| `fontSize`                      | 12, 13, 14, 16, 18, 20 (default 14)                                                                                    |
+| `windowDecoration`              | `macos`, `macos-subtle`, `windows`, `minimal`, `none`, `lumis`, `markdown`                                             |
+| `outerPadding`                  | 0, 16, 32, 64, 96, 128; no visible outer padding without a background                                                  |
+| `innerPadding`                  | 8, 12, 16, 24, 32, 48                                                                                                  |
+| `cornerRadius`                  | 0, 4, 8, 12, 16                                                                                                        |
+| `lineNumbers`                   | Boolean; default from brand, otherwise true                                                                            |
+| `wordDiff`                      | Boolean, default false; with `language: "diff"`, highlights only the changed words in paired `-`/`+` lines             |
+| `header`                        | Partial object detailed below                                                                                          |
+| `footer`                        | Partial object detailed below                                                                                          |
+| `author`                        | Author label (1–64 characters) for footer attribution; requires enabled footer with `showAuthor`                       |
+| `reactions`                     | Line-keyed arrays of `{emoji, reactors: [{username}]}`; at most 5 chips/line, 10 reactors/chip, label 1–16 characters  |
+| `comments`                      | Line-keyed `{body, author?}`; one rendered comment per source line, body 1–2000 characters                             |
+| `showReactions`, `showComments` | Booleans; default true when corresponding annotation data is supplied; false hides it                                  |
+| `aspectRatio`                   | Default from brand, otherwise fit to the card; `"16:9"` centers the card on a 1600×900 canvas filled by the background |
+| `ligatures`                     | Default from brand, otherwise `true`; `false` draws operator sequences such as `\|>` and `->` as separate characters   |
+| `format`                        | Only `svg`                                                                                                             |
+| `pixelRatio`                    | Keep 1; legacy 2 is accepted but is not the local PNG scale setting                                                    |
+| `fixture`                       | Omit or `plain`; `vercel`/`avatars` are legacy benchmarks, incompatible with `brand`                                   |
 
 `aspectRatio: "16:9"` keeps the card's layout, frames it 16:9 and scales that
 frame to 1600×900 (3200×1800 with legacy `pixelRatio: 2`). `outerPadding` is

@@ -92,6 +92,8 @@ import {
   EXPORT_CHAR_WIDTH,
 } from "./export-utils";
 import type { SvgToken } from "./export-utils";
+import { getBrandPreset } from "./brand-presets";
+import { languageDisplayName } from "./snippet-utils";
 
 // Re-apply highlighter implementations before each test so mock call counts
 // are fresh and implementations are always set even after vi.clearAllMocks().
@@ -2077,7 +2079,8 @@ describe("EXPORT_BRAND_BACKGROUNDS — premium scenes", () => {
   it("renders layered lighting, canvas rims, frame depth, and finite geometry for all brands", async () => {
     const { EXPORT_BRAND_BACKGROUNDS, createHighlightedSvg } = await import("./export-utils");
 
-    for (const background of EXPORT_BRAND_BACKGROUNDS) {
+    // Layered brands (Lumis, MDEx) replace the ambient scene; covered below.
+    for (const background of EXPORT_BRAND_BACKGROUNDS.filter((bg) => !bg.decoration)) {
       const svg = await createHighlightedSvg(
         "const polished = true",
         "scene.ts",
@@ -2547,5 +2550,164 @@ describe("createHighlightedSvg 16:9 canvas and ligatures", () => {
     const svg = await render(elixir, { fontId: "system", ligatures: false });
     expect(svg).toContain('style="font-variant-ligatures:none"');
     expect(svg).toContain(">|&gt; Enum.map(&amp;(&amp;1 * 2))</tspan>");
+  });
+});
+
+// ── Lumis and MDEx brand presets ─────────────────────────────────────────────
+
+describe("Lumis and MDEx brand presets", () => {
+  const CODE =
+    'Mix.install([{:mdex, "~> 0.14"}])\n\nMDEx.new(markdown: markdown, extension: [ofm_callouts: true])\n|> IO.puts()';
+
+  async function renderPreset(id: string, filename = "notes.md", language = "typescript") {
+    const { EXPORT_BRAND_BACKGROUNDS } = await import("./export-utils");
+    const preset = getBrandPreset(id)!;
+    const background = EXPORT_BRAND_BACKGROUNDS.find((bg) => bg.brandId === id)!;
+    const s = preset.settings;
+    const markup = await createHighlightedSvg(
+      CODE,
+      filename,
+      s.theme,
+      1200,
+      undefined,
+      background,
+      s.outerPadding,
+      s.lineNumbers,
+      s.fontId,
+      language,
+      null,
+      false,
+      true,
+      false,
+      null,
+      null,
+      null,
+      false,
+      null,
+      s.windowDecoration,
+      s.cornerRadius,
+      s.innerPadding,
+      s.header,
+      s.footer,
+      EXPORT_FONT_SIZE,
+      false,
+      s.aspectRatio,
+      s.ligatures,
+    );
+    const svg = new DOMParser().parseFromString(markup, "image/svg+xml").documentElement;
+    const frame = background.frame!;
+    const card = [...svg.querySelectorAll("rect")].find(
+      (rect) =>
+        rect.getAttribute("fill") === frame.cardFill &&
+        rect.getAttribute("stroke") === frame.cardBorder!.color,
+    )!;
+    return { markup, svg, card, frame };
+  }
+
+  it.each(["lumis", "lumis-dark", "mdex-purple", "mdex-purple-dark"])(
+    "renders %s on a 16:9 canvas with the card centred",
+    async (id) => {
+      const { svg, card } = await renderPreset(id);
+      expect(svg.getAttribute("width")).toBe("1600");
+      expect(svg.getAttribute("height")).toBe("900");
+      const [left, top, width, height] = svg.getAttribute("viewBox")!.split(" ").map(Number);
+      expect(width! / height!).toBeCloseTo(16 / 9, 5);
+
+      const [x, y, w, h] = ["x", "y", "width", "height"].map((a) => Number(card.getAttribute(a)));
+      const gaps = {
+        left: x! - left!,
+        right: left! + width! - (x! + w!),
+        top: y! - top!,
+        bottom: top! + height! - (y! + h!),
+      };
+      expect(Math.abs(gaps.left - gaps.right)).toBeLessThanOrEqual(1);
+      expect(Math.abs(gaps.top - gaps.bottom)).toBeLessThanOrEqual(1);
+      // At least the preset's outer padding on the tighter axis.
+      expect(Math.min(gaps.left, gaps.top)).toBeGreaterThanOrEqual(
+        getBrandPreset(id)!.settings.outerPadding - 1,
+      );
+    },
+  );
+
+  it("paints the Lumis layers and no ambient scene", async () => {
+    const { svg } = await renderPreset("lumis-dark");
+    const layers = [...svg.querySelectorAll("[data-brand-layer]")].map((el) =>
+      el.getAttribute("data-brand-layer"),
+    );
+    expect(layers).toEqual(["radial-glow", "code-field", "sun-bands"]);
+    expect(svg.querySelectorAll('[data-brand-layer="sun-bands"] rect')).toHaveLength(5);
+    expect(svg.querySelector("[data-scene-layer]")).toBeNull();
+    expect(svg.querySelector('[filter="url(#brand-card-shadow)"]')).toBeNull();
+  });
+
+  it("draws the Lumis bar: icon + filename left, < Language /> and exactly 3 sun dashes right", async () => {
+    const { svg, card } = await renderPreset("lumis", "lumis_card.exs");
+    const dashes = [...svg.querySelectorAll('[data-brand-header="dash"]')];
+    expect(dashes.map((dash) => dash.getAttribute("fill"))).toEqual([
+      "#8C6BFF",
+      "#FF6F6F",
+      "#FFC23D",
+    ]);
+    expect(svg.querySelector('[data-brand-header="mark"]')?.getAttribute("href")).toMatch(
+      /^data:image\//,
+    );
+    const filename = svg.querySelector('[data-brand-header="filename"]')!;
+    const language = svg.querySelector('[data-brand-header="language"]')!;
+    expect(filename.textContent).toBe("lumis_card.exs");
+    expect(filename.getAttribute("fill")).toBe("#545A78");
+    expect(language.textContent).toBe(`< ${languageDisplayName("typescript")} />`);
+    expect(language.getAttribute("font-weight")).toBe("600");
+
+    // Label ends left of the dashes; dashes end at the card's right padding.
+    const cardRight = Number(card.getAttribute("x")) + Number(card.getAttribute("width"));
+    const lastDash = dashes[2]!;
+    const dashesRight = Number(lastDash.getAttribute("x")) + Number(lastDash.getAttribute("width"));
+    expect(cardRight - dashesRight).toBeGreaterThan(0);
+    expect(Number(language.getAttribute("x"))).toBeLessThan(Number(dashes[0]!.getAttribute("x")));
+    expect(language.getAttribute("text-anchor")).toBe("end");
+  });
+
+  it("draws the markdown bar: bold # filename, muted ```lang, [-][□][x], and nothing else", async () => {
+    const { svg, markup, card, frame } = await renderPreset("mdex-purple");
+    const run = (role: string) => svg.querySelector(`[data-brand-header="${role}"]`)!;
+    expect(run("filename").textContent).toBe("# notes.md");
+    expect(run("filename").getAttribute("font-weight")).toBe("800");
+    expect(run("filename").getAttribute("fill")).toBe("#6E3C88");
+    expect(run("language").textContent).toBe("```typescript");
+    expect(run("language").getAttribute("font-weight")).toBe("400");
+    expect(run("language").getAttribute("fill")).toBe("#6B6560");
+    expect(run("controls").textContent).toBe("[-][□][x]");
+    expect(run("strip").getAttribute("fill")).toBe(frame.headerFill);
+
+    // Removed in v5/v5.1: [copy], the M> tile, the language chip, the closing fence.
+    expect(markup).not.toContain("[copy]");
+    expect(svg.querySelector("image")).toBeNull();
+    expect(svg.querySelector('[data-brand-header="dash"]')).toBeNull();
+    expect(
+      [...svg.querySelectorAll("rect[data-brand-header]")].map((r) =>
+        r.getAttribute("data-brand-header"),
+      ),
+    ).toEqual(["strip"]);
+    const fences = [...svg.querySelectorAll("text")].filter((t) => t.textContent?.includes("```"));
+    expect(fences).toEqual([run("language")]);
+
+    // Header chrome stays in the bar; the code area is untouched.
+    const headerBottom =
+      Number(run("strip").getAttribute("y")) + Number(run("strip").getAttribute("height"));
+    for (const el of svg.querySelectorAll("[data-brand-header]")) {
+      const y = Number(el.getAttribute("y") ?? el.getAttribute("y1"));
+      expect(y, el.getAttribute("data-brand-header")!).toBeLessThanOrEqual(headerBottom);
+    }
+    expect(Number(card.getAttribute("y"))).toBe(Number(run("strip").getAttribute("y")));
+  });
+
+  it("hides the markdown filename slot when there is no filename", async () => {
+    const { svg, card } = await renderPreset("mdex-purple-dark", "", "plaintext");
+    expect(svg.querySelector('[data-brand-header="filename"]')).toBeNull();
+    const language = svg.querySelector('[data-brand-header="language"]')!;
+    expect(language.textContent).toBe("```");
+    // The label moves into the filename's place at the left padding.
+    expect(Number(language.getAttribute("x"))).toBeLessThan(Number(card.getAttribute("x")) + 20);
+    expect(language.getAttribute("fill")).toBe("#A8A29E");
   });
 });

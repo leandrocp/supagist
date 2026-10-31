@@ -68,7 +68,7 @@ Every Brand resolves to a typed premium scene from `lib/brand-scenes.ts`: three 
 
 Brand defaults use 32px outer padding (64px for Vercel) so ordinary cards occupy roughly 84–88% of the canvas width; short snippets stay compact while longer snippets grow naturally. PNG rendering remains density-independent through the selected 2x/4x/6x pixel ratio.
 
-Brand application is a one-time patch to the existing composer draft fields, not a second active styling engine. `findMatchingBrandPreset` derives whether the current fields—including Header and Footer options—still exactly match a preset. Legacy local drafts containing synthetic IDs such as `supabase-dark` are explicitly mapped to official Lumis IDs; `brand-themes.ts` and `theme-loader.ts` remain only as compatibility for already-published snippets.
+Brand application is a one-time patch to the existing composer draft fields, not a second active styling engine. `findMatchingBrandPreset` derives whether the current fields—including Header and Footer options—still exactly match a preset. Legacy local drafts containing synthetic IDs such as `supabase-dark` are explicitly mapped to official Lumis IDs; `brand-themes.ts` and `theme-loader.ts` remain as compatibility for already-published snippets, and also hold the `lumis-paper`, `lumis-dusk` and `mdex-paper` palettes behind the Lumis and MDEx presets. Those four presets replace the ambient scene with canvas layers (`background.decoration.layers`) and use the `lumis` and `markdown` window bars; `renderBrandLayers` and the bar layout in `export-utils.ts` drive both the export and the composer preview.
 
 ## Header and Footer metadata
 

@@ -255,6 +255,76 @@ export const BRAND_THEMES: BrandTheme[] = [
     },
     logoUrl: "/brands/stripe.svg",
   },
+
+  // ── Lumis + MDEx (brand presets, design spec v5.2) ───────────────────────
+  // Lumis, light: lumis.sh #hero-wow light tokens; comment darkened #8a8478 -> #736d62 for AA.
+  // Both Lumis palettes stay in the sun's hue family: no green or cyan.
+  {
+    id: "lumis-paper",
+    brand: "lumis",
+    name: "Lumis Paper",
+    appearance: "light",
+    gradient: { from: "#F7F5F0", to: "#F7F5F0" },
+    palette: {
+      foreground: "#0e1530",
+      editorBg: "#ffffff",
+      comment: "#736d62",
+      string: "#8f6200",
+      number: "#c8354a",
+      constant: "#b8461a",
+      keyword: "#5b3fd9",
+      function: "#b4235f",
+      parameter: "#0e1530",
+      punctuation: "#545a78",
+      property: "#c8354a",
+    },
+    logoUrl: "/brands/lumis-icon-light.svg",
+  },
+  // Lumis, dark: lumis.sh #hero-wow dark tokens (sun palette on ink).
+  {
+    id: "lumis-dusk",
+    brand: "lumis",
+    name: "Lumis Dusk",
+    appearance: "dark",
+    gradient: { from: "#0E1530", to: "#0E1530" },
+    palette: {
+      foreground: "#f7f5f0",
+      editorBg: "#161e3f",
+      comment: "#8a90b2",
+      string: "#ffc23d",
+      number: "#ff6f6f",
+      constant: "#ff7a45",
+      keyword: "#a58bff",
+      function: "#ff5fae",
+      parameter: "#f7f5f0",
+      punctuation: "#f7f5f0",
+      property: "#ff6f6f",
+    },
+    logoUrl: "/brands/lumis-icon-dark.svg",
+  },
+  // MDEx, light: Catppuccin Latte (what mdelixir.dev ships) pulled to >= 4.5:1
+  // on white; keyword -> MDEx purple #6E3C88. Dark side uses stock catppuccin_macchiato.
+  {
+    id: "mdex-paper",
+    brand: "mdex",
+    name: "MDEx Paper",
+    appearance: "light",
+    gradient: { from: "#FAFAF9", to: "#FAFAF9" },
+    palette: {
+      foreground: "#4c4f69",
+      editorBg: "#ffffff",
+      comment: "#717489",
+      string: "#358423",
+      number: "#cb4b01",
+      constant: "#a26715",
+      keyword: "#6e3c88",
+      function: "#1e66f5",
+      parameter: "#4c4f69",
+      punctuation: "#717489",
+      property: "#cf4141",
+    },
+    logoUrl: "/brands/mdex-tile.svg",
+  },
 ];
 
 // ── Lookups ──────────────────────────────────────────────────────────────────

@@ -50,7 +50,7 @@ export const appearanceOptions = {
   outerPadding: EXPORT_OUTER_PADDING_VALUES,
   innerPadding: EXPORT_INNER_PADDING_VALUES,
   cornerRadius: EXPORT_CORNER_RADIUS_VALUES,
-  windowDecorations: ["macos", "macos-subtle", "windows", "minimal", "none"],
+  windowDecorations: ["macos", "macos-subtle", "windows", "minimal", "none", "lumis", "markdown"],
   header: DEFAULT_HEADER_SETTINGS,
   footer: DEFAULT_FOOTER_SETTINGS,
   alignments: ["left", "center", "right"],
@@ -91,6 +91,11 @@ export async function renderSnippet(rawInput: RenderInput): Promise<RenderResult
     (preset) => preset.id === (input.brand ?? (fixture !== "plain" ? "vercel" : undefined)),
   );
   const settings = brand?.settings;
+  // Only some presets set these, so the type inferred from the generated JS lacks them.
+  const presetAspectRatio =
+    settings && "aspectRatio" in settings ? (settings.aspectRatio as "16:9" | null) : null;
+  const presetLigatures =
+    settings && "ligatures" in settings ? (settings.ligatures as boolean) : true;
   const theme = input.theme ?? settings?.theme ?? "github_dark";
   const language = input.language ?? inferLanguage(input.filename, input.code);
   if (!supportedLanguages.includes(language)) throw new Error(`Unsupported language: ${language}`);
@@ -178,8 +183,8 @@ export async function renderSnippet(rawInput: RenderInput): Promise<RenderResult
     footer,
     input.fontSize ?? 14,
     input.wordDiff ?? false,
-    input.aspectRatio ?? null,
-    input.ligatures ?? true,
+    input.aspectRatio ?? presetAspectRatio,
+    input.ligatures ?? presetLigatures,
   );
   // App font subsets rely on browser fallback for the comment arrow. Supply a
   // portable fallback too, so native conversion never turns it into a missing glyph.

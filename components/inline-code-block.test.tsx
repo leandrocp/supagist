@@ -2,6 +2,8 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { InlineCodeBlock } from "./inline-code-block";
+import { getBrandPreset } from "@/lib/brand-presets";
+import { languageDisplayName } from "@/lib/snippet-utils";
 
 const { mockLoadLanguage, mockHighlightIter } = vi.hoisted(() => {
   const emitWholeCode = (code: string, _language: string, _theme: unknown, cb: Function) =>
@@ -321,6 +323,56 @@ describe("InlineCodeBlock preview mode", () => {
     expect(screen.getByText("snippet.ts")).toBeTruthy();
     expect(screen.getByText("TypeScript")).toBeTruthy();
     expect((container.firstElementChild as HTMLElement).style.backgroundColor).toBe("#171717");
+  });
+
+  it("mirrors the export's Lumis bar: mark, filename, < Language />, 3 sun dashes", () => {
+    const lumis = getBrandPreset("lumis")!;
+    render(
+      <InlineCodeBlock
+        {...baseProps}
+        filename="lumis_card.exs"
+        language="elixir"
+        windowDecoration="lumis"
+        brandFrame={lumis.background.frame}
+        header={lumis.settings.header}
+        showChromeActions={false}
+      />,
+    );
+
+    const bar = screen.getByTestId("lumis-window-header");
+    // 46px = the design's 72px bar at a 22px code font, scaled to 14px code.
+    expect(bar.style.height).toBe("46px");
+    expect(screen.getByTestId("lumis-window-mark").style.backgroundImage).toContain(
+      "/brands/lumis-icon-light.svg",
+    );
+    expect(bar.textContent).toBe(`lumis_card.exs< ${languageDisplayName("elixir")} />`);
+    expect(
+      screen.getAllByTestId("lumis-window-dash").map((dash) => dash.style.backgroundColor),
+    ).toEqual(["#8C6BFF", "#FF6F6F", "#FFC23D"]);
+    expect(screen.queryByRole("button", { name: "Copy code" })).toBeNull();
+  });
+
+  it("mirrors the export's markdown bar and hides the filename slot when empty", () => {
+    const mdex = getBrandPreset("mdex-purple")!;
+    const props = {
+      ...baseProps,
+      language: "elixir",
+      windowDecoration: "markdown" as const,
+      brandFrame: mdex.background.frame,
+      header: mdex.settings.header,
+      showChromeActions: false,
+    };
+    const { rerender } = render(<InlineCodeBlock {...props} filename="notes.md" />);
+
+    const bar = screen.getByTestId("markdown-window-header");
+    expect(bar.textContent).toBe("# notes.md```elixir[-][□][x]");
+    expect(screen.getByText("# notes.md").style.fontWeight).toBe("800");
+    expect(screen.getByText("```elixir").style.fontWeight).toBe("400");
+    expect(bar.style.backgroundColor).toBe("#F5F5F4");
+    expect(bar.textContent).not.toContain("[copy]");
+
+    rerender(<InlineCodeBlock {...props} filename="" />);
+    expect(screen.getByTestId("markdown-window-header").textContent).toBe("```elixir[-][□][x]");
   });
 
   it("renders the Minimal window decoration without control dots", () => {

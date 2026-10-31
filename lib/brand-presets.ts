@@ -24,7 +24,23 @@ export {
   visibleFooterItems,
 } from "@/lib/export-metadata";
 
-export type BrandWindowDecoration = "macos" | "macos-subtle" | "windows" | "minimal" | "none";
+export type BrandWindowDecoration =
+  | "macos"
+  | "macos-subtle"
+  | "windows"
+  | "minimal"
+  | "none"
+  | "lumis"
+  | "markdown";
+
+/** One header text run. `format` fills `{filename}`, `{Language}` (display
+ *  name) and `{lang}` (language id). */
+export type BrandHeaderText = {
+  format?: string;
+  color: string;
+  opacity?: number;
+  weight?: number;
+};
 
 export type BrandFramePreset = {
   showDots?: boolean;
@@ -33,7 +49,31 @@ export type BrandFramePreset = {
   cardBorder?: { color: string; width: number } | null;
   cardRadius?: number;
   cardFill?: string;
+  /** Header chrome for the `lumis` and `markdown` window decorations. Sizes
+   *  are design px at a 22px code font and scale with the export font size. */
+  headerMark?: { kind: "image"; src: string; size: number };
+  headerHeight?: number;
+  headerFill?: string;
+  headerBorder?: string;
+  filenameLabel?: BrandHeaderText;
+  /** The language run; `markdown` also paints its `[-][□][x]` in this colour. */
+  languageLabel?: BrandHeaderText;
 };
+
+/** Canvas layers painted behind the card, positioned on the visible (16:9)
+ *  canvas: x and y are fractions of its width and height, radii and sizes
+ *  are fractions of, or design px on, a 1600px-wide canvas. */
+export type BrandDecorationLayer =
+  | {
+      kind: "radial-glow";
+      cx: number;
+      cy: number;
+      r: number;
+      stops: readonly { offset: number; color: string; opacity: number }[];
+    }
+  | { kind: "sun-bands"; cx: number; cy: number; r: number }
+  | { kind: "code-field"; color: string; opacity: number }
+  | { kind: "dot-grid"; color: string; opacity: number; size: number };
 
 export type BrandPresetShape = {
   id: string;
@@ -42,6 +82,8 @@ export type BrandPresetShape = {
    *  no logo to source — the picker falls back to an accent dot rather than
    *  us inventing a mark that could be mistaken for theirs. */
   logoUrl?: string;
+  /** Paint the logo in its own colours instead of as an accent-tinted mask. */
+  logoFullColor?: boolean;
   accent: string;
   appearance: BrandSceneAppearance;
   scene?: BrandScenePreset;
@@ -52,6 +94,8 @@ export type BrandPresetShape = {
     patternUrl?: string;
     brandId: string;
     frame?: BrandFramePreset;
+    /** Replaces the ambient scene (glows, vignette, rims, card shadow). */
+    decoration?: { layers: readonly BrandDecorationLayer[] };
   };
   settings: {
     theme: string;
@@ -63,6 +107,9 @@ export type BrandPresetShape = {
     header: ExportHeaderSettings;
     footer: ExportFooterSettings;
     windowDecoration: BrandWindowDecoration;
+    /** Only set by presets that need them; others leave the current value. */
+    aspectRatio?: "16:9" | null;
+    ligatures?: boolean;
   };
 };
 
@@ -284,6 +331,142 @@ const PLZ_SCENE = signatureScene("dark", "#2DD4BF", "#5EEAD4", {
     shadow: { color: "#020F14", opacity: 0.7, y: 12, blur: 26 },
   },
 });
+
+// Lumis and MDEx brand looks (design spec v5.2). Layers sit on a 1600×900
+// canvas: the horizon glow and sun at (1190, 640), the glow r 640, sun r 430.
+const LUMIS_GLOW_DARK = [
+  { offset: 0, color: "#FF8A4C", opacity: 0.44 },
+  { offset: 0.38, color: "#FF6F6F", opacity: 0.21 },
+  { offset: 0.66, color: "#FF5FAE", opacity: 0.09 },
+  { offset: 1, color: "#FF5FAE", opacity: 0 },
+] as const;
+const LUMIS_GLOW_LIGHT = [
+  { offset: 0, color: "#FFC23D", opacity: 0.4 },
+  { offset: 0.4, color: "#FF7A45", opacity: 0.18 },
+  { offset: 0.68, color: "#FF5FAE", opacity: 0.07 },
+  { offset: 1, color: "#FF5FAE", opacity: 0 },
+] as const;
+
+function lumisLook(dark: boolean) {
+  const fill = dark ? "#161E3F" : "#FFFFFF";
+  const border = dark ? "#2E3760" : "#DCD7CB";
+  const icon = dark ? "/brands/lumis-icon-dark.svg" : "/brands/lumis-icon-light.svg";
+  const label = dark ? "Lumis Dark" : "Lumis";
+  return {
+    id: dark ? "lumis-dark" : "lumis",
+    name: label,
+    logoUrl: icon,
+    logoFullColor: true,
+    accent: "#FF5FAE",
+    appearance: dark ? "dark" : "light",
+    background: {
+      label,
+      from: dark ? "#0E1530" : "#F7F5F0",
+      to: dark ? "#0E1530" : "#F7F5F0",
+      brandId: dark ? "lumis-dark" : "lumis",
+      decoration: {
+        layers: [
+          {
+            kind: "radial-glow",
+            cx: 0.744,
+            cy: 0.711,
+            r: 0.4,
+            stops: dark ? LUMIS_GLOW_DARK : LUMIS_GLOW_LIGHT,
+          },
+          {
+            kind: "code-field",
+            color: dark ? "#AEB3CF" : "#0E1530",
+            opacity: dark ? 0.1 : 0.08,
+          },
+          { kind: "sun-bands", cx: 0.744, cy: 0.711, r: 0.269 },
+        ],
+      },
+      frame: {
+        showDots: false,
+        showCenteredFilename: false,
+        cardBorder: { color: border, width: 1 },
+        cardRadius: 8,
+        cardFill: fill,
+        headerMark: { kind: "image", src: icon, size: 34 },
+        headerHeight: 72,
+        headerBorder: border,
+        filenameLabel: dark
+          ? { format: "{filename}", color: "#F7F5F0", opacity: 0.62, weight: 400 }
+          : { format: "{filename}", color: "#545A78", weight: 400 },
+        languageLabel: {
+          format: "< {Language} />",
+          color: dark ? "#A58BFF" : "#5B3FD9",
+          weight: 600,
+        },
+      },
+    },
+    settings: defaults(dark ? "lumis-dusk" : "lumis-paper", {
+      windowDecoration: "lumis",
+      aspectRatio: "16:9",
+      // The design's 200px margin is not a Supagist option; 128 is its fallback.
+      outerPadding: 128,
+      innerPadding: 24,
+      cornerRadius: 8,
+      fontId: "jetbrains",
+      ligatures: false,
+      header: {
+        ...DEFAULT_HEADER_SETTINGS,
+        showFilename: true,
+        filenamePosition: "left",
+        showLanguage: true,
+        languagePosition: "right",
+      },
+    }),
+  } as const satisfies BrandPresetShape;
+}
+
+function mdexLook(dark: boolean) {
+  const border = dark ? "#44403C" : "#E7E5E4";
+  const label = dark ? "MDEx Purple Dark" : "MDEx Purple";
+  return {
+    id: dark ? "mdex-purple-dark" : "mdex-purple",
+    name: label,
+    logoUrl: "/brands/mdex-tile.svg",
+    logoFullColor: true,
+    accent: "#6E3C88",
+    appearance: dark ? "dark" : "light",
+    background: {
+      label,
+      from: "#6E3C88",
+      to: "#6E3C88",
+      brandId: dark ? "mdex-purple-dark" : "mdex-purple",
+      decoration: {
+        layers: [{ kind: "dot-grid", color: "#FFFFFF", opacity: 0.3, size: 20 }],
+      },
+      frame: {
+        showDots: false,
+        showCenteredFilename: false,
+        cardBorder: { color: border, width: 1 },
+        cardRadius: 0,
+        cardFill: dark ? "#1C1917" : "#FFFFFF",
+        headerHeight: 58,
+        headerFill: dark ? "#292524" : "#F5F5F4",
+        headerBorder: border,
+        filenameLabel: {
+          format: "# {filename}",
+          color: dark ? "#C4A5D6" : "#6E3C88",
+          weight: 800,
+        },
+        languageLabel: { format: "```{lang}", color: dark ? "#A8A29E" : "#6B6560", weight: 400 },
+      },
+    },
+    settings: defaults(dark ? "catppuccin_macchiato" : "mdex-paper", {
+      windowDecoration: "markdown",
+      aspectRatio: "16:9",
+      outerPadding: 96,
+      innerPadding: 16,
+      cornerRadius: 0,
+      fontId: "jetbrains",
+      ligatures: false,
+      header: { ...DEFAULT_HEADER_SETTINGS, showFilename: true, filenamePosition: "left" },
+    }),
+  } as const satisfies BrandPresetShape;
+}
 
 const defaults = (
   theme: string,
@@ -888,6 +1071,10 @@ export const BRAND_PRESETS = [
       },
     }),
   },
+  lumisLook(false),
+  lumisLook(true),
+  mdexLook(false),
+  mdexLook(true),
 ] as const satisfies readonly BrandPresetShape[];
 
 export type BrandPreset = (typeof BRAND_PRESETS)[number];

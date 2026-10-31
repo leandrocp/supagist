@@ -13,7 +13,9 @@ import {
 import { nameToColor, nameToInitials } from "@/lib/presence-utils";
 import {
   BRAND_PRESETS,
+  type BrandDecorationLayer,
   type BrandFramePreset,
+  type BrandWindowDecoration,
   type BrandId,
   resolveBrandScene,
   type BrandPresetShape,
@@ -122,7 +124,267 @@ export function exportCharWidthForFontSize(fontSize: number) {
 }
 
 export type ExportComment = { author?: string; body: string };
-export type WindowDecoration = "macos" | "macos-subtle" | "windows" | "minimal" | "none";
+export type WindowDecoration = BrandWindowDecoration;
+
+// ── Brand window bars (`lumis`, `markdown`) ─────────────────────────────────
+// Design px at a 22px code font; both bars scale with the export font size so
+// they keep the design's proportions to the code.
+const BRAND_HEADER_DESIGN_FONT_SIZE = 22;
+export const LUMIS_HEADER = {
+  height: 72,
+  padX: 30,
+  markGap: 14,
+  filenameSize: 19,
+  labelSize: 17,
+  labelGap: 22,
+  dash: { width: 16, height: 6, gap: 5 },
+} as const;
+export const MARKDOWN_HEADER = {
+  height: 58,
+  padX: 24,
+  fontSize: 21,
+  gap: 24,
+  controls: "[-][□][x]",
+} as const;
+/** The Lumis sun, top to bottom, in units of its diameter / 152. */
+export const LUMIS_SUN_BANDS = [
+  { color: "#8C6BFF", from: 0, to: 30 },
+  { color: "#FF5FAE", from: 33, to: 58 },
+  { color: "#FF6F6F", from: 62, to: 84 },
+  { color: "#FF7A45", from: 89, to: 108 },
+  { color: "#FFC23D", from: 114, to: 152 },
+] as const;
+/** The `lumis` window controls: the sun's ends and middle (violet, coral, gold). */
+export const LUMIS_HEADER_DASHES = [0, 2, 4].map((band) => LUMIS_SUN_BANDS[band]!.color);
+const MONO_ADVANCE_EM = 0.6;
+
+export function isBrandHeaderDecoration(
+  decoration: WindowDecoration,
+): decoration is "lumis" | "markdown" {
+  return decoration === "lumis" || decoration === "markdown";
+}
+
+export function brandHeaderScale(fontSize: number) {
+  return normalizeExportFontSize(fontSize) / BRAND_HEADER_DESIGN_FONT_SIZE;
+}
+
+/** Height of the window bar above the code; 0 when there is none. */
+export function exportHeaderHeight(
+  decoration: WindowDecoration,
+  fontSize: number = EXPORT_FONT_SIZE,
+  frame?: BrandFramePreset,
+) {
+  if (decoration === "none") return 0;
+  if (!isBrandHeaderDecoration(decoration)) return EXPORT_WINDOW_CHROME_HEIGHT;
+  const design =
+    frame?.headerHeight ?? (decoration === "lumis" ? LUMIS_HEADER.height : MARKDOWN_HEADER.height);
+  return Math.round(design * brandHeaderScale(fontSize));
+}
+
+export type BrandHeaderRun = { text: string; color: string; opacity: number; weight: number };
+
+/** The filename and language runs of a `lumis` / `markdown` bar. Frames
+ *  without brand colours fall back to the card's readable chrome colour. */
+export function brandHeaderRuns(
+  decoration: "lumis" | "markdown",
+  frame: BrandFramePreset | undefined,
+  header: ExportHeaderSettings,
+  filename: string,
+  language: string,
+  chromeColor: string,
+): { filename: BrandHeaderRun | null; language: BrandHeaderRun | null } {
+  const lumis = decoration === "lumis";
+  const run = (
+    style: BrandFramePreset["filenameLabel"],
+    format: string,
+    opacity: number,
+    weight: number,
+  ): BrandHeaderRun => ({
+    text: (style?.format ?? format)
+      .replaceAll("{filename}", filename)
+      .replaceAll("{Language}", languageDisplayName(language))
+      .replaceAll("{lang}", language === "plaintext" ? "" : language),
+    color: style?.color ?? chromeColor,
+    opacity: style ? (style.opacity ?? 1) : opacity,
+    weight: style?.weight ?? weight,
+  });
+  return {
+    filename:
+      header.showFilename && filename
+        ? run(frame?.filenameLabel, lumis ? "{filename}" : "# {filename}", 0.7, lumis ? 400 : 800)
+        : null,
+    language: header.showLanguage
+      ? run(frame?.languageLabel, lumis ? "< {Language} />" : "```{lang}", 0.6, lumis ? 600 : 400)
+      : null,
+  };
+}
+
+function brandHeaderRequiredWidth(
+  decoration: "lumis" | "markdown",
+  frame: BrandFramePreset | undefined,
+  runs: ReturnType<typeof brandHeaderRuns>,
+  fontSize: number,
+) {
+  const s = brandHeaderScale(fontSize);
+  const width = (run: BrandHeaderRun | null, size: number) =>
+    run ? run.text.length * MONO_ADVANCE_EM * size * s : 0;
+  if (decoration === "lumis") {
+    const mark = frame?.headerMark ? frame.headerMark.size + LUMIS_HEADER.markGap : 0;
+    const { dash } = LUMIS_HEADER;
+    return (
+      (2 * LUMIS_HEADER.padX + mark + LUMIS_HEADER.labelGap + 3 * dash.width + 2 * dash.gap) * s +
+      width(runs.filename, LUMIS_HEADER.filenameSize) +
+      width(runs.language, LUMIS_HEADER.labelSize) +
+      (runs.filename && runs.language ? 2 * LUMIS_HEADER.labelGap * s : 0)
+    );
+  }
+  const { padX, fontSize: size, gap, controls } = MARKDOWN_HEADER;
+  return (
+    (2 * padX + gap) * s +
+    width(runs.filename, size) +
+    (runs.filename && runs.language ? gap * s : 0) +
+    width(runs.language, size) +
+    controls.length * MONO_ADVANCE_EM * size * s
+  );
+}
+
+// ── Brand canvas layers ─────────────────────────────────────────────────────
+
+/** The lumis.sh hero code field, one 28-row cycle. «…» marks italic runs. */
+const LUMIS_CODE_FIELD = [
+  "«# CLI»",
+  "«$» «curl» «-LsSf» «https://lumis.sh/install.sh» «|» «sh»",
+  "«$» «lumis» highlight app.js «--theme» «dracula»",
+  "",
+  "«// Rust»",
+  "«use» lumis«::{»highlight«,» «HtmlInlineBuilder»«};»",
+  '«let» html «=» «highlight»«(»«"const x = 1"»«,» formatter«);»',
+  "",
+  "«# Elixir»",
+  '«Lumis»«.»«highlight!»«(»«"const x = 1"»«,»',
+  '  «formatter»«:» «{:»html_inline«,» «language»«:» «"javascript"»«})»',
+  "",
+  "«// JavaScript / TypeScript»",
+  "«import» «{» highlight «}» «from» «'@lumis-sh/lumis'»",
+  "«const» html «=» «await» «highlight»«(»«'const x = 1'»«,» options«)»",
+  "",
+  "«// Browsers / CDN»",
+  "«import» «{» highlight «}» «from»",
+  "  «'https://cdn.jsdelivr.net/npm/@lumis-sh/lumis/+esm'»",
+  "",
+  "«// Java (Lumis4J)»",
+  "«var» lumis «=» «Lumis»«.»«builder»«().»«build»«();»",
+  '«var» result «=» lumis«.»«highlight»«(»«"const x = 1"»«);»',
+  "",
+  "«# Python (fastpylight)»",
+  "«from» fastpylight «import» highlight_spans«,» theme_css",
+  'html «=» «highlight_spans»«(»«"const x = 1"»«,» «"javascript"»«)»',
+  "",
+];
+const CODE_FIELD = {
+  fontSize: 17,
+  lineHeight: 29.75,
+  firstBaseline: 11,
+  columns: [0, 552, 1104],
+} as const;
+
+function codeFieldRow(line: string) {
+  let italic = false;
+  let run = "";
+  let out = "";
+  const flush = () => {
+    if (run) out += `<tspan${italic ? ' font-style="italic"' : ""}>${escapeXml(run)}</tspan>`;
+    run = "";
+  };
+  for (const char of line) {
+    if (char === "«" || char === "»") {
+      flush();
+      italic = char === "«";
+    } else run += char;
+  }
+  flush();
+  return out;
+}
+
+export type ExportViewport = { left: number; top: number; width: number; height: number };
+
+/**
+ * SVG markup for a brand's canvas layers, laid out on the visible canvas so
+ * card size and padding never move them. Shared by the export and the live
+ * preview; `idPrefix` keeps gradient/pattern ids unique when several render
+ * on one page.
+ */
+export function renderBrandLayers(
+  layers: readonly BrandDecorationLayer[],
+  viewport: ExportViewport,
+  fontFamily: string,
+  idPrefix = "brand-layer",
+): string {
+  const { left, top, width, height } = viewport;
+  const s = width / EXPORT_CANVAS_16_9.width;
+  return layers
+    .map((layer, index) => {
+      const id = `${idPrefix}-${index}`;
+      if (layer.kind === "radial-glow") {
+        const stops = layer.stops
+          .map(
+            (stop) =>
+              `<stop offset="${stop.offset}" stop-color="${escapeXml(stop.color)}" stop-opacity="${stop.opacity}"/>`,
+          )
+          .join("");
+        return (
+          `<defs><radialGradient id="${id}" gradientUnits="userSpaceOnUse" cx="${left + layer.cx * width}" cy="${top + layer.cy * height}" r="${layer.r * width}">${stops}</radialGradient></defs>` +
+          `<rect data-brand-layer="radial-glow" x="${left}" y="${top}" width="${width}" height="${height}" fill="url(#${id})"/>`
+        );
+      }
+      if (layer.kind === "sun-bands") {
+        const r = layer.r * width;
+        const cx = left + layer.cx * width;
+        const cy = top + layer.cy * height;
+        const unit = (2 * r) / 152;
+        const bands = LUMIS_SUN_BANDS.map(
+          (band) =>
+            `<rect x="${cx - r}" y="${+(cy - r + band.from * unit).toFixed(2)}" width="${2 * r}" height="${+((band.to - band.from) * unit).toFixed(2)}" fill="${band.color}"/>`,
+        ).join("");
+        return (
+          `<defs><clipPath id="${id}"><circle cx="${cx}" cy="${cy}" r="${r}"/></clipPath></defs>` +
+          `<g data-brand-layer="sun-bands" clip-path="url(#${id})">${bands}</g>`
+        );
+      }
+      if (layer.kind === "dot-grid") {
+        const size = layer.size * s;
+        return (
+          `<defs><pattern id="${id}" patternUnits="userSpaceOnUse" x="${left}" y="${top}" width="${size}" height="${size}">` +
+          `<circle cx="${2 * s}" cy="${2 * s}" r="${s}" fill="${escapeXml(layer.color)}" fill-opacity="${layer.opacity}"/>` +
+          `</pattern></defs>` +
+          `<rect data-brand-layer="dot-grid" x="${left}" y="${top}" width="${width}" height="${height}" fill="url(#${id})"/>`
+        );
+      }
+      const rows = Math.ceil(
+        (EXPORT_CANVAS_16_9.width * (height / width) - CODE_FIELD.firstBaseline) /
+          CODE_FIELD.lineHeight,
+      );
+      const text = CODE_FIELD.columns
+        .flatMap((column) =>
+          Array.from({ length: rows + 1 }, (_, row) => {
+            const line = LUMIS_CODE_FIELD[row % LUMIS_CODE_FIELD.length]!;
+            if (!line) return "";
+            const x = +(left + column * s).toFixed(2);
+            const y = +(top + (CODE_FIELD.firstBaseline + row * CODE_FIELD.lineHeight) * s).toFixed(
+              2,
+            );
+            return `<text x="${x}" y="${y}" xml:space="preserve">${codeFieldRow(line)}</text>`;
+          }),
+        )
+        .join("");
+      return (
+        `<g data-brand-layer="code-field" font-family="${escapeXml(fontFamily)}" font-size="${+(CODE_FIELD.fontSize * s).toFixed(2)}" font-weight="500" fill="${escapeXml(layer.color)}" fill-opacity="${layer.opacity}" style="font-variant-ligatures:none">` +
+        text +
+        `</g>`
+      );
+    })
+    .join("");
+}
 type ExportVisualRow = {
   tokens: SvgToken[];
   lineNum: number | null;
@@ -272,6 +534,8 @@ export type ExportBackground = {
   frame?: BrandFrame;
   /** Layered canvas lighting, border, guides, and frame-depth recipe. */
   scene?: BrandScenePreset;
+  /** Brand canvas layers; brands with these have no ambient scene. */
+  decoration?: { layers: readonly BrandDecorationLayer[] };
 };
 
 export const EXPORT_BACKGROUNDS: ExportBackground[] = [
@@ -301,7 +565,7 @@ export const EXPORT_BRAND_BACKGROUNDS: ExportBackground[] = BRAND_PRESETS.map(
     logoUrl: preset.logoUrl,
     brandId: preset.id as BrandId,
     frame: preset.background.frame,
-    scene: resolveBrandScene(preset),
+    scene: preset.background.decoration ? undefined : resolveBrandScene(preset),
   }),
 );
 
@@ -357,8 +621,10 @@ function exportMetadataText(sourceUrl: string) {
 function exportTopPad(
   windowDecoration: WindowDecoration = "macos",
   innerPadding = EXPORT_INNER_PADDING,
+  fontSize = EXPORT_FONT_SIZE,
+  frame?: BrandFramePreset,
 ) {
-  return windowDecoration === "none" ? innerPadding : EXPORT_WINDOW_CHROME_HEIGHT + innerPadding;
+  return exportHeaderHeight(windowDecoration, fontSize, frame) + innerPadding;
 }
 
 function resolveRenderedWindowDecoration(
@@ -567,7 +833,12 @@ export function estimateExportDimensions({
     Boolean(background?.frame?.headerStrip),
   );
   const renderHeader = effectiveWindowDecoration !== "none";
-  const topPad = exportTopPad(effectiveWindowDecoration, innerPaddingPx);
+  const topPad = exportTopPad(
+    effectiveWindowDecoration,
+    innerPaddingPx,
+    fontSize,
+    background?.frame,
+  );
   const hasReactions = showReactions && reactions && Object.keys(reactions).length > 0;
   const longestLinePx = Math.min(
     Math.max(
@@ -586,17 +857,31 @@ export function estimateExportDimensions({
     ? footerContentWidth(footerItems, language, theme, rawLines.length, code, author)
     : 0;
   const headerInsets = headerMetadataInsets(effectiveWindowDecoration);
-  const headerWidthPx = renderHeader
-    ? headerRequiredWidth(
-        resolvedHeader,
-        filename,
-        language,
-        headerInsets.left,
-        headerInsets.right,
-        Boolean(background?.frame?.headerStrip) ||
-          (background?.frame?.showCenteredFilename ?? true),
-      )
-    : 0;
+  const headerWidthPx = !renderHeader
+    ? 0
+    : isBrandHeaderDecoration(effectiveWindowDecoration)
+      ? brandHeaderRequiredWidth(
+          effectiveWindowDecoration,
+          background?.frame,
+          brandHeaderRuns(
+            effectiveWindowDecoration,
+            background?.frame,
+            resolvedHeader,
+            filename,
+            language,
+            "",
+          ),
+          fontSize,
+        )
+      : headerRequiredWidth(
+          resolvedHeader,
+          filename,
+          language,
+          headerInsets.left,
+          headerInsets.right,
+          Boolean(background?.frame?.headerStrip) ||
+            (background?.frame?.showCenteredFilename ?? true),
+        );
   const naturalWidth = Math.max(
     longestLinePx +
       (lineNumbers ? EXPORT_GUTTER_WIDTH + innerPaddingPx : innerPaddingPx) +
@@ -804,7 +1089,17 @@ export async function createHighlightedSvg(
     Boolean(background?.frame?.headerStrip),
   );
   const renderHeader = renderedWindowDecoration !== "none";
-  const topPad = exportTopPad(renderedWindowDecoration, innerPaddingPx);
+  const headerHeight = exportHeaderHeight(
+    renderedWindowDecoration,
+    codeFontSize,
+    background?.frame,
+  );
+  const topPad = exportTopPad(
+    renderedWindowDecoration,
+    innerPaddingPx,
+    codeFontSize,
+    background?.frame,
+  );
   const maxSourceLines =
     height !== undefined
       ? Math.max(1, Math.floor((height - topPad - innerPaddingPx) / codeLineHeight))
@@ -878,17 +1173,27 @@ export async function createHighlightedSvg(
     ? footerContentWidth(footerItems, language, theme, rawLines.length, code, author)
     : 0;
   const headerInsets = headerMetadataInsets(renderedWindowDecoration);
-  const headerWidthPx = renderHeader
-    ? headerRequiredWidth(
-        resolvedHeader,
-        filename,
-        language,
-        headerInsets.left,
-        headerInsets.right,
-        Boolean(background?.frame?.headerStrip) ||
-          (background?.frame?.showCenteredFilename ?? true),
-      )
-    : 0;
+  const brandHeader = isBrandHeaderDecoration(renderedWindowDecoration)
+    ? renderedWindowDecoration
+    : null;
+  const headerWidthPx = !renderHeader
+    ? 0
+    : brandHeader
+      ? brandHeaderRequiredWidth(
+          brandHeader,
+          background?.frame,
+          brandHeaderRuns(brandHeader, background?.frame, resolvedHeader, filename, language, ""),
+          codeFontSize,
+        )
+      : headerRequiredWidth(
+          resolvedHeader,
+          filename,
+          language,
+          headerInsets.left,
+          headerInsets.right,
+          Boolean(background?.frame?.headerStrip) ||
+            (background?.frame?.showCenteredFilename ?? true),
+        );
   // Line-number exports keep the gutter fixed, then apply configurable inner
   // padding on both sides of the code body. Header and footer chrome also
   // participate in natural sizing so aligned labels cannot overlap controls.
@@ -1028,8 +1333,7 @@ export async function createHighlightedSvg(
   const codeX =
     outerPaddingPx + (lineNumbers ? EXPORT_GUTTER_WIDTH + innerPaddingPx : innerPaddingPx);
   const gutterDividerX = outerPaddingPx + EXPORT_GUTTER_WIDTH;
-  const gutterDividerTop =
-    outerPaddingPx + (renderedWindowDecoration === "none" ? 0 : EXPORT_WINDOW_CHROME_HEIGHT);
+  const gutterDividerTop = outerPaddingPx + headerHeight;
   const gutterDividerBottom = outerPaddingPx + actualHeight - (renderFooter ? FOOTER_HEIGHT : 0);
   const gutterDividerMarkup = lineNumbers
     ? `<line data-export-gutter-divider="true" x1="${gutterDividerX}" y1="${gutterDividerTop}" x2="${gutterDividerX}" y2="${gutterDividerBottom}" stroke="${escapeXml(editorFg)}" stroke-opacity="0.12" stroke-width="1"/>`
@@ -1270,6 +1574,9 @@ export async function createHighlightedSvg(
       sceneDefs +
       `</defs>` +
       `<rect width="${totalWidth}" height="${totalHeight}" fill="url(#outerBg)"/>` +
+      (background.decoration
+        ? renderBrandLayers(background.decoration.layers, viewport, fontFamily)
+        : "") +
       sceneCanvasLayers +
       patternMarkup +
       brandDecoration +
@@ -1292,6 +1599,7 @@ export async function createHighlightedSvg(
 
   const headerItems = [
     renderHeader &&
+    !brandHeader &&
     resolvedHeader.showFilename &&
     filename &&
     (Boolean(frame?.headerStrip) || (frame?.showCenteredFilename ?? true))
@@ -1302,7 +1610,7 @@ export async function createHighlightedSvg(
           position: resolvedHeader.filenamePosition,
         }
       : null,
-    renderHeader && resolvedHeader.showLanguage && language
+    renderHeader && !brandHeader && resolvedHeader.showLanguage && language
       ? {
           text: languageDisplayName(language),
           opacity: 0.5,
@@ -1346,9 +1654,30 @@ export async function createHighlightedSvg(
     })
     .join("");
 
+  const brandHeaderMarkup = brandHeader
+    ? renderBrandHeader({
+        decoration: brandHeader,
+        frame,
+        runs: brandHeaderRuns(brandHeader, frame, resolvedHeader, filename, language, chromeColor),
+        x: outerPaddingPx,
+        y: outerPaddingPx,
+        width: actualWidth,
+        height: headerHeight,
+        cardHeight: actualHeight,
+        cardRadius,
+        fontSize: codeFontSize,
+        fontFamily,
+        chromeColor,
+        markDataUrl:
+          brandHeader === "lumis" && frame?.headerMark
+            ? await loadImageDataUrl(frame.headerMark.src)
+            : null,
+      })
+    : "";
+
   const windowDividerY = outerPaddingPx + (frame?.headerStrip ? 36 : EXPORT_WINDOW_CHROME_HEIGHT);
   const windowDividerMarkup =
-    renderedWindowDecoration !== "none"
+    renderedWindowDecoration !== "none" && !brandHeader
       ? `<line data-export-window-divider="true" x1="${outerPaddingPx}" y1="${windowDividerY}" x2="${outerPaddingPx + actualWidth}" y2="${windowDividerY}" stroke="${chromeColor}" stroke-opacity="0.12" stroke-width="1"/>`
       : "";
 
@@ -1476,6 +1805,7 @@ export async function createHighlightedSvg(
     windowsControlsMarkup +
     headerMarkup +
     windowDividerMarkup +
+    brandHeaderMarkup +
     gutterDividerMarkup +
     lineMarkup +
     footerMarkup +
@@ -1639,6 +1969,103 @@ function renderBrandFrame(
     `<rect data-scene-layer="frame-inner-stroke" x="${outerPadding + 1.5}" y="${outerPadding + 1.5}" width="${Math.max(0, actualWidth - 3)}" height="${Math.max(0, actualHeight - 3)}" rx="${Math.max(0, cardRadius - 1.5)}" ry="${Math.max(0, cardRadius - 1.5)}" fill="none" stroke="${escapeXml(scene.frame.innerStroke)}" stroke-width="1"/>` +
     `<line data-scene-layer="frame-highlight" x1="${outerPadding + cardRadius}" y1="${topHighlightY}" x2="${outerPadding + actualWidth - cardRadius}" y2="${topHighlightY}" stroke="${escapeXml(scene.frame.highlight)}" stroke-width="1"/>`
   );
+}
+
+/** The `lumis` and `markdown` window bars (design spec v5.2), drawn on top
+ *  of the card. Nothing is drawn inside the code area. */
+function renderBrandHeader({
+  decoration,
+  frame,
+  runs,
+  x,
+  y,
+  width,
+  height,
+  cardHeight,
+  cardRadius,
+  fontSize,
+  fontFamily,
+  chromeColor,
+  markDataUrl,
+}: {
+  decoration: "lumis" | "markdown";
+  frame: BrandFramePreset | undefined;
+  runs: ReturnType<typeof brandHeaderRuns>;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  cardHeight: number;
+  cardRadius: number;
+  fontSize: number;
+  fontFamily: string;
+  chromeColor: string;
+  markDataUrl: string | null;
+}): string {
+  const s = brandHeaderScale(fontSize);
+  const midY = y + height / 2;
+  const text = (
+    run: BrandHeaderRun,
+    textX: number,
+    size: number,
+    anchor: "start" | "end",
+    role: string,
+  ) =>
+    `<text data-brand-header="${role}" x="${+textX.toFixed(2)}" y="${+midY.toFixed(2)}" font-size="${+(size * s).toFixed(2)}" font-family="${escapeXml(fontFamily)}" font-weight="${run.weight}" dominant-baseline="central" text-anchor="${anchor}" fill="${escapeXml(run.color)}"${run.opacity < 1 ? ` fill-opacity="${run.opacity}"` : ""} xml:space="preserve" style="font-variant-ligatures:none">${escapeXml(run.text)}</text>`;
+  const border = frame?.headerBorder ?? frame?.cardBorder?.color;
+  const divider = `<line data-brand-header="divider" x1="${x}" y1="${y + height - 0.5}" x2="${x + width}" y2="${y + height - 0.5}" stroke="${escapeXml(border ?? chromeColor)}"${border ? "" : ' stroke-opacity="0.12"'} stroke-width="1"/>`;
+
+  if (decoration === "lumis") {
+    const { padX, markGap, filenameSize, labelSize, labelGap, dash } = LUMIS_HEADER;
+    let left = x + padX * s;
+    let markup = "";
+    if (markDataUrl && frame?.headerMark) {
+      const size = frame.headerMark.size * s;
+      const href = escapeXml(markDataUrl);
+      markup += `<image data-brand-header="mark" href="${href}" xlink:href="${href}" x="${+left.toFixed(2)}" y="${+(midY - size / 2).toFixed(2)}" width="${+size.toFixed(2)}" height="${+size.toFixed(2)}"/>`;
+      left += size + markGap * s;
+    }
+    if (runs.filename) markup += text(runs.filename, left, filenameSize, "start", "filename");
+    const dashesX = x + width - (padX + 3 * dash.width + 2 * dash.gap) * s;
+    markup += LUMIS_HEADER_DASHES.map(
+      (color, index) =>
+        `<rect data-brand-header="dash" x="${+(dashesX + index * (dash.width + dash.gap) * s).toFixed(2)}" y="${+(midY - (dash.height / 2) * s).toFixed(2)}" width="${+(dash.width * s).toFixed(2)}" height="${+(dash.height * s).toFixed(2)}" rx="${+((dash.height / 2) * s).toFixed(2)}" fill="${color}"/>`,
+    ).join("");
+    if (runs.language)
+      markup += text(runs.language, dashesX - labelGap * s, labelSize, "end", "language");
+    return markup + divider;
+  }
+
+  const { padX, fontSize: size, gap, controls } = MARKDOWN_HEADER;
+  const clipId = "brand-header-clip";
+  let markup = frame?.headerFill
+    ? `<defs><clipPath id="${clipId}"><rect x="${x}" y="${y}" width="${width}" height="${cardHeight}" rx="${cardRadius}" ry="${cardRadius}"/></clipPath></defs>` +
+      `<rect data-brand-header="strip" x="${x}" y="${y}" width="${width}" height="${height}" fill="${escapeXml(frame.headerFill)}" clip-path="url(#${clipId})"/>`
+    : "";
+  let left = x + padX * s;
+  if (runs.filename) {
+    markup += text(runs.filename, left, size, "start", "filename");
+    left += (runs.filename.text.length * MONO_ADVANCE_EM * size + gap) * s;
+  }
+  if (runs.language) markup += text(runs.language, left, size, "start", "language");
+  const muted = runs.language ?? {
+    text: "",
+    color: frame?.languageLabel?.color ?? chromeColor,
+    opacity: frame?.languageLabel ? (frame.languageLabel.opacity ?? 1) : 0.6,
+    weight: 400,
+  };
+  markup += text(
+    { ...muted, text: controls, weight: 400 },
+    x + width - padX * s,
+    size,
+    "end",
+    "controls",
+  );
+  // Repaint the card edge the strip covered.
+  const outline = frame?.cardBorder
+    ? `<rect x="${x}" y="${y}" width="${width}" height="${cardHeight}" rx="${cardRadius}" ry="${cardRadius}" fill="none" stroke="${escapeXml(frame.cardBorder.color)}" stroke-width="${frame.cardBorder.width}"/>`
+    : "";
+  return markup + divider + outline;
 }
 
 type BrandDecorationArgs = {

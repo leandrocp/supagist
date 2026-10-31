@@ -582,6 +582,8 @@ export function ExportModal({
               ["Windows", "windows"],
               ["Minimal", "minimal"],
               ["None", "none"],
+              ["Lumis", "lumis"],
+              ["Markdown", "markdown"],
             ].map(([label, value]) => (
               <button
                 key={value}

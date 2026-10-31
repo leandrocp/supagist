@@ -75,6 +75,18 @@
     "sha256": "f27dfed8a4c9b2a768783e2ca8f85008c5a5cfeea731b76b71a0b8e18dde4145",
     "bytes": 322209
   },
+  "lumis-icon-light.svg": {
+    "source": "public/brands/lumis-icon-light.svg",
+    "sourceSha256": "32c8dc36ee4b2d91787034b8724d78794b022d4248f08200322cb4fa6b62a4ac",
+    "sha256": "32c8dc36ee4b2d91787034b8724d78794b022d4248f08200322cb4fa6b62a4ac",
+    "bytes": 5669
+  },
+  "lumis-icon-dark.svg": {
+    "source": "public/brands/lumis-icon-dark.svg",
+    "sourceSha256": "ead9d25071922a22995b2536817d55931e320aea7babc975302de6118107cb40",
+    "sha256": "ead9d25071922a22995b2536817d55931e320aea7babc975302de6118107cb40",
+    "bytes": 6079
+  },
   "vendor-licenses.txt": {
     "sha256": "6a8db3b9a24c1cf83dee04e662bcf274bfaae83f4d5881fa9cd1c6d1698bdf78",
     "bytes": 8817,

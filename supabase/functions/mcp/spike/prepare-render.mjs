@@ -253,7 +253,12 @@ async function prepareBrandAssets(manifest) {
       await record(license, `node_modules/@fontsource/${source}/LICENSE`, {}, true);
     }
   }
-  for (const name of ["tailwind-beams.png", "resend-dark.png"])
+  for (const name of [
+    "tailwind-beams.png",
+    "resend-dark.png",
+    "lumis-icon-light.svg",
+    "lumis-icon-dark.svg",
+  ])
     await record(name, `public/brands/${name}`, {}, true);
   if (vendorNotices) manifest["vendor-licenses.txt"] = vendorNotices;
 }

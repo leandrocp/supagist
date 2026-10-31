@@ -1,4 +1,7 @@
+import { useId } from "react";
+import type { BrandDecorationLayer } from "@/lib/brand-presets";
 import type { BrandScenePreset } from "@/lib/brand-scenes";
+import { renderBrandLayers } from "@/lib/export-utils";
 
 function FadedLine({ className }: { className: string }) {
   return (
@@ -78,5 +81,34 @@ export function BrandSceneDecoration({ scene }: { scene: BrandScenePreset }) {
         </div>
       ) : null}
     </div>
+  );
+}
+
+/** The export's brand canvas layers, drawn over a `width`×`height` canvas
+ *  that covers the element (the same viewport-relative geometry). */
+export function BrandDecorationLayers({
+  layers,
+  width,
+  height,
+  fontFamily = "'JetBrains Mono',ui-monospace,monospace",
+}: {
+  layers: readonly BrandDecorationLayer[];
+  width: number;
+  height: number;
+  fontFamily?: string;
+}) {
+  const id = `brand-layer-${useId().replaceAll(":", "")}`;
+  return (
+    <svg
+      aria-hidden
+      data-testid="preview-brand-layers"
+      className="pointer-events-none absolute inset-0 z-0 size-full"
+      viewBox={`0 0 ${width} ${height}`}
+      preserveAspectRatio="xMidYMid slice"
+      // Markup comes from preset constants, never user input.
+      dangerouslySetInnerHTML={{
+        __html: renderBrandLayers(layers, { left: 0, top: 0, width, height }, fontFamily, id),
+      }}
+    />
   );
 }

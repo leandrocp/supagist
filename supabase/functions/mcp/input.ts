@@ -72,7 +72,9 @@ export const renderInput = z
     outerPadding: z.literal(EXPORT_OUTER_PADDING_VALUES).optional(),
     innerPadding: z.literal(EXPORT_INNER_PADDING_VALUES).optional(),
     cornerRadius: z.literal(EXPORT_CORNER_RADIUS_VALUES).optional(),
-    windowDecoration: z.enum(["macos", "macos-subtle", "windows", "minimal", "none"]).optional(),
+    windowDecoration: z
+      .enum(["macos", "macos-subtle", "windows", "minimal", "none", "lumis", "markdown"])
+      .optional(),
     lineNumbers: z.boolean().optional(),
     wordDiff: z
       .boolean()

@@ -22,8 +22,17 @@ import {
   EXPORT_GUTTER_WIDTH,
   EXPORT_INNER_PADDING,
   EXPORT_LINE_NUM_WIDTH,
+  LUMIS_HEADER,
+  LUMIS_HEADER_DASHES,
+  MARKDOWN_HEADER,
+  brandHeaderRuns,
+  brandHeaderScale,
+  exportHeaderHeight,
   exportLineHeightForFontSize,
+  isBrandHeaderDecoration,
   normalizeExportFontSize,
+  readableOnFill,
+  type BrandHeaderRun,
   type WindowDecoration,
 } from "@/lib/export-utils";
 
@@ -536,6 +545,112 @@ export function InlineCodeBlock({
   }
   const cardFill = brandFrame?.cardFill ?? c.bg;
 
+  // `lumis` / `markdown` bars mirror the export's renderBrandHeader.
+  const brandHeader = isBrandHeaderDecoration(windowDecoration) ? windowDecoration : null;
+  const renderBrandWindowHeader = (decoration: "lumis" | "markdown") => {
+    const s = brandHeaderScale(codeFontSize);
+    const runs = brandHeaderRuns(
+      decoration,
+      brandFrame,
+      resolvedHeader,
+      filename,
+      language,
+      readableOnFill(cardFill),
+    );
+    const runStyle = (run: BrandHeaderRun, size: number): React.CSSProperties => ({
+      color: run.color,
+      opacity: run.opacity,
+      fontWeight: run.weight,
+      fontSize: size * s,
+    });
+    const style: React.CSSProperties = {
+      height: exportHeaderHeight(decoration, codeFontSize, brandFrame),
+      backgroundColor: brandFrame?.headerFill ?? cardFill,
+      borderColor: brandFrame?.headerBorder ?? brandFrame?.cardBorder?.color ?? c.border,
+      fontVariantLigatures: "none",
+    };
+    if (decoration === "lumis") {
+      const { padX, markGap, filenameSize, labelSize, labelGap, dash } = LUMIS_HEADER;
+      const mark = brandFrame?.headerMark;
+      return (
+        <div
+          data-testid="lumis-window-header"
+          className="flex items-center justify-between gap-4 border-b whitespace-pre"
+          style={{ ...style, paddingInline: padX * s }}
+        >
+          <div className="flex min-w-0 items-center" style={{ gap: markGap * s }}>
+            {mark ? (
+              <span
+                aria-hidden
+                data-testid="lumis-window-mark"
+                className="shrink-0 bg-contain bg-center bg-no-repeat"
+                style={{
+                  width: mark.size * s,
+                  height: mark.size * s,
+                  backgroundImage: `url(${mark.src})`,
+                }}
+              />
+            ) : null}
+            {runs.filename ? (
+              <span className="truncate" style={runStyle(runs.filename, filenameSize)}>
+                {runs.filename.text}
+              </span>
+            ) : null}
+          </div>
+          <div className="flex shrink-0 items-center" style={{ gap: labelGap * s }}>
+            {runs.language ? (
+              <span style={runStyle(runs.language, labelSize)}>{runs.language.text}</span>
+            ) : null}
+            <span aria-hidden className="flex" style={{ gap: dash.gap * s }}>
+              {LUMIS_HEADER_DASHES.map((color) => (
+                <span
+                  key={color}
+                  data-testid="lumis-window-dash"
+                  style={{
+                    width: dash.width * s,
+                    height: dash.height * s,
+                    borderRadius: (dash.height / 2) * s,
+                    backgroundColor: color,
+                  }}
+                />
+              ))}
+            </span>
+          </div>
+        </div>
+      );
+    }
+    const { padX, fontSize: size, gap, controls } = MARKDOWN_HEADER;
+    const muted = runs.language ?? {
+      text: "",
+      color: brandFrame?.languageLabel?.color ?? readableOnFill(cardFill),
+      opacity: brandFrame?.languageLabel ? (brandFrame.languageLabel.opacity ?? 1) : 0.6,
+      weight: 400,
+    };
+    return (
+      <div
+        data-testid="markdown-window-header"
+        className="flex items-center justify-between gap-4 border-b whitespace-pre"
+        style={{ ...style, paddingInline: padX * s }}
+      >
+        <div className="flex min-w-0 items-center" style={{ gap: gap * s }}>
+          {runs.filename ? (
+            <span className="truncate" style={runStyle(runs.filename, size)}>
+              {runs.filename.text}
+            </span>
+          ) : null}
+          {runs.language ? (
+            <span className="shrink-0" style={runStyle(runs.language, size)}>
+              {runs.language.text}
+            </span>
+          ) : null}
+        </div>
+        <span aria-hidden className="shrink-0" style={runStyle({ ...muted, weight: 400 }, size)}>
+          {controls}
+        </span>
+      </div>
+    );
+  };
+
   return (
     <div
       className={cn("overflow-hidden text-sm", className)}
@@ -546,7 +661,9 @@ export function InlineCodeBlock({
       }}
     >
       {showWindowHeader ? (
-        showBrandHeader ? (
+        brandHeader ? (
+          renderBrandWindowHeader(brandHeader)
+        ) : showBrandHeader ? (
           <div
             data-testid="brand-header-strip"
             className="grid h-9 grid-cols-3 items-center gap-2 border-b px-4 text-xs"

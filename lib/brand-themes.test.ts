@@ -6,10 +6,18 @@ import {
   isBrandThemeId,
 } from "./brand-themes";
 
+// ray.so partner themes; Lumis and MDEx themes back their brand presets.
+const RAYSO_BRANDS = new Set(["supabase", "vercel", "tailwind", "resend", "stripe"]);
+
 describe("BRAND_THEMES registry", () => {
-  it("includes all 5 brands", () => {
+  it("includes the 5 ray.so brands plus the Lumis and MDEx preset themes", () => {
     const brands = new Set(BRAND_THEMES.map((t) => t.brand));
-    expect(brands).toEqual(new Set(["supabase", "vercel", "tailwind", "resend", "stripe"]));
+    expect(brands).toEqual(new Set([...RAYSO_BRANDS, "lumis", "mdex"]));
+    expect(BRAND_THEMES.filter((t) => !RAYSO_BRANDS.has(t.brand)).map((t) => t.id)).toEqual([
+      "lumis-paper",
+      "lumis-dusk",
+      "mdex-paper",
+    ]);
   });
 
   it("ships light + dark for every brand except Stripe", () => {
@@ -30,8 +38,8 @@ describe("BRAND_THEMES registry", () => {
     expect(new Set(ids).size).toBe(ids.length);
   });
 
-  it("ids follow the `<brand>-<appearance>` pattern", () => {
-    for (const t of BRAND_THEMES) {
+  it("ray.so theme ids follow the `<brand>-<appearance>` pattern", () => {
+    for (const t of BRAND_THEMES.filter((theme) => RAYSO_BRANDS.has(theme.brand))) {
       expect(t.id).toBe(`${t.brand}-${t.appearance}`);
     }
   });
@@ -85,5 +93,37 @@ describe("buildLumisThemeFromBrand", () => {
     const brand = getBrandTheme("supabase-light")!;
     const theme = buildLumisThemeFromBrand(brand);
     expect(theme.highlights?.["markup.heading"]?.bold).toBe(true);
+  });
+});
+
+describe("Lumis brand themes", () => {
+  // Hue in degrees, or null for greys, from the sRGB channels.
+  function hue(hex: string): number | null {
+    const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255);
+    const max = Math.max(r, g, b);
+    const chroma = max - Math.min(r, g, b);
+    if (chroma < 0.08) return null;
+    const h =
+      max === r
+        ? ((g - b) / chroma + 6) % 6
+        : max === g
+          ? (b - r) / chroma + 2
+          : (r - g) / chroma + 4;
+    return h * 60;
+  }
+
+  it("keeps every token out of the green and cyan hues (75°–200°)", () => {
+    // Guard the hue helper itself: green and cyan land in the band, the sun does not.
+    expect(hue("#358423")).toBeGreaterThan(75);
+    expect(hue("#11efe3")).toBeLessThan(200);
+    expect(hue("#ffc23d")).toBeLessThan(75);
+
+    for (const id of ["lumis-paper", "lumis-dusk"]) {
+      for (const [key, color] of Object.entries(getBrandTheme(id)!.palette)) {
+        const h = hue(color);
+        if (h === null) continue;
+        expect(h >= 75 && h <= 200, `${id}.${key} ${color} hue ${h.toFixed(0)}`).toBe(false);
+      }
+    }
   });
 });

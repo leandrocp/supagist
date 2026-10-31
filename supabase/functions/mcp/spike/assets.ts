@@ -11,6 +11,8 @@ const images = new Map([
   ["m0:avatar-2", "avatar-2.png"],
   ["/brands/tailwind-beams.png", "tailwind-beams.png"],
   ["/brands/resend-dark.png", "resend-dark.png"],
+  ["/brands/lumis-icon-light.svg", "lumis-icon-light.svg"],
+  ["/brands/lumis-icon-dark.svg", "lumis-icon-dark.svg"],
 ]);
 const allowed = new Set([...fonts.values(), ...images.values()]);
 
@@ -44,5 +46,6 @@ export async function loadFontBase64(file: string): Promise<string> {
 export async function loadImageDataUrl(url: string): Promise<string> {
   const name = images.get(url);
   if (!name) throw new Error("Renderer only accepts bundled image paths");
-  return `data:image/png;base64,${base64(await assetBytes(name))}`;
+  const type = name.endsWith(".svg") ? "image/svg+xml" : "image/png";
+  return `data:${type};base64,${base64(await assetBytes(name))}`;
 }

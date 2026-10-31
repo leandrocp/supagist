@@ -17,6 +17,7 @@ import {
   type BrandPreset,
 } from "@/lib/brand-presets";
 import { createBrandCanvasBackground } from "@/lib/brand-scenes";
+import { BrandDecorationLayers } from "@/components/brand-scene-decoration";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -44,6 +45,17 @@ function BrandLogo({ preset, className }: { preset: BrandPreset; className?: str
     );
   }
 
+  if ("logoFullColor" in preset && preset.logoFullColor) {
+    return (
+      <span
+        aria-hidden
+        data-testid="brand-logo-full-color"
+        className={cn("relative z-10 size-4 shrink-0 bg-contain bg-center bg-no-repeat", className)}
+        style={{ backgroundImage: `url(${logoUrl})` }}
+      />
+    );
+  }
+
   return (
     <span
       aria-hidden
@@ -63,7 +75,20 @@ function BrandLogo({ preset, className }: { preset: BrandPreset; className?: str
   );
 }
 
+function BrandSwatchLayers({ preset }: { preset: BrandPreset }) {
+  return "decoration" in preset.background ? (
+    <BrandDecorationLayers
+      // The code field is unreadable at swatch size.
+      layers={preset.background.decoration.layers.filter((layer) => layer.kind !== "code-field")}
+      width={1600}
+      height={900}
+    />
+  ) : null;
+}
+
 function brandPreviewStyle(preset: BrandPreset): React.CSSProperties {
+  // Layered brands paint their layers over the flat canvas (BrandSwatchLayers).
+  if ("decoration" in preset.background) return { backgroundColor: preset.background.from };
   const scene = resolveBrandScene(preset);
   return {
     backgroundImage: createBrandCanvasBackground(
@@ -97,9 +122,10 @@ export function BrandPicker({ value, onChange, className }: Props) {
         >
           {active ? (
             <span
-              className="flex size-6 shrink-0 items-center justify-center rounded-md border border-white/10"
+              className="relative flex size-6 shrink-0 items-center justify-center overflow-hidden rounded-md border border-white/10"
               style={brandPreviewStyle(active)}
             >
+              <BrandSwatchLayers preset={active} />
               <BrandLogo preset={active} />
             </span>
           ) : (
@@ -139,9 +165,10 @@ export function BrandPicker({ value, onChange, className }: Props) {
                 className="h-16 min-w-0 cursor-pointer gap-2 rounded-md border border-transparent px-2 data-[selected=true]:border-border data-[selected=true]:bg-surface-200"
               >
                 <span
-                  className="flex size-9 shrink-0 items-center justify-center rounded-md border border-white/10 shadow-xs"
+                  className="relative flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-md border border-white/10 shadow-xs"
                   style={brandPreviewStyle(preset)}
                 >
+                  <BrandSwatchLayers preset={preset} />
                   <BrandLogo preset={preset} />
                 </span>
                 <span className="min-w-0 truncate text-xs font-medium">{preset.name}</span>

@@ -20,6 +20,10 @@ These marks identify third-party Brand presets and do not imply endorsement.
   silhouettes, because the picker paints them as CSS masks. Flue's solid
   field is inverted into a knock-out so the staggered squares stay visible;
   RivetKit's opaque backing plate is dropped for the same reason.
+- Lumis (`lumis-icon-light.svg`, `lumis-icon-dark.svg`) and MDEx
+  (`mdex-tile.svg`) are the projects' own marks, from the Supagist brand
+  preset design package (v5.2). They are multi-colour, so the picker paints
+  them as images rather than masks.
 - The `plz` preset ships **no** mark. The project has no logo to source, and
   drawing one would put an invented glyph in front of users as if it were the
   project's identity. The picker falls back to an accent dot.

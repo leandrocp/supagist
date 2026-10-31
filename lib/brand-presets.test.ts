@@ -1,8 +1,10 @@
+import { createHash } from "node:crypto";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { availableThemes } from "@lumis-sh/lumis/client";
 import { describe, expect, it } from "vitest";
 import { DEFAULT_FOOTER_SETTINGS, DEFAULT_HEADER_SETTINGS } from "./export-metadata";
+import { buildLumisThemeFromBrand, getBrandTheme, isBrandThemeId } from "./brand-themes";
 import {
   BRAND_PRESETS,
   applyBrandPreset,
@@ -28,7 +30,7 @@ const BASE_APPEARANCE = {
 
 describe("BRAND_PRESETS", () => {
   it("ships the complete social-developer launch catalog", () => {
-    expect(BRAND_PRESETS).toHaveLength(29);
+    expect(BRAND_PRESETS).toHaveLength(33);
     expect(BRAND_PRESETS.map((preset) => preset.name)).toEqual(
       expect.arrayContaining([
         "Supabase",
@@ -46,6 +48,10 @@ describe("BRAND_PRESETS", () => {
         "Files SDK",
         "RivetKit",
         "plz",
+        "Lumis",
+        "Lumis Dark",
+        "MDEx Purple",
+        "MDEx Purple Dark",
       ]),
     );
   });
@@ -71,15 +77,24 @@ describe("BRAND_PRESETS", () => {
     }
   });
 
-  it("maps every brand to an official Lumis theme", () => {
+  it("maps every brand to an official Lumis theme, or its own registry theme", () => {
     const officialThemes = new Set(availableThemes().map((theme) => theme.name));
 
     for (const preset of BRAND_PRESETS) {
-      expect(
-        officialThemes.has(preset.settings.theme),
-        `${preset.name}: ${preset.settings.theme}`,
-      ).toBe(true);
+      const { theme } = preset.settings;
+      // Only the layered Lumis/MDEx looks ship their own palettes.
+      const known =
+        officialThemes.has(theme) || ("decoration" in preset.background && isBrandThemeId(theme));
+      expect(known, `${preset.name}: ${theme}`).toBe(true);
     }
+  });
+
+  it("leaves the 29 launch presets exactly as they were before Lumis and MDEx", () => {
+    const launch = BRAND_PRESETS.filter((preset) => !NEW_PRESET_IDS.includes(preset.id));
+    // Digest of the 29 presets on main before the Lumis/MDEx presets landed.
+    expect(createHash("sha256").update(JSON.stringify(launch)).digest("hex")).toBe(
+      "f1931dca2bfb10a204ac17774a7e9617cf729e094b8720838c72d57686111358",
+    );
   });
 
   it("migrates legacy synthetic brand themes to official Lumis ids", () => {
@@ -130,7 +145,8 @@ describe("BRAND_PRESETS", () => {
       // than pointing at a file we invented. But when one is declared it has
       // to be a real asset at the conventional path.
       if (!preset.logoUrl) continue;
-      expect(preset.logoUrl).toBe(`/brands/${preset.id}.svg`);
+      // Light/dark pairs share their project's multi-colour marks.
+      if (!("logoFullColor" in preset)) expect(preset.logoUrl).toBe(`/brands/${preset.id}.svg`);
       expect(existsSync(join(process.cwd(), "public", preset.logoUrl))).toBe(true);
     }
   });
@@ -221,6 +237,81 @@ describe("social-screenshot brand reproductions", () => {
       const brand = preset(id);
       expect(brand.background.frame?.cardRadius, id).toBe(brand.settings.cornerRadius);
     }
+  });
+});
+
+const NEW_PRESET_IDS: readonly string[] = [
+  "lumis",
+  "lumis-dark",
+  "mdex-purple",
+  "mdex-purple-dark",
+];
+
+describe("Lumis and MDEx presets", () => {
+  // WCAG 2 relative luminance / contrast ratio, independent of the renderer.
+  const channel = (value: number) => {
+    const c = value / 255;
+    return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+  };
+  const rgb = (hex: string) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
+  const luminance = ([r, g, b]: number[]) =>
+    0.2126 * channel(r!) + 0.7152 * channel(g!) + 0.0722 * channel(b!);
+  const contrast = (fg: number[], bg: string) => {
+    const [a, b] = [luminance(fg), luminance(rgb(bg))].sort((x, y) => y - x);
+    return (a! + 0.05) / (b! + 0.05);
+  };
+  const over = (fg: string, opacity: number, bg: string) =>
+    rgb(fg).map((value, i) => value * opacity + rgb(bg)[i]! * (1 - opacity));
+
+  it("matches the documented contrast of known pairs", () => {
+    expect(contrast(rgb("#5B3FD9"), "#FFFFFF")).toBeCloseTo(6.65, 1);
+    expect(contrast(over("#F7F5F0", 0.62, "#161E3F"), "#161E3F")).toBeCloseTo(6.49, 1);
+    expect(contrast(rgb("#717489"), "#FFFFFF")).toBeCloseTo(4.6, 1);
+  });
+
+  it.each(NEW_PRESET_IDS)("%s keeps every code token and header run at AA (4.5:1)", async (id) => {
+    const preset = getBrandPreset(id)!;
+    const frame = preset.background.frame;
+    const card = frame.cardFill;
+    const brandTheme = getBrandTheme(preset.settings.theme);
+    const highlights = (
+      brandTheme
+        ? buildLumisThemeFromBrand(brandTheme)
+        : (await import(`@lumis-sh/themes/${preset.settings.theme}`)).default
+    ).highlights as Record<string, { fg?: string; bg?: string }>;
+
+    for (const [scope, style] of Object.entries(highlights)) {
+      // Line numbers are off in these presets; badge scopes sit on their own bg.
+      if (!style.fg || scope.startsWith("line_number")) continue;
+      const ratio = contrast(rgb(style.fg), style.bg ?? card);
+      expect(ratio, `${scope} ${style.fg}`).toBeGreaterThanOrEqual(4.5);
+    }
+
+    const strip = "headerFill" in frame ? frame.headerFill : card;
+    for (const run of [frame.filenameLabel, frame.languageLabel]) {
+      const opacity = "opacity" in run ? run.opacity : 1;
+      expect(contrast(over(run.color, opacity, strip), strip), run.color).toBeGreaterThanOrEqual(
+        4.5,
+      );
+    }
+  });
+
+  it("applies 16:9, JetBrains Mono, no ligatures, no footer, and filename metadata", () => {
+    for (const id of NEW_PRESET_IDS) {
+      const { settings } = getBrandPreset(id)!;
+      expect(settings, id).toMatchObject({
+        aspectRatio: "16:9",
+        fontId: "jetbrains",
+        ligatures: false,
+        lineNumbers: false,
+        footer: { enabled: false },
+        header: { showFilename: true, filenamePosition: "left" },
+      });
+      // Existing padding options only; the design's 200px is not one of them.
+      expect([0, 16, 32, 64, 96, 128]).toContain(settings.outerPadding);
+    }
+    expect(getBrandPreset("lumis")?.settings.outerPadding).toBe(128);
+    expect(getBrandPreset("mdex-purple")?.settings.outerPadding).toBe(96);
   });
 });
 

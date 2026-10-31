@@ -17,6 +17,8 @@ const images = {
   "m0:avatar-2": "avatar-2.png",
   "/brands/tailwind-beams.png": "tailwind-beams.png",
   "/brands/resend-dark.png": "resend-dark.png",
+  "/brands/lumis-icon-light.svg": "lumis-icon-light.svg",
+  "/brands/lumis-icon-dark.svg": "lumis-icon-dark.svg",
 };
 
 afterEach(() => vi.unstubAllGlobals());
@@ -39,11 +41,12 @@ describe("Edge asset allowlist", () => {
     expect(embedded.size).toBe(4);
   });
 
-  it("embeds only the two fixed brand PNGs and original M0 avatars", async () => {
+  it("embeds only the fixed brand images and original M0 avatars", async () => {
     vi.stubGlobal("Deno", { readFile });
     for (const [path, name] of Object.entries(images)) {
+      const type = name.endsWith(".svg") ? "image/svg+xml" : "image/png";
       expect(await loadImageDataUrl(path)).toBe(
-        `data:image/png;base64,${readFileSync(new URL(`../assets/${name}`, import.meta.url)).toString("base64")}`,
+        `data:${type};base64,${readFileSync(new URL(`../assets/${name}`, import.meta.url)).toString("base64")}`,
       );
     }
   });
@@ -139,11 +142,16 @@ describe("M0 generated renderer provenance", () => {
         );
     }
     expect(readdirSync(assets).filter((name) => name.endsWith(".wasm"))).toEqual([]);
-    for (const name of Object.values(images))
+    for (const name of Object.values(images).filter((name) => name.endsWith(".png")))
       expect([...readFileSync(new URL(name, assets)).subarray(0, 8)]).toEqual([
         137, 80, 78, 71, 13, 10, 26, 10,
       ]);
-    for (const name of ["tailwind-beams.png", "resend-dark.png"]) {
+    for (const name of [
+      "tailwind-beams.png",
+      "resend-dark.png",
+      "lumis-icon-light.svg",
+      "lumis-icon-dark.svg",
+    ]) {
       expect(manifest[name].source).toBe(`public/brands/${name}`);
       expect(
         readFileSync(new URL(name, assets)).equals(
