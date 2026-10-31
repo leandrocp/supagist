@@ -114,6 +114,13 @@ jobs:
           supabase/functions/mcp/rate-limit_test.ts
           supabase/functions/mcp/server_test.ts
           supabase/functions/mcp/spike/render.deno.ts
+      - run: >-
+          deno test --config supabase/functions/render/deno.json
+          --allow-read --allow-net --allow-env
+          supabase/functions/render/handler_test.ts
+      - run: >-
+          deno check --config supabase/functions/render/deno.json
+          supabase/functions/render/index.ts
 
   mcp-e2e:
     name: MCP Edge Function e2e
@@ -171,6 +178,19 @@ jobs:
         run: supabase start
       - name: Seed local buckets
         run: supabase seed buckets
+      # e2e/cli.test.ts renders through the app's /api routes into this function.
+      - name: Serve the render function
+        run: |
+          nohup supabase functions serve render > "$RUNNER_TEMP/functions.log" 2>&1 &
+          # A PUT gets 405 once the function answers, without using a quota.
+          for _ in $(seq 1 90); do
+            status="$(curl -s -o /dev/null -w '%{http_code}' -X PUT \
+              http://127.0.0.1:54321/functions/v1/render || true)"
+            if [ "$status" = 405 ]; then exit 0; fi
+            sleep 2
+          done
+          cat "$RUNNER_TEMP/functions.log"
+          exit 1
       - name: Export local Supabase env
         run: |
           set -a
@@ -186,6 +206,9 @@ jobs:
       - run: npm run test:e2e:build
         env:
           PLAYWRIGHT_BASE_URL: http://localhost:3000
+      - name: Function logs
+        if: failure()
+        run: cat "$RUNNER_TEMP/functions.log"
       - uses: actions/upload-artifact@v7.0.2
         if: failure()
         with:

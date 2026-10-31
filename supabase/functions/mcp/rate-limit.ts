@@ -8,7 +8,7 @@ export function rateLimitMessage(retryAfter: number) {
 }
 
 // Verified auth.users ID for leandro@leandro.io. Never match client-supplied identity.
-const UNLIMITED_USER_ID = "288417c7-4c03-4277-988f-24f3c2fc814b";
+export const UNLIMITED_USER_ID = "288417c7-4c03-4277-988f-24f3c2fc814b";
 
 export const RATE_LIMITS = {
   user: { minute: 5, day: 100 },

@@ -66,6 +66,9 @@ export const appearanceOptions = {
   notes:
     "brand selects a complete preset; explicit fields override it. background is only a canvas. system font uses portable JetBrains Mono. PNG conversion and 2x/4x/6x scale are local, not MCP. Reactions/comments are supplied render data, not published collaboration. aspectRatio 16:9 outputs a 1600x900 canvas with the card centered; outerPadding is the minimum margin. ligatures false splits operator ligatures such as |> into separate characters.",
 };
+/** Input the renderer cannot draw, as opposed to an internal failure. */
+export class RenderInputError extends Error {}
+
 export type RenderResult = {
   svg: string;
   bytes: Uint8Array;
@@ -98,8 +101,9 @@ export async function renderSnippet(rawInput: RenderInput): Promise<RenderResult
     settings && "ligatures" in settings ? (settings.ligatures as boolean) : true;
   const theme = input.theme ?? settings?.theme ?? "github_dark";
   const language = input.language ?? inferLanguage(input.filename, input.code);
-  if (!supportedLanguages.includes(language)) throw new Error(`Unsupported language: ${language}`);
-  if (!supportedThemes.includes(theme)) throw new Error(`Unsupported theme: ${theme}`);
+  if (!supportedLanguages.includes(language))
+    throw new RenderInputError(`Unsupported language: ${language}`);
+  if (!supportedThemes.includes(theme)) throw new RenderInputError(`Unsupported theme: ${theme}`);
   const showComments = input.showComments ?? Boolean(input.comments);
   const visualRows = input.code
     .split("\n")
@@ -113,7 +117,7 @@ export async function renderSnippet(rawInput: RenderInput): Promise<RenderResult
       0,
     );
   if (visualRows > 30)
-    throw new Error(
+    throw new RenderInputError(
       "Export exceeds 30 visual rows after wrapping/comments; choose a shorter excerpt or split the image",
     );
   const cursor = parserEventCursor();

@@ -51,7 +51,8 @@ const nextConfig: NextConfig = {
   // Lumis's Node entry loads its native addon with a runtime `require`, which
   // bundlers cannot place; Node must load the package itself
   // (leandrocp/lumis#1589).
-  serverExternalPackages: ["@lumis-sh/lumis"],
+  // resvg (PNG for /api/render) is a native addon too.
+  serverExternalPackages: ["@lumis-sh/lumis", "@resvg/resvg-js"],
   // It also finds the installed @lumis-sh/wasm-* parsers at runtime, from the
   // project directory, which file tracing cannot follow. Without these the
   // deployed saved view would fall back to plain text for every snippet.

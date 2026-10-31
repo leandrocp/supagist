@@ -119,3 +119,10 @@ enabled = true
 verify_jwt = false
 entrypoint = "./functions/mcp/index.ts"
 static_files = ["./functions/mcp/assets/*"]
+
+# Public CLI render API (#7). Tokens are optional; handler.ts verifies them.
+[functions.render]
+enabled = true
+verify_jwt = false
+entrypoint = "./functions/render/index.ts"
+static_files = ["./functions/mcp/assets/*"]
