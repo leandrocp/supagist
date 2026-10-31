@@ -49,8 +49,10 @@ The function is live and intentionally stays live. Main pushes deploy it via
 Supabase's GitHub integration. The original spike conclusions below are retained
 as historical measurements, not instructions to remove the service.
 
-Every authenticated MCP HTTP request consumes the IP quota (20/minute,
-300/day) before the SDK dispatches anything. Each `tools/call` also consumes the
+Every authenticated MCP HTTP request consumes the IP backstop (20/minute,
+300/day) before the SDK dispatches anything. The backstop is keyed on IP _and_
+verified user, so users sharing an egress IP (for example Google's Connected
+Apps traffic) never throttle each other. Each `tools/call` also consumes the
 user quota (5/minute, 100/day); connection setup (initialize, notifications,
 lists, GET) does not, so many clients on one account cannot exhaust it before
 their first tool call. `render_snippet` also consumes a separate user quota
@@ -59,25 +61,27 @@ their first tool call. `render_snippet` also consumes a separate user quota
 `ctx.supabaseAdmin`; no schema, function, or grant change is required.
 
 The sole exception is leandro@leandro.io, matched by its verified auth user ID
-in `rate-limit.ts`: that account bypasses all user, render, and IP quota checks
-and does not consume shared IP quota. Authentication, input validation, and
-batch rejection still apply. Everyone else's limits are unchanged. User quotas
+in `rate-limit.ts`: that account bypasses all user, render, and IP quota checks.
+Authentication, input validation, and batch rejection still apply. Everyone else's limits are unchanged. User quotas
 are shared across all connections for the same account, not reset when a new
 client connects.
 
 Denied attempts also count. The RPC uses first-request-relative windows and
 returns only a boolean, so `Retry-After` conservatively reports the full denied
-window: 60 seconds or 86,400 seconds (the longer when both fail). HTTP 429 tool
-responses contain a JSON-RPC result with `isError: true` and exactly
-`Rate limit reached. Need more? Contact supagist@leandro.io`. Some clients surface
-HTTP 429 before displaying the MCP body. RPC outages fail closed with 503.
+window: 60 seconds or 86,400 seconds (the longer when both fail). HTTP 429
+responses contain a JSON-RPC error with code `-32300` (`USER_RATE_LIMITED`, per
+Google's Connected Apps integration standards) and the message
+`Rate limit reached. Try again in up to 1 minute. Need more? Contact supagist@leandro.io`
+(`24 hours` when a daily quota is exhausted). Some clients surface HTTP 429
+before displaying the MCP body. RPC outages fail closed with 503.
 
 The IP key uses the first `x-forwarded-for` hop, then `cf-connecting-ip`, then
 `x-real-ip`; absent headers share an `unknown` bucket. This backstop depends on
 the gateway supplying trustworthy headers; verified user quotas remain the
 primary control. OAuth discovery, preflight, and rejected authentication never
-dispatch tools and do not consume signed-in quotas. Legacy JSON-RPC batches are
-rejected with 400 to prevent many renders bypassing the per-tool quota.
+dispatch tools, never reach the database, and are not rate limited here. Legacy
+JSON-RPC batches are rejected with 400 to prevent many renders bypassing the
+per-tool quota.
 
 ### Connect with OAuth
 

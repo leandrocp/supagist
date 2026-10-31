@@ -1,4 +1,11 @@
-export const RATE_LIMIT_MESSAGE = "Rate limit reached. Need more? Contact supagist@leandro.io";
+// Google Connected Apps: rate limits are terminal JSON-RPC errors, not tool results.
+// https://developers.google.com/connected-apps/mcp/server-optimization#mcp_error_handling
+export const USER_RATE_LIMITED = -32300;
+
+export function rateLimitMessage(retryAfter: number) {
+  const wait = retryAfter >= RATE_LIMITS.windows.day ? "24 hours" : "1 minute";
+  return `Rate limit reached. Try again in up to ${wait}. Need more? Contact supagist@leandro.io`;
+}
 
 // Verified auth.users ID for leandro@leandro.io. Never match client-supplied identity.
 const UNLIMITED_USER_ID = "288417c7-4c03-4277-988f-24f3c2fc814b";
@@ -42,7 +49,10 @@ export async function enforceRateLimits(
     userId === UNLIMITED_USER_ID
       ? []
       : [
-          { key: `mcp:ip:${ip}`, limits: RATE_LIMITS.ip },
+          // Every caller here is a verified user. Scope the IP backstop to that
+          // user so people sharing an egress IP (for example Google's) never
+          // throttle each other; it still bounds setup traffic per account.
+          { key: `mcp:ip:${ip}:user:${userId}`, limits: RATE_LIMITS.ip },
           // Connection setup (initialize, notifications, lists, GET) is shared by
           // every client on an account; charging it here starved first tool calls.
           ...(toolCall ? [{ key: `mcp:user:${userId}`, limits: RATE_LIMITS.user }] : []),
@@ -91,13 +101,11 @@ export async function enforceRateLimits(
     const id =
       typeof message?.id === "string" || typeof message?.id === "number" ? message.id : null;
     return Response.json(
-      toolCall
-        ? {
-            jsonrpc: "2.0",
-            id,
-            result: { isError: true, content: [{ type: "text", text: RATE_LIMIT_MESSAGE }] },
-          }
-        : { jsonrpc: "2.0", id, error: { code: -32000, message: RATE_LIMIT_MESSAGE } },
+      {
+        jsonrpc: "2.0",
+        id,
+        error: { code: USER_RATE_LIMITED, message: rateLimitMessage(retryAfter) },
+      },
       {
         status: 429,
         // The existing RPC exposes no start/reset time. A full window is a

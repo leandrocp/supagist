@@ -1,7 +1,10 @@
 import { strict as assert } from "node:assert";
 import { enforceRateLimits } from "./rate-limit.ts";
 
-const message = "Rate limit reached. Need more? Contact supagist@leandro.io";
+const minuteMessage =
+  "Rate limit reached. Try again in up to 1 minute. Need more? Contact supagist@leandro.io";
+const dayMessage =
+  "Rate limit reached. Try again in up to 24 hours. Need more? Contact supagist@leandro.io";
 const ownerId = "288417c7-4c03-4277-988f-24f3c2fc814b";
 
 // Fake only the I/O boundary; model the existing RPC's first-use windows and
@@ -37,22 +40,23 @@ function request(tool = "list_options", headers = { "x-forwarded-for": "192.0.2.
   });
 }
 
-async function limited(response: Response | null, retry: number) {
+// Google Connected Apps requires USER_RATE_LIMITED (-32300) as a JSON-RPC error.
+async function limited(response: Response | null, retry: number, id: unknown = "request-7") {
   assert.ok(response);
   assert.equal(response.status, 429);
   assert.equal(response.headers.get("Retry-After"), String(retry));
   assert.deepEqual(await response.json(), {
     jsonrpc: "2.0",
-    id: "request-7",
-    result: { isError: true, content: [{ type: "text", text: message }] },
+    id,
+    error: { code: -32300, message: retry === 60 ? minuteMessage : dayMessage },
   });
 }
 
 for (const [key, cap, retry, tool] of [
   ["mcp:user:alice:m", 5, 60, "list_options"],
   ["mcp:user:alice:d", 100, 86400, "list_options"],
-  ["mcp:ip:192.0.2.1:m", 20, 60, "list_options"],
-  ["mcp:ip:192.0.2.1:d", 300, 86400, "list_options"],
+  ["mcp:ip:192.0.2.1:user:alice:m", 20, 60, "list_options"],
+  ["mcp:ip:192.0.2.1:user:alice:d", 300, 86400, "list_options"],
   ["mcp:render:alice:m", 3, 60, "render_snippet"],
   ["mcp:render:alice:d", 20, 86400, "render_snippet"],
 ] as const) {
@@ -68,7 +72,7 @@ for (const [key, cap, retry, tool] of [
   });
 }
 
-Deno.test("user quotas follow users across IPs; IP quotas aggregate different users", async () => {
+Deno.test("user quotas follow users across IPs; IP backstop is per user on that IP", async () => {
   const db = fakeRpc();
   db.seed("mcp:user:alice:m", 5);
   await limited(
@@ -80,7 +84,7 @@ Deno.test("user quotas follow users across IPs; IP quotas aggregate different us
     60,
   );
   assert.equal(await enforceRateLimits(request(), "bob", db), null);
-  db.seed("mcp:ip:192.0.2.1:m", 20);
+  db.seed("mcp:ip:192.0.2.1:user:charlie:m", 20);
   await limited(await enforceRateLimits(request(), "charlie", db), 60);
   assert.equal(
     await enforceRateLimits(
@@ -90,6 +94,23 @@ Deno.test("user quotas follow users across IPs; IP quotas aggregate different us
     ),
     null,
   );
+});
+
+Deno.test("many users behind one shared egress IP never throttle each other", async () => {
+  const db = fakeRpc();
+  // 40 users each send the setup messages plus one tool call from one Google IP:
+  // 160 requests, eight times the 20/minute backstop if it were shared.
+  for (let user = 0; user < 40; user++) {
+    for (const body of setupBodies)
+      if (body) assert.equal(await enforceRateLimits(setupRequest(body), `user-${user}`, db), null);
+    assert.equal(await enforceRateLimits(request(), `user-${user}`, db), null);
+  }
+  // One account flooding setup traffic from that IP is still bounded.
+  for (let i = 0; i < 20; i++)
+    assert.equal(await enforceRateLimits(setupRequest(setupBodies[0]), "flooder", db), null);
+  const denied = await enforceRateLimits(setupRequest(setupBodies[0]), "flooder", db);
+  await limited(denied, 60, 5);
+  assert.equal(await enforceRateLimits(request(), "user-0", db), null);
 });
 
 Deno.test("render quota is tighter, does not block other tools, and still consumes global quotas", async () => {
@@ -114,7 +135,7 @@ Deno.test("first forwarded hop takes precedence, then Cloudflare, then real-IP, 
     {},
   ]) {
     const db = fakeRpc();
-    db.seed(`mcp:ip:${Object.keys(headers).length ? "192.0.2.1" : "unknown"}:m`, 20);
+    db.seed(`mcp:ip:${Object.keys(headers).length ? "192.0.2.1" : "unknown"}:user:alice:m`, 20);
     await limited(
       await enforceRateLimits(
         new Request(request(), { headers: headers as HeadersInit }),
@@ -145,10 +166,10 @@ Deno.test("initialize, list, notifications, malformed bodies, and GET consume IP
     db.seed("mcp:user:alice:m", 5);
     db.seed("mcp:user:alice:d", 100);
     assert.equal(await enforceRateLimits(setupRequest(body), "alice", db), null);
-    db.seed("mcp:ip:192.0.2.1:m", 20);
+    db.seed("mcp:ip:192.0.2.1:user:alice:m", 20);
     const response = await enforceRateLimits(setupRequest(body), "alice", db);
     assert.equal(response?.status, 429);
-    assert.equal((await response!.json()).error.message, message);
+    assert.deepEqual((await response!.json()).error, { code: -32300, message: minuteMessage });
   }
 });
 
@@ -173,7 +194,7 @@ Deno.test("many fresh connections on one account do not limit the first tool cal
 Deno.test("daily denial wins Retry-After when multiple windows are exhausted", async () => {
   const db = fakeRpc();
   db.seed("mcp:user:alice:m", 5);
-  db.seed("mcp:ip:192.0.2.1:d", 300);
+  db.seed("mcp:ip:192.0.2.1:user:alice:d", 300);
   await limited(await enforceRateLimits(request(), "alice", db), 86400);
 });
 
@@ -197,7 +218,12 @@ Deno.test("allowed request body is preserved for MCP dispatch", async () => {
 
 Deno.test("owner bypasses exhausted user, render, and IP quotas without charging other users", async () => {
   const db = fakeRpc();
-  for (const key of [`mcp:user:${ownerId}`, `mcp:render:${ownerId}`, "mcp:ip:192.0.2.1"])
+  for (const key of [
+    `mcp:user:${ownerId}`,
+    `mcp:render:${ownerId}`,
+    `mcp:ip:192.0.2.1:user:${ownerId}`,
+    "mcp:ip:192.0.2.1:user:alice",
+  ])
     for (const window of ["m", "d"]) db.seed(`${key}:${window}`, 1000);
   for (const tool of ["list_options", "render_snippet"]) {
     const req = request(tool);
@@ -207,10 +233,10 @@ Deno.test("owner bypasses exhausted user, render, and IP quotas without charging
   await limited(await enforceRateLimits(request(), "alice", db), 86400);
 
   const sharedIp = fakeRpc();
-  sharedIp.seed("mcp:ip:192.0.2.1:m", 19);
+  sharedIp.seed("mcp:ip:192.0.2.1:user:alice:m", 19);
   assert.equal(await enforceRateLimits(request(), ownerId, sharedIp), null);
   assert.equal(await enforceRateLimits(request(), "alice", sharedIp), null);
-  await limited(await enforceRateLimits(request(), "bob", sharedIp), 60);
+  await limited(await enforceRateLimits(request(), "alice", sharedIp), 60);
 });
 
 Deno.test("owner connection setup cannot limit its first tool call; fresh non-owner works under quota", async () => {

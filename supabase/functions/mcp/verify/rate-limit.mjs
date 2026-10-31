@@ -131,9 +131,10 @@ try {
   });
   assert.equal(denied.response.status, 429);
   assert.equal(denied.response.headers.get("retry-after"), "60");
-  assert.deepEqual(denied.data.result, {
-    isError: true,
-    content: [{ type: "text", text: "Rate limit reached. Need more? Contact supagist@leandro.io" }],
+  assert.deepEqual(denied.data.error, {
+    code: -32300,
+    message:
+      "Rate limit reached. Try again in up to 1 minute. Need more? Contact supagist@leandro.io",
   });
   success(await call("tools/list"));
   success(await call("tools/call", { name: "list_options", arguments: {} }));

@@ -144,9 +144,10 @@ the missing capability instead of falling back to server-side PNG.
 
 - Signed-in user: 5 tool calls/minute, 100/day.
 - Rendering: 3 attempts/minute, 20/day, including invalid render attempts.
-- IP backstop: 20 requests/minute, 300/day, including connection setup.
-- Denied attempts also count. On HTTP 429 or the tool message
-  `Rate limit reached. Need more? Contact supagist@leandro.io`, stop issuing calls.
+- Per-account backstop for each IP: 20 requests/minute, 300/day, including
+  connection setup.
+- Denied attempts also count. On HTTP 429 or MCP error `-32300` (message starts
+  `Rate limit reached.`), stop issuing calls.
   Respect `Retry-After` if the client exposes it. If hidden, do not assume the
   minute quota caused the rejection: daily quotas may be exhausted. Do not retry
   in a loop, switch accounts/IPs, or split requests to evade quotas.
