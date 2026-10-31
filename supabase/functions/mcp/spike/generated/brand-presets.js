@@ -19,8 +19,8 @@ export {
  *  name) and `{lang}` (language id). */
 
 /** Canvas layers painted behind the card, positioned on the visible (16:9)
- *  canvas: x and y are fractions of its width and height, radii and sizes
- *  are fractions of, or design px on, a 1600px-wide canvas. */
+ *  canvas: x, y and heights are fractions of its width and height, sizes
+ *  are design px on a 1600px-wide canvas. */
 
 const darkFrame = (fill, border, radius = 8) => ({
   showDots: false,
@@ -230,19 +230,20 @@ const PLZ_SCENE = signatureScene("dark", "#2DD4BF", "#5EEAD4", {
   },
 });
 
-// Lumis and MDEx brand looks (design spec v5.2). Layers sit on a 1600×900
-// canvas: the horizon glow and sun at (1190, 640), the glow r 640, sun r 430.
-const LUMIS_GLOW_DARK = [
-  { offset: 0, color: "#FF8A4C", opacity: 0.44 },
-  { offset: 0.38, color: "#FF6F6F", opacity: 0.21 },
-  { offset: 0.66, color: "#FF5FAE", opacity: 0.09 },
-  { offset: 1, color: "#FF5FAE", opacity: 0 },
+// Lumis and MDEx brand looks (design spec v5.2; Lumis backgrounds v5.3 C,
+// "band horizon"). Lumis layers sit on a 1600×900 canvas: the badge sky, the
+// sun's bands as a horizon from y 460 to 865, and the badge tree in the right
+// gutter at 3.6× with its hill's left end at (1143.6, 851.8).
+const LUMIS_SKY_DARK = [
+  { offset: 0, color: "#1B1847" },
+  { offset: 0.5, color: "#36257A" },
+  { offset: 0.82, color: "#6A3290" },
+  { offset: 1, color: "#8A3B8E" },
 ];
-const LUMIS_GLOW_LIGHT = [
-  { offset: 0, color: "#FFC23D", opacity: 0.4 },
-  { offset: 0.4, color: "#FF7A45", opacity: 0.18 },
-  { offset: 0.68, color: "#FF5FAE", opacity: 0.07 },
-  { offset: 1, color: "#FF5FAE", opacity: 0 },
+const LUMIS_SKY_LIGHT = [
+  { offset: 0, color: "#F7F5F0" },
+  { offset: 0.55, color: "#FBEDE6" },
+  { offset: 1, color: "#FCDCCB" },
 ];
 
 function lumisLook(dark) {
@@ -264,19 +265,14 @@ function lumisLook(dark) {
       brandId: dark ? "lumis-dark" : "lumis",
       decoration: {
         layers: [
-          {
-            kind: "radial-glow",
-            cx: 0.744,
-            cy: 0.711,
-            r: 0.4,
-            stops: dark ? LUMIS_GLOW_DARK : LUMIS_GLOW_LIGHT,
-          },
+          { kind: "linear-gradient", stops: dark ? LUMIS_SKY_DARK : LUMIS_SKY_LIGHT },
           {
             kind: "code-field",
             color: dark ? "#AEB3CF" : "#0E1530",
             opacity: dark ? 0.1 : 0.08,
           },
-          { kind: "sun-bands", cx: 0.744, cy: 0.711, r: 0.269 },
+          { kind: "horizon-bands", top: 460 / 900, height: 405 / 900 },
+          { kind: "silhouette", x: 1143.6 / 1600, y: 851.8 / 900, scale: 3.6, color: "#0E1530" },
         ],
       },
       frame: {

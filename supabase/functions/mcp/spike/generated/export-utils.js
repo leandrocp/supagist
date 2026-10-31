@@ -130,6 +130,13 @@ export const LUMIS_SUN_BANDS = [
   { color: "#FF7A45", from: 89, to: 108 },
   { color: "#FFC23D", from: 114, to: 152 },
 ];
+/** The tree on its hill from the Lumis badge (leandrocp/lumis
+ *  assets/brand/logo/badge-*.svg), verbatim, in the badge's 260px units. */
+const LUMIS_TREE_PATH =
+  "M56.53 120.41 L56.45 120.99 L56.11 121.51 L54.72 122.37 L53.9 122.98 L53.13 123.67 L52.26 124.67 L51.19 126.39 L50.47 128.28 L50.26 129.29 L50.13 130.61 L50.14 131.65 L50.26 132.65 L50.56 133.94 L50.9 134.9 L51.34 135.83 L52.05 136.96 L52.9 138.01 L53.88 138.93 L54.98 139.72 L56.17 140.36 L57.13 140.74 L58.42 141.08 L59.75 141.26 L61.2 141.28 L61.85 141.56 L62.28 142.14 L62.61 143.43 L63.08 144.69 L64.1 146.44 L64.94 147.47 L65.68 148.19 L66.74 148.99 L67.63 149.53 L68.83 150.07 L70.13 150.47 L71.46 150.69 L72.81 150.73 L74.15 150.6 L75.46 150.3 L76.73 149.82 L77.9 149.2 L80.74 151.31 L83.57 153.67 L85.3 155.26 L86.89 156.87 L89 159.29 L90.76 161.7 L92.15 164.08 L93.13 166.42 L93.55 167.94 L93.29 170.8 L92.99 172.64 L92.36 175.3 L91.48 177.79 L90.93 178.99 L90.6 177.92 L89.77 181.02 L89.08 181.99 L85.04 182.3 L79.88 182.81 L72.83 183.71 L72.6 180.22 L70.38 184.07 L69.96 184.13 L69.6 179.22 L67.64 184.51 L58.61 186.16 L54.22 187.1 L52.6 182.52 L52.03 187.6 L51.93 187.62 L49.6 181.32 L49.08 188.3 L43.12 189.82 L46.3 194.22 L48.45 196.93 L50.68 199.56 L53 202.12 L55.4 204.6 L57.88 207 L60.44 209.32 L63.07 211.55 L65.78 213.7 L68.55 215.76 L71.39 217.72 L74.29 219.59 L77.25 221.37 L80.27 223.04 L83.34 224.62 L86.46 226.1 L89.63 227.47 L92.84 228.74 L96.09 229.9 L99.37 230.96 L102.69 231.91 L106.04 232.74 L109.42 233.47 L112.81 234.09 L116.23 234.6 L119.66 234.99 L123.1 235.27 L126.55 235.44 L130 235.5 L133.45 235.44 L136.9 235.27 L140.34 234.99 L143.77 234.6 L147.19 234.09 L150.58 233.47 L153.96 232.74 L157.31 231.91 L160.63 230.96 L163.91 229.9 L167.16 228.74 L170.37 227.47 L173.54 226.1 L176.66 224.62 L179.73 223.04 L182.75 221.37 L185.71 219.59 L188.61 217.72 L191.45 215.76 L194.22 213.7 L196.93 211.55 L199.56 209.32 L202.12 207 L204.6 204.6 L207 202.12 L209.32 199.56 L211.45 197.05 L198.61 195.31 L197.6 190.97 L196.18 194.97 L195.86 194.92 L194.6 189.97 L193.55 194.58 L170.92 191.09 L170.6 184.99 L168.19 190.65 L167.97 190.61 L167.6 183.59 L165.68 190.24 L152.22 188 L150.6 183.94 L150.11 187.64 L149.62 187.56 L147.6 182.94 L147.24 187.16 L122 183 L117.91 182.44 L113.64 182.02 L110.88 181.84 L109.86 180.53 L108.92 179.01 L108.14 177.41 L107.52 175.71 L107.04 173.92 L106.71 172.03 L106.51 170.04 L106.45 167.94 L107.11 165.36 L108.11 162.79 L109.42 160.25 L110.46 158.56 L111.61 156.9 L113.55 154.43 L115.32 152.46 L116.31 152.42 L117.17 152.29 L118.23 152.01 L119.04 151.69 L120.5 150.84 L121.35 150.14 L122.17 149.3 L122.6 149.05 L123.05 148.97 L123.5 149.04 L125.28 149.95 L126.89 150.47 L128.22 150.69 L129.59 150.73 L131.26 150.54 L132.86 150.08 L134.11 149.52 L135.51 148.61 L136.53 147.73 L137.42 146.71 L138.17 145.59 L138.77 144.38 L139.12 143.4 L139.42 142.11 L139.55 140.75 L139.5 139.09 L139.59 138.7 L139.77 138.39 L140.09 138.08 L140.49 137.88 L142.44 137.64 L144.38 137.05 L146.14 136.11 L147.48 135.04 L148.81 133.52 L149.82 131.77 L150.47 129.85 L150.73 127.85 L150.65 126.18 L150.3 124.54 L149.68 122.97 L148.99 121.78 L148.17 120.71 L147.22 119.75 L145.86 118.75 L144.11 117.84 L143.82 117.56 L143.62 117.22 L143.53 116.6 L143.8 114.95 L143.86 113.75 L143.8 112.57 L143.55 111.04 L143.22 109.88 L142.78 108.78 L142.24 107.73 L141.33 106.28 L141.25 105.88 L141.25 104.47 L141.04 103.37 L140.57 102.11 L139.85 100.96 L139.11 100.15 L138.4 99.56 L137.43 98.98 L136.41 98.58 L135.53 98.37 L134.64 98.28 L133.51 98.34 L132.23 98.58 L131.83 98.52 L131.5 98.38 L131.03 97.91 L130.19 96.08 L128.98 94.21 L127.78 92.84 L126.43 91.66 L124.56 90.45 L122.92 89.71 L121.17 89.18 L119.09 88.84 L118.6 88.61 L118.32 88.33 L118.13 87.97 L117.95 86.69 L117.73 85.72 L117.37 84.76 L116.89 83.86 L116.15 82.87 L115.43 82.15 L114.63 81.53 L113.75 81.02 L112.82 80.63 L111.84 80.37 L110.84 80.24 L110.06 80.22 L108.33 80.48 L107.37 80.81 L106.51 81.2 L105.98 81.28 L103.72 80.65 L102.14 80.36 L100.55 80.23 L98.94 80.25 L97.86 80.36 L96.3 80.64 L93.89 81.35 L91.67 81.08 L90.57 81.12 L89.73 81.24 L88.12 81.73 L86.61 82.54 L85.72 83.22 L84.76 84.22 L84.1 85.13 L83.56 86.14 L83.17 87.19 L82.88 88.55 L82.8 89.67 L82.86 91.18 L82.73 91.57 L82.46 91.93 L81.84 92.27 L79.49 92.64 L77.66 93.19 L75.9 93.99 L74.28 95 L73.15 95.9 L72.14 96.88 L70.65 98.75 L69.49 100.84 L68.96 102.17 L68.55 103.54 L68.2 104.05 L67.65 104.36 L66.12 104.63 L64.9 104.98 L62.95 105.83 L61.86 106.48 L60.85 107.24 L59.91 108.09 L59.06 109.03 L58.09 110.38 L57.47 111.5 L56.83 113.04 L56.47 114.28 L56.2 115.92 L56.14 117.21 L56.25 118.87ZM92.18 150.07 L93.38 148.65 L93.95 147.67 L94.29 146.88 L94.83 145.24 L95.33 144.78 L95.93 144.61 L100.01 144.72 L102.54 144.68 L105.69 144.5 L106.13 144.56 L106.57 144.8 L106.91 145.2 L107.54 147.16 L107.9 147.92 L108.44 148.79 L105.75 151.12 L103.3 153.61 L101.08 156.3 L99.57 158.48 L98.34 156.83 L96.42 154.52 L94.2 152.11Z";
+/** Where the badge hill meets the badge circle, in badge units. */
+const LUMIS_HILL_LEFT = { x: 43.12, y: 189.82 };
+const LUMIS_HILL_RIGHT = { x: 211.45, y: 197.05 };
 /** The `lumis` window controls: the sun's ends and middle (violet, coral, gold). */
 export const LUMIS_HEADER_DASHES = [0, 2, 4].map((band) => LUMIS_SUN_BANDS[band].color);
 const MONO_ADVANCE_EM = 0.6;
@@ -268,30 +275,44 @@ export function renderBrandLayers(layers, viewport, fontFamily, idPrefix = "bran
   return layers
     .map((layer, index) => {
       const id = `${idPrefix}-${index}`;
-      if (layer.kind === "radial-glow") {
+      if (layer.kind === "linear-gradient") {
         const stops = layer.stops
-          .map(
-            (stop) =>
-              `<stop offset="${stop.offset}" stop-color="${escapeXml(stop.color)}" stop-opacity="${stop.opacity}"/>`,
-          )
+          .map((stop) => `<stop offset="${stop.offset}" stop-color="${escapeXml(stop.color)}"/>`)
           .join("");
         return (
-          `<defs><radialGradient id="${id}" gradientUnits="userSpaceOnUse" cx="${left + layer.cx * width}" cy="${top + layer.cy * height}" r="${layer.r * width}">${stops}</radialGradient></defs>` +
-          `<rect data-brand-layer="radial-glow" x="${left}" y="${top}" width="${width}" height="${height}" fill="url(#${id})"/>`
+          `<defs><linearGradient id="${id}" gradientUnits="userSpaceOnUse" x1="${left}" y1="${top}" x2="${left}" y2="${top + height}">${stops}</linearGradient></defs>` +
+          `<rect data-brand-layer="linear-gradient" x="${left}" y="${top}" width="${width}" height="${height}" fill="url(#${id})"/>`
         );
       }
-      if (layer.kind === "sun-bands") {
-        const r = layer.r * width;
-        const cx = left + layer.cx * width;
-        const cy = top + layer.cy * height;
-        const unit = (2 * r) / 152;
+      if (layer.kind === "horizon-bands") {
+        const y = top + layer.top * height;
+        const unit = (layer.height * height) / 152;
         const bands = LUMIS_SUN_BANDS.map(
           (band) =>
-            `<rect x="${cx - r}" y="${+(cy - r + band.from * unit).toFixed(2)}" width="${2 * r}" height="${+((band.to - band.from) * unit).toFixed(2)}" fill="${band.color}"/>`,
+            `<rect x="${left}" y="${+(y + band.from * unit).toFixed(2)}" width="${width}" height="${+((band.to - band.from) * unit).toFixed(2)}" fill="${band.color}"/>`,
         ).join("");
+        return `<g data-brand-layer="horizon-bands">${bands}</g>`;
+      }
+      if (layer.kind === "silhouette") {
+        // Drawn in badge units: k maps them to canvas px, (ox, oy) is the badge origin.
+        const k = layer.scale * s;
+        const ox = left + layer.x * width - LUMIS_HILL_LEFT.x * k;
+        const oy = top + layer.y * height - LUMIS_HILL_LEFT.y * k;
+        const u = (n) => +n.toFixed(2);
+        // The badge hill stops at its circle; carry it 20 design px past the
+        // canvas edges and bottom so it reads as the ground.
+        const edgeLeft = u((left - 20 * s - ox) / k);
+        const edgeRight = u((left + width + 20 * s - ox) / k);
+        const edgeBottom = u((top + height + 20 * s - oy) / k);
+        const { x: lx, y: ly } = LUMIS_HILL_LEFT;
+        const { x: rx, y: ry } = LUMIS_HILL_RIGHT;
+        const hill =
+          `M${lx} ${ly} Q${u(lx - 22.5)} ${u(ly + 6.5)} ${edgeLeft} ${u(ly + 31.5)}` +
+          ` L${edgeLeft} ${edgeBottom} L${edgeRight} ${edgeBottom} L${edgeRight} ${u(ry + 10)}` +
+          ` Q${u(rx + 30)} ${u(ry + 6.5)} ${rx} ${ry} L150 200 L60 195Z`;
         return (
-          `<defs><clipPath id="${id}"><circle cx="${cx}" cy="${cy}" r="${r}"/></clipPath></defs>` +
-          `<g data-brand-layer="sun-bands" clip-path="url(#${id})">${bands}</g>`
+          `<g data-brand-layer="silhouette" transform="translate(${u(ox)} ${u(oy)}) scale(${+k.toFixed(4)})" fill="${escapeXml(layer.color)}">` +
+          `<path d="${hill}"/><path d="${LUMIS_TREE_PATH}"/></g>`
         );
       }
       if (layer.kind === "dot-grid") {

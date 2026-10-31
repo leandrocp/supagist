@@ -2629,15 +2629,96 @@ describe("Lumis and MDEx brand presets", () => {
     },
   );
 
-  it("paints the Lumis layers and no ambient scene", async () => {
-    const { svg } = await renderPreset("lumis-dark");
-    const layers = [...svg.querySelectorAll("[data-brand-layer]")].map((el) =>
-      el.getAttribute("data-brand-layer"),
-    );
-    expect(layers).toEqual(["radial-glow", "code-field", "sun-bands"]);
-    expect(svg.querySelectorAll('[data-brand-layer="sun-bands"] rect')).toHaveLength(5);
-    expect(svg.querySelector("[data-scene-layer]")).toBeNull();
-    expect(svg.querySelector('[filter="url(#brand-card-shadow)"]')).toBeNull();
+  it.each(["lumis", "lumis-dark"])(
+    "paints the %s band horizon behind the card and no ambient scene",
+    async (id) => {
+      const { svg, card } = await renderPreset(id);
+      const layerEls = [...svg.querySelectorAll("[data-brand-layer]")];
+      expect(layerEls.map((el) => el.getAttribute("data-brand-layer"))).toEqual([
+        "linear-gradient",
+        "code-field",
+        "horizon-bands",
+        "silhouette",
+      ]);
+      expect(svg.querySelector("circle, radialGradient, clipPath")).toBeNull();
+      expect(svg.querySelector("[data-scene-layer]")).toBeNull();
+      expect(svg.querySelector('[filter="url(#brand-card-shadow)"]')).toBeNull();
+
+      // Every layer is painted before the opaque card, so none shows inside it.
+      for (const el of layerEls) {
+        expect(el.compareDocumentPosition(card) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+      }
+      expect(card.getAttribute("fill")).toMatch(/^#[0-9A-F]{6}$/i);
+
+      const [left, top, width, height] = svg.getAttribute("viewBox")!.split(" ").map(Number);
+      const num = (el: Element, attr: string) => Number(el.getAttribute(attr));
+
+      // A vertical sky over the whole visible canvas, darkest (or paper) at the top.
+      const sky = svg.querySelector('[data-brand-layer="linear-gradient"]')!;
+      const gradient = svg.querySelector(sky.getAttribute("fill")!.slice(4, -1))!;
+      expect(gradient.getAttribute("x1")).toBe(gradient.getAttribute("x2"));
+      expect(num(gradient, "y2") - num(gradient, "y1")).toBeCloseTo(height!, 5);
+      expect(gradient.querySelector("stop")!.getAttribute("stop-color")).toBe(
+        id === "lumis" ? "#F7F5F0" : "#1B1847",
+      );
+
+      // The sun's five bands span the full width, top to bottom in sun order,
+      // with the gaps between them widening downward.
+      const bands = [...svg.querySelectorAll('[data-brand-layer="horizon-bands"] rect')];
+      expect(bands.map((band) => band.getAttribute("fill"))).toEqual([
+        "#8C6BFF",
+        "#FF5FAE",
+        "#FF6F6F",
+        "#FF7A45",
+        "#FFC23D",
+      ]);
+      for (const band of bands) {
+        expect(num(band, "x")).toBe(left);
+        expect(num(band, "width")).toBe(width);
+      }
+      const gaps = bands
+        .slice(1)
+        .map((band, i) => num(band, "y") - (num(bands[i]!, "y") + num(bands[i]!, "height")));
+      for (let i = 1; i < gaps.length; i++) expect(gaps[i]!).toBeGreaterThan(gaps[i - 1]!);
+      const first = bands[0]!;
+      const last = bands[4]!;
+      expect(num(first, "y") - top!).toBeCloseTo((460 / 900) * height!, 0);
+      expect(num(last, "y") + num(last, "height") - num(first, "y")).toBeCloseTo(
+        (405 / 900) * height!,
+        0,
+      );
+
+      // The badge tree stands in the right gutter, and its hill runs past the
+      // canvas's left, right and bottom edges.
+      const tree = svg.querySelector('[data-brand-layer="silhouette"]')!;
+      const [, tx, ty, k] = tree
+        .getAttribute("transform")!
+        .match(/^translate\(([-\d.]+) ([-\d.]+)\) scale\(([\d.]+)\)$/)!
+        .map(Number);
+      // Like every layer it sits on the canvas, not the card: the badge hill's
+      // left end (x 43.12, left of the whole tree) is right of the design's card
+      // edge (1109 of 1600), and the tree is 3.6× the badge.
+      expect((tx! + 43.12 * k! - left!) / width!).toBeGreaterThan(1109 / 1600);
+      expect(k! / (width! / 1600)).toBeCloseTo(3.6, 3);
+      const [hill, treePath] = [...tree.querySelectorAll("path")];
+      expect(treePath!.getAttribute("d")).toMatch(/^M56\.53 120\.41 L56\.45 120\.99 .*Z$/);
+      const points = [...hill!.getAttribute("d")!.matchAll(/(-?[\d.]+) (-?[\d.]+)/g)].map(
+        ([, x, y]) => [tx! + Number(x) * k!, ty! + Number(y) * k!] as const,
+      );
+      expect(Math.min(...points.map(([x]) => x))).toBeLessThan(left!);
+      expect(Math.max(...points.map(([x]) => x))).toBeGreaterThan(left! + width!);
+      expect(Math.max(...points.map(([, y]) => y))).toBeGreaterThan(top! + height!);
+      expect(tree.getAttribute("fill")).toBe("#0E1530");
+    },
+  );
+
+  it.each(["mdex-purple", "mdex-purple-dark"])("keeps %s on its dot grid only", async (id) => {
+    const { svg } = await renderPreset(id);
+    expect(
+      [...svg.querySelectorAll("[data-brand-layer]")].map((el) =>
+        el.getAttribute("data-brand-layer"),
+      ),
+    ).toEqual(["dot-grid"]);
   });
 
   it("draws the Lumis bar: icon + filename left, < Language /> and exactly 3 sun dashes right", async () => {
