@@ -545,8 +545,10 @@ export function InlineCodeBlock({
   }
   const cardFill = brandFrame?.cardFill ?? c.bg;
 
-  // `lumis` / `markdown` bars mirror the export's renderBrandHeader.
+  // `lumis` / `markdown` bars mirror the export's renderBrandHeader. Their
+  // design paints the code area in the card fill too, as the export does.
   const brandHeader = isBrandHeaderDecoration(windowDecoration) ? windowDecoration : null;
+  const bodyFill = brandHeader ? cardFill : null;
   const renderBrandWindowHeader = (decoration: "lumis" | "markdown") => {
     const s = brandHeaderScale(codeFontSize);
     const runs = brandHeaderRuns(
@@ -782,7 +784,7 @@ export function InlineCodeBlock({
             ref={gutterRef}
             className={cn("overflow-visible select-none", showLineNumbers && "border-r")}
             style={{
-              backgroundColor: c.gutter,
+              backgroundColor: bodyFill ?? c.gutter,
               borderColor: c.border,
               paddingBlock: innerPadding,
             }}
@@ -845,7 +847,7 @@ export function InlineCodeBlock({
         ) : null}
 
         {/* ── Code area ── */}
-        <div className="relative overflow-hidden" style={{ backgroundColor: c.bg }}>
+        <div className="relative overflow-hidden" style={{ backgroundColor: bodyFill ?? c.bg }}>
           {showGutter && !showLineNumbers && activeInlineActionLine !== null ? (
             <div
               className="absolute z-20"

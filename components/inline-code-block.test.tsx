@@ -375,6 +375,18 @@ describe("InlineCodeBlock preview mode", () => {
     expect(screen.getByTestId("markdown-window-header").textContent).toBe("```elixir[-][□][x]");
   });
 
+  it("paints a brand bar's code area in the card fill, not the theme background", () => {
+    // The mocked theme's background is #111111; the export fills the card with #1C1917.
+    const frame = getBrandPreset("mdex-purple-dark")!.background.frame;
+    const props = { ...baseProps, brandFrame: frame, showChromeActions: false };
+    const { rerender } = render(<InlineCodeBlock {...props} windowDecoration="markdown" />);
+    expect(screen.getByLabelText("Code").parentElement?.style.backgroundColor).toBe("#1C1917");
+
+    // Other decorations keep painting the theme background on the same frame.
+    rerender(<InlineCodeBlock {...props} windowDecoration="minimal" />);
+    expect(screen.getByLabelText("Code").parentElement?.style.backgroundColor).not.toBe("#1C1917");
+  });
+
   it("renders the Minimal window decoration without control dots", () => {
     render(<InlineCodeBlock {...baseProps} windowDecoration="minimal" />);
 
