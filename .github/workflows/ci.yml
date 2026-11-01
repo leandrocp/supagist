@@ -139,8 +139,13 @@ jobs:
       - uses: supabase/setup-cli@v3.0.1
         with:
           version: 2.117.0
+      # The stack listens on 54320-54329, inside Linux's ephemeral range, so an
+      # outgoing connection (such as an image pull) can hold one of them as its
+      # source port and make Docker fail to bind it. Keep them out of that range.
       - name: Start local Supabase
-        run: supabase start
+        run: |
+          sudo sysctl -w net.ipv4.ip_local_reserved_ports=54320-54329
+          supabase start
       # publish_snippet uploads to the snippet-images bucket.
       - name: Seed local buckets
         run: supabase seed buckets
@@ -204,8 +209,13 @@ jobs:
       - uses: supabase/setup-cli@v3.0.1
         with:
           version: 2.117.0
+      # The stack listens on 54320-54329, inside Linux's ephemeral range, so an
+      # outgoing connection (such as an image pull) can hold one of them as its
+      # source port and make Docker fail to bind it. Keep them out of that range.
       - name: Start local Supabase
-        run: supabase start
+        run: |
+          sudo sysctl -w net.ipv4.ip_local_reserved_ports=54320-54329
+          supabase start
       - name: Seed local buckets
         run: supabase seed buckets
       # e2e/cli.test.ts renders through the app's /api routes into this function.
@@ -262,8 +272,13 @@ jobs:
       - uses: supabase/setup-cli@v3.0.1
         with:
           version: 2.117.0
+      # The stack listens on 54320-54329, inside Linux's ephemeral range, so an
+      # outgoing connection (such as an image pull) can hold one of them as its
+      # source port and make Docker fail to bind it. Keep them out of that range.
       - name: Start local Supabase
-        run: supabase start
+        run: |
+          sudo sysctl -w net.ipv4.ip_local_reserved_ports=54320-54329
+          supabase start
       - name: Apply migrations
         run: supabase db reset --local
       - name: Export local Supabase env
@@ -301,8 +316,13 @@ jobs:
       - uses: supabase/setup-cli@v3.0.1
         with:
           version: 2.117.0
+      # The stack listens on 54320-54329, inside Linux's ephemeral range, so an
+      # outgoing connection (such as an image pull) can hold one of them as its
+      # source port and make Docker fail to bind it. Keep them out of that range.
       - name: Start local Supabase
-        run: supabase start
+        run: |
+          sudo sysctl -w net.ipv4.ip_local_reserved_ports=54320-54329
+          supabase start
       - name: Seed local buckets
         run: supabase seed buckets
       - name: Export local Supabase env
