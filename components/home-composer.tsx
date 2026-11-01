@@ -78,6 +78,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { publishSnippet } from "@/app/actions/publish";
+import { WINDOW_DECORATIONS, parseSnippetAppearance } from "@/lib/snippet-appearance";
 import { toast } from "sonner";
 import { ClipboardType, FileImage, FileText } from "lucide-react";
 import { copyRichText, createRichTextClipboard } from "@/lib/rich-text-export";
@@ -85,15 +86,6 @@ import { copyRichText, createRichTextClipboard } from "@/lib/rich-text-export";
 const DRAFT_KEY = "supagist:draft:v1";
 const ANNOTATIONS_KEY = "supagist:annotations:v1";
 const WINDOW_DECORATION_SCHEMA = 2;
-const WINDOW_DECORATIONS: WindowDecoration[] = [
-  "macos",
-  "macos-subtle",
-  "windows",
-  "minimal",
-  "none",
-  "lumis",
-  "markdown",
-];
 const DEV_MODE = process.env.NODE_ENV !== "production";
 
 // Kick off WASM loading as early as possible — in parallel with the InlineCodeBlock chunk
@@ -436,8 +428,11 @@ export function HomeComposer() {
       formData.set("code", draft.code);
       formData.set("filename", draft.filename);
       formData.set("theme", draft.theme);
-      formData.set("language", language);
+      // The saved view highlights with this, so a picked language must win
+      // over detection or the published colours differ from the preview.
+      formData.set("language", draft.languageOverride ?? language);
       formData.set("font_id", draft.fontId);
+      formData.set("appearance", JSON.stringify(parseSnippetAppearance(draft)));
       formData.set("canonical_image", canonicalFile);
       formData.set("og_image", ogFile);
       formData.set("svg", svgBlob);

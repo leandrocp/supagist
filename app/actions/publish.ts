@@ -11,6 +11,7 @@ import {
   codePointLength,
 } from "@/lib/snippet-utils";
 import { snippetCardPath } from "@/lib/og-image";
+import { parseSnippetAppearance } from "@/lib/snippet-appearance";
 
 type PublishResult = { path: string; error?: never } | { error: string; path?: never };
 
@@ -39,6 +40,10 @@ export async function publishSnippet(formData: FormData): Promise<PublishResult>
   const cardImage = formData.get("card_image");
   const reactionsJson = formData.get("reactions");
   const commentsJson = formData.get("comments");
+  // How the author composed the snippet: background, frame, spacing and the
+  // rest. Snapped to the composer's options; a missing field (an older
+  // bundle mid-deploy) stores the defaults rather than failing the publish.
+  const appearance = parseSnippetAppearance(parseDraftObject(formData.get("appearance")));
 
   if (
     typeof code !== "string" ||
@@ -176,6 +181,7 @@ export async function publishSnippet(formData: FormData): Promise<PublishResult>
     language,
     theme,
     font_id: fontId,
+    appearance,
     code: normalizedCode,
     code_char_count: codeLength,
     line_count: normalizedCode.split("\n").length,

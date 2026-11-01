@@ -7,6 +7,8 @@ vi.mock("@/lib/supabase/server", () => ({
 }));
 
 import { publishSnippet } from "./publish";
+import { getBrandPreset } from "@/lib/brand-presets";
+import { DEFAULT_SNIPPET_APPEARANCE, type SnippetAppearance } from "@/lib/snippet-appearance";
 
 // ── Mock factory ──────────────────────────────────────────────────────────────
 
@@ -325,6 +327,49 @@ describe("publishSnippet — happy path", () => {
     expect(row.code).toBe("a🔥b");
     expect(row.code_char_count).toBe(3);
     expect(row.code.length).toBe(4); // sanity-check the JS-vs-PG divergence
+  });
+
+  it("stores the composed appearance so the saved view keeps the brand canvas", async () => {
+    // Regression: only theme and font were stored, so a snippet composed on
+    // the Lumis canvas was published without its background, frame, padding
+    // or 16:9 canvas.
+    const supabase = makeMockSupabase();
+    mockCreateClient.mockResolvedValue(supabase);
+    const lumis = getBrandPreset("lumis")!;
+    const composed = {
+      ...lumis.settings,
+      background: lumis.background.label,
+      pixelRatio: 2,
+      showReactions: true,
+      fontSize: 18,
+      code: "never stored here",
+    };
+    await publishSnippet(makeFormData({ appearance: JSON.stringify(composed) }));
+
+    const row = supabase._.mockInsert.mock.calls[0]![0] as { appearance: SnippetAppearance };
+    expect(row.appearance).toEqual({
+      background: "Lumis",
+      outerPadding: 128,
+      innerPadding: 24,
+      cornerRadius: 8,
+      pixelRatio: 2,
+      lineNumbers: false,
+      showReactions: true,
+      header: lumis.settings.header,
+      footer: lumis.settings.footer,
+      windowDecoration: "lumis",
+      fontSize: 18,
+      aspectRatio: "16:9",
+      ligatures: false,
+    });
+  });
+
+  it("stores the default appearance when a client sends none", async () => {
+    const supabase = makeMockSupabase();
+    mockCreateClient.mockResolvedValue(supabase);
+    await publishSnippet(makeFormData());
+    const row = supabase._.mockInsert.mock.calls[0]![0] as { appearance: SnippetAppearance };
+    expect(row.appearance).toEqual(DEFAULT_SNIPPET_APPEARANCE);
   });
 });
 

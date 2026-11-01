@@ -198,10 +198,27 @@ describe.skipIf(skip)("owner edit/delete RLS and account deletion", () => {
       { short_id: "hijack" },
       { view_count: 1_000_000 },
       { svg_path: `${alice.id}/snippets/${randomUUID()}/canonical.svg` },
+      // The stored images were rendered from it; edits do not re-render them.
+      { appearance: { background: "Lumis" } },
     ]) {
       const { error } = await alice.client.from("snippets").update(change).eq("id", id);
       expect(error?.message, JSON.stringify(change)).toMatch(
         /snippet_field_not_editable|row-level security/,
+      );
+    }
+  });
+
+  it("a snippet keeps the appearance it was published with, as a bounded object", async () => {
+    const { id } = await insertSnippet(alice);
+    const appearance = { background: "Lumis", windowDecoration: "lumis", ligatures: false };
+    expect((await admin.from("snippets").update({ appearance }).eq("id", id)).error).toBeNull();
+    const { data } = await anon.from("snippets").select("appearance").eq("id", id).single();
+    expect(data?.appearance).toEqual(appearance);
+
+    for (const invalid of [["Lumis"], "Lumis", { pad: "x".repeat(5000) }]) {
+      const { error } = await admin.from("snippets").update({ appearance: invalid }).eq("id", id);
+      expect(error?.message, JSON.stringify(invalid).slice(0, 40)).toMatch(
+        /snippets_appearance_check/,
       );
     }
   });
