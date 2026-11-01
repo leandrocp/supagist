@@ -31,7 +31,7 @@ assert.deepEqual(tool.annotations, {
   readOnlyHint: false,
   destructiveHint: false,
   idempotentHint: false,
-  openWorldHint: false,
+  openWorldHint: true,
 });
 
 const published = await call({

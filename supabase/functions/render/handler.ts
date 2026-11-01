@@ -142,6 +142,12 @@ export async function handleRequest(req: Request, ctx: Context, deps: Deps): Pro
     const message = issues.map((issue) => `${issue.path || "input"}: ${issue.message}`).join("; ");
     return failure(400, "INVALID_INPUT", message, { issues });
   }
+  // PNG rasterizes on Vercel Node (supagist.app/api/render), never on Edge.
+  if (parsed.data.format === "png") {
+    return failure(400, "INVALID_INPUT", "format: this endpoint renders SVG only", {
+      issues: [{ path: "format", message: "this endpoint renders SVG only" }],
+    });
+  }
   try {
     const { svg, width, height } = await deps.render(raw);
     return new Response(svg, {

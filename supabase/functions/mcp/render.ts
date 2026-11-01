@@ -27,6 +27,7 @@ import { loadTheme } from "./spike/theme-loader.ts";
 import packages from "./spike/generated/parser-packages.json" with { type: "json" };
 import { themes } from "./spike/generated/themes.js";
 import { BRAND_THEMES } from "./spike/generated/brand-themes.js";
+import { closeMatches } from "./themes.ts";
 
 export const supportedLanguages: string[] = [
   "plaintext",
@@ -64,10 +65,17 @@ export const appearanceOptions = {
   ligatures: [true, false],
   limits: { codePoints: 8000, visualRows: 30, wrapColumns: 110 },
   notes:
-    "brand selects a complete preset; explicit fields override it. background is only a canvas. system font uses portable JetBrains Mono. PNG conversion and 2x/4x/6x scale are local, not MCP. Reactions/comments are supplied render data, not published collaboration. aspectRatio 16:9 outputs a 1600x900 canvas with the card centered; outerPadding is the minimum margin. ligatures false splits operator ligatures such as |> into separate characters.",
+    "brand selects a complete preset; explicit fields override it. background is only a canvas. system font uses portable JetBrains Mono. Reactions/comments are supplied render data, not published collaboration. aspectRatio 16:9 outputs a 1600x900 canvas with the card centered; outerPadding is the minimum margin. ligatures false splits operator ligatures such as |> into separate characters.",
 };
 /** Input the renderer cannot draw, as opposed to an internal failure. */
 export class RenderInputError extends Error {}
+
+function unsupported(kind: "language" | "theme", value: string, supported: string[]) {
+  const matches = closeMatches(value, supported);
+  return matches.length
+    ? `Unsupported ${kind}: ${value}. Close matches: ${matches.join(", ")}`
+    : `Unsupported ${kind}: ${value}`;
+}
 
 export type RenderResult = {
   svg: string;
@@ -93,10 +101,7 @@ export type RenderResult = {
 export async function renderSnippet(rawInput: RenderInput): Promise<RenderResult> {
   const start = performance.now();
   const input = renderInput.parse(rawInput);
-  const fixture = input.fixture;
-  const brand = BRAND_PRESETS.find(
-    (preset) => preset.id === (input.brand ?? (fixture !== "plain" ? "vercel" : undefined)),
-  );
+  const brand = BRAND_PRESETS.find((preset) => preset.id === input.brand);
   const settings = brand?.settings;
   // Only some presets set these, so the type inferred from the generated JS lacks them.
   const presetAspectRatio =
@@ -106,8 +111,9 @@ export async function renderSnippet(rawInput: RenderInput): Promise<RenderResult
   const theme = input.theme ?? settings?.theme ?? "github_dark";
   const language = input.language ?? inferLanguage(input.filename, input.code);
   if (!supportedLanguages.includes(language))
-    throw new RenderInputError(`Unsupported language: ${language}`);
-  if (!supportedThemes.includes(theme)) throw new RenderInputError(`Unsupported theme: ${theme}`);
+    throw new RenderInputError(unsupported("language", language, supportedLanguages));
+  if (!supportedThemes.includes(theme))
+    throw new RenderInputError(unsupported("theme", theme, supportedThemes));
   const showComments = input.showComments ?? Boolean(input.comments);
   const visualRows = input.code
     .split("\n")
@@ -143,27 +149,7 @@ export async function renderSnippet(rawInput: RenderInput): Promise<RenderResult
   const background = backgrounds.find((preset) => preset.label === backgroundLabel);
   const fontId = input.fontId ?? settings?.fontId ?? "jetbrains";
   const header = { ...DEFAULT_HEADER_SETTINGS, ...settings?.header, ...input.header };
-  const footer = {
-    ...DEFAULT_FOOTER_SETTINGS,
-    ...(fixture === "avatars" ? { enabled: true } : settings?.footer),
-    ...input.footer,
-  };
-  const avatars = fixture === "avatars";
-  const reactions = avatars
-    ? {
-        3: [
-          {
-            emoji: "+1",
-            reactors: [
-              { username: "Ada", avatarUrl: "m0:avatar-1" },
-              { username: "Grace", avatarUrl: "m0:avatar-2" },
-            ],
-          },
-        ],
-        15: [{ emoji: "+1", reactors: [{ username: "Grace", avatarUrl: "m0:avatar-2" }] }],
-        30: [{ emoji: "+1", reactors: [{ username: "Ada", avatarUrl: "m0:avatar-1" }] }],
-      }
-    : undefined;
+  const footer = { ...DEFAULT_FOOTER_SETTINGS, ...settings?.footer, ...input.footer };
   let svg = await createHighlightedSvg(
     input.code,
     input.filename,
@@ -175,12 +161,12 @@ export async function renderSnippet(rawInput: RenderInput): Promise<RenderResult
     input.lineNumbers ?? settings?.lineNumbers ?? true,
     fontId === "system" ? "jetbrains" : fontId,
     language,
-    input.reactions ?? reactions,
-    input.showReactions ?? (Boolean(input.reactions) || avatars),
+    input.reactions,
+    input.showReactions ?? Boolean(input.reactions),
     true,
-    avatars,
-    input.author ?? (avatars ? "Ada" : undefined),
-    avatars ? "m0:avatar-1" : undefined,
+    false,
+    input.author,
+    undefined,
     input.comments,
     showComments,
     undefined,
@@ -214,8 +200,10 @@ export async function renderSnippet(rawInput: RenderInput): Promise<RenderResult
   if (!dimensions) throw new Error("App renderer did not emit SVG dimensions");
   const logicalWidth = Number(dimensions[1]);
   const logicalHeight = Number(dimensions[2]);
-  const width = Math.round(logicalWidth * input.pixelRatio);
-  const height = Math.round(logicalHeight * input.pixelRatio);
+  // PNG is rasterized elsewhere from a 1x SVG; here pixelRatio only sizes the SVG.
+  const pixelRatio = input.format === "svg" ? (input.pixelRatio ?? 1) : 1;
+  const width = Math.round(logicalWidth * pixelRatio);
+  const height = Math.round(logicalHeight * pixelRatio);
   const svgEnd = performance.now();
   // Scale the viewport, not the viewBox; rasterization belongs to the client.
   svg = svg.replace(
@@ -231,9 +219,7 @@ export async function renderSnippet(rawInput: RenderInput): Promise<RenderResult
   console.log(
     JSON.stringify({
       event: "render-complete",
-      format: input.format,
-      fixture,
-      pixelRatio: input.pixelRatio,
+      pixelRatio,
       width,
       height,
       ...timings,

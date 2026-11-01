@@ -138,14 +138,14 @@ try {
   });
   success(await call("tools/list"));
   success(await call("tools/call", { name: "list_options", arguments: {} }));
-  log("Waiting for Retry-After before checking PNG rejection and recovery...");
+  log("Waiting for Retry-After before checking validation and recovery...");
   await new Promise((resolve) => setTimeout(resolve, 61_000));
   const png = await call("tools/call", {
     name: "render_snippet",
-    arguments: { code: "const answer = 42;", format: "png" },
+    arguments: { code: "const answer = 42;", format: "png", pixelRatio: 4 },
   });
   assert.equal(png.response.status, 200);
-  assert.equal(png.data.result?.isError, true, "PNG must be rejected by tool validation");
+  assert.equal(png.data.result?.isError, true, "4x PNG must be rejected by tool validation");
   const recovered = await call("tools/call", {
     name: "render_snippet",
     arguments: { code: "const answer = 42;" },
@@ -153,7 +153,7 @@ try {
   success(recovered);
   assert.ok(recovered.data.result.content[0].text.includes("<svg"));
   log(
-    "PASS: real signed-in initialize/list, SVG by default, first 3 renders allowed, render 4 denied before validation, other tools available, PNG rejected, SVG recovers after Retry-After.",
+    "PASS: real signed-in initialize/list, SVG by default, first 3 renders allowed, render 4 denied before validation, other tools available, 4x PNG rejected, SVG recovers after Retry-After.",
   );
 } finally {
   await writeFile(`${directory}/transcript.json`, JSON.stringify(transcript, null, 2) + "\n");

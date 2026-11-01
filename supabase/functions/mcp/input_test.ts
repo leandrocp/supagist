@@ -3,7 +3,7 @@ import { renderInput } from "./input.ts";
 
 Deno.test("render input preserves Unicode code points, normalizes newlines, and bounds output scale", () => {
   const input = renderInput.parse({ code: "a\r\nb\rc" });
-  if (input.code !== "a\nb\nc" || input.pixelRatio !== 1 || input.format !== "svg") {
+  if (input.code !== "a\nb\nc" || input.pixelRatio !== undefined || input.format !== "svg") {
     throw new Error("Normalization or defaults changed");
   }
   for (const code of ["x".repeat(8000), "😀".repeat(8000)]) {
@@ -15,11 +15,9 @@ Deno.test("render input preserves Unicode code points, normalizes newlines, and 
     { code: "😀".repeat(8001) },
     { code: "x", pixelRatio: 0 },
     { code: "x", pixelRatio: 3 },
-    { code: "x", format: "png" },
+    { code: "x", format: "png", pixelRatio: 4 },
     { code: "x", format: "jpeg" },
-    { code: "x", fixture: "unknown" },
     { code: "x", brand: "unknown" },
-    { code: "x", brand: "supabase", fixture: "vercel" },
     { code: "x", background: "unknown" },
     { code: "x", fontId: "unknown" },
     { code: "x", fontSize: 15 },
@@ -97,4 +95,23 @@ Deno.test("16:9 canvas and ligatures toggle are optional, advertised tool fields
   ) {
     throw new Error("Tool schema does not advertise aspectRatio and ligatures");
   }
+});
+
+Deno.test("old clients' fixture field is ignored, but other unknown fields still fail", () => {
+  for (const fixture of ["plain", "vercel", "avatars", "anything"]) {
+    const input = renderInput.parse({ code: "x", brand: "supabase", fixture });
+    if (input.brand !== "supabase") throw new Error("Legacy fixture changed the request");
+  }
+  const result = renderInput.safeParse({ code: "x", fixture: "plain", branding: "supabase" });
+  if (result.success || !result.error.issues.some((issue) => issue.message.includes("branding")))
+    throw new Error("Unknown fields must still be rejected by name");
+  const schema = z.toJSONSchema(renderInput, { io: "input" }) as {
+    properties: Record<string, { enum?: string[] }>;
+    additionalProperties: unknown;
+  };
+  if (schema.additionalProperties !== false)
+    throw new Error("The advertised schema must be closed");
+  if ("fixture" in schema.properties) throw new Error("The legacy field must stay unadvertised");
+  if (schema.properties.format?.enum?.join() !== "svg,png")
+    throw new Error("Tool schema must advertise svg and png");
 });

@@ -3,15 +3,14 @@ import { z } from "zod";
 import { renderInput } from "./input.ts";
 import { redactSecrets, type RedactionSummary } from "./redact.ts";
 
-// Appearance inputs match the render tool. Annotations, author and benchmark
-// fixtures are render-only data: a saved snippet's author is the signed-in user.
+// Appearance inputs match the render tool. Annotations and author are
+// render-only data: a saved snippet's author is the signed-in user.
 const {
   reactions: _reactions,
   comments: _comments,
   showReactions: _showReactions,
   showComments: _showComments,
   author: _author,
-  fixture: _fixture,
   format: _format,
   pixelRatio: _pixelRatio,
   ...appearance

@@ -26,7 +26,11 @@ Deno.serve(
       const denied = await enforceRateLimits(req, userClaims!.id, supabaseAdmin);
       if (denied) return denied;
 
-      const caller = { userId: userClaims!.id, supabase };
+      const caller = {
+        userId: userClaims!.id,
+        supabase,
+        authorization: req.headers.get("authorization")!,
+      };
       return createMcpHandler(() => createServer(caller)).fetch(req);
     },
   ),

@@ -30,9 +30,12 @@ Deno.test("public renderer: all fixtures, SVG only, 1x/2x, real highlighting and
       assert.equal(text.includes("brand-card-shadow"), fixture !== "plain");
       if (fixture !== "plain") assert.match(text, /<feDropShadow[^>]*stdDeviation="17"/);
       if (fixture === "avatars") {
-        assert.match(text, /data:image\/png;base64,iVBOR/);
+        // Supplied reactors render as initials; no image is fetched or embedded.
         assert.match(text, /value30/);
-        assert.match(text, /fill="url\(#avatar-/);
+        assert.equal(text.split(">+1<").length - 1, 3);
+        assert.equal(text.split(">A<").length - 1, 2);
+        assert.equal(text.split(">G<").length - 1, 2);
+        assert.ok(!text.includes("data:image/png"));
       }
       assert.ok(text.includes(`width="${svg.width}" height="${svg.height}"`));
       if (pixelRatio === 2) {
@@ -51,8 +54,20 @@ Deno.test("invalid parsers/themes/ratios and remote avatars fail rather than sil
   assert.ok(supportedThemes.includes("github_dark"));
   await assert.rejects(() => renderSnippet({ ...input, language: "m0-missing-parser" }));
   await assert.rejects(() => renderSnippet({ ...input, theme: "m0-missing-theme" }));
+  // Unknown ids name their closest supported matches, without loading anything.
+  await assert.rejects(
+    () => renderSnippet({ ...input, theme: "drakula" }),
+    /^Error: Unsupported theme: drakula\. Close matches: dracula(, |$)/,
+  );
+  await assert.rejects(
+    () => renderSnippet({ ...input, theme: "tokyonight" }),
+    /Close matches: .*tokyonight_night/,
+  );
+  await assert.rejects(
+    () => renderSnippet({ ...input, language: "typscript" }),
+    /Unsupported language: typscript\. Close matches: typescript/,
+  );
   await assert.rejects(() => renderSnippet({ ...input, pixelRatio: 3 as 1 }), /pixelRatio/);
-  await assert.rejects(() => renderSnippet({ ...input, format: "png" as "svg" }), /svg/);
   await assert.rejects(
     () => loadImageDataUrl("https://example.com/avatar.png"),
     /bundled image paths/,

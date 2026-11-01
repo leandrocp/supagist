@@ -1,15 +1,48 @@
-# Supagist MCP: SVG rendering on Supabase
+# Supagist MCP server
 
-`render_snippet` generates **SVG only**, defaulting to `format: "svg"` and
-`pixelRatio: 1`. Explicit `format: "png"` requests are rejected by validation;
-the PNG render path, resvg wrapper, and resvg WASM have been removed from the
-function. Reconnect MCP clients to refresh their cached tool schema.
+A remote MCP server, `supagist`, on a Supabase Edge Function. Tools:
 
-The [Supagist skill](../../../.agents/skills/supagist/SKILL.md)
-teaches clients to save the XML as `.svg` and offers optional local PNG conversion.
-MCP rendering stays on Supabase; no Vercel rendering fallback is needed or added.
-The web app retains browser-side PNG/SVG exports. The original M0 measurements
-below describe the retired SVG+PNG implementation, not the SVG-only contract.
+| Tool              | Input                                                           | Output                                                           | Writes |
+| ----------------- | --------------------------------------------------------------- | ---------------------------------------------------------------- | ------ |
+| `render_snippet`  | code plus appearance; `format` `svg` (default) or `png`         | SVG document as text, or a PNG as MCP image content plus size    | no     |
+| `search_themes`   | `query`, `family`, `appearance` (dark/light), `limit`, `offset` | a JSON page of `{id, appearance, family, kind}` and `nextOffset` | no     |
+| `list_options`    | none                                                            | formats, languages, themes, brands, backgrounds, fonts, limits   | no     |
+| `publish_snippet` | code plus appearance and an optional title                      | unlisted link, stored SVG URL, redaction counts                  | yes    |
+
+Descriptions and server instructions are in `server.ts`; `server_test.ts`
+keeps them from naming other tools (Google Connected Apps snapshots them).
+
+## SVG on Edge, PNG on Vercel Node
+
+SVG renders in this function. PNG does not: Edge's 2 s CPU cap cannot
+rasterize (see the measurements below), so for `format: "png"` the function
+POSTs the same input to `https://supagist.app/api/render` with the caller's own
+`Authorization` header (`png.ts`). That route renders the SVG through the
+`render` function and rasterizes it with native resvg (`lib/render-api.ts`).
+There is no second rasterizer. MCP PNGs are inline previews, so `pixelRatio` is
+1 or 2 (default 2); the CLI API's 4× and 6× are not offered here. For larger
+output, use SVG, which scales losslessly. A PNG call counts against both this
+server's render quota and the render API's per-user quota for the same account.
+Set `SUPAGIST_RENDER_API_URL` to point a local function at a local web app
+(see CONTRIBUTING.md).
+
+## Themes and close matches
+
+`search_themes` searches the ~240 themes (Lumis themes plus the app's brand
+themes). `appearance` comes from each theme's own data, and `family` from the
+upstream Neovim plugin that `@lumis-sh/themes` NOTICE.md records for it (for
+example `EdenEast/nightfox.nvim` groups dayfox, terafox and nightfox). Brand
+themes use their brand as the family. `spike/prepare-render.mjs` generates the
+catalog as `spike/generated/theme-catalog.json`. An unknown `theme` or
+`language` in a render is rejected with up to five close matches.
+
+## Older clients
+
+Tool schemas were SVG-only before, with a hidden `fixture` benchmark field.
+Clients with a cached schema keep working: `fixture` is accepted and ignored,
+and `format: "svg"` with `pixelRatio` 1 or 2 behaves as before. Every other
+unknown field is still rejected, and the advertised schema stays closed
+(`additionalProperties: false`).
 
 ## Brand presets and advanced controls
 
@@ -28,7 +61,8 @@ Named fonts and brand pattern images are embedded. `system` uses JetBrains Mono
 for portability. Comments embed Hack as a missing-glyph fallback where needed.
 Remote avatar URLs and custom fonts are not accepted. Rendering does not publish
 or fetch saved collaboration. More than 30 visual rows (wrapping/comments
-included) is rejected rather than silently cropped. Unknown fields are rejected.
+included) is rejected rather than silently cropped. Unknown fields are rejected,
+apart from the legacy `fixture`.
 
 Run the public examples through local Supabase with:
 
@@ -38,10 +72,8 @@ mise exec deno@2.9.0 -- deno test --config supabase/functions/mcp/deno.json \
   --allow-read --allow-net --allow-env supabase/functions/mcp/spike/render.deno.ts
 ```
 
-The converter defaults to 2000px width and supports explicit 1×/2×/4×/6× scales.
-These are local PNG choices, not new Edge rasterization modes. The original
-uncompressed-bundle caveat below still applies; adding fonts/patterns is not a
-claim that the local ESZIP satisfies a hosted size limit.
+The original uncompressed-bundle caveat below still applies; adding
+fonts/patterns is not a claim that the local ESZIP satisfies a hosted size limit.
 
 ## Live endpoint and rate limits (2026-10-29)
 
@@ -62,7 +94,8 @@ publishing is refused with -32300 before the trigger fires). Constants live in
 `rate-limit.ts`. All checks call the existing `public.check_rate_limit` RPC using
 `ctx.supabaseAdmin`.
 
-`publish_snippet` (2026-11-01) redacts secrets (`redact.ts`), renders the SVG,
+`search_themes` and `list_options` consume only the IP backstop and the user
+quota. `publish_snippet` (2026-11-01) redacts secrets (`redact.ts`), renders the SVG,
 then uploads it and inserts the snippet with the caller-scoped client, so RLS,
 Storage policies and the publish trigger apply as the signed-in user. Snippets
 are `unlisted` and store no PNGs. `verify/publish.mjs` checks the contract
@@ -123,19 +156,21 @@ curl -i https://zivpihasridowvzrgiix.supabase.co/functions/v1/mcp \
   -H 'Content-Type: application/json' \
   -H 'Accept: application/json, text/event-stream' \
   -H 'MCP-Protocol-Version: 2025-06-18' \
-  --data '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"render_snippet","arguments":{"code":"const answer = 42;","language":"javascript","theme":"github_dark","format":"svg","pixelRatio":1}}}'
+  --data '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"render_snippet","arguments":{"code":"const answer = 42;","language":"javascript","theme":"github_dark"}}}'
 ```
 
 SVG is returned as MCP text, not a saved file or public URL. Extract the complete
 SVG text from the result and save it as `.svg`; renaming a JSON envelope is not
-enough. Use the skill's local converter for PNG. Original heavy PNG fixtures
-exceeded the 2 s Edge CPU cap; removing that stage avoids the known bottleneck.
+enough. With `"format":"png"` the first content item is an MCP image
+(`mimeType: image/png`, base64 `data`) and the second is `{format, width, height}`.
 
 ### Repeat the checks
 
 ```bash
 mise exec deno@2.9.0 -- deno test --config supabase/functions/mcp/deno.json \
-  supabase/functions/mcp/input_test.ts supabase/functions/mcp/rate-limit_test.ts
+  --allow-read --allow-net --allow-env \
+  supabase/functions/mcp/input_test.ts supabase/functions/mcp/rate-limit_test.ts \
+  supabase/functions/mcp/server_test.ts supabase/functions/mcp/themes_test.ts
 # Requires local Supabase + functions serve; creates only a disposable LOCAL user.
 node supabase/functions/mcp/verify/rate-limit.mjs
 # Requires existing hosted credentials; never creates hosted users or resets buckets.
@@ -149,15 +184,16 @@ minute quota; the test deliberately consumes 6 render attempts and checks the
 6th gets 429, while `tools/list` and `list_options` still work. Output, full
 redacted HTTP/MCP transcripts, and sample exports are saved separately under
 `.amp/in/artifacts/mcp-rate-limit/{local,production}/`. Auth secrets and cookies
-are never written there. The script then waits 61 seconds, verifies PNG rejection,
-and confirms SVG recovery. Local evidence is not production proof.
+are never written there. The script then waits 61 seconds, verifies that a 4×
+PNG is rejected by validation, and confirms SVG recovery. Local evidence is not production proof.
 
 ## Historical M0 recommendation
 
-The following measurements and commands apply to the pre-SVG-only spike. To
+The following measurements and commands apply to the pre-SVG-only spike. They
+are why PNG now rasterizes on Vercel Node rather than here. To
 reproduce the PNG benchmarks (`verify/limits.mjs` and `verify/measure.mjs`), use
-the historical spike commit `823a631`, not the current SVG-only endpoint.
-The current `verify/local.mjs` validates all six SVG fixtures and PNG rejection,
+the historical spike commit `823a631`, not the current endpoint.
+The current `verify/local.mjs` validates all six SVG fixtures and format validation,
 waiting for quota windows rather than bypassing the limiter.
 
 **Recommendation: pursue the Vercel Node fallback (option C). Do not promote

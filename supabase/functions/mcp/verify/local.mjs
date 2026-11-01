@@ -112,6 +112,7 @@ async function main() {
     "list_options",
     "publish_snippet",
     "render_snippet",
+    "search_themes",
   ]);
   for (const tool of tools.data.result.tools)
     assert.equal(tool.annotations.readOnlyHint, tool.name !== "publish_snippet");
@@ -119,7 +120,7 @@ async function main() {
   assert.ok(JSON.parse(options.data.result.content[0].text).languages.includes("javascript"));
   for (const [index, input] of [
     { code: "" },
-    { code: "x", format: "png" },
+    { code: "x", format: "jpeg" },
     { code: "x", pixelRatio: 3 },
     { code: "x", theme: "missing" },
     { code: "x", language: "missing" },
@@ -177,7 +178,7 @@ async function main() {
     }
   }
   console.log(
-    "PASS: discovery, missing/invalid/anonymous auth, signed-in tools, PNG rejection, and all 6 SVG exports",
+    "PASS: discovery, missing/invalid/anonymous auth, signed-in tools, format validation, and all 6 SVG exports",
   );
 }
 

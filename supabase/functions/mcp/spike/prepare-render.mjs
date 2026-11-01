@@ -113,6 +113,33 @@ await writeFile(
     "\n};\n",
 );
 
+// Theme search catalog: appearance from each theme's own data, family from the
+// upstream Neovim plugin that NOTICE.md records for it.
+const notice = await readFile(
+  new URL("node_modules/@lumis-sh/themes/dist/NOTICE.md", root),
+  "utf8",
+);
+const families = new Map(
+  notice
+    .split("\n")
+    .filter((line) => line.startsWith("| `"))
+    .map((line) => {
+      const [theme, source] = line.split(" | ");
+      return [theme.slice(3, -1), source.slice(1, source.indexOf("]"))];
+    }),
+);
+const catalog = [];
+for (const name of themeNames) {
+  const { appearance } = JSON.parse(
+    await readFile(new URL(`node_modules/@lumis-sh/themes/dist/json/${name}.json`, root)),
+  );
+  const family = families.get(name);
+  if (!family || !["dark", "light"].includes(appearance))
+    throw new Error(`Theme metadata missing for ${name}`);
+  catalog.push({ id: name, appearance, family });
+}
+await writeFile(new URL("theme-catalog.json", generated), JSON.stringify(catalog) + "\n");
+
 const downloads = [
   [
     "JetBrainsMono-Regular.ttf",

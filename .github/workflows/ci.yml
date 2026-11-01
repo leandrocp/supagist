@@ -114,6 +114,7 @@ jobs:
           supabase/functions/mcp/rate-limit_test.ts
           supabase/functions/mcp/redact_test.ts
           supabase/functions/mcp/server_test.ts
+          supabase/functions/mcp/themes_test.ts
           supabase/functions/mcp/spike/render.deno.ts
       - run: >-
           deno test --config supabase/functions/render/deno.json
@@ -142,9 +143,16 @@ jobs:
       # publish_snippet uploads to the snippet-images bucket.
       - name: Seed local buckets
         run: supabase seed buckets
-      - name: Serve the MCP function
+      # PNG goes MCP -> web app /api/render -> render function -> resvg, so
+      # serve every function and the web app the MCP function calls back into.
+      - name: Serve the Edge Functions and the web app
         run: |
-          nohup supabase functions serve mcp > "$RUNNER_TEMP/functions.log" 2>&1 &
+          echo 'SUPAGIST_RENDER_API_URL=http://host.docker.internal:3000/api/render' > "$RUNNER_TEMP/functions.env"
+          nohup supabase functions serve --env-file "$RUNNER_TEMP/functions.env" \
+            > "$RUNNER_TEMP/functions.log" 2>&1 &
+          eval "$(supabase status -o env | grep -E '^(API_URL|PUBLISHABLE_KEY)=')"
+          NEXT_PUBLIC_SUPABASE_URL="$API_URL" NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY="$PUBLISHABLE_KEY" \
+            nohup npx next dev -p 3000 -H 0.0.0.0 > "$RUNNER_TEMP/web.log" 2>&1 &
           # Unauthenticated calls get 401 once the function answers.
           for _ in $(seq 1 90); do
             status="$(curl -s -o /dev/null -w '%{http_code}' -X POST \
@@ -154,14 +162,27 @@ jobs:
           done
           cat "$RUNNER_TEMP/functions.log"
           exit 1
+      # Also compiles /api/render's module graph before the first PNG call.
+      - name: Wait for the web app
+        run: |
+          for _ in $(seq 1 90); do
+            status="$(curl -s -o /dev/null -w '%{http_code}' -X POST http://127.0.0.1:3000/api/render \
+              -H 'content-type: application/json' -d '{}' || true)"
+            if [ "$status" = 400 ]; then exit 0; fi
+            sleep 2
+          done
+          cat "$RUNNER_TEMP/web.log"
+          exit 1
       # OAuth-protected HTTP, tool schema, catalog, skill examples, 16:9 and
       # ligatures, each render as a disposable local user.
       - run: node supabase/functions/mcp/verify/appearance.mjs
       # Auth, unlisted + redacted storage, RLS visibility and -32300.
       - run: node supabase/functions/mcp/verify/publish.mjs
+      # search_themes, PNG through the web app, legacy inputs, close matches.
+      - run: node supabase/functions/mcp/verify/tools.mjs
       - name: Function logs
         if: failure()
-        run: cat "$RUNNER_TEMP/functions.log"
+        run: cat "$RUNNER_TEMP/functions.log" "$RUNNER_TEMP/web.log"
       - name: Stop Supabase
         if: always()
         run: supabase stop
