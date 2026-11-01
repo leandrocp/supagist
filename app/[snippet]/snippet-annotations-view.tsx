@@ -584,9 +584,8 @@ export function SnippetAnnotationsView({
     }
 
     if (!emoji) {
-      // Use .select() so an RLS-blocked delete surfaces as zero rows (and
-      // we can avoid sending a stale broadcast). Without it, RLS denials
-      // are silent — the bug we just fixed in the policies.
+      // Use .select() so an RLS-blocked delete surfaces as zero rows: RLS
+      // denies a DELETE without an error, so zero rows is the failure signal.
       const { data: deleted, error } = await supabase
         .from("snippet_line_reactions")
         .delete()
@@ -594,7 +593,10 @@ export function SnippetAnnotationsView({
         .eq("author_id", currentUserId)
         .eq("line_number", line)
         .select("id");
-      if (error || !deleted?.length) return;
+      if (error || !deleted?.length) {
+        toast.error("Could not remove your reaction. Please try again.");
+        return;
+      }
 
       const deletedIds = new Set(deleted.map((row) => row.id));
       setLineReactions((prev) => ({
@@ -604,7 +606,7 @@ export function SnippetAnnotationsView({
       return;
     }
 
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("snippet_line_reactions")
       .upsert(
         { snippet_id: snippetId, author_id: currentUserId, line_number: line, emoji },
@@ -612,6 +614,7 @@ export function SnippetAnnotationsView({
       )
       .select("id")
       .single();
+    if (error) toast.error("Could not save your reaction. Please try again.");
 
     if (data?.id) {
       setLineReactions((prev) => ({
@@ -663,11 +666,16 @@ export function SnippetAnnotationsView({
       return;
     }
 
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("snippet_comments")
       .insert({ snippet_id: snippetId, author_id: currentUserId, line_number: line, body })
       .select("id, created_at")
       .single();
+    if (error) {
+      // Give the draft back so nothing the user typed is lost.
+      setCommentDraft(body);
+      toast.error("Could not post your comment. Please try again.");
+    }
 
     if (data?.id) {
       setLineComments((prev) => ({

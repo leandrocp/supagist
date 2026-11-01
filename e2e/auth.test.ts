@@ -134,6 +134,56 @@ test("authenticated user can add a reaction to a line", async ({ page }) => {
   await expect(page.getByRole("button", { name: /reacted with 🔥/i })).toBeVisible();
 });
 
+test("removing a line reaction persists across a reload", async ({ page }) => {
+  await page.goto("/");
+  await page.locator("textarea").fill("const unreact = 1;");
+  await page.getByRole("button", { name: /^publish$/i }).click();
+  await page.waitForURL(/\/[a-z0-9-]+-[a-z0-9]{6}$/);
+
+  const gutterLine = page.locator(".group\\/gutterline").first();
+  const reacted = page.getByRole("button", { name: /reacted with 🔥/i });
+  await gutterLine.hover();
+  await gutterLine.getByRole("button", { name: "Add a reaction" }).click();
+  await page.getByRole("button", { name: "🔥" }).click();
+  await expect(reacted).toBeVisible();
+
+  await page.reload();
+  await expect(reacted).toBeVisible();
+  await gutterLine.hover();
+  await gutterLine.getByRole("button", { name: "Add a reaction" }).click();
+  await page.getByRole("button", { name: "Remove reaction" }).click();
+  await expect(reacted).toHaveCount(0);
+
+  await page.reload();
+  await expect(page.getByText("const unreact")).toBeVisible();
+  await expect(reacted).toHaveCount(0);
+});
+
+test("a failed reaction removal says so and keeps the reaction", async ({ page }) => {
+  await page.goto("/");
+  await page.locator("textarea").fill("const failing = 1;");
+  await page.getByRole("button", { name: /^publish$/i }).click();
+  await page.waitForURL(/\/[a-z0-9-]+-[a-z0-9]{6}$/);
+
+  const gutterLine = page.locator(".group\\/gutterline").first();
+  const reacted = page.getByRole("button", { name: /reacted with 🔥/i });
+  await gutterLine.hover();
+  await gutterLine.getByRole("button", { name: "Add a reaction" }).click();
+  await page.getByRole("button", { name: "🔥" }).click();
+  await expect(reacted).toBeVisible();
+
+  await page.route("**/rest/v1/snippet_line_reactions*", (route) =>
+    route.request().method() === "DELETE"
+      ? route.fulfill({ status: 500, contentType: "application/json", body: '{"message":"x"}' })
+      : route.fallback(),
+  );
+  await gutterLine.hover();
+  await gutterLine.getByRole("button", { name: "Add a reaction" }).click();
+  await page.getByRole("button", { name: "Remove reaction" }).click();
+  await expect(page.getByText("Could not remove your reaction. Please try again.")).toBeVisible();
+  await expect(reacted).toBeVisible();
+});
+
 test("saved view window toolbar fits an iPhone SE viewport", async ({ page }) => {
   await page.goto("/");
   await page.locator("textarea").fill("const fits = true;");
