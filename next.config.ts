@@ -70,6 +70,7 @@ const nextConfig: NextConfig = {
     // edited snippets with the parsers, TTF faces and brand images
     // (lib/snippet-render.ts).
     "/\\[snippet\\]/og.png": ["./assets/og/**/*", ...SNIPPET_RENDER_FILES],
+    "/\\[snippet\\]/image.png": SNIPPET_RENDER_FILES,
     // Read at request time; see lib/google-connected-apps.ts.
     "/.well-known/google-connected-apps": ["./google-connected-apps.json"],
   },

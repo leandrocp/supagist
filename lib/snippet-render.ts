@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { createHighlightedSvg, EXPORT_WIDTH, type ExportRuntime } from "@/lib/export-utils";
@@ -30,6 +31,19 @@ const TTF = new Map([
 ]);
 const FONT_DIR = join(process.cwd(), "supabase/functions/mcp/assets");
 const PUBLIC_DIR = join(process.cwd(), "public");
+
+/** `?v=` for a live render: changes whenever the row's picture would. */
+export function renderVersion(snippet: Omit<RenderableSnippet, "author">): string {
+  const key = JSON.stringify([
+    snippet.code,
+    snippet.filename,
+    snippet.language,
+    snippet.theme,
+    snippet.font_id,
+    snippet.appearance,
+  ]);
+  return createHash("sha256").update(key).digest("hex").slice(0, 12);
+}
 
 let highlighter: ExportRuntime["highlighter"] | null = null;
 

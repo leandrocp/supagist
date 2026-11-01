@@ -64,6 +64,25 @@ describe("getMySnippets", () => {
     expect(result[0]).not.toHaveProperty("canonical_image_path");
   });
 
+  it("links an edited snippet's thumbnail to its live render, versioned by content", async () => {
+    // An edit nulls canonical_image_path (and drops the stored file).
+    const edited = (code: string) => ({
+      ...SNIPPET,
+      canonical_image_path: null,
+      code,
+      theme: "dracula",
+      font_id: "jetbrains",
+      appearance: null,
+    });
+    mockCreateClient.mockResolvedValue(makeMockSupabase({ snippets: [edited("one")] }));
+    const [before] = await getMySnippets();
+    mockCreateClient.mockResolvedValue(makeMockSupabase({ snippets: [edited("two")] }));
+    const [after] = await getMySnippets();
+    expect(before.thumbnail_url).toMatch(/^\/hello-ts-abc123\/image\.png\?v=[0-9a-f]{12}$/);
+    expect(after.thumbnail_url).not.toBe(before.thumbnail_url);
+    expect(after).not.toHaveProperty("code");
+  });
+
   it("returns empty array when the user has no snippets", async () => {
     mockCreateClient.mockResolvedValue(makeMockSupabase({ snippets: [] }));
     expect(await getMySnippets()).toEqual([]);
