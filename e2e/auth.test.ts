@@ -68,10 +68,9 @@ for (const font of [
   { id: "jetbrains", label: "JetBrains Mono", family: '"JetBrains Mono"' },
 ]) {
   test(`published snippets retain ${font.label} in the saved view and export`, async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/compose");
     await page.locator("textarea").fill("const font = 'saved';\nconsole.log(font);");
     await page.getByLabel("Filename").fill("font.ts");
-    await page.getByRole("button", { name: "Advanced settings" }).click();
     await page.getByRole("combobox", { name: "Font", exact: true }).click();
     await page.getByRole("option", { name: font.label, exact: true }).click();
     await expect(page.locator("textarea")).toHaveCSS("font-family", font.family);

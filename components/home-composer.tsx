@@ -3,7 +3,17 @@
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { availableThemes, availableLanguages } from "@lumis-sh/lumis/client";
-import { Check, ChevronDown, Copy, Download, Lock, Shuffle, Upload } from "lucide-react";
+import {
+  Check,
+  ChevronDown,
+  Copy,
+  Download,
+  Lock,
+  Shuffle,
+  SlidersHorizontal,
+  Upload,
+} from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   EXPORT_MAX_LINES,
@@ -74,7 +84,6 @@ import { createClient } from "@/lib/supabase/client";
 import { cn, hasEnvVars } from "@/lib/utils";
 import { UserAvatar } from "@/components/user-avatar";
 import { Spinner } from "@/components/ui/spinner";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { publishSnippet } from "@/app/actions/publish";
 import { createDraftPng, createDraftSvg, createSnippetImages } from "@/lib/snippet-images";
@@ -174,7 +183,16 @@ type DraftAnnotations = {
   reactions: Record<number, string>;
 };
 
-export function HomeComposer() {
+type HomeComposerProps = {
+  /**
+   * The home page shows a teaser: a wide preview with the basic options. The
+   * full-screen editor at /compose shows every setting. Both edit the same
+   * localStorage draft, so moving between them keeps the work.
+   */
+  full?: boolean;
+};
+
+export function HomeComposer({ full = false }: HomeComposerProps) {
   const router = useRouter();
   const [draft, setDraft] = useState<Draft>({
     filename: DEFAULT_FILENAME,
@@ -205,7 +223,6 @@ export function HomeComposer() {
   const [isExporting, setIsExporting] = useState(false);
   const [copied, setCopied] = useState(false);
   const [backgroundQuery, setBackgroundQuery] = useState("");
-  const [advancedOpen, setAdvancedOpen] = useState(false);
   const [exportMenuOpen, setExportMenuOpen] = useState(false);
   const [showAuthBanner, setShowAuthBanner] = useState(false);
   const authBannerTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -657,15 +674,25 @@ export function HomeComposer() {
   return (
     <section
       data-testid="composer-shell"
-      className="flex min-h-0 flex-col text-foreground lg:h-[clamp(30rem,calc(100dvh-14rem),36rem)]"
+      data-variant={full ? "full" : "teaser"}
+      className={cn("flex min-h-0 flex-col text-foreground", full && "lg:h-full")}
     >
       <div
         data-testid="composer-main"
-        className="grid min-h-0 flex-1 gap-6 lg:grid-cols-[minmax(0,1fr)_24.5rem] lg:grid-rows-[minmax(0,1fr)_auto] lg:gap-x-8"
+        className={cn(
+          "grid min-h-0 flex-1 gap-6",
+          full &&
+            "lg:grid-cols-[minmax(0,1fr)_24.5rem] lg:grid-rows-[minmax(0,1fr)_auto] lg:gap-x-8",
+        )}
       >
         <div
           data-testid="preview-pane"
-          className="relative flex min-h-[clamp(13rem,34dvh,22rem)] flex-col items-center lg:col-start-1 lg:row-start-1 justify-center overflow-auto lg:min-h-0"
+          className={cn(
+            "relative flex min-h-[clamp(13rem,34dvh,22rem)] flex-col items-center justify-center overflow-auto",
+            full
+              ? "lg:col-start-1 lg:row-start-1 lg:min-h-0"
+              : "rounded-2xl md:bg-surf2/60 md:p-8 lg:max-h-[min(72dvh,46rem)]",
+          )}
         >
           {showAuthBanner ? (
             <div className="absolute inset-x-0 top-0 z-10 flex min-h-11 items-center gap-3 rounded-xl bg-surf2 px-4 py-2 text-sm text-muted-foreground">
@@ -769,20 +796,25 @@ export function HomeComposer() {
 
         <div
           data-testid="composer-workspace"
-          className="relative flex min-h-0 w-full flex-col overflow-hidden lg:col-start-2 lg:row-span-2 lg:row-start-1"
+          className={cn(
+            "relative flex min-h-0 w-full flex-col overflow-hidden",
+            full && "lg:col-start-2 lg:row-span-2 lg:row-start-1",
+          )}
         >
           <ScrollArea data-testid="customization-scroll" type="hover" className="min-h-0 flex-1">
-            <div className="min-w-0 pb-4 lg:pr-1">
-              <div className="mb-5 flex flex-col gap-1">
-                <h2 className="font-display text-[28px] leading-tight text-foreground">
+            <div className={cn("min-w-0", full && "pb-4 lg:pr-1")}>
+              {full ? (
+                <h2 className="mb-5 font-display text-[28px] leading-tight text-foreground">
                   Customize
                 </h2>
-                <p className="text-sm text-muted-foreground">
-                  Start with the essentials, then fine-tune if needed
-                </p>
-              </div>
+              ) : null}
 
-              <div className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2">
+              <div
+                className={cn(
+                  "grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2",
+                  !full && "lg:grid-cols-[repeat(4,minmax(0,1fr))_auto] lg:items-end",
+                )}
+              >
                 <div className="flex min-w-0 flex-col gap-1">
                   <span className={panelLabelClass}>Brand</span>
                   <BrandPicker
@@ -906,25 +938,19 @@ export function HomeComposer() {
                   </Popover>
                 </div>
 
-                <Collapsible
-                  open={advancedOpen}
-                  onOpenChange={setAdvancedOpen}
-                  className="col-span-full"
-                >
-                  <CollapsibleTrigger asChild>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      className="h-11 w-full justify-between rounded-xl px-1 text-[15px] text-foreground hover:bg-transparent"
-                    >
-                      Advanced settings
-                      <ChevronDown
-                        data-icon="inline-end"
-                        className={cn("transition-transform", advancedOpen && "rotate-180")}
-                      />
-                    </Button>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent className="pt-4">
+                {!full ? (
+                  <Button
+                    asChild
+                    variant="outline"
+                    className="h-11 px-5 sm:col-span-full lg:col-auto"
+                  >
+                    <Link href="/compose">
+                      <SlidersHorizontal data-icon="inline-start" />
+                      All options
+                    </Link>
+                  </Button>
+                ) : (
+                  <div className="col-span-full pt-2">
                     <div className="flex flex-col gap-4">
                       <div className="flex flex-col gap-2">
                         <span className="eyebrow text-faint">Code and frame</span>
@@ -1372,8 +1398,8 @@ export function HomeComposer() {
                         </section>
                       </div>
                     </div>
-                  </CollapsibleContent>
-                </Collapsible>
+                  </div>
+                )}
               </div>
             </div>
           </ScrollArea>
@@ -1381,7 +1407,10 @@ export function HomeComposer() {
 
         <div
           data-testid="composer-actions"
-          className="flex min-w-0 shrink-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between lg:col-start-1 lg:row-start-2"
+          className={cn(
+            "flex min-w-0 shrink-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between",
+            full && "lg:col-start-1 lg:row-start-2",
+          )}
         >
           <div className="flex min-w-0 flex-wrap items-center gap-x-5 gap-y-1 font-mono text-[13px] text-muted-foreground">
             <span className="hidden lg:inline">Export or publish</span>

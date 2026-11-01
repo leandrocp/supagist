@@ -167,11 +167,10 @@ for (const [language, [code, token]] of Object.entries(samples)) {
     });
 
     try {
-      const response = await page.goto("/");
+      const response = await page.goto("/compose");
       const csp = response?.headers()["content-security-policy"];
       expect(csp).toBeDefined();
       expect(csp).not.toContain("cdn.jsdelivr.net");
-      await page.getByRole("button", { name: "Advanced settings", exact: true }).click();
       await page.getByRole("combobox", { name: "Language", exact: true }).click();
       await page.getByRole("option", { name: language, exact: true }).click();
       await page.getByLabel("Code", { exact: true }).fill(code);

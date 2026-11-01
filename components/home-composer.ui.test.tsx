@@ -132,10 +132,27 @@ describe("HomeComposer controls", () => {
     expect(container.querySelector("nav")).toBeNull();
   });
 
-  it("keeps the preview visible while customization scrolls independently", () => {
+  it("shows only the basic options on the home teaser and links to the full editor", () => {
     render(<HomeComposer />);
 
-    expect(screen.getByTestId("composer-shell").className).toContain("lg:h-[clamp(");
+    for (const name of ["Brand", "Theme", "Background"]) {
+      expect(screen.getByText(name, { selector: "span" })).toBeTruthy();
+    }
+    expect(screen.getByLabelText("Filename")).toBeTruthy();
+    expect(screen.queryByRole("combobox", { name: "Font" })).toBeNull();
+    expect(screen.queryByRole("heading", { name: "Header" })).toBeNull();
+    expect(screen.getByRole("link", { name: "All options" }).getAttribute("href")).toBe("/compose");
+    // The teaser preview spans the page instead of sharing it with a side panel.
+    expect(screen.getByTestId("composer-main").className).not.toContain("lg:grid-cols-");
+    expect(screen.getByRole("button", { name: "Publish" })).toBeTruthy();
+  });
+
+  it("keeps the preview visible while customization scrolls independently", () => {
+    render(<HomeComposer full />);
+
+    expect(screen.queryByRole("link", { name: "All options" })).toBeNull();
+    expect(screen.getByRole("combobox", { name: "Font" })).toBeTruthy();
+    expect(screen.getByTestId("composer-shell").className).toContain("lg:h-full");
     expect(screen.getByTestId("composer-main").className).toContain("lg:grid-cols-");
     expect(screen.getByTestId("preview-pane").className).toContain("overflow-auto");
     expect(screen.getByTestId("composer-workspace").className).toContain("overflow-hidden");
@@ -190,9 +207,7 @@ describe("HomeComposer controls", () => {
   });
 
   it("groups granular Header and Footer controls in advanced settings", () => {
-    render(<HomeComposer />);
-
-    fireEvent.click(screen.getByRole("button", { name: "Advanced settings" }));
+    render(<HomeComposer full />);
 
     expect(screen.getByRole("heading", { name: "Header" })).toBeTruthy();
     expect(screen.getByRole("heading", { name: "Footer" })).toBeTruthy();
@@ -224,21 +239,8 @@ describe("HomeComposer controls", () => {
     expect(within(screen.getByTestId("preview-footer")).queryByText("github_light")).toBeNull();
   });
 
-  it("hides advanced choices until requested", () => {
-    render(<HomeComposer />);
-
-    expect(screen.queryByRole("combobox", { name: "Language" })).toBeNull();
-
-    fireEvent.click(screen.getByRole("button", { name: "Advanced settings" }));
-
-    expect(screen.getByRole("combobox", { name: "Language" })).toBeTruthy();
-    expect(screen.getByRole("combobox", { name: "Scale" })).toBeTruthy();
-  });
-
   it("offers separate Minimal and macOS Subtle window styles", () => {
-    render(<HomeComposer />);
-
-    fireEvent.click(screen.getByRole("button", { name: "Advanced settings" }));
+    render(<HomeComposer full />);
     fireEvent.click(screen.getByRole("combobox", { name: "Window" }));
 
     expect(screen.getByRole("option", { name: "Minimal" })).toBeTruthy();
@@ -246,9 +248,7 @@ describe("HomeComposer controls", () => {
   });
 
   it("offers a font size picker next to the font picker", () => {
-    render(<HomeComposer />);
-
-    fireEvent.click(screen.getByRole("button", { name: "Advanced settings" }));
+    render(<HomeComposer full />);
 
     expect(screen.getByRole("combobox", { name: "Font" }).textContent).toBe("System");
     expect(screen.getByRole("combobox", { name: "Font size" }).textContent).toBe("14px");
@@ -267,13 +267,11 @@ describe("HomeComposer controls", () => {
   });
 
   it("toggles ligatures and the 16:9 size, reflected in the live preview", () => {
-    render(<HomeComposer />);
+    render(<HomeComposer full />);
     const preview = () => screen.getByTestId("code-preview");
     const canvas = () => preview().parentElement!;
     expect(preview().style.fontVariantLigatures).toBe("");
     expect(canvas().style.aspectRatio).toBe("");
-
-    fireEvent.click(screen.getByRole("button", { name: "Advanced settings" }));
     fireEvent.click(screen.getByRole("switch", { name: "Ligatures" }));
     expect(preview().style.fontVariantLigatures).toBe("none");
 
@@ -330,9 +328,7 @@ describe("HomeComposer controls", () => {
   });
 
   it("keeps each visible-detail switch associated with its label", () => {
-    render(<HomeComposer />);
-
-    fireEvent.click(screen.getByRole("button", { name: "Advanced settings" }));
+    render(<HomeComposer full />);
 
     const lineNumbers = screen.getByRole("switch", { name: "Line numbers" });
     expect(lineNumbers.getAttribute("aria-checked")).toBe("false");
@@ -344,9 +340,7 @@ describe("HomeComposer controls", () => {
   });
 
   it("enables reaction visibility when a reaction is added", () => {
-    render(<HomeComposer />);
-
-    fireEvent.click(screen.getByRole("button", { name: "Advanced settings" }));
+    render(<HomeComposer full />);
     const reactions = screen.getByRole("switch", { name: "Reactions" });
     expect(reactions.getAttribute("aria-checked")).toBe("false");
 
@@ -359,11 +353,10 @@ describe("HomeComposer controls", () => {
   });
 
   it("uses an outer-padding slider that supports zero", () => {
-    render(<HomeComposer />);
+    render(<HomeComposer full />);
 
     fireEvent.click(screen.getByRole("button", { name: "None" }));
     fireEvent.click(screen.getByRole("button", { name: "Forest" }));
-    fireEvent.click(screen.getByRole("button", { name: "Advanced settings" }));
 
     const outerPaddingSlider = screen.getByRole("slider", { name: "Outer padding" });
     expect(outerPaddingSlider.getAttribute("aria-valuemin")).toBe("0");
@@ -380,9 +373,7 @@ describe("HomeComposer controls", () => {
   });
 
   it("applies configurable inner padding to the preview", () => {
-    render(<HomeComposer />);
-
-    fireEvent.click(screen.getByRole("button", { name: "Advanced settings" }));
+    render(<HomeComposer full />);
 
     const innerPaddingSlider = screen.getByRole("slider", { name: "Inner padding" });
     expect(screen.getByTestId("code-preview").getAttribute("data-inner-padding")).toBe("16");
@@ -393,9 +384,7 @@ describe("HomeComposer controls", () => {
   });
 
   it("controls preview corner radius from square to 16px", () => {
-    render(<HomeComposer />);
-
-    fireEvent.click(screen.getByRole("button", { name: "Advanced settings" }));
+    render(<HomeComposer full />);
 
     const radiusSlider = screen.getByRole("slider", { name: "Corner radius" });
     expect(radiusSlider.getAttribute("aria-valuemax")).toBe("4");

@@ -191,7 +191,7 @@ for (const preset of BRAND_PRESETS) {
   test(`brand ${preset.name}: the published snippet looks the way it was composed`, async ({
     page,
   }) => {
-    await page.goto("/");
+    await page.goto("/compose");
     await page.locator("textarea").fill(CODE);
     await page.getByLabel("Filename").fill("greet.ts");
     await page.getByRole("button", { name: "Brand", exact: true }).click();
@@ -202,7 +202,6 @@ for (const preset of BRAND_PRESETS) {
       preset.background.label,
     );
     // 2× keeps three full-size PNG renders per test within CI memory.
-    await page.getByRole("button", { name: "Advanced settings" }).click();
     await page.getByRole("combobox", { name: "Scale", exact: true }).click();
     await page.getByRole("option", { name: "2x", exact: true }).click();
 
@@ -342,14 +341,13 @@ for (const { name, draft } of OPTION_CASES) {
 // ── The composer's controls ──────────────────────────────────────────────────
 
 test("options set through the composer controls are published", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/compose");
   await page.locator("textarea").fill(CODE);
   await page.getByLabel("Filename").fill("greet.ts");
 
   await page.getByRole("button", { name: "None", exact: true }).click();
   await page.getByRole("button", { name: "Raindrop" }).click();
   await page.keyboard.press("Escape");
-  await page.getByRole("button", { name: "Advanced settings" }).click();
   const choose = async (label: string, option: string) => {
     await page.getByRole("combobox", { name: label, exact: true }).click();
     await page.getByRole("option", { name: option, exact: true }).click();

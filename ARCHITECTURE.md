@@ -88,7 +88,8 @@ The Brand picker uses a visual, searchable shadcn `Command` inside `Popover`, sh
 app/
   layout.tsx                   Root layout — wraps children in <Providers>, mounts NotificationsListener + Toaster
   providers.tsx                Calls signInAnonymously() on first visit
-  page.tsx                     Homepage — renders HomeComposer + MySnippets
+  page.tsx                     Homepage — HomeComposer teaser (preview + basic options)
+  compose/page.tsx             Full-screen HomeComposer with every option (same draft)
   terms/page.tsx               Static terms of use
   error.tsx, not-found.tsx     Branded error + 404 pages
   [snippet]/
