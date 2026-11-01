@@ -1,0 +1,7 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+inheritance: true
+reviews:
+  auto_review:
+    # Generated release pull requests (version bump and changelog only).
+    ignore_title_keywords:
+      - "chore(release): "
