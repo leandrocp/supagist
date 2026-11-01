@@ -84,6 +84,30 @@ describe("hasEnvVars", () => {
 });
 
 describe("getMetadataBase", () => {
+  it("uses the production domain on production deploys and the deployment URL on previews", () => {
+    const keys = [
+      "NEXT_PUBLIC_SITE_URL",
+      "VERCEL_ENV",
+      "VERCEL_URL",
+      "VERCEL_PROJECT_PRODUCTION_URL",
+    ] as const;
+    const original = Object.fromEntries(keys.map((k) => [k, process.env[k]]));
+    try {
+      delete process.env.NEXT_PUBLIC_SITE_URL;
+      process.env.VERCEL_URL = "supagist-abc123-leandrocp.vercel.app";
+      process.env.VERCEL_PROJECT_PRODUCTION_URL = "supagist.app";
+      process.env.VERCEL_ENV = "production";
+      expect(getMetadataBase().toString()).toBe("https://supagist.app/");
+      process.env.VERCEL_ENV = "preview";
+      expect(getMetadataBase().toString()).toBe("https://supagist-abc123-leandrocp.vercel.app/");
+    } finally {
+      for (const k of keys) {
+        if (original[k] === undefined) delete process.env[k];
+        else process.env[k] = original[k];
+      }
+    }
+  });
+
   it("falls back safely when the configured site URL is invalid", () => {
     const original = process.env.NEXT_PUBLIC_SITE_URL;
     process.env.NEXT_PUBLIC_SITE_URL = "not a valid URL";

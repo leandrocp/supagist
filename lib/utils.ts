@@ -6,10 +6,14 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function getAppUrl() {
-  return (
-    process.env.NEXT_PUBLIC_SITE_URL ??
-    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000")
-  );
+  if (process.env.NEXT_PUBLIC_SITE_URL) return process.env.NEXT_PUBLIC_SITE_URL;
+  // Production links and share images use the public domain, not the
+  // per-deployment hostname; preview deployments keep their own URL.
+  const host =
+    process.env.VERCEL_ENV === "production"
+      ? (process.env.VERCEL_PROJECT_PRODUCTION_URL ?? process.env.VERCEL_URL)
+      : process.env.VERCEL_URL;
+  return host ? `https://${host}` : "http://localhost:3000";
 }
 
 export function getMetadataBase(): URL {
