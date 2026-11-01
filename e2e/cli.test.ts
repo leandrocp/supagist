@@ -22,7 +22,9 @@ test.beforeAll(async () => {
 test.afterAll(() => rm(dir, { recursive: true, force: true }));
 
 const supagist = (...args: string[]) =>
-  cli(process.execPath, ["packages/cli", ...args, "--host", host]).then(
+  cli(process.execPath, ["packages/cli", ...args], {
+    env: { ...process.env, SUPAGIST_HOST: host },
+  }).then(
     ({ stdout }) => ({ code: 0, stdout }),
     (error: { code: number; stdout: string }) => ({ code: error.code, stdout: error.stdout }),
   );

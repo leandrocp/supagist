@@ -35,7 +35,6 @@ supagist <file|-> [options]
 | `--open`            | Open the saved image, or the published snippet.                                                                                                                                                                    |
 | `--from-clipboard`  | Render the code on the clipboard (`pbpaste` on macOS, `wl-paste` or `xclip` on Linux, PowerShell on Windows).                                                                                                      |
 | `--json`            | Print a JSON result, or a JSON error, on stdout.                                                                                                                                                                   |
-| `--host <url>`      | Use another server, such as `http://localhost:3000` or a preview deployment. Also `SUPAGIST_HOST`. Default `https://supagist.app`.                                                                                 |
 | `-h, --help`        | Show help.                                                                                                                                                                                                         |
 | `-v, --version`     | Show the version.                                                                                                                                                                                                  |
 
@@ -182,8 +181,7 @@ and approve **Supagist CLI**. The CLI is its own OAuth client with its own
 session: it registers itself, uses PKCE and receives the code on a
 `127.0.0.1` loopback port. It never reads or reuses your browser session.
 Credentials live in `~/.config/supagist/<host>.json` (or under
-`$XDG_CONFIG_HOME`) with mode 0600, and refresh themselves. `--host` picks the
-server, so local and preview deployments keep separate sign-ins.
+`$XDG_CONFIG_HOME`) with mode 0600, and refresh themselves.
 `auth logout` ends the CLI's session on the server and deletes the local file.
 
 ## Develop
@@ -194,7 +192,7 @@ From the repository root:
 supabase start
 supabase functions serve   # render, plus mcp for --publish
 npm run dev
-node packages/cli src/app.ts --host http://localhost:3000 --out app.svg
+SUPAGIST_HOST=http://localhost:3000 node packages/cli src/app.ts --out app.svg
 npx vitest run packages/cli       # unit tests
 npx playwright test e2e/cli.test.ts --project=chromium   # against the local server
 ```

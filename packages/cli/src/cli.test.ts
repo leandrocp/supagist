@@ -355,7 +355,8 @@ describe("run", () => {
     fetchMock.mockRejectedValue(
       new TypeError("fetch failed", { cause: new Error("ECONNREFUSED") }),
     );
-    expect(await cli(join(dir, "auth.ts"), "--host", "http://localhost:3999")).toBe(1);
+    env.SUPAGIST_HOST = "http://localhost:3999";
+    expect(await cli(join(dir, "auth.ts"))).toBe(1);
     expect(stderr.join("")).toBe("supagist: Could not reach http://localhost:3999: ECONNREFUSED\n");
   });
 
@@ -405,15 +406,18 @@ describe("run", () => {
     expect(stderr.join("")).toBe("Saved snippet.svg (600×400)\n");
   });
 
-  it("uses SUPAGIST_HOST unless --host is given, and validates both", async () => {
+  it("uses SUPAGIST_HOST for local servers, validates it, and has no --host flag", async () => {
     fetchMock.mockImplementation(() => Promise.resolve(svgResponse()));
     env.SUPAGIST_HOST = "http://localhost:3000/";
     await cli(join(dir, "auth.ts"));
-    await cli(join(dir, "auth.ts"), "--host", "https://preview.vercel.app");
     expect(sent(0).url).toBe("http://localhost:3000/api/render");
-    expect(sent(1).url).toBe("https://preview.vercel.app/api/render");
-    expect(await cli(join(dir, "auth.ts"), "--host", "ftp://x")).toBe(2);
-    expect(await cli(join(dir, "auth.ts"), "--host", "not a url")).toBe(2);
+    env.SUPAGIST_HOST = "ftp://x";
+    expect(await cli(join(dir, "auth.ts"))).toBe(2);
+    env.SUPAGIST_HOST = "not a url";
+    expect(await cli(join(dir, "auth.ts"))).toBe(2);
+    delete env.SUPAGIST_HOST;
+    expect(await cli(join(dir, "auth.ts"), "--host", "https://x.app")).toBe(2);
+    expect(stderr.join("")).toContain("Unknown option --host");
   });
 
   it("prints the server's option catalog", async () => {
@@ -437,7 +441,7 @@ describe("run", () => {
     expect(await cli("--version")).toBe(0);
     expect(stdout.join("")).toBe(`${VERSION}\n`);
     expect(await cli("help")).toBe(0);
-    expect(stdout.join("")).toContain("Exit codes: 0 ok, 1 failure, 2 usage.");
+    expect(stdout.join("")).toContain("0 success   1 error   2 wrong arguments");
     expect(stdout.join("")).toContain("https://supagist.app\n\nExamples\n");
     expect(fetchMock).not.toHaveBeenCalled();
   });

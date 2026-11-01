@@ -53,7 +53,6 @@ Output
       --json              Machine-readable output and errors on stdout
       --publish           Save an unlisted snippet to your account instead
       --title <text>      Page title of the published snippet
-      --host <url>        Server (default: $SUPAGIST_HOST or ${DEFAULT_HOST})
 
 Appearance (values come from \`supagist options\`; flags override the brand)
   --brand <id>  --theme <id>  --background <label|none>  --font <id>
@@ -66,9 +65,13 @@ Appearance (values come from \`supagist options\`; flags override the brand)
   --[no-]footer  --[no-]footer-language  --[no-]footer-theme  --[no-]footer-lines
   --[no-]footer-chars  --[no-]footer-author  --footer-align <left|center|right>
 
-Rendering creates nothing on the server. --publish creates an unlisted snippet
-(anyone with the link can view it) after replacing common secrets with
-[REDACTED:kind]. Exit codes: 0 ok, 1 failure, 2 usage.
+Privacy
+  Rendering doesn't save your code anywhere.
+  --publish saves it as a snippet that only people with the link can see.
+  API keys and other secrets are removed before it's saved.
+
+Exit codes
+  0 success   1 error   2 wrong arguments
 `;
 
 /**
@@ -106,7 +109,7 @@ export async function run(argv, io) {
     const args = parseArgs(argv);
     if (args.command === "version") return print(io, `${VERSION}\n`);
     if (args.command === "help") return print(io, HELP);
-    const host = resolveHost(/** @type {string | undefined} */ (args.flags.host), io.env);
+    const host = resolveHost(io.env);
     if (args.command === "options") return await options(host, args.flags, io);
     if (args.command === "auth")
       return await auth(host, /** @type {string} */ (args.action), args.flags, io);
@@ -138,17 +141,17 @@ function print(io, text) {
   return EXIT.ok;
 }
 
-/** @param {string | undefined} flag @param {Io["env"]} env */
-export function resolveHost(flag, env) {
-  const value = flag ?? env.SUPAGIST_HOST ?? DEFAULT_HOST;
+/** SUPAGIST_HOST points the CLI at a local or preview server (see CONTRIBUTING.md). @param {Io["env"]} env */
+export function resolveHost(env) {
+  const value = env.SUPAGIST_HOST || DEFAULT_HOST;
   let url;
   try {
     url = new URL(value);
   } catch {
-    throw new UsageError(`--host must be a URL such as ${DEFAULT_HOST}, got "${value}".`);
+    throw new UsageError(`SUPAGIST_HOST must be a URL such as ${DEFAULT_HOST}, got "${value}".`);
   }
   if (url.protocol !== "https:" && url.protocol !== "http:") {
-    throw new UsageError(`--host must use http or https, got "${value}".`);
+    throw new UsageError(`SUPAGIST_HOST must use http or https, got "${value}".`);
   }
   return url.href.replace(/\/+$/, "");
 }

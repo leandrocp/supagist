@@ -138,13 +138,13 @@ npm link ./packages/cli
 supagist --help
 ```
 
-By default the CLI calls the production render API (`https://supagist.app`). Point it at your local stack with `--host` or `SUPAGIST_HOST`:
+By default the CLI calls the production render API (`https://supagist.app`). Point it at your local stack, or a preview deployment, with `SUPAGIST_HOST`:
 
 ```sh
 supabase start
 supabase functions serve render                     # the Edge Function behind /api/render
 npm run dev                                         # the app proxies /api/render to it
-node packages/cli/bin/supagist.js src/app.ts --host http://localhost:3000 --out app.svg
+SUPAGIST_HOST=http://localhost:3000 node packages/cli src/app.ts --out app.svg
 ```
 
 CLI tests:

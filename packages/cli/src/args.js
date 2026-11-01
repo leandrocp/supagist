@@ -42,7 +42,6 @@ export const APPEARANCE_FLAGS = {
 /** @type {Record<string, Flag>} */
 const GLOBAL_FLAGS = {
   json: { type: "boolean" },
-  host: { type: "string" },
   help: { type: "boolean" },
   version: { type: "boolean" },
 };

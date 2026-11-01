@@ -23,7 +23,6 @@ npx supagist auth login|logout|status
 | `--language <id>`   | Exact language id; by default the server detects it from the filename and code                        |
 | `--pixel-ratio <n>` | PNG `1`, `2` (default), `4`, `6`; SVG `1` or `2`                                                      |
 | `--json`            | One JSON line on stdout, for results and errors                                                       |
-| `--host <url>`      | Another server, e.g. `http://localhost:3000`; also `SUPAGIST_HOST`                                    |
 | `--publish`         | Save an unlisted snippet instead of a file. Not with `--out`, `--format`, `--pixel-ratio`, `--author` |
 | `--title <text>`    | Page title of a published snippet; also forms the link slug                                           |
 
