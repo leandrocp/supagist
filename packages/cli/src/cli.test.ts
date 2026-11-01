@@ -54,7 +54,8 @@ describe("parseArgs", () => {
   });
 
   it.each([
-    [["a.ts", "--brnd", "x"], "Unknown option --brnd"],
+    [["a.ts", "--brnd", "x"], "Unknown option --brnd. Did you mean --brand?"],
+    [["a.ts", "--line-number"], "Did you mean --line-numbers?"],
     [["a.ts", "--constructor", "x"], "Unknown option --constructor"],
     [["a.ts", "--no-brand"], "Unknown option --no-brand"],
     [["a.ts", "--brand"], "--brand needs a value"],
@@ -333,6 +334,23 @@ describe("run", () => {
       ok: false,
       error: { code: "INVALID_INPUT", message: "brand: Invalid option", status: 400 },
     });
+  });
+
+  it("suggests the brand that was meant", async () => {
+    fetchMock.mockImplementation(async (input) =>
+      String(input).endsWith("/api/options")
+        ? Response.json({ brands: [{ id: "supabase" }, { id: "vercel" }] })
+        : Response.json(
+            {
+              error: { code: "INVALID_INPUT", message: "brand: Invalid option: expected one of …" },
+            },
+            { status: 400 },
+          ),
+    );
+    expect(await cli(join(dir, "auth.ts"), "--brand", "supabse")).toBe(2);
+    expect(stderr.join("")).toBe(
+      "supagist: Unknown brand supabse. Did you mean supabase? Run supagist options to see them all.\n",
+    );
   });
 
   it("exits 1 on rate limits, keeping Retry-After", async () => {

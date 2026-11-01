@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { access, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { basename, extname, join, resolve } from "node:path";
-import { UsageError, parseArgs, parseLineRange, renderFields } from "./args.js";
+import { UsageError, closest, parseArgs, parseLineRange, renderFields } from "./args.js";
 import { AuthError, accessToken, loadCredentials, login, logout, tokenClaims } from "./auth.js";
 
 export const VERSION = JSON.parse(
@@ -78,7 +78,7 @@ Exit codes
  * @typedef {{
  *   stdin: AsyncIterable<Buffer | string> & { isTTY?: boolean },
  *   stdout: { write(chunk: string | Uint8Array): unknown, isTTY?: boolean },
- *   stderr: { write(chunk: string): unknown },
+ *   stderr: { write(chunk: string): unknown, isTTY?: boolean },
  *   env: Record<string, string | undefined>,
  *   fetch: typeof fetch,
  *   openUrl?: (url: string) => unknown,
@@ -277,11 +277,13 @@ async function render(host, file, flags, io) {
   };
   if (flags.publish) return await publish(host, fields, flags, io);
   const body = { ...fields, ...(format === "png" ? { format } : {}) };
-  const response = await request(host, "/api/render", io, {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify(body),
-  });
+  const response = await spin(io, `Rendering ${fields.filename ?? "code"}`, () =>
+    request(host, "/api/render", io, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(body),
+    }),
+  ).catch((error) => suggestBrand(error, host, flags, io));
   const bytes = new Uint8Array(await response.arrayBuffer());
   const width = Number(response.headers.get("x-supagist-width")) || undefined;
   const height = Number(response.headers.get("x-supagist-height")) || undefined;
@@ -324,6 +326,47 @@ async function render(host, file, flags, io) {
   }
   io.stdout.write(bytes);
   return EXIT.ok;
+}
+
+/**
+ * Shows a spinner on stderr while work runs, only when a person is watching.
+ * @template T @param {Io} io @param {string} label @param {() => Promise<T>} work
+ */
+async function spin(io, label, work) {
+  if (!io.stderr.isTTY || io.env.CI) return work();
+  const frames = "⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏";
+  let i = 0;
+  const draw = () => io.stderr.write(`\r${frames[i++ % frames.length]} ${label}…`);
+  draw();
+  const timer = setInterval(draw, 80);
+  try {
+    return await work();
+  } finally {
+    clearInterval(timer);
+    io.stderr.write("\r\x1b[2K");
+  }
+}
+
+/**
+ * The server lists every brand when one is unknown; say which one was meant.
+ * @param {unknown} error @param {string} host @param {Record<string, unknown>} flags @param {Io} io
+ * @returns {Promise<never>}
+ */
+async function suggestBrand(error, host, flags, io) {
+  if (!(error instanceof ApiError) || error.details.code !== "INVALID_INPUT" || !flags.brand) {
+    throw error;
+  }
+  const brands = await request(host, "/api/options", io)
+    .then((r) => r.json())
+    .then((catalog) => catalog.brands.map((/** @type {{ id: string }} */ b) => b.id))
+    .catch(() => null);
+  const brand = String(flags.brand);
+  if (!brands || brands.includes(brand)) throw error;
+  const guess = closest(brand, brands);
+  throw new ApiError({
+    ...error.details,
+    message: `Unknown brand ${brand}.${guess ? ` Did you mean ${guess}?` : ""} Run supagist options to see them all.`,
+  });
 }
 
 /**

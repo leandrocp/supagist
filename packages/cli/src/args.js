@@ -96,7 +96,12 @@ export function parseArgs(argv) {
     const negated = rawName.startsWith("no-") && lookup(rawName.slice(3))?.type === "boolean";
     const name = negated ? rawName.slice(3) : rawName;
     const flag = lookup(name);
-    if (!flag) throw new UsageError(`Unknown option --${rawName}. Run supagist --help.`);
+    if (!flag) {
+      const guess = closest(rawName, Object.keys(flagSet));
+      throw new UsageError(
+        `Unknown option --${rawName}.${guess ? ` Did you mean --${guess}?` : ""} Run supagist --help.`,
+      );
+    }
     if (name in flags) throw new UsageError(`--${name} was given more than once.`);
     if (flag.type === "boolean") {
       if (inline !== undefined) throw new UsageError(`--${rawName} takes no value.`);
@@ -178,4 +183,35 @@ export function renderFields(flags) {
     else fields[flag.field] = flags[name];
   }
   return fields;
+}
+
+/** Edit distance between two strings (insertions, deletions, substitutions). @param {string} a @param {string} b */
+function distance(a, b) {
+  let previous = Array.from({ length: b.length + 1 }, (_, i) => i);
+  for (let i = 1; i <= a.length; i++) {
+    const current = [i];
+    for (let j = 1; j <= b.length; j++) {
+      current[j] = Math.min(
+        previous[j] + 1,
+        current[j - 1] + 1,
+        previous[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1),
+      );
+    }
+    previous = current;
+  }
+  return previous[b.length];
+}
+
+/**
+ * The candidate nearest to word, if it is close enough to be a typo.
+ * @param {string} word @param {Iterable<string>} candidates
+ */
+export function closest(word, candidates) {
+  let best;
+  let bestDistance = Math.max(2, Math.floor(word.length / 3)) + 1;
+  for (const candidate of candidates) {
+    const d = distance(word, candidate);
+    if (d < bestDistance) [best, bestDistance] = [candidate, d];
+  }
+  return best;
 }
