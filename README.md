@@ -3,89 +3,125 @@
   <img alt="Supagist. Share a code snippet. Reactions and comments on every line." src="./assets/brand/readme/readme-banner.png" width="1280">
 </picture>
 
-![supagist](./public/supagist.png)
+<p align="center"><strong>Share a code snippet. Reactions and comments on every line.</strong></p>
 
-Live at **[supagist.app](https://supagist.app)**
+<p align="center">
+  <a href="./LICENSE"><img alt="License: MIT" src="https://img.shields.io/github/license/leandrocp/supagist"></a>
+  <a href="https://github.com/leandrocp/supagist/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/leandrocp/supagist/ci.yml?branch=main"></a>
+  <a href="https://supagist.app"><img alt="Live at supagist.app" src="https://img.shields.io/badge/live-supagist.app-black"></a>
+  <a href="#mcp"><img alt="MCP endpoint: supagist.app/mcp" src="https://img.shields.io/badge/MCP-supagist.app%2Fmcp-black"></a>
+</p>
 
-## Features
+<p align="center">
+  <a href="https://supagist.app">Website</a> ·
+  <a href="#mcp">MCP</a> ·
+  <a href="#cli">CLI</a> ·
+  <a href="#agent-skill">Agent skill</a> ·
+  <a href="./CONTRIBUTING.md">Contributing</a>
+</p>
 
-- Per-line reactions. Click a line, pick an emoji. Other readers' reactions show next to yours.
-- Per-line comments. Each line gets its own thread.
-- Live presence. The status bar shows who's reading the snippet right now.
-- Syntax highlighting via [Lumis](https://lumis.sh). 100+ languages, plenty of themes.
-- Export as PNG or SVG, with optional gradient backgrounds and font choices.
-- Sign in with GitHub or email. Reading is free; reacting and commenting need an account.
+## What it is
 
-<p align="center"><img src="./public/export.png" alt="Export modal" width="50%" /></p>
+Supagist is a place to share code and talk about it line by line. Paste a snippet, get a link, and anyone with the link can react to or comment on the exact line they mean. You can also turn a snippet into a polished image, or have your coding agent do it for you.
 
-## Supagist agent skill
+- Per-line reactions and comments. Click a line, pick an emoji or start a thread.
+- Live presence. The status bar shows who is reading the snippet right now.
+- Syntax highlighting by [Lumis](https://lumis.sh): 100+ languages and plenty of themes.
+- Image export as PNG or SVG, with brand presets, backgrounds and fonts.
+- An [MCP server](#mcp) and a [CLI](#cli) so coding agents and scripts can render code images.
 
-The [Supagist skill](./.agents/skills/supagist/SKILL.md)
-teaches coding agents to connect to Supagist over OAuth, save SVG exports as real
-`.svg` files, and offer optional PNG conversion on the client machine. The skill
-and MCP use SVG exclusively; PNG conversion runs locally, not in an Edge Function
-or a separate hosted rendering service. The web app's export options are unchanged.
+## Getting started
 
-Install the skill from this repository:
+### Website
 
-```bash
+Open [supagist.app](https://supagist.app), paste your code, and share the link. Reading is free. Sign in with GitHub or email to react and comment.
+
+### MCP
+
+The Supagist MCP server renders code as SVG from your coding agent. It speaks Streamable HTTP and signs you in with OAuth, so there is no API key to copy. Endpoint:
+
+```text
+https://supagist.app/mcp
+```
+
+Add it to your client, then sign in with your Supagist account when the client asks.
+
+**Claude Code**
+
+```sh
+claude mcp add --transport http supagist https://supagist.app/mcp
+```
+
+Then run `/mcp` inside Claude Code, pick `supagist`, and authenticate.
+
+**Cursor** — add this to `~/.cursor/mcp.json` (or `.cursor/mcp.json` in a project):
+
+```json
+{
+  "mcpServers": {
+    "supagist": { "url": "https://supagist.app/mcp" }
+  }
+}
+```
+
+**Amp**
+
+```sh
+amp mcp add supagist https://supagist.app/mcp
+```
+
+**Codex**
+
+```sh
+codex mcp add supagist --url https://supagist.app/mcp
+codex mcp login supagist
+```
+
+**VS Code** — add this to `.vscode/mcp.json`:
+
+```json
+{
+  "servers": {
+    "supagist": { "type": "http", "url": "https://supagist.app/mcp" }
+  }
+}
+```
+
+Tools:
+
+| Tool             | What it does                                                                                                                      |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `render_snippet` | Renders code as an SVG code image. Supports brand presets, themes, fonts, backgrounds, window chrome, line numbers and more.      |
+| `list_options`   | Lists every supported language, theme, brand, background, font and limit. Call it first if you are unsure which values are valid. |
+
+Rendering publishes nothing and is rate limited per account.
+
+### CLI
+
+The `supagist` CLI renders a file or stdin to an SVG or PNG image from the terminal. It is not published to npm yet, so run it from a clone of this repository (Node.js 22 or later, no install step):
+
+```sh
+git clone https://github.com/leandrocp/supagist
+cd supagist
+node packages/cli/bin/supagist.js packages/cli/src/args.js --lines 1-20 --brand supabase --out code.png
+cat main.rs | node packages/cli/bin/supagist.js - --filename main.rs --theme dracula --out card.svg
+node packages/cli/bin/supagist.js options
+```
+
+See the [CLI README](./packages/cli/README.md) for every flag, JSON output and limits. Your code is sent to the Supagist render API to be drawn and nothing is stored, but don't render secrets.
+
+### Agent skill
+
+```sh
 npx skills add leandrocp/supagist --skill supagist
 ```
 
-Installing the skill and connecting/authenticating the MCP server are separate
-steps; the skill includes the connection instructions. PNG conversion requires
-Node.js 22+ and explicit approval to install its isolated resvg dependency.
-It never adds dependencies to the user's application or uploads SVGs for conversion.
+The [skill](./.agents/skills/supagist/SKILL.md) teaches your coding agent to connect to the MCP server, save SVGs as real files, and convert them to PNG locally.
 
-For maintainers, validate discovery before publishing:
+## Contributing
 
-```bash
-DISABLE_TELEMETRY=1 npx skills add . --list --skill supagist
-```
-
-The skill follows the [skills.sh GitHub distribution format](https://github.com/vercel-labs/skills/blob/main/docs/creating-skills.md).
-Preparing these files does not publish a directory listing or install the skill
-for anyone. After release, verify the remote installation command above; do not
-claim a skills.sh listing until it is visible there.
-
-## CLI
-
-[`packages/cli`](./packages/cli/README.md) renders a file or stdin to SVG or PNG
-from the terminal, with every export option as a flag. It calls the public
-render API at `supagist.app/api/render` and creates nothing on the server.
-
-```bash
-node packages/cli src/lib/auth.ts --lines 12-40 --brand supabase --out auth.png
-```
-
-## Run locally
-
-```bash
-git clone https://github.com/leandrocp/supagist
-cd supagist
-mise install
-mise run setup
-mise run dev
-```
-
-App runs on `http://localhost:3000`. Studio at `http://127.0.0.1:54323`.
-
-For GitHub OAuth in dev, set `SUPABASE_AUTH_GITHUB_CLIENT_ID` and `SUPABASE_AUTH_GITHUB_SECRET` in your shell. Or skip it and use email/password.
-
-## Tests
-
-```bash
-mise run test
-mise run test:integration
-mise run test:e2e
-```
-
-## How it works
-
-See [ARCHITECTURE.md](./ARCHITECTURE.md) for auth states, realtime channels, storage layout, the export pipeline, and URL design.
-
-Release, monitoring, rollback, recovery, and incident procedures live in [OPERATIONS.md](./OPERATIONS.md). Dependency exceptions and vulnerability reporting guidance live in [SECURITY.md](./SECURITY.md).
+Want to run Supagist locally or send a change? See [CONTRIBUTING.md](./CONTRIBUTING.md). Architecture, operations and security notes live in [ARCHITECTURE.md](./ARCHITECTURE.md), [OPERATIONS.md](./OPERATIONS.md) and [SECURITY.md](./SECURITY.md).
 
 ## License
 
-MIT.
+[MIT](./LICENSE). Syntax highlighting by [Lumis](https://lumis.sh).
