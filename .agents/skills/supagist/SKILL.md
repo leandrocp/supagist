@@ -2,7 +2,7 @@
 name: supagist
 description: Makes polished code images with Supagist, as PNG or SVG files or shareable links, with brand presets, themes, fonts, frames and 16:9 social canvases. Use for code screenshots, "make an image of this function", "share this on X", code images for a README or blog post, Carbon- or ray.so-style requests, or publishing a Supagist snippet link.
 license: MIT
-compatibility: Uses the supagist CLI (Node.js 22 or later, run with npx or from a clone of leandrocp/supagist) or, without a shell, the Supagist remote MCP server at https://supagist.app/mcp. Publishing needs a Supagist account.
+compatibility: Uses the supagist CLI (Node.js 22 or later, run with npx supagist) or, without a shell, the Supagist remote MCP server at https://supagist.app/mcp. Publishing needs a Supagist account.
 ---
 
 # Supagist
@@ -15,8 +15,7 @@ when the user asks for one.
 
 - **Shell available (Claude Code, Cursor, Codex, Amp, …): use the CLI.**
   `npx supagist <file> --out image.png`. Every flag is in
-  [reference/cli.md](reference/cli.md). If the npm package isn't available
-  yet, run `node packages/cli` from a clone of `leandrocp/supagist`.
+  [reference/cli.md](reference/cli.md).
 - **No shell, or the Supagist MCP server is already connected:** use the MCP
   tools `render_snippet`, `search_themes`, `list_options` and
   `publish_snippet`. Read [reference/mcp.md](reference/mcp.md) to save the SVG

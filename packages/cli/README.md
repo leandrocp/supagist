@@ -198,7 +198,8 @@ npx playwright test e2e/cli.test.ts --project=chromium   # against the local ser
 
 ## Release
 
-Bump `version` in `packages/cli/package.json`, merge to `main`, then push a
-matching tag such as `cli-v0.1.0`. The Release CLI workflow tests the package
+0.1.0 was published by hand. For later versions, bump `version` in
+`packages/cli/package.json`, merge to `main`, then push a matching tag such as
+`cli-v0.1.1`. The Release CLI workflow tests the package
 and publishes it to npm with provenance, using the `NPM_TOKEN` repository
 secret.

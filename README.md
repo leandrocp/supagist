@@ -104,27 +104,17 @@ Rendering, searching and listing options save nothing. Every tool is rate limite
 
 The `supagist` CLI renders a file or stdin to an SVG or PNG image from the terminal, and publishes it as an unlisted snippet when you want a link. Node.js 22 or later, no runtime dependencies.
 
-**npm (coming soon).** The package isn't on npm yet. Once it is:
-
 ```sh
 npx supagist src/lib/auth.ts --lines 12-40 --brand supabase --out auth.png
-```
-
-**From a clone (works today):**
-
-```sh
-git clone https://github.com/leandrocp/supagist
-cd supagist
-node packages/cli packages/cli/src/args.js --lines 1-20 --brand supabase --out code.png
-cat main.rs | node packages/cli - --filename main.rs --theme dracula --out card.svg
-node packages/cli options
+cat main.rs | npx supagist - --filename main.rs --theme dracula --out card.svg
+npx supagist options
 ```
 
 Rendering stores nothing. To get a shareable link instead, sign in once and add `--publish`:
 
 ```sh
-node packages/cli auth login
-node packages/cli src/app.ts --lines 1-20 --brand supabase --publish
+npx supagist auth login
+npx supagist src/app.ts --lines 1-20 --brand supabase --publish
 ```
 
 Published snippets are unlisted (anyone with the link can view them, nothing lists or indexes them), and common secrets are replaced with `[REDACTED:kind]` before anything is stored. See the [CLI README](./packages/cli/README.md) for every flag, JSON output and limits.

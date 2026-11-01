@@ -1,10 +1,9 @@
 # Supagist CLI
 
-`npx supagist` needs Node.js 22 or later and has no runtime dependencies.
-Until the npm package is released, run it from a clone of
-https://github.com/leandrocp/supagist with `node packages/cli` in place of
-`npx supagist`. If `npx supagist --version` fails because the package isn't
-found, use the clone or the [MCP path](mcp.md).
+`npx supagist` needs Node.js 22 or later and has no runtime dependencies. If
+npm can't be reached, run it from a clone of https://github.com/leandrocp/supagist
+with `node packages/cli` in place of `npx supagist`, or use the
+[MCP path](mcp.md).
 
 ```sh
 npx supagist <file|-> [flags]        # render to a file (or stdout)
