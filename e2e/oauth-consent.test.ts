@@ -12,7 +12,10 @@ test("OAuth consent preserves the authorization request through sign-in", async 
 test("OAuth consent without an authorization request cannot approve anything", async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 });
   await page.goto("/oauth/consent");
-  await expect(page.getByRole("alert")).toContainText("Missing authorization request");
+  // Production builds also mount Next's route announcer as role="alert".
+  await expect(
+    page.getByRole("alert").filter({ hasText: "Missing authorization request" }),
+  ).toBeVisible();
   await expect(page.getByRole("button", { name: "Approve" })).toHaveCount(0);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });
