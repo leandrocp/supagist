@@ -53,8 +53,7 @@ Then exercise login, publish, snippet rendering, reaction, comment, PNG/SVG expo
 
 ## Monitoring
 
-- `.github/workflows/uptime.yml` probes `/api/health` every 15 minutes.
-- `/api/health` checks both the application and a public RLS-backed database query.
+- `/api/health` checks both the application and a public RLS-backed database query. Point an external uptime monitor at it; GitHub Actions schedules are delayed by hours and are not a monitor.
 - `instrumentation.ts` emits structured server errors to platform stderr.
 - `app/error.tsx` forwards sanitized client route errors to `/api/errors`; that route emits structured platform logs without cookies, headers, or stacks.
 - Configure GitHub Actions failure notifications and Vercel log/error alerts for `server_request_error` and `client_route_error` events.
@@ -95,7 +94,7 @@ Test it with `supabase db reset --local`, the integration suite, and a dry-run a
 
 ## Incident response
 
-1. **Detect:** uptime workflow, platform alert, user report, or Supabase advisor.
+1. **Detect:** external uptime monitor, platform alert, user report, or Supabase advisor.
 2. **Contain:** pause deployments; disable cleanup Cron for deletion/storage incidents; disable affected Auth provider if credential compromise is suspected.
 3. **Assess:** record release SHA, UTC start time, affected routes/users, database migration version, and relevant structured error events.
 4. **Recover:** roll back the app or ship a tested forward migration; restore data only through approved Supabase recovery paths.
