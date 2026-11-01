@@ -111,6 +111,7 @@ jobs:
           deno test --config supabase/functions/mcp/deno.json
           --allow-read --allow-net --allow-env
           supabase/functions/mcp/input_test.ts
+          supabase/functions/mcp/manage_test.ts
           supabase/functions/mcp/rate-limit_test.ts
           supabase/functions/mcp/redact_test.ts
           supabase/functions/mcp/server_test.ts
@@ -180,6 +181,8 @@ jobs:
       - run: node supabase/functions/mcp/verify/publish.mjs
       # search_themes, PNG through the web app, legacy inputs, close matches.
       - run: node supabase/functions/mcp/verify/tools.mjs
+      # Owner-only update_snippet and delete_snippet, including Storage removal.
+      - run: node supabase/functions/mcp/verify/manage.mjs
       - name: Function logs
         if: failure()
         run: cat "$RUNNER_TEMP/functions.log" "$RUNNER_TEMP/web.log"

@@ -41,7 +41,14 @@ Deno.test("initialize advertises the supagist name, version and instructions", a
 Deno.test("tool descriptions never name other tools or local-only workflows", async () => {
   const { tools } = await rpc("tools/list");
   const names = tools.map((tool: { name: string }) => tool.name).sort();
-  assert.deepEqual(names, ["list_options", "publish_snippet", "render_snippet", "search_themes"]);
+  assert.deepEqual(names, [
+    "delete_snippet",
+    "list_options",
+    "publish_snippet",
+    "render_snippet",
+    "search_themes",
+    "update_snippet",
+  ]);
   for (const text of [
     SERVER_INSTRUCTIONS,
     ...tools.map((t: { description: string }) => t.description),
@@ -170,5 +177,38 @@ Deno.test("PNG renders through the render API with the caller's own token", asyn
     assert.equal(sent.length, before);
   } finally {
     globalThis.fetch = realFetch;
+  }
+});
+
+Deno.test("update_snippet and delete_snippet are owner-only, destructive and take a link", async () => {
+  const { tools } = await rpc("tools/list");
+  const byName = Object.fromEntries(tools.map((t: { name: string }) => [t.name, t]));
+  for (const name of ["update_snippet", "delete_snippet"]) {
+    const tool = byName[name];
+    assert.equal(tool.annotations.readOnlyHint, false, name);
+    assert.equal(tool.annotations.destructiveHint, true, name);
+    assert.ok(tool.inputSchema.required.includes("snippet"), name);
+    assert.ok(tool.description.includes("owns"), name);
+  }
+  assert.deepEqual(Object.keys(byName.update_snippet.inputSchema.properties).sort(), [
+    "code",
+    "language",
+    "snippet",
+    "theme",
+    "title",
+    "visibility",
+  ]);
+  assert.ok(byName.update_snippet.description.includes("redacted"));
+  assert.deepEqual(Object.keys(byName.delete_snippet.inputSchema.properties), ["snippet"]);
+});
+
+Deno.test("signed-out callers cannot update or delete", async () => {
+  for (const [name, args] of [
+    ["update_snippet", { snippet: "https://supagist.app/a-abc123", title: "x" }],
+    ["delete_snippet", { snippet: "https://supagist.app/a-abc123" }],
+  ] as const) {
+    const result = await rpc("tools/call", { name, arguments: args });
+    assert.equal(result.isError, true, name);
+    assert.match(result.content[0].text, /Sign in/);
   }
 });

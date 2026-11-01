@@ -95,6 +95,8 @@ Tools:
 | `search_themes`   | Searches the syntax themes by name, family (for example `catppuccin` or `nightfox`) and light or dark, a page at a time.                         |
 | `list_options`    | Lists every supported format, language, theme, brand, background, font and limit. Call it first if you are unsure which values are valid.        |
 | `publish_snippet` | Saves the code to your account as an unlisted Supagist link, with secrets redacted first. Your agent should ask you before it publishes.         |
+| `update_snippet`  | Edits the code, title, language, theme or visibility of one of your snippets, by link. Secrets are redacted first.                               |
+| `delete_snippet`  | Permanently deletes one of your snippets, by link, with its images, reactions and comments.                                                      |
 
 Rendering, searching and listing options save nothing. Every tool is rate limited per account.
 

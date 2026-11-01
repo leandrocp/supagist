@@ -2,6 +2,7 @@ import { McpServer } from "@modelcontextprotocol/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import { renderInput } from "./input.ts";
+import { deleteInput, updateInput } from "./manage.ts";
 import { publishInput } from "./publish.ts";
 import { searchThemesInput } from "./themes.ts";
 
@@ -15,7 +16,7 @@ const readOnly = {
 // Google Connected Apps snapshots the name, instructions and tool list at
 // registration. Describe what each tool does; never name other tools.
 export const SERVER_INSTRUCTIONS =
-  "Supagist turns source code into polished, shareable code images. It renders a snippet as a self-contained SVG document, or as a PNG image you can look at and iterate on, with syntax highlighting, syntax themes, complete brand presets (for example Supabase or Vercel style), fonts, backgrounds, window chrome, line numbers, word-level diffs, header and footer details, and supplied reactions or comments. Over 200 syntax themes are available; search them by name, family or light and dark appearance instead of guessing an id, and an unknown theme or language id is rejected with its closest matches. Rendering, searching and listing options are read-only and save nothing. Publishing saves a new snippet to the signed-in user's account as an unlisted link: anyone with the link can view it, but it never appears in listings or search results, and secrets in the code are always redacted before anything is stored. Confirm with the user before publishing. Access uses the signed-in user's Supagist account and is rate limited per account. One image fits at most 30 visual rows, including wrapped lines and comments; longer code needs an excerpt or several images.";
+  "Supagist turns source code into polished, shareable code images. It renders a snippet as a self-contained SVG document, or as a PNG image you can look at and iterate on, with syntax highlighting, syntax themes, complete brand presets (for example Supabase or Vercel style), fonts, backgrounds, window chrome, line numbers, word-level diffs, header and footer details, and supplied reactions or comments. Over 200 syntax themes are available; search them by name, family or light and dark appearance instead of guessing an id, and an unknown theme or language id is rejected with its closest matches. Rendering, searching and listing options are read-only and save nothing. Publishing saves a new snippet to the signed-in user's account as an unlisted link: anyone with the link can view it, but it never appears in listings or search results, and secrets in the code are always redacted before anything is stored. The signed-in user can also edit or permanently delete their own snippets by link, and nobody else's. Confirm with the user before publishing, editing or deleting. Access uses the signed-in user's Supagist account and is rate limited per account. One image fits at most 30 visual rows, including wrapped lines and comments; longer code needs an excerpt or several images.";
 
 /** The verified caller, for tools that write to their account. */
 export type Caller = {
@@ -90,6 +91,46 @@ export function createServer(caller?: Caller) {
     async (input) => {
       const { searchThemes } = await import("./themes.ts");
       return { content: [{ type: "text" as const, text: JSON.stringify(searchThemes(input)) }] };
+    },
+  );
+  server.registerTool(
+    "update_snippet",
+    {
+      description:
+        "Edits a snippet the signed-in user owns, identified by its supagist.app link; snippets owned by anyone else are refused. Changes any of code, title, language, theme and visibility (public or unlisted) and leaves the rest as it was; the link stays the same. New code has the same limits as publishing (at most 30 source lines and 8,000 Unicode characters) and secrets in the code and title are always redacted first. Images stored for the old version are removed when the code, language or theme changes; the page always shows the current version. Returns JSON with url, visibility and redactions (a count per secret kind, never the values).",
+      inputSchema: updateInput,
+      annotations: {
+        readOnlyHint: false,
+        destructiveHint: true,
+        idempotentHint: true,
+        openWorldHint: false,
+      },
+    },
+    async (input) => {
+      if (!caller) throw new Error("Sign in to edit snippets.");
+      const { updateSnippet } = await import("./manage.ts");
+      const result = await updateSnippet(input, caller.userId, caller.supabase);
+      return { content: [{ type: "text" as const, text: JSON.stringify(result) }] };
+    },
+  );
+  server.registerTool(
+    "delete_snippet",
+    {
+      description:
+        "Permanently deletes a snippet the signed-in user owns, identified by its supagist.app link, together with its stored images, reactions and comments; snippets owned by anyone else are refused. This cannot be undone and the link stops working. Returns JSON with the deleted link.",
+      inputSchema: deleteInput,
+      annotations: {
+        readOnlyHint: false,
+        destructiveHint: true,
+        idempotentHint: true,
+        openWorldHint: false,
+      },
+    },
+    async (input) => {
+      if (!caller) throw new Error("Sign in to delete snippets.");
+      const { deleteSnippet } = await import("./manage.ts");
+      const result = await deleteSnippet(input, caller.userId, caller.supabase);
+      return { content: [{ type: "text" as const, text: JSON.stringify(result) }] };
     },
   );
   server.registerTool(

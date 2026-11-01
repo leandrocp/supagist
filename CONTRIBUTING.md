@@ -195,9 +195,10 @@ The scripted checks that CI runs against the local functions, each using disposa
 node supabase/functions/mcp/verify/appearance.mjs   # schema, catalog, skill examples
 node supabase/functions/mcp/verify/publish.mjs      # publish, redaction, unlisted, rate limit
 node supabase/functions/mcp/verify/tools.mjs        # search_themes, PNG, legacy inputs
+node supabase/functions/mcp/verify/manage.mjs       # owner-only update and delete
 ```
 
-The tools are `render_snippet` (SVG or PNG), `search_themes`, `list_options` and `publish_snippet`. Their descriptions and the server instructions live in `server.ts`. They must not name other tools. That rule comes from Google Connected Apps, which snapshots them at registration, and `server_test.ts` enforces it.
+The tools are `render_snippet` (SVG or PNG), `search_themes`, `list_options`, `publish_snippet`, `update_snippet` and `delete_snippet`. Their descriptions and the server instructions live in `server.ts`. They must not name other tools. That rule comes from Google Connected Apps, which snapshots them at registration, and `server_test.ts` enforces it.
 
 For the production endpoint, rate limits and the OAuth setup, see [`supabase/functions/mcp/README.md`](./supabase/functions/mcp/README.md).
 

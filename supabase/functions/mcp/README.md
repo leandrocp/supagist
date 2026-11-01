@@ -2,12 +2,14 @@
 
 A remote MCP server, `supagist`, on a Supabase Edge Function. Tools:
 
-| Tool              | Input                                                           | Output                                                           | Writes |
-| ----------------- | --------------------------------------------------------------- | ---------------------------------------------------------------- | ------ |
-| `render_snippet`  | code plus appearance; `format` `svg` (default) or `png`         | SVG document as text, or a PNG as MCP image content plus size    | no     |
-| `search_themes`   | `query`, `family`, `appearance` (dark/light), `limit`, `offset` | a JSON page of `{id, appearance, family, kind}` and `nextOffset` | no     |
-| `list_options`    | none                                                            | formats, languages, themes, brands, backgrounds, fonts, limits   | no     |
-| `publish_snippet` | code plus appearance and an optional title                      | unlisted link, stored SVG URL, redaction counts                  | yes    |
+| Tool              | Input                                                                  | Output                                                           | Writes |
+| ----------------- | ---------------------------------------------------------------------- | ---------------------------------------------------------------- | ------ |
+| `render_snippet`  | code plus appearance; `format` `svg` (default) or `png`                | SVG document as text, or a PNG as MCP image content plus size    | no     |
+| `search_themes`   | `query`, `family`, `appearance` (dark/light), `limit`, `offset`        | a JSON page of `{id, appearance, family, kind}` and `nextOffset` | no     |
+| `list_options`    | none                                                                   | formats, languages, themes, brands, backgrounds, fonts, limits   | no     |
+| `publish_snippet` | code plus appearance and an optional title                             | unlisted link, stored SVG URL, redaction counts                  | yes    |
+| `update_snippet`  | `snippet` link plus `code`, `title`, `language`, `theme`, `visibility` | link, visibility, redaction counts                               | yes    |
+| `delete_snippet`  | `snippet` link                                                         | the deleted link                                                 | yes    |
 
 Descriptions and server instructions are in `server.ts`; `server_test.ts`
 keeps them from naming other tools (Google Connected Apps snapshots them).
@@ -100,6 +102,14 @@ then uploads it and inserts the snippet with the caller-scoped client, so RLS,
 Storage policies and the publish trigger apply as the signed-in user. Snippets
 are `unlisted` and store no PNGs. `verify/publish.mjs` checks the contract
 against local Supabase in CI.
+
+`update_snippet` and `delete_snippet` (2026-11-01, `manage.ts`) take a snippet
+link and act only on the caller's own snippets, through the caller-scoped
+client: RLS owner policies and the snippets guard trigger decide what can
+change. Updates redact secrets like publishes and drop stored images that no
+longer match; deletes cascade annotations and queue every stored file for
+cleanup, and remove the caller's files right away. `verify/manage.mjs` checks
+both in CI.
 
 The sole exception is leandro@leandro.io, matched by its verified auth user ID
 in `rate-limit.ts`: that account bypasses all user, render, and IP quota checks.
