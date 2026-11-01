@@ -122,6 +122,7 @@ export async function publishSnippet(
     language: rendered.language,
     theme: rendered.theme,
     font_id: rendered.fontId,
+    appearance: rendered.appearance,
     code: code.code,
     code_char_count: Array.from(code.code).length,
     line_count: code.code.split("\n").length,

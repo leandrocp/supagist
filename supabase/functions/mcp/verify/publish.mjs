@@ -55,7 +55,7 @@ assert.ok(
 const shortId = result.url.slice(-6);
 const { data: own } = await client
   .from("snippets")
-  .select("visibility, title, code, line_count, theme, font_id, author_id")
+  .select("visibility, title, code, line_count, theme, font_id, author_id, appearance")
   .eq("short_id", shortId)
   .single();
 const { data: user } = await client.auth.getUser();
@@ -64,6 +64,9 @@ assert.equal(own.visibility, "unlisted");
 assert.equal(own.title, "Deploy config");
 assert.equal(own.line_count, 5);
 assert.equal(own.font_id, "geist");
+// The saved view draws the brand canvas and frame from the stored appearance.
+assert.equal(own.appearance.background, "Supabase");
+assert.equal(own.appearance.windowDecoration, "none");
 assert.ok(own.code.includes('awsAccessKeyId: "[REDACTED:aws_access_key]"'));
 assert.ok(own.code.includes('githubToken: "[REDACTED:github_token]"'));
 assert.ok(!own.code.includes(awsKey) && !own.code.includes(githubToken));

@@ -87,6 +87,22 @@ export type RenderResult = {
   theme: string;
   language: string;
   fontId: string;
+  /** The rest of the resolved appearance, as `snippets.appearance` stores it
+   *  so the saved view shows a published snippet as rendered. */
+  appearance: {
+    background: string | null;
+    outerPadding?: number;
+    innerPadding: number;
+    cornerRadius?: number;
+    lineNumbers: boolean;
+    showReactions: false;
+    header: typeof DEFAULT_HEADER_SETTINGS;
+    footer: typeof DEFAULT_FOOTER_SETTINGS;
+    windowDecoration: string;
+    fontSize: number;
+    aspectRatio: "16:9" | null;
+    ligatures: boolean;
+  };
   logicalWidth: number;
   logicalHeight: number;
   timings: {
@@ -150,6 +166,20 @@ export async function renderSnippet(rawInput: RenderInput): Promise<RenderResult
   const fontId = input.fontId ?? settings?.fontId ?? "jetbrains";
   const header = { ...DEFAULT_HEADER_SETTINGS, ...settings?.header, ...input.header };
   const footer = { ...DEFAULT_FOOTER_SETTINGS, ...settings?.footer, ...input.footer };
+  const appearance: RenderResult["appearance"] = {
+    background: background?.label ?? null,
+    outerPadding: input.outerPadding ?? settings?.outerPadding,
+    innerPadding: input.innerPadding ?? settings?.innerPadding ?? 16,
+    cornerRadius: input.cornerRadius ?? settings?.cornerRadius,
+    lineNumbers: input.lineNumbers ?? settings?.lineNumbers ?? true,
+    showReactions: false,
+    header,
+    footer,
+    windowDecoration: input.windowDecoration ?? settings?.windowDecoration ?? "macos",
+    fontSize: input.fontSize ?? 14,
+    aspectRatio: input.aspectRatio ?? presetAspectRatio,
+    ligatures: input.ligatures ?? presetLigatures,
+  };
   let svg = await createHighlightedSvg(
     input.code,
     input.filename,
@@ -157,8 +187,8 @@ export async function renderSnippet(rawInput: RenderInput): Promise<RenderResult
     1200,
     undefined,
     background,
-    input.outerPadding ?? settings?.outerPadding,
-    input.lineNumbers ?? settings?.lineNumbers ?? true,
+    appearance.outerPadding,
+    appearance.lineNumbers,
     fontId === "system" ? "jetbrains" : fontId,
     language,
     input.reactions,
@@ -171,14 +201,14 @@ export async function renderSnippet(rawInput: RenderInput): Promise<RenderResult
     showComments,
     undefined,
     input.windowDecoration ?? settings?.windowDecoration ?? "macos",
-    input.cornerRadius ?? settings?.cornerRadius,
-    input.innerPadding ?? settings?.innerPadding ?? 16,
+    appearance.cornerRadius,
+    appearance.innerPadding,
     header,
     footer,
-    input.fontSize ?? 14,
+    appearance.fontSize,
     input.wordDiff ?? false,
-    input.aspectRatio ?? presetAspectRatio,
-    input.ligatures ?? presetLigatures,
+    appearance.aspectRatio,
+    appearance.ligatures,
   );
   // App font subsets rely on browser fallback for the comment arrow. Supply a
   // portable fallback too, so native conversion never turns it into a missing glyph.
@@ -234,6 +264,7 @@ export async function renderSnippet(rawInput: RenderInput): Promise<RenderResult
     theme,
     language,
     fontId,
+    appearance,
     logicalWidth,
     logicalHeight,
     timings,

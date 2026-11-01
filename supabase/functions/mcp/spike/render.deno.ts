@@ -363,3 +363,39 @@ Deno.test("ligatures false draws each operator character in its own text chunk a
     assert.ok(lines >= 9);
   }
 });
+
+Deno.test("the resolved appearance a publish stores matches what was rendered", async () => {
+  const lumis = await renderSnippet({ code: "const a = 1;", filename: "a.ts", brand: "lumis" });
+  assert.deepEqual(
+    {
+      background: lumis.appearance.background,
+      windowDecoration: lumis.appearance.windowDecoration,
+      outerPadding: lumis.appearance.outerPadding,
+      aspectRatio: lumis.appearance.aspectRatio,
+      ligatures: lumis.appearance.ligatures,
+      lineNumbers: lumis.appearance.lineNumbers,
+    },
+    {
+      background: "Lumis",
+      windowDecoration: "lumis",
+      outerPadding: 128,
+      aspectRatio: "16:9",
+      ligatures: false,
+      lineNumbers: false,
+    },
+  );
+  assert.equal(`${lumis.width}x${lumis.height}`, "1600x900");
+
+  // Explicit fields override the brand, and no brand means no canvas.
+  const plain = await renderSnippet({
+    code: "const a = 1;",
+    filename: "a.ts",
+    brand: "lumis",
+    background: null,
+    windowDecoration: "windows",
+    fontSize: 18,
+  });
+  assert.equal(plain.appearance.background, null);
+  assert.equal(plain.appearance.windowDecoration, "windows");
+  assert.equal(plain.appearance.fontSize, 18);
+});
