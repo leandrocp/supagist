@@ -265,6 +265,61 @@ test("the owner edits a snippet from its page and the change persists", async ({
   expect((await image.body()).length).toBeGreaterThan(1000);
 });
 
+test("people delete their own comments after confirming, and only their own", async ({ page }) => {
+  const admin = createClient(process.env.E2E_SUPABASE_URL!, process.env.E2E_SUPABASE_SERVICE_KEY!, {
+    auth: { persistSession: false },
+  });
+  const path = await seedSnippet("const talk = 1;", "comments.ts");
+  const { data: snippet } = await admin
+    .from("snippets")
+    .select("id")
+    .eq("short_id", path.split("-").pop()!)
+    .single();
+  const { data: other } = await admin.auth.admin.createUser({
+    email: `commenter-${randomUUID()}@test.local`,
+    email_confirm: true,
+    user_metadata: { user_name: `commenter-${randomUUID().slice(0, 6)}` },
+  });
+  try {
+    await admin.from("snippet_comments").insert({
+      snippet_id: snippet!.id,
+      author_id: other.user!.id,
+      line_number: 1,
+      body: "Not yours",
+    });
+
+    await page.goto(path);
+    const line = page.locator(".group\\/gutterline").first();
+    await line.hover();
+    await line.getByRole("button", { name: "Add a comment" }).click();
+    await page.getByRole("textbox", { name: "Add a comment…" }).fill("Mine to delete");
+    await page.getByRole("button", { name: "Save", exact: true }).click();
+    await expect(page.getByRole("textbox", { name: "Add a comment…" })).toHaveValue("");
+    await expect(page.getByText("Mine to delete")).toBeVisible();
+    await expect(page.getByText("Not yours")).toBeVisible();
+    await expect(page.getByRole("button", { name: "Delete comment" })).toHaveCount(1);
+
+    const dialog = page.getByRole("dialog", { name: "Delete your comment?" });
+    await page.getByRole("button", { name: "Delete comment" }).click();
+    await dialog.getByRole("button", { name: "Cancel" }).click();
+    await expect(dialog).toBeHidden();
+    await expect(page.getByText("Mine to delete")).toBeVisible();
+
+    await page.getByRole("button", { name: "Delete comment" }).click();
+    await dialog.getByRole("button", { name: "Delete comment" }).click();
+    await expect(dialog).toBeHidden();
+    await expect(page.getByText("Mine to delete")).toHaveCount(0);
+
+    await page.reload();
+    await line.hover();
+    await line.getByRole("button", { name: "Add a comment" }).click();
+    await expect(page.getByText("Not yours")).toBeVisible();
+    await expect(page.getByText("Mine to delete")).toHaveCount(0);
+  } finally {
+    await admin.auth.admin.deleteUser(other.user!.id);
+  }
+});
+
 test("the owner deletes a snippet from its page; the link stops working", async ({ page }) => {
   const path = await openSeeded(page, "const doomed = 1;", "delete-me.ts");
 

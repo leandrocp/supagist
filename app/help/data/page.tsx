@@ -56,8 +56,9 @@ export default function DataHelpPage() {
       <Section title="Comments and reactions">
         <p>
           To remove a line reaction you added, open the snippet, open the reaction picker on that
-          line and choose Remove reaction. Comments cannot be edited or deleted from the site yet;
-          email us with the snippet link and the comment to remove.
+          line and choose Remove reaction. To delete a comment you wrote, open the comments on its
+          line, choose the trash icon next to it and confirm. Comments cannot be edited; delete it
+          and post a new one instead.
         </p>
       </Section>
 

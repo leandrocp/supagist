@@ -181,8 +181,8 @@ export default function PrivacyPage() {
           <Link href="/account" className="text-foreground underline-offset-2 hover:underline">
             /account
           </Link>
-          . To delete a comment, or to ask what data we hold about you, email <ContactLink /> from
-          the address on your account. See{" "}
+          . You can delete a comment you wrote from its line on the snippet. To ask what data we
+          hold about you, email <ContactLink /> from the address on your account. See{" "}
           <Link href="/help/data" className="text-foreground underline-offset-2 hover:underline">
             Managing your data
           </Link>{" "}

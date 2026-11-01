@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Check, ClipboardType, Copy, MessageSquarePlus, SmilePlus } from "lucide-react";
+import { Check, ClipboardType, Copy, MessageSquarePlus, SmilePlus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { CHIP_EXIT, play } from "@/lib/motion";
 import { cn } from "@/lib/utils";
@@ -23,6 +23,9 @@ import { BrandWindowHeader } from "@/components/brand-window-header";
 import { copyRichText, createRichTextClipboard } from "@/lib/rich-text-export";
 import { createClient } from "@/lib/supabase/client";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
+import { ResponsiveModal } from "@/components/responsive-modal";
 import {
   languageDisplayName,
   codePointLength,
@@ -271,6 +274,9 @@ export function SnippetAnnotationsView({
   const [selectedCommentLine, setSelectedCommentLine] = useState<number | null>(null);
   const [selectedReactionLine, setSelectedReactionLine] = useState<number | null>(null);
   const [commentDraft, setCommentDraft] = useState("");
+  // The own comment waiting on its delete confirmation, and whether it's going.
+  const [commentToDelete, setCommentToDelete] = useState<LineComment | null>(null);
+  const [deletingComment, setDeletingComment] = useState(false);
   const [authPrompt, setAuthPrompt] = useState(false);
   const [copied, setCopied] = useState(false);
   // Transient list of "ping" animations played when remote viewers react.
@@ -810,6 +816,40 @@ export function SnippetAnnotationsView({
     }
   };
 
+  const removeComment = (id: string) =>
+    setLineComments((prev) =>
+      Object.fromEntries(
+        Object.entries(prev).map(([line, thread]) => [line, thread.filter((c) => c.id !== id)]),
+      ),
+    );
+
+  /** Deletes the viewer's own comment once they confirm. */
+  const handleDeleteComment = async () => {
+    if (!commentToDelete) return;
+    const { id } = commentToDelete;
+    if (!currentUserId) {
+      // dev mode only
+      removeComment(id);
+      setCommentToDelete(null);
+      return;
+    }
+    setDeletingComment(true);
+    // RLS denies someone else's delete with zero rows rather than an error.
+    const { data, error } = await supabase
+      .from("snippet_comments")
+      .delete()
+      .eq("id", id)
+      .eq("author_id", currentUserId)
+      .select("id");
+    setDeletingComment(false);
+    if (error || !data?.length) {
+      toast.error("Could not delete your comment. Please try again.");
+      return;
+    }
+    removeComment(id);
+    setCommentToDelete(null);
+  };
+
   // ── Render ─────────────────────────────────────────────────────────────────
   const fontFamily = (EXPORT_FONTS.find((font) => font.id === fontId) ?? EXPORT_FONTS[0]!).family;
   const { header, windowDecoration } = appearance;
@@ -1294,18 +1334,18 @@ export function SnippetAnnotationsView({
                 />
                 <div className="min-w-0 flex-1">
                   <div
-                    className="flex items-baseline gap-2 text-xs"
+                    className="flex min-w-0 items-baseline gap-2 text-xs"
                     style={{ color: c.headerText }}
                   >
                     <Link
                       href={`https://github.com/${cmt.authorUsername}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="font-medium hover:underline"
+                      className="truncate font-medium hover:underline"
                     >
                       @{cmt.authorUsername}
                     </Link>
-                    <time dateTime={cmt.createdAt} className="opacity-70">
+                    <time dateTime={cmt.createdAt} className="shrink-0 opacity-70">
                       {formatCommentTimestamp(cmt.createdAt)}
                     </time>
                   </div>
@@ -1316,6 +1356,18 @@ export function SnippetAnnotationsView({
                     {cmt.body}
                   </p>
                 </div>
+                {cmt.authorId === (currentUserId ?? "dev-user") ? (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    aria-label="Delete comment"
+                    className="-my-1.5 size-11 shrink-0 opacity-70 hover:opacity-100 sm:size-8"
+                    style={{ color: c.headerText }}
+                    onClick={() => setCommentToDelete(cmt)}
+                  >
+                    <Trash2 />
+                  </Button>
+                ) : null}
               </div>
             ))}
 
@@ -1362,6 +1414,34 @@ export function SnippetAnnotationsView({
           </div>
         </div>
       ) : null}
+
+      <ResponsiveModal
+        open={commentToDelete !== null}
+        onOpenChange={(open) => !open && !deletingComment && setCommentToDelete(null)}
+        title="Delete your comment?"
+        description="It will be removed for everyone. This cannot be undone."
+        footer={
+          <>
+            <Button
+              variant="ghost"
+              disabled={deletingComment}
+              onClick={() => setCommentToDelete(null)}
+            >
+              Cancel
+            </Button>
+            <Button disabled={deletingComment} onClick={() => void handleDeleteComment()}>
+              {deletingComment ? <Spinner /> : null}
+              Delete comment
+            </Button>
+          </>
+        }
+      >
+        {commentToDelete ? (
+          <p className="line-clamp-4 rounded-xl bg-surf2 px-3 py-2 text-sm whitespace-pre-wrap wrap-break-word">
+            {commentToDelete.body}
+          </p>
+        ) : null}
+      </ResponsiveModal>
 
       {/* Auth nudge */}
       {authPrompt ? (
