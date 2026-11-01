@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { generateGuestName } from "@/lib/presence-utils";
+import { Pencil } from "lucide-react";
 import { UserAvatar } from "@/components/user-avatar";
 
 type PresenceUser = { key: string; name: string; avatarUrl?: string };
@@ -124,21 +125,21 @@ export function HomePresence() {
     // Just the viewer in the lobby.
     label = (
       <>
-        <span className="text-foreground/80">{lead.name}</span>
+        <span>{lead.name}</span>
         <span> is writing a snippet…</span>
       </>
     );
   } else if (remainingAfterLead === 1) {
     label = (
       <>
-        <span className="text-foreground/80">{lead.name}</span>
+        <span>{lead.name}</span>
         <span> and 1 other are writing snippets…</span>
       </>
     );
   } else {
     label = (
       <>
-        <span className="text-foreground/80">{lead.name}</span>
+        <span>{lead.name}</span>
         <span> and {remainingAfterLead} others are writing snippets…</span>
       </>
     );
@@ -147,10 +148,11 @@ export function HomePresence() {
   return (
     <div
       data-testid="home-presence"
-      className="hidden min-w-0 items-center gap-2 text-xs text-muted-foreground sm:flex"
+      className="hidden min-w-0 items-center gap-2 text-sm text-muted-foreground sm:flex"
       title={ordered.map((v) => v.name).join(", ")}
     >
-      <div className="flex -space-x-1.5">
+      {/* Avatars between sm and md; from md the pencil and sentence carry it. */}
+      <div className="flex -space-x-1.5 md:hidden">
         {stack.map((v) => (
           <UserAvatar
             key={v.key}
@@ -168,6 +170,7 @@ export function HomePresence() {
       </div>
       {/* Below sm, reserve the nav for links and account controls. Between
           sm and md, avatars carry the presence signal without the sentence. */}
+      <Pencil aria-hidden="true" className="hidden size-[15px] shrink-0 text-wax-text md:block" />
       <span className="hidden truncate md:inline">{label}</span>
     </div>
   );

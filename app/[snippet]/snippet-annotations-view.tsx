@@ -1002,7 +1002,7 @@ export function SnippetAnnotationsView({
           className="space-y-3 border-t px-4 py-3"
           style={{ borderColor: c.border, backgroundColor: c.gutter }}
         >
-          <p className="font-sans text-xs font-medium" style={{ color: c.buttonText }}>
+          <p className="eyebrow" style={{ color: c.headerText }}>
             Comments on line {selectedCommentLine}
           </p>
 
@@ -1048,7 +1048,7 @@ export function SnippetAnnotationsView({
             <textarea
               ref={commentInputRef}
               maxLength={2000}
-              className="themed-placeholder min-h-16 w-full resize-none rounded-md border px-3 py-2 font-sans text-sm outline-hidden transition-colors focus-visible:ring-2"
+              className="themed-placeholder min-h-16 w-full resize-none rounded-xl border px-3 py-2 font-sans text-sm outline-hidden transition-colors focus-visible:focus-ring"
               style={
                 {
                   backgroundColor: c.bg,
@@ -1057,7 +1057,6 @@ export function SnippetAnnotationsView({
                   // Drive the placeholder + focus ring off the theme palette so
                   // the form blends with the editor instead of the page chrome.
                   ["--placeholder-color"]: c.headerText,
-                  ["--tw-ring-color"]: "rgba(59, 130, 246, 0.4)",
                 } as React.CSSProperties
               }
               value={commentDraft}
@@ -1065,16 +1064,11 @@ export function SnippetAnnotationsView({
               placeholder="Add a comment…"
               autoFocus
             />
-            <div className="flex gap-2">
+            <div className="flex flex-row-reverse justify-end gap-2">
               <button
                 type="button"
                 onClick={() => void handleSaveComment()}
-                className="rounded-md px-3 py-1.5 text-xs font-medium transition-colors hover:brightness-110"
-                style={{
-                  backgroundColor: "rgba(59, 130, 246, 0.9)",
-                  color: "#ffffff",
-                  border: "1px solid rgba(59, 130, 246, 1)",
-                }}
+                className="min-h-9 rounded-full bg-wax px-4 font-sans text-sm font-semibold text-on-wax transition-colors hover:bg-wax-hover focus-visible:focus-ring"
               >
                 Save
               </button>
@@ -1084,7 +1078,7 @@ export function SnippetAnnotationsView({
                   setSelectedCommentLine(null);
                   setCommentDraft("");
                 }}
-                className="rounded-md px-3 py-1.5 text-xs font-medium transition-colors hover:opacity-80"
+                className="min-h-9 rounded-full px-4 font-sans text-sm font-semibold transition-opacity hover:opacity-80 focus-visible:focus-ring"
                 style={{ color: c.buttonText }}
               >
                 Cancel
@@ -1103,8 +1097,10 @@ export function SnippetAnnotationsView({
           <span style={{ color: c.headerText }}>Log in to leave reactions or comments.</span>
           <Link
             href={loginUrl}
-            className="rounded-md px-3 py-1 text-xs font-medium transition-opacity hover:opacity-80"
-            style={{ backgroundColor: c.bg, color: c.headerText, border: `1px solid ${c.border}` }}
+            // Inside the snippet's own palette, so the link takes the theme's
+            // text colour; the site's postal blue can't hold contrast on every theme.
+            className="rounded-full px-2 py-1 font-semibold underline underline-offset-4 hover:opacity-80 focus-visible:focus-ring"
+            style={{ color: c.buttonText }}
           >
             Log in
           </Link>

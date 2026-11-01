@@ -13,6 +13,7 @@ const link = "text-foreground underline-offset-2 hover:underline";
 export default function DataHelpPage() {
   return (
     <LegalPage
+      eyebrow="Help"
       title="Managing your data"
       subtitle="How to view, change and delete your snippets and account."
       updated="November 1, 2026"

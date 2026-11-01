@@ -37,8 +37,6 @@ describe("Home", () => {
     expect(screen.queryByText("A Supabase-native collaboration demo")).toBeNull();
 
     const footer = screen.getByRole("contentinfo");
-    expect(footer.className).toContain("py-4");
-    expect(screen.getByText("Composer").parentElement?.className).toContain("pb-0");
     expect(footer.textContent).toContain("Inspired by ray.so");
     expect(footer.textContent).not.toContain("Backgrounds by ray.so");
   });

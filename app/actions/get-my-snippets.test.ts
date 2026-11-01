@@ -15,6 +15,7 @@ const SNIPPET = {
   language: "typescript",
   created_at: "2026-04-24T00:00:00Z",
   view_count: 5,
+  canonical_image_path: "user-1/snippets/s1/canonical.png",
 };
 
 function makeMockSupabase({
@@ -32,6 +33,13 @@ function makeMockSupabase({
   return {
     auth: { getUser: vi.fn().mockResolvedValue({ data: { user } }) },
     from: mockFrom,
+    storage: {
+      from: vi.fn().mockReturnValue({
+        getPublicUrl: (path: string) => ({
+          data: { publicUrl: `https://cdn.test/snippet-images/${path}` },
+        }),
+      }),
+    },
   };
 }
 
@@ -49,6 +57,11 @@ describe("getMySnippets", () => {
     expect(result).toHaveLength(1);
     expect(result[0].short_id).toBe("abc123");
     expect(result[0].filename).toBe("hello.ts");
+    // The thumbnail is the stored render's public URL; the raw path is not leaked.
+    expect(result[0].thumbnail_url).toBe(
+      "https://cdn.test/snippet-images/user-1/snippets/s1/canonical.png",
+    );
+    expect(result[0]).not.toHaveProperty("canonical_image_path");
   });
 
   it("returns empty array when the user has no snippets", async () => {

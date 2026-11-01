@@ -14,7 +14,9 @@ describe("Supabase design-system tokens", () => {
     expect(globalsCss).toContain("--foreground-light:");
     expect(globalsCss).toContain("--foreground-lighter:");
     expect(globalsCss).toContain("--foreground-muted:");
-    expect(globalsCss).toContain("--brand: 153.1 60.2% 52.7%;");
+    // The brand accent is the Supagist wax red (brand/v3), not Supabase green.
+    expect(globalsCss).toContain("--wax: 4.2 64.5% 47.5%; /* #C7362B */");
+    expect(globalsCss).toContain("--brand: var(--wax);");
   });
 
   it("clips viewport breakout art without creating horizontal page scroll", () => {

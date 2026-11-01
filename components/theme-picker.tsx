@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Check, ChevronsUpDown } from "lucide-react";
+import { Check, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
@@ -104,8 +104,8 @@ export function ThemePicker({
           style={triggerStyle}
         >
           <span className="truncate">{activeLabel}</span>
-          <ChevronsUpDown
-            className="ml-auto size-3.5 shrink-0 opacity-60"
+          <ChevronDown
+            className="ml-auto size-4 shrink-0 opacity-70"
             style={iconColor ? { color: iconColor } : undefined}
           />
         </button>

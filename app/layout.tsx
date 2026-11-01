@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Source_Code_Pro } from "next/font/google";
+import { Fraunces, Geist, IBM_Plex_Mono } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import { Analytics } from "@vercel/analytics/next";
 import { Providers } from "./providers";
@@ -49,8 +49,17 @@ const geistSans = Geist({
   subsets: ["latin"],
 });
 
-const sourceCodePro = Source_Code_Pro({
-  variable: "--font-source-code-pro",
+// Brand type, all SIL OFL 1.1. next/font downloads these at build time and
+// serves them from this origin, so pages make no request to Google Fonts.
+const fraunces = Fraunces({
+  variable: "--font-fraunces",
+  display: "swap",
+  subsets: ["latin"],
+  axes: ["opsz", "SOFT", "WONK"],
+});
+
+const plexMono = IBM_Plex_Mono({
+  variable: "--font-plex-mono",
   display: "swap",
   subsets: ["latin"],
   weight: ["400", "500"],
@@ -63,11 +72,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${geistSans.className} ${sourceCodePro.variable} antialiased`}>
+      <body
+        className={`${geistSans.className} ${geistSans.variable} ${fraunces.variable} ${plexMono.variable} antialiased`}
+      >
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
           <Providers enableSupabaseSession={hasEnvVars}>{children}</Providers>
           {hasEnvVars ? <NotificationsListener /> : null}
-          <Toaster richColors closeButton position="bottom-right" />
+          <Toaster closeButton position="bottom-right" />
         </ThemeProvider>
         <Analytics />
       </body>

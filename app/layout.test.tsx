@@ -7,8 +7,9 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import RootLayout, { metadata } from "./layout";
 
 vi.mock("next/font/google", () => ({
-  Geist: () => ({ className: "geist" }),
-  Source_Code_Pro: () => ({ variable: "source-code-pro" }),
+  Geist: () => ({ className: "geist", variable: "geist" }),
+  Fraunces: () => ({ variable: "fraunces" }),
+  IBM_Plex_Mono: () => ({ variable: "plex-mono" }),
 }));
 vi.mock("next-themes", () => ({
   ThemeProvider: ({ children }: { children: ReactNode }) => children,

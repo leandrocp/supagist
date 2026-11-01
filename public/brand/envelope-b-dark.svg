@@ -1,0 +1,40 @@
+<svg width="660" height="400" viewBox="0 0 660 400" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+    <filter id="grainb" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="3" seed="7" result="n"/>
+      <feColorMatrix in="n" type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .10 0"/>
+      <feComposite in2="SourceGraphic" operator="in"/></filter>
+    <filter id="fibreb" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency=".004 .03" numOctaves="2" seed="3" result="n"/>
+      <feColorMatrix in="n" type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .05 0"/>
+      <feComposite in2="SourceGraphic" operator="in"/></filter>
+    <filter id="liftb" x="-10%" y="-10%" width="120%" height="140%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="9"/><feOffset dy="7"/>
+      <feComponentTransfer><feFuncA type="linear" slope=".55"/></feComponentTransfer>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="liftsmb" x="-10%" y="-10%" width="120%" height="140%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="3"/><feOffset dy="2"/>
+      <feComponentTransfer><feFuncA type="linear" slope=".45"/></feComponentTransfer>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="edgeb"><feGaussianBlur stdDeviation="14"/></filter>
+    <filter id="softb"><feGaussianBlur stdDeviation="2.2"/></filter>
+      <linearGradient id="flb" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#242424"/><stop offset="1" stop-color="#1B1B1B"/></linearGradient>
+      <linearGradient id="slb" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#191919"/><stop offset="1" stop-color="#0E0E0E"/></linearGradient>
+      <linearGradient id="srb" x1="1" y1="0" x2="0" y2="0"><stop offset="0" stop-color="#191919"/><stop offset="1" stop-color="#0E0E0E"/></linearGradient>
+      <linearGradient id="btb" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#1D1D1D"/><stop offset="1" stop-color="#191919"/></linearGradient>
+      <clipPath id="cfb"><path d="M0,0 L660,0 L351.0,224.7 Q330,240 309.0,224.7 Z"/></clipPath>
+      <clipPath id="ceb"><rect x="0" y="0" width="660" height="400"/></clipPath>
+    </defs>
+    <g clip-path="url(#ceb)">
+      <rect x="0" y="0" width="660" height="400" fill="#0E0E0E"/>
+      <g filter="url(#liftsmb)"><path d="M0,0 L260,212.0 Q330,218.0 260,228.0 L0,400 Z" fill="url(#slb)"/></g>
+      <g filter="url(#liftsmb)"><path d="M660,0 L400,212.0 Q330,218.0 400,228.0 L660,400 Z" fill="url(#srb)"/></g>
+      <g filter="url(#liftb)"><path d="M0,400 L290,174.0 Q330,160.0 370,174.0 L660,400 Z" fill="url(#btb)"/></g>
+      <g filter="url(#liftb)"><path d="M0,0 L660,0 L351.0,224.7 Q330,240 309.0,224.7 Z" fill="url(#flb)"/></g>
+      <g clip-path="url(#cfb)">
+        <path d="M0,0 L660,0 L351.0,224.7 Q330,240 309.0,224.7 Z" fill="none" stroke="#000000" stroke-opacity="0.275" stroke-width="30" filter="url(#edgeb)"/>
+        <rect x="0" y="0" width="660" height="10" fill="#FFFFFF" fill-opacity="0.042" filter="url(#softb)"/>
+      </g>
+      <rect x="0" y="0" width="660" height="400" fill="#fff" filter="url(#fibreb)"/>
+      <rect x="0" y="0" width="660" height="400" fill="#fff" filter="url(#grainb)"/>
+    </g></svg>

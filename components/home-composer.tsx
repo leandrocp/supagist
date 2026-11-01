@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { availableThemes, availableLanguages } from "@lumis-sh/lumis/client";
-import { Check, ChevronDown, Copy, Download, Shuffle, Upload, X } from "lucide-react";
+import { Check, ChevronDown, Copy, Download, Lock, Shuffle, Upload } from "lucide-react";
 import { useRouter } from "next/navigation";
 import {
   EXPORT_WIDTH,
@@ -398,7 +398,7 @@ export function HomeComposer() {
       // can show every unique reaction with the reactor's avatar. Lift the
       // draft into chip shape using the viewer's own username as the reactor.
       const reactorUsername = effectiveViewerLabel || "you";
-      const [canonicalFile, ogFile, svgString] = await Promise.all([
+      const [canonicalFile, ogFile, svgString, cardFile] = await Promise.all([
         createPreviewImage(draft, selectedBackground, exportReactions),
         createOgImage(draft, reactorUsername, viewerAvatar),
         createHighlightedSvg(
@@ -428,6 +428,7 @@ export function HomeComposer() {
           draft.footer,
           draft.fontSize,
         ),
+        createCardImage(draft),
       ]);
       const svgBlob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
 
@@ -440,6 +441,7 @@ export function HomeComposer() {
       formData.set("canonical_image", canonicalFile);
       formData.set("og_image", ogFile);
       formData.set("svg", svgBlob);
+      formData.set("card_image", cardFile);
       formData.set("reactions", JSON.stringify(annotations.reactions));
       formData.set("comments", JSON.stringify({}));
 
@@ -662,13 +664,11 @@ export function HomeComposer() {
     });
   };
 
-  const actionButtonClass =
-    "h-11 border-border-control bg-surface-200 text-foreground hover:bg-surface-300 hover:text-foreground";
-  const panelLabelClass = "text-xs font-medium text-foreground-lighter";
-  const panelControlClass =
-    "h-11 rounded-md border border-border-control bg-surface-200 px-3 text-sm text-foreground outline-hidden transition focus-visible:ring-2 focus-visible:ring-ring/50";
+  const actionButtonClass = "h-11 px-6";
+  const panelLabelClass = "text-[13px] font-medium text-muted-foreground";
+  const panelControlClass = "h-11 w-full";
   const menuItemClass =
-    "h-11 justify-start text-foreground-light hover:bg-surface-300 hover:text-foreground";
+    "h-11 justify-start rounded-lg font-normal text-foreground hover:bg-surf2 hover:text-foreground";
   const selectedBackgroundStyle = selectedBackground
     ? selectedBackground.patternUrl
       ? {
@@ -723,33 +723,38 @@ export function HomeComposer() {
   return (
     <section
       data-testid="composer-shell"
-      className="-mx-5 -mt-10 flex h-[calc(100dvh-4rem)] min-h-0 flex-col overflow-hidden bg-background-alternative text-foreground lg:-mx-5 lg:-mt-16 xl:-mx-[calc((100vw-72rem)/2+1.25rem)]"
+      className="flex min-h-0 flex-col text-foreground lg:h-[clamp(30rem,calc(100dvh-14rem),36rem)]"
     >
       <div
         data-testid="composer-main"
-        className="grid min-h-0 flex-1 grid-rows-[clamp(13rem,34dvh,22rem)_minmax(0,1fr)] lg:grid-cols-[minmax(0,1fr)_28rem] lg:grid-rows-1"
+        className="grid min-h-0 flex-1 gap-6 lg:grid-cols-[minmax(0,1fr)_24.5rem] lg:grid-rows-[minmax(0,1fr)_auto] lg:gap-x-8"
       >
         <div
           data-testid="preview-pane"
-          className="relative flex min-h-0 items-center justify-center overflow-auto p-4 sm:p-6 lg:p-8"
+          className="relative flex min-h-[clamp(13rem,34dvh,22rem)] flex-col items-center lg:col-start-1 lg:row-start-1 justify-center overflow-auto lg:min-h-0"
         >
           {showAuthBanner ? (
-            <div className="absolute left-4 right-4 top-4 z-10 flex items-center justify-between rounded-md border border-border bg-surface-100 px-4 py-2.5 text-sm text-foreground shadow-lg sm:left-auto sm:right-8 sm:w-96">
-              <span>Log in to enable all features.</span>
-              <div className="flex items-center gap-1">
-                <Button type="button" size="xs" onClick={() => router.push("/auth/login")}>
-                  Log in
-                </Button>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon-xs"
-                  onClick={() => setShowAuthBanner(false)}
-                  aria-label="Dismiss"
-                >
-                  <X />
-                </Button>
-              </div>
+            <div className="absolute inset-x-0 top-0 z-10 flex min-h-11 items-center gap-3 rounded-xl bg-surf2 px-4 py-2 text-sm text-muted-foreground">
+              <Lock aria-hidden="true" className="size-4 shrink-0" />
+              <span className="min-w-0 flex-1">Log in to enable all features.</span>
+              <Button
+                type="button"
+                variant="ghost"
+                size="xs"
+                className="text-foreground"
+                onClick={() => router.push("/auth/login")}
+              >
+                Log in
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="xs"
+                className="font-normal text-muted-foreground"
+                onClick={() => setShowAuthBanner(false)}
+              >
+                Dismiss
+              </Button>
             </div>
           ) : null}
 
@@ -830,15 +835,17 @@ export function HomeComposer() {
 
         <div
           data-testid="composer-workspace"
-          className="relative flex min-h-0 w-full flex-col overflow-hidden border-t border-border bg-surface-100 lg:border-l lg:border-t-0"
+          className="relative flex min-h-0 w-full flex-col overflow-hidden lg:col-start-2 lg:row-span-2 lg:row-start-1"
         >
           <ScrollArea data-testid="customization-scroll" type="hover" className="min-h-0 flex-1">
-            <div className="min-w-0 p-4 lg:p-6">
-              <div className="mb-4 flex items-center justify-between gap-3">
-                <span className="text-base font-semibold text-foreground">Customize</span>
-                <span className="hidden truncate text-xs text-foreground-muted sm:block">
+            <div className="min-w-0 pb-4 lg:pr-1">
+              <div className="mb-5 flex flex-col gap-1">
+                <h2 className="font-display text-[28px] leading-tight text-foreground">
+                  Customize
+                </h2>
+                <p className="text-sm text-muted-foreground">
                   Start with the essentials, then fine-tune if needed
-                </span>
+                </p>
               </div>
 
               <div className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2">
@@ -852,20 +859,19 @@ export function HomeComposer() {
 
                 <div className="flex min-w-0 flex-col gap-1">
                   <span className={panelLabelClass}>Theme</span>
-                  <div className="flex h-11 items-center overflow-hidden rounded-md border border-border-control bg-surface-200 text-foreground">
+                  <div className="flex h-11 items-center gap-2 text-foreground">
                     <ThemePicker
                       value={draft.theme}
                       onChange={(next) => setDraft((d) => ({ ...d, theme: next }))}
                       themes={themes.map((t) => ({ id: t.name, label: t.name }))}
-                      triggerClassName="min-w-0 flex-1 text-foreground"
+                      triggerClassName="h-11 min-w-0 flex-1 rounded-xl bg-surf2 px-3.5 text-foreground hover:bg-surf3"
                       iconColor="hsl(var(--foreground-muted))"
                     />
-                    <div className="w-px self-stretch bg-border" />
                     <button
                       type="button"
                       title="Random theme"
                       aria-label="Random theme"
-                      className="flex h-full w-11 shrink-0 items-center justify-center text-foreground-lighter transition-colors hover:bg-surface-300 hover:text-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring/50"
+                      className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-surf2 text-foreground transition-colors hover:bg-surf3 focus-visible:focus-ring"
                       onClick={() => {
                         const others = themes.filter((t) => t.name !== draft.theme);
                         const pick = others[Math.floor(Math.random() * others.length)];
@@ -880,7 +886,7 @@ export function HomeComposer() {
                 <label className="flex min-w-0 flex-col gap-1">
                   <span className={panelLabelClass}>File</span>
                   <Input
-                    className="h-11 rounded-md border-border-control bg-surface-200 font-mono text-sm text-foreground shadow-none placeholder:text-foreground-muted"
+                    className="font-mono"
                     value={draft.filename}
                     onChange={(e) => setDraft((d) => ({ ...d, filename: e.target.value }))}
                     placeholder="snippet.tsx"
@@ -894,7 +900,7 @@ export function HomeComposer() {
                     <PopoverTrigger asChild>
                       <button
                         type="button"
-                        className="flex h-11 min-w-0 items-center gap-2 rounded-md border border-border-control bg-surface-200 px-3 text-sm text-foreground transition hover:border-border-strong focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring/50"
+                        className="flex h-11 min-w-0 items-center gap-2 rounded-xl bg-surf2 px-3.5 text-[15px] text-foreground transition-colors hover:bg-surf3 focus-visible:focus-ring"
                       >
                         <span
                           className={cn(
@@ -906,11 +912,7 @@ export function HomeComposer() {
                         <span className="truncate">{selectedBackground?.label ?? "None"}</span>
                       </button>
                     </PopoverTrigger>
-                    <PopoverContent
-                      side="top"
-                      align="start"
-                      className="w-[min(92vw,360px)] border-border bg-popover text-popover-foreground"
-                    >
+                    <PopoverContent side="top" align="start" className="w-[min(92vw,360px)]">
                       <div className="flex flex-col gap-3">
                         <div>
                           <p className="text-sm font-medium">Background</p>
@@ -922,17 +924,16 @@ export function HomeComposer() {
                           value={backgroundQuery}
                           onChange={(e) => setBackgroundQuery(e.target.value)}
                           placeholder="Search backgrounds"
-                          className="h-11 rounded-md border-border-control bg-surface-200 text-foreground placeholder:text-foreground-muted"
                         />
                         <div className="grid max-h-72 grid-cols-2 gap-2 overflow-y-auto pr-1">
                           <button
                             type="button"
                             onClick={() => setDraft((d) => ({ ...d, background: null }))}
                             className={cn(
-                              "flex h-11 items-center gap-2 rounded-md border px-3 text-sm transition",
+                              "flex h-11 items-center gap-2 rounded-lg px-3 text-sm transition-colors focus-visible:focus-ring",
                               !draft.background
-                                ? "border-brand/40 bg-brand-subtle text-brand-strong"
-                                : "border-border text-foreground-lighter hover:border-border-strong",
+                                ? "bg-ink text-paper"
+                                : "bg-surf2 text-muted-foreground hover:bg-surf3",
                             )}
                           >
                             <span className="size-4 rounded-full border border-current" />
@@ -944,10 +945,10 @@ export function HomeComposer() {
                               type="button"
                               onClick={() => setDraft((d) => ({ ...d, background: b.label }))}
                               className={cn(
-                                "flex h-11 min-w-0 items-center gap-2 rounded-md border px-3 text-left text-sm transition",
+                                "flex h-11 min-w-0 items-center gap-2 rounded-lg px-3 text-left text-sm transition-colors focus-visible:focus-ring",
                                 draft.background === b.label
-                                  ? "border-brand/40 bg-brand-subtle text-brand-strong"
-                                  : "border-border text-foreground-lighter hover:border-border-strong",
+                                  ? "bg-ink text-paper"
+                                  : "bg-surf2 text-muted-foreground hover:bg-surf3",
                               )}
                             >
                               <span
@@ -980,7 +981,7 @@ export function HomeComposer() {
                     <Button
                       type="button"
                       variant="ghost"
-                      className="h-11 w-full justify-between px-3 text-foreground-light hover:bg-surface-200 hover:text-foreground"
+                      className="h-11 w-full justify-between rounded-xl px-1 text-[15px] text-foreground hover:bg-transparent"
                     >
                       Advanced settings
                       <ChevronDown
@@ -992,9 +993,7 @@ export function HomeComposer() {
                   <CollapsibleContent className="pt-4">
                     <div className="flex flex-col gap-4">
                       <div className="flex flex-col gap-2">
-                        <span className="text-xs font-medium text-foreground-muted">
-                          Code and frame
-                        </span>
+                        <span className="eyebrow text-faint">Code and frame</span>
                         <div className="grid min-w-0 grid-cols-2 gap-3">
                           <div className="flex min-w-0 flex-col gap-1">
                             <span className={panelLabelClass}>Language</span>
@@ -1139,14 +1138,12 @@ export function HomeComposer() {
                       </div>
                       <UiSeparator />
                       <div className="flex flex-col gap-2">
-                        <span className="text-xs font-medium text-foreground-muted">
-                          Spacing and shape
-                        </span>
+                        <span className="eyebrow text-faint">Spacing and shape</span>
                         <div className="grid min-w-0 gap-3">
                           <div className="flex min-w-0 flex-col gap-1">
                             <div className="flex items-center justify-between gap-3">
                               <span className={panelLabelClass}>Outer padding</span>
-                              <output className="shrink-0 text-xs tabular-nums text-foreground-lighter">
+                              <output className="shrink-0 font-mono text-xs tabular-nums text-muted-foreground">
                                 {draft.outerPadding}px
                               </output>
                             </div>
@@ -1174,7 +1171,7 @@ export function HomeComposer() {
                           <div className="flex min-w-0 flex-col gap-1">
                             <div className="flex items-center justify-between gap-3">
                               <span className={panelLabelClass}>Inner padding</span>
-                              <output className="shrink-0 text-xs tabular-nums text-foreground-lighter">
+                              <output className="shrink-0 font-mono text-xs tabular-nums text-muted-foreground">
                                 {draft.innerPadding}px
                               </output>
                             </div>
@@ -1197,7 +1194,7 @@ export function HomeComposer() {
                           <div className="flex min-w-0 flex-col gap-1">
                             <div className="flex items-center justify-between gap-3">
                               <span className={panelLabelClass}>Corners</span>
-                              <output className="shrink-0 text-xs tabular-nums text-foreground-lighter">
+                              <output className="shrink-0 font-mono text-xs tabular-nums text-muted-foreground">
                                 {draft.cornerRadius}px
                               </output>
                             </div>
@@ -1225,9 +1222,7 @@ export function HomeComposer() {
                       </div>
                       <UiSeparator />
                       <div className="flex flex-col gap-4">
-                        <span className="text-xs font-medium text-foreground-muted">
-                          Visible details
-                        </span>
+                        <span className="eyebrow text-faint">Visible details</span>
                         <div className="flex min-w-0 flex-wrap items-center gap-x-8 gap-y-1">
                           {[
                             ["Line numbers", "lineNumbers"],
@@ -1249,7 +1244,6 @@ export function HomeComposer() {
                                     setDraft((d) => ({ ...d, [key]: checked }))
                                   }
                                   aria-label={label}
-                                  className="h-6 w-11 shrink-0 data-[state=checked]:bg-brand data-[state=unchecked]:bg-surface-300 **:data-[slot=switch-thumb]:size-5 **:data-[slot=switch-thumb]:bg-white"
                                 />
                               </label>
                             );
@@ -1269,7 +1263,7 @@ export function HomeComposer() {
                               >
                                 Header
                               </h3>
-                              <p className="text-xs text-foreground-muted">
+                              <p className="text-xs text-muted-foreground">
                                 Window chrome and identifying details
                               </p>
                             </div>
@@ -1279,7 +1273,6 @@ export function HomeComposer() {
                                 setDraft((d) => ({ ...d, header: { ...d.header, enabled } }))
                               }
                               aria-label="Show header"
-                              className="h-6 w-11 shrink-0 data-[state=checked]:bg-brand data-[state=unchecked]:bg-surface-300 **:data-[slot=switch-thumb]:size-5 **:data-[slot=switch-thumb]:bg-white"
                             />
                           </div>
                           <div
@@ -1357,7 +1350,7 @@ export function HomeComposer() {
                               >
                                 Footer
                               </h3>
-                              <p className="text-xs text-foreground-muted">
+                              <p className="text-xs text-muted-foreground">
                                 Choose exactly which export details appear
                               </p>
                             </div>
@@ -1367,7 +1360,6 @@ export function HomeComposer() {
                                 setDraft((d) => ({ ...d, footer: { ...d.footer, enabled } }))
                               }
                               aria-label="Show footer"
-                              className="h-6 w-11 shrink-0 data-[state=checked]:bg-brand data-[state=unchecked]:bg-surface-300 **:data-[slot=switch-thumb]:size-5 **:data-[slot=switch-thumb]:bg-white"
                             />
                           </div>
                           <div
@@ -1451,114 +1443,112 @@ export function HomeComposer() {
               </div>
             </div>
           </ScrollArea>
+        </div>
 
-          <div
-            data-testid="composer-actions"
-            className="flex min-w-0 shrink-0 flex-col gap-3 border-t border-border bg-surface-100 p-4"
-          >
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-              <span className="shrink-0 whitespace-nowrap text-sm font-semibold text-foreground">
-                Export or publish
+        <div
+          data-testid="composer-actions"
+          className="flex min-w-0 shrink-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between lg:col-start-1 lg:row-start-2"
+        >
+          <div className="flex min-w-0 flex-wrap items-center gap-x-5 gap-y-1 font-mono text-[13px] text-muted-foreground">
+            <span className="hidden lg:inline">Export or publish</span>
+            <div className="contents">
+              <span className="font-mono">
+                {draft.aspectRatio
+                  ? `${EXPORT_CANVAS_16_9.width} × ${EXPORT_CANVAS_16_9.height}`
+                  : `${exportDimensions.width} × ${exportDimensions.height}`}
+                px
               </span>
-              <div className="flex min-w-0 flex-wrap gap-x-3 gap-y-1 text-xs text-foreground-muted sm:justify-end">
-                <span className="font-mono">
-                  {draft.aspectRatio
-                    ? `${EXPORT_CANVAS_16_9.width} × ${EXPORT_CANVAS_16_9.height}`
-                    : `${exportDimensions.width} × ${exportDimensions.height}`}
-                  px
-                </span>
-                <span className="font-mono">{lineCount} lines</span>
-                <span className={cn("font-mono", isOverLimit && "font-medium text-destructive")}>
-                  {charCount.toLocaleString()} / 8,000 characters
-                </span>
-              </div>
+              <span className="font-mono">{lineCount} lines</span>
+              <span className={cn("font-mono", isOverLimit && "font-medium text-destructive")}>
+                {charCount.toLocaleString()} / 8,000 characters
+              </span>
             </div>
-
-            <ButtonGroup className="grid w-full grid-cols-2 font-sans">
-              <Popover open={exportMenuOpen} onOpenChange={setExportMenuOpen}>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" disabled={busy} className={actionButtonClass}>
-                    {isExporting ? (
-                      <Spinner data-icon="inline-start" />
-                    ) : (
-                      <Download data-icon="inline-start" />
-                    )}
-                    Export
-                    <ChevronDown data-icon="inline-end" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent
-                  side="top"
-                  align="end"
-                  className="w-64 border-border bg-popover p-2 text-popover-foreground"
-                >
-                  <div className="flex flex-col gap-1">
-                    <Button
-                      variant="ghost"
-                      disabled={busy}
-                      onClick={handleCopy}
-                      className={menuItemClass}
-                    >
-                      {copied ? (
-                        <Check data-icon="inline-start" />
-                      ) : (
-                        <Copy data-icon="inline-start" />
-                      )}
-                      {copied ? "Copied" : "Copy code"}
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      disabled={busy}
-                      onClick={() => void handleExportPng()}
-                      className={menuItemClass}
-                    >
-                      <Download data-icon="inline-start" />
-                      PNG image
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      disabled={busy}
-                      onClick={() => void handleExportSvg()}
-                      className={menuItemClass}
-                    >
-                      <FileImage data-icon="inline-start" />
-                      SVG image
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      disabled={busy}
-                      onClick={handleDownloadRaw}
-                      className={menuItemClass}
-                    >
-                      <FileText data-icon="inline-start" />
-                      Source file
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      disabled={busy}
-                      onClick={handleCopyRichText}
-                      className={menuItemClass}
-                    >
-                      <ClipboardType data-icon="inline-start" />
-                      Copy as rich text
-                    </Button>
-                  </div>
-                </PopoverContent>
-              </Popover>
-              <Button
-                disabled={busy || (Boolean(effectiveViewerLabel) && isOverLimit)}
-                onClick={handlePublish}
-                className="h-11"
-              >
-                {isPublishing ? (
-                  <Spinner data-icon="inline-start" />
-                ) : (
-                  <Upload data-icon="inline-start" />
-                )}
-                Publish
-              </Button>
-            </ButtonGroup>
           </div>
+
+          <ButtonGroup className="grid w-full grid-cols-2 gap-3 font-sans sm:flex sm:w-auto [&>*]:rounded-full!">
+            <Popover open={exportMenuOpen} onOpenChange={setExportMenuOpen}>
+              <PopoverTrigger asChild>
+                <Button variant="outline" disabled={busy} className={actionButtonClass}>
+                  {isExporting ? (
+                    <Spinner data-icon="inline-start" />
+                  ) : (
+                    <Download data-icon="inline-start" />
+                  )}
+                  Export
+                  <ChevronDown data-icon="inline-end" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent
+                side="top"
+                align="end"
+                className="w-64 border-border bg-popover p-2 text-popover-foreground"
+              >
+                <div className="flex flex-col gap-1">
+                  <Button
+                    variant="ghost"
+                    disabled={busy}
+                    onClick={handleCopy}
+                    className={menuItemClass}
+                  >
+                    {copied ? (
+                      <Check data-icon="inline-start" />
+                    ) : (
+                      <Copy data-icon="inline-start" />
+                    )}
+                    {copied ? "Copied" : "Copy code"}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    disabled={busy}
+                    onClick={() => void handleExportPng()}
+                    className={menuItemClass}
+                  >
+                    <Download data-icon="inline-start" />
+                    PNG image
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    disabled={busy}
+                    onClick={() => void handleExportSvg()}
+                    className={menuItemClass}
+                  >
+                    <FileImage data-icon="inline-start" />
+                    SVG image
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    disabled={busy}
+                    onClick={handleDownloadRaw}
+                    className={menuItemClass}
+                  >
+                    <FileText data-icon="inline-start" />
+                    Source file
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    disabled={busy}
+                    onClick={handleCopyRichText}
+                    className={menuItemClass}
+                  >
+                    <ClipboardType data-icon="inline-start" />
+                    Copy as rich text
+                  </Button>
+                </div>
+              </PopoverContent>
+            </Popover>
+            <Button
+              disabled={busy || (Boolean(effectiveViewerLabel) && isOverLimit)}
+              onClick={handlePublish}
+              className="h-11 px-6"
+            >
+              {isPublishing ? (
+                <Spinner data-icon="inline-start" />
+              ) : (
+                <Upload data-icon="inline-start" />
+              )}
+              Publish
+            </Button>
+          </ButtonGroup>
         </div>
       </div>
     </section>
@@ -1601,6 +1591,15 @@ async function createPreviewImage(
     draft.footer,
     draft.fontSize,
   );
+}
+
+/**
+ * The card alone (no background, no reactions) at 2×, for the per-snippet
+ * share image: the server lays it into the envelope instead of re-running
+ * Lumis. Same frame, header and footer as the author's export.
+ */
+async function createCardImage(draft: Draft): Promise<File> {
+  return createPreviewImage({ ...draft, pixelRatio: 2, showReactions: false }, null);
 }
 
 async function createOgImage(

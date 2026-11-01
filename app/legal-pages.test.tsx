@@ -44,6 +44,22 @@ describe("legal pages", () => {
     expect(contact()).toContain("mailto:supagist@leandro.io");
   });
 
+  it.each([
+    ["terms", TermsPage],
+    ["privacy", PrivacyPage],
+    ["data help", DataHelpPage],
+  ])("%s has a table of contents whose links all land on a heading", (_name, Page) => {
+    render(<Page />);
+    const toc = screen.getByRole("navigation", { name: "On this page" });
+    const links = Array.from(toc.querySelectorAll("a"));
+    expect(links.length).toBeGreaterThan(2);
+    for (const link of links) {
+      const target = document.getElementById(link.getAttribute("href")!.slice(1));
+      expect(target, link.textContent!).not.toBeNull();
+      expect(target!.querySelector("h2")?.textContent?.replace(/\.$/, "")).toBe(link.textContent);
+    }
+  });
+
   it("data help points to the snippets list and to email for deletion that is not self-serve", () => {
     render(<DataHelpPage />);
     expect(screen.getByRole("link", { name: "Your snippets" }).getAttribute("href")).toBe(

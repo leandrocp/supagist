@@ -8,29 +8,25 @@ test("home page loads and shows the supagist brand", async ({ page }) => {
   await expect(page.getByText("supagist").first()).toBeVisible();
 });
 
-test("agent skill callout stays discoverable and reachable across viewport sizes", async ({
-  page,
-}) => {
+test("agent skill stays discoverable and reachable across viewport sizes", async ({ page }) => {
+  // site/v1: a strip above the nav from md up, and the hero's secondary
+  // action at every width.
   await page.goto("/");
-  const callout = page.getByRole("note", { name: "Supagist agent skill" });
-  const link = callout.getByRole("link", { name: /get the skill/i });
-  await expect(link).toHaveAttribute(
-    "href",
-    "https://github.com/leandrocp/supagist#supagist-agent-skill",
-  );
+  const SKILL = "https://github.com/leandrocp/supagist#supagist-agent-skill";
+  const strip = page.getByRole("complementary", { name: "Supagist agent skill" });
+  const link = page.getByRole("link", { name: /agent skill/i });
+  await expect(link).toHaveAttribute("href", SKILL);
   await expect(link).toHaveAttribute("target", "_blank");
   for (const width of [375, 768, 1280]) {
     await page.setViewportSize({ width, height: 812 });
-    await expect(callout).toBeInViewport();
+    if (width < 768) await expect(strip).toBeHidden();
+    else await expect(strip.getByRole("link", { name: /get the skill/i })).toBeInViewport();
     await expect(link).toBeInViewport();
     const box = (await link.boundingBox())!;
     expect(box.height).toBeGreaterThanOrEqual(44);
     expect(box.x).toBeGreaterThanOrEqual(0);
     expect(box.x + box.width).toBeLessThanOrEqual(width);
     await link.click({ trial: true });
-    const nav = (await page.getByTestId("app-nav").boundingBox())!;
-    const composer = (await page.getByTestId("composer-shell").boundingBox())!;
-    expect(Math.abs(composer.y - (nav.y + nav.height))).toBeLessThan(2);
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
       width,
     );
@@ -46,7 +42,7 @@ test("agent skill callout stays discoverable and reachable across viewport sizes
   const popupPromise = page.waitForEvent("popup");
   await page.keyboard.press("Enter");
   const popup = await popupPromise;
-  await expect(popup).toHaveURL("https://github.com/leandrocp/supagist#supagist-agent-skill");
+  await expect(popup).toHaveURL(SKILL);
   await popup.close();
 });
 
@@ -65,7 +61,8 @@ test("home status bar shows the friendly language name (not all-caps id)", async
 
 test("terms page loads", async ({ page }) => {
   await page.goto("/terms");
-  await expect(page.getByText(/supagist is open source/i)).toBeVisible();
+  // The table of contents repeats the clause title, so ask for the heading.
+  await expect(page.getByRole("heading", { name: /supagist is open source/i })).toBeVisible();
 });
 
 test("privacy and data help pages load", async ({ page }) => {
@@ -109,7 +106,7 @@ test("login link is reachable from the home page nav", async ({ page }) => {
   expect(response?.status()).toBe(200);
 });
 
-test("home page has exactly one header bar, flush with the composer", async ({ page }) => {
+test("home page has exactly one header bar", async ({ page }) => {
   await page.goto("/");
 
   const nav = page.getByTestId("app-nav");
@@ -117,12 +114,8 @@ test("home page has exactly one header bar, flush with the composer", async ({ p
   await expect(page.locator("nav")).toHaveCount(1);
 
   // Brand and account controls share the single row.
-  await expect(nav.getByText("Supagist")).toBeVisible();
-
-  // The composer starts immediately below the nav — no second chrome row.
-  const navBox = await nav.boundingBox();
-  const shellBox = await page.getByTestId("composer-shell").boundingBox();
-  expect(Math.abs((shellBox?.y ?? 0) - ((navBox?.y ?? 0) + (navBox?.height ?? 0)))).toBeLessThan(2);
+  await expect(nav.getByRole("img", { name: "Supagist" })).toBeVisible();
+  await expect(nav.getByRole("link", { name: "Log in", exact: true })).toBeVisible();
 });
 
 test("lobby presence leaves navigation readable on mobile and remains visible above sm", async ({
@@ -150,16 +143,30 @@ test("lobby presence leaves navigation readable on mobile and remains visible ab
       if (width < 640) await expect(presence).toBeHidden();
       else await expect(presence).toBeVisible();
 
-      const snippets = nav.getByRole("link", { name: "Snippets", exact: true });
       const login = nav.getByRole("link", { name: "Log in", exact: true });
-      await expect(snippets).toBeVisible();
       await expect(login).toBeVisible();
-      const snippetsBox = (await snippets.boundingBox())!;
       const accountBox = (await nav.locator(":scope > div").last().boundingBox())!;
-      expect(snippetsBox.x + snippetsBox.width).toBeLessThanOrEqual(accountBox.x);
       expect(accountBox.x + accountBox.width).toBeLessThanOrEqual(width);
+
+      if (width < 768) {
+        // Below md the destinations live in the menu (site/v1 mobile nav).
+        const menu = nav.getByRole("button", { name: "Menu" });
+        await menu.click();
+        const item = page.getByRole("menuitem", { name: "Snippets", exact: true });
+        await expect(item).toBeInViewport();
+        await page.keyboard.press("Escape");
+        continue;
+      }
+      const snippets = nav.getByRole("link", { name: "Snippets", exact: true });
+      await expect(snippets).toBeVisible();
+      const snippetsBox = (await snippets.boundingBox())!;
+      expect(snippetsBox.x + snippetsBox.width).toBeLessThanOrEqual(accountBox.x);
       // Visibility alone does not detect another element covering the link.
-      await snippets.click({ trial: true, position: { x: snippetsBox.width - 1, y: 5 } });
+      // Mid-height: the pill's rounded corners are outside its hit area.
+      await snippets.click({
+        trial: true,
+        position: { x: snippetsBox.width - 1, y: snippetsBox.height / 2 },
+      });
     }
   } finally {
     await context.close();
@@ -228,7 +235,7 @@ test("composer remains usable at 375px with a stable overlay selector", async ({
 });
 
 test("font-mono text renders in the monospace font, not the inherited sans", async ({ page }) => {
-  // next/font defines --font-source-code-pro on <body>; resolving --font-mono
+  // next/font defines the mono family variable on <body>; resolving --font-mono
   // on :root made every font-mono element (the saved view's code included)
   // fall back to Geist.
   await page.goto("/");
@@ -236,7 +243,7 @@ test("font-mono text renders in the monospace font, not the inherited sans", asy
     .getByText(/^\d+ lines?$/)
     .first()
     .evaluate((element) => getComputedStyle(element).fontFamily);
-  expect(fontFamily).toContain("Source Code Pro");
+  expect(fontFamily).toContain("IBM Plex Mono");
 });
 
 // Real browser WASM loading, including a language outside the former manual map.

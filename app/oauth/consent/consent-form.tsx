@@ -2,21 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import type { OAuthAuthorizationDetails } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/client";
 import { buildLoginUrl } from "@/lib/auth-redirect";
-import { BrandDot } from "@/components/brand-dot";
+import { AuthHeading } from "@/components/auth-heading";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
+import { cn } from "@/lib/utils";
 
 export function ConsentForm({ authorizationId }: { authorizationId: string }) {
   const router = useRouter();
@@ -84,93 +76,82 @@ export function ConsentForm({ authorizationId }: { authorizationId: string }) {
     }
   }
 
+  const scopes = details?.scope.split(" ").filter(Boolean) ?? [];
+
   return (
-    <section className="flex w-full max-w-md flex-col gap-6" aria-label="OAuth authorization">
-      <Link
-        href="/"
-        className="inline-flex min-h-11 items-center justify-center gap-2 text-lg font-medium tracking-tight"
+    <section className="flex w-full flex-col gap-7" aria-label="OAuth authorization">
+      <AuthHeading
+        title={
+          <span className="break-words">
+            {details ? `Authorize ${details.client.name || "application"}` : "Authorize an app"}
+          </span>
+        }
       >
-        <BrandDot /> Supagist
-      </Link>
-      <Card>
-        <CardHeader>
-          <CardTitle>
-            <h1 className="break-words">
-              {details ? `Authorize ${details.client.name || "application"}` : "Authorize an app"}
-            </h1>
-          </CardTitle>
-          <CardDescription>
-            Only approve apps you trust. Client names are supplied by the app, not verified by
-            Supagist.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-4">
-          {details ? (
-            <>
-              <p className="text-sm">This app will be able to act as you in Supagist.</p>
-              <dl className="flex flex-col gap-3 text-sm">
-                <div>
-                  <dt className="text-muted-foreground">Signed in as</dt>
-                  <dd className="break-all">{details.user.email}</dd>
-                </div>
-                <div>
-                  <dt className="text-muted-foreground">Client ID</dt>
-                  <dd className="break-all font-mono text-xs">{details.client.id}</dd>
-                </div>
-                <div>
-                  <dt className="text-muted-foreground">Return address</dt>
-                  <dd className="break-all font-mono text-xs">{details.redirect_uri}</dd>
-                </div>
-              </dl>
-              <div className="text-sm">
-                <p className="text-muted-foreground">Requested scopes</p>
-                {details.scope.trim() ? (
-                  <ul className="list-inside list-disc">
-                    {details.scope
-                      .split(" ")
-                      .filter(Boolean)
-                      .map((scope) => (
-                        <li key={scope} className="break-all font-mono text-xs">
-                          {scope}
-                        </li>
-                      ))}
-                  </ul>
-                ) : (
-                  <p>No additional identity scopes requested.</p>
-                )}
-              </div>
-            </>
-          ) : !error ? (
-            <p role="status" className="flex items-center gap-2 text-sm">
-              <Spinner /> Loading authorization request…
-            </p>
-          ) : null}
-          {error && (
-            <p role="alert" className="text-sm text-destructive">
-              {error}
-            </p>
-          )}
-        </CardContent>
-        {details && (
-          <CardFooter className="flex flex-wrap gap-3">
-            <Button
-              variant="outline"
-              className="min-h-11 flex-1"
-              disabled={pending}
-              onClick={() => void decide(false)}
-            >
-              Deny
-            </Button>
-            <Button
-              className="min-h-11 flex-1"
-              disabled={pending}
-              onClick={() => void decide(true)}
-            >
-              {pending && <Spinner data-icon="inline-start" />} Approve
-            </Button>
-          </CardFooter>
-        )}
-      </Card>
+        {details ? "This app will be able to act as you in Supagist." : null}
+      </AuthHeading>
+
+      {details ? (
+        <dl className="flex flex-col gap-3 text-sm">
+          {(
+            [
+              ["Signed in as", details.user.email, false],
+              ["Client ID", details.client.id, true],
+              ["Return address", details.redirect_uri, true],
+            ] as const
+          ).map(([label, value, mono]) => (
+            <div key={label} className="grid grid-cols-[9.5rem_minmax(0,1fr)] gap-x-4">
+              <dt className="text-muted-foreground">{label}</dt>
+              <dd className={cn("break-all", mono && "font-mono text-[13px]")}>{value}</dd>
+            </div>
+          ))}
+          <div className="grid grid-cols-[9.5rem_minmax(0,1fr)] gap-x-4">
+            <dt className="text-muted-foreground">Requested scopes</dt>
+            <dd>
+              {scopes.length > 0 ? (
+                <ul className="flex flex-wrap gap-x-3 gap-y-1">
+                  {scopes.map((scope) => (
+                    <li key={scope} className="break-all font-mono text-[13px]">
+                      {scope}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p>No additional identity scopes requested.</p>
+              )}
+            </dd>
+          </div>
+        </dl>
+      ) : !error ? (
+        <p role="status" className="flex items-center gap-2 text-sm text-muted-foreground">
+          <Spinner /> Loading authorization request…
+        </p>
+      ) : null}
+
+      {error && (
+        <p role="alert" className="text-sm text-wax-text">
+          {error}
+        </p>
+      )}
+
+      {details && (
+        <div className="grid grid-cols-2 gap-3">
+          <Button className="min-h-11" disabled={pending} onClick={() => void decide(true)}>
+            {pending && <Spinner data-icon="inline-start" />} Approve
+          </Button>
+          <Button
+            variant="secondary"
+            className="min-h-11"
+            disabled={pending}
+            onClick={() => void decide(false)}
+          >
+            Deny
+          </Button>
+        </div>
+      )}
+
+      <p className="text-[13px] text-muted-foreground">
+        Only approve apps you trust. Client names are supplied by the app, not verified by Supagist.
+      </p>
     </section>
   );
 }

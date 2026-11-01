@@ -37,13 +37,13 @@ function Slider({
       <SliderPrimitive.Track
         data-slot="slider-track"
         className={cn(
-          "relative grow overflow-hidden rounded-full bg-muted data-[orientation=horizontal]:h-1.5 data-[orientation=horizontal]:w-full data-[orientation=vertical]:h-full data-[orientation=vertical]:w-1.5",
+          "relative grow overflow-hidden rounded-full bg-surf3 data-[orientation=horizontal]:h-1 data-[orientation=horizontal]:w-full data-[orientation=vertical]:h-full data-[orientation=vertical]:w-1.5",
         )}
       >
         <SliderPrimitive.Range
           data-slot="slider-range"
           className={cn(
-            "absolute bg-primary data-[orientation=horizontal]:h-full data-[orientation=vertical]:w-full",
+            "absolute bg-wax data-[orientation=horizontal]:h-full data-[orientation=vertical]:w-full",
           )}
         />
       </SliderPrimitive.Track>
@@ -54,7 +54,7 @@ function Slider({
           aria-label={ariaLabel}
           aria-labelledby={ariaLabelledBy}
           aria-valuetext={ariaValueText}
-          className="relative block size-4 shrink-0 rounded-full border border-primary bg-white shadow-xs ring-ring/50 transition-[color,box-shadow] after:absolute after:-inset-4 after:content-[''] hover:ring-4 focus-visible:ring-4 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50"
+          className="relative block size-5 shrink-0 rounded-full border-[3px] border-wax bg-surf transition-[box-shadow] after:absolute after:-inset-3 after:content-[''] focus-visible:focus-ring disabled:pointer-events-none disabled:opacity-40"
         />
       ))}
     </SliderPrimitive.Root>

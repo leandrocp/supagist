@@ -13,6 +13,7 @@ import {
   escapeHtml,
   groupExportReactions,
   buildSnippetSocialAlt,
+  languageDisplayName,
 } from "@/lib/snippet-utils";
 import { loadTheme } from "@/lib/theme-loader";
 import { highlightHtmlLines, loadLanguageOrPlaintext } from "@/lib/lumis-lines";
@@ -183,75 +184,77 @@ export default async function SnippetPage({ params }: Props) {
   const requestHeaders = await headers();
   const snippetUrl = buildAppUrl(param, getRequestOrigin(requestHeaders));
 
+  const createdAt = new Date(snippet.created_at).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+
   return (
-    <main className="min-h-screen bg-background">
-      <div className="mx-auto flex min-h-screen w-full max-w-6xl flex-col px-5">
-        <AppNav />
+    <main className="flex min-h-screen flex-col bg-background">
+      <AppNav />
 
-        <section className="flex flex-1 flex-col gap-6 py-8 lg:py-10">
-          {/* Header */}
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-            <div className="space-y-1">
-              <h1 className="text-2xl font-semibold tracking-tight">
-                {snippet.title ?? snippet.filename}
-              </h1>
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
-                {author ? (
-                  <Link
-                    href={`https://github.com/${author.username}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-1.5 transition-colors hover:text-foreground"
-                  >
-                    <UserAvatar
-                      username={author.username}
-                      avatarUrl={author.avatar_url}
-                      size="sm"
-                    />
-                    <span>@{author.username}</span>
-                  </Link>
-                ) : null}
-                {snippet.visibility === "unlisted" ? (
-                  <Badge variant="outline" title="Only people with the link can see this snippet">
-                    Unlisted
-                  </Badge>
-                ) : null}
-                <span>{snippet.theme}</span>
-                {snippet.language ? <span>{snippet.language}</span> : null}
-                <span>{snippet.line_count} lines</span>
-                <span>{new Date(snippet.created_at).toLocaleDateString()}</span>
-              </div>
-            </div>
+      <section className="mx-auto flex w-full max-w-[1020px] flex-1 flex-col gap-7 px-5 pt-[34px] pb-14 md:px-12 md:pt-14">
+        <header className="flex flex-col gap-3">
+          <h1 className="font-display text-[34px] leading-[1.05] break-words text-foreground md:text-[52px]">
+            {snippet.title ?? snippet.filename}
+          </h1>
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[15px] text-muted-foreground">
+            {author ? (
+              <Link
+                href={`https://github.com/${author.username}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 rounded-full font-medium text-foreground focus-visible:focus-ring"
+              >
+                <UserAvatar
+                  username={author.username}
+                  avatarUrl={author.avatar_url}
+                  size="default"
+                />
+                <span>@{author.username}</span>
+              </Link>
+            ) : null}
+            {snippet.visibility === "unlisted" ? (
+              <Badge
+                variant="secondary"
+                className="text-[13px] font-medium"
+                title="Only people with the link can see this snippet"
+              >
+                Unlisted
+              </Badge>
+            ) : null}
+            <span>{snippet.theme}</span>
+            {snippet.language ? <span>{languageDisplayName(snippet.language)}</span> : null}
+            <span>{snippet.line_count} lines</span>
+            <span>{createdAt}</span>
           </div>
+        </header>
 
-          {/* Collaborative code block */}
-          {/* max-h-[calc(100dvh-...)] caps the card to the viewport so the
-              chrome + editor body + comment panel + status bar all stay
-              visible without the page scrolling past the footer. Mobile
-              uses a larger chrome budget because the header and footer wrap
-              onto more lines below the md breakpoint. */}
-          <div className="flex max-h-[calc(100dvh-16rem)] min-h-0 flex-col overflow-hidden rounded-xl border border-border/60 md:max-h-[calc(100dvh-13rem)]">
-            <SnippetAnnotationsView
-              snippetId={snippet.id}
-              filename={snippet.filename}
-              code={snippet.code}
-              language={language}
-              snippetUrl={snippetUrl}
-              snippetTheme={snippet.theme}
-              fontId={snippet.font_id}
-              snippetReactions={snippetReactions}
-              preRenderedLines={preRenderedLines}
-              themeIsDark={themeIsDark}
-              themeBg={themeBg}
-              themeFg={themeFg}
-              currentUserId={currentUserId}
-              author={author}
-            />
-          </div>
-        </section>
+        {/* The collaborative code block keeps the snippet's own theme; only the
+            frame around it is site chrome. max-h caps the card to the viewport
+            so the chrome, body, comments and status bar stay visible. */}
+        <div className="flex max-h-[calc(100dvh-16rem)] min-h-0 flex-col overflow-hidden rounded-[14px] shadow-[0_30px_60px_-24px_hsl(var(--shadow-tint)/0.35),0_0_0_1px_rgb(0_0_0/0.05)] md:max-h-[calc(100dvh-13rem)]">
+          <SnippetAnnotationsView
+            snippetId={snippet.id}
+            filename={snippet.filename}
+            code={snippet.code}
+            language={language}
+            snippetUrl={snippetUrl}
+            snippetTheme={snippet.theme}
+            fontId={snippet.font_id}
+            snippetReactions={snippetReactions}
+            preRenderedLines={preRenderedLines}
+            themeIsDark={themeIsDark}
+            themeBg={themeBg}
+            themeFg={themeFg}
+            currentUserId={currentUserId}
+            author={author}
+          />
+        </div>
+      </section>
 
-        <SiteFooter />
-      </div>
+      <SiteFooter />
     </main>
   );
 }

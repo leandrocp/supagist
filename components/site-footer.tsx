@@ -1,5 +1,7 @@
 import Link from "next/link";
-import { cn } from "@/lib/utils";
+import { ArrowUpRight } from "lucide-react";
+import { SealMark } from "@/components/brand/seal-mark";
+import { Wordmark } from "@/components/brand/wordmark";
 
 const LINKS = [
   {
@@ -13,36 +15,50 @@ const LINKS = [
   { href: "/help/data", label: "Your data", external: false },
 ] as const;
 
-const linkClass = "underline-offset-2 hover:text-foreground hover:underline";
+const creditLink = "underline-offset-2 hover:text-foreground hover:underline";
 
 /**
- * Shared page footer. Carries the "Built on Supabase" badge, which used to sit
- * in the nav next to the wordmark — it is provenance, not navigation, so it
- * competed with the actual destinations up there.
- *
- * `fullBleed` matches `AppNav`: on the home page the bar above and the composer
- * both span the viewport, so a footer rule confined to the centred column stops
- * short at both ends and reads as a broken divider.
+ * Shared page footer: the flat seal and the credit line on the left, project
+ * links on the right; stacked on mobile. Like the nav it spans the page at the
+ * page padding and has no rule above it: tone and space separate it.
  */
-export function SiteFooter({ fullBleed = false }: { fullBleed?: boolean }) {
+export function SiteFooter() {
   return (
     <footer
       data-testid="site-footer"
-      className={cn(
-        "flex flex-col gap-3 border-t border-border py-4 text-xs text-foreground-muted sm:flex-row sm:items-center sm:justify-between sm:gap-4",
-        fullBleed && "px-5",
-      )}
+      className="mt-auto flex flex-col gap-4 px-5 pt-[34px] pb-6 text-sm text-muted-foreground md:flex-row-reverse md:items-center md:justify-between md:px-12 md:pt-14 md:pb-5"
     >
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-        {/* No "Built on Supabase" badge here — the credit line below already
-            says it, and better, by naming Lumis and ray.so too. */}
-        <p className="font-mono uppercase tracking-code-label">
+      <div className="flex flex-col gap-3 md:hidden">
+        <span className="flex items-center gap-2 text-foreground">
+          <SealMark className="size-[22px]" />
+          <Wordmark className="h-[18px]" />
+        </span>
+      </div>
+
+      <ul className="flex flex-wrap items-center gap-x-6 gap-y-3 text-foreground">
+        {LINKS.map(({ href, label, external }) => (
+          <li key={href}>
+            <Link
+              href={href}
+              className="inline-flex items-center gap-0.5 rounded-sm underline-offset-4 hover:underline focus-visible:focus-ring"
+              {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+            >
+              {label}
+              {external ? <ArrowUpRight aria-hidden="true" className="size-3.5" /> : null}
+            </Link>
+          </li>
+        ))}
+      </ul>
+
+      <p className="flex items-center gap-2.5">
+        <SealMark className="hidden size-[22px] md:block" />
+        <span>
           Built with{" "}
           <Link
             href="https://supabase.com"
             target="_blank"
             rel="noopener noreferrer"
-            className={`text-brand-link ${linkClass}`}
+            className={creditLink}
           >
             Supabase
           </Link>{" "}
@@ -51,34 +67,21 @@ export function SiteFooter({ fullBleed = false }: { fullBleed?: boolean }) {
             href="https://lumis.sh"
             target="_blank"
             rel="noopener noreferrer"
-            className={linkClass}
+            className={creditLink}
           >
             Lumis
-          </Link>{" "}
-          · Inspired by{" "}
+          </Link>
+          . Inspired by{" "}
           <Link
             href="https://ray.so"
             target="_blank"
             rel="noopener noreferrer"
-            className={linkClass}
+            className={creditLink}
           >
             ray.so
           </Link>
-        </p>
-      </div>
-
-      <div className="flex flex-wrap items-center gap-x-5 gap-y-2 font-mono uppercase tracking-code-label">
-        {LINKS.map(({ href, label, external }) => (
-          <Link
-            key={href}
-            href={href}
-            className={linkClass}
-            {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-          >
-            {label}
-          </Link>
-        ))}
-      </div>
+        </span>
+      </p>
     </footer>
   );
 }

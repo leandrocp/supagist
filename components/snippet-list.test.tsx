@@ -13,6 +13,7 @@ const snippet = {
   language: "typescript",
   created_at: "2026-07-14T12:00:00.000Z",
   view_count: 42,
+  thumbnail_url: "https://cdn.test/snippet-images/u/snippets/s/canonical.png",
 };
 
 describe("SnippetList", () => {
@@ -21,16 +22,16 @@ describe("SnippetList", () => {
 
     const link = screen.getByRole("link", { name: /hello\.ts/i });
     expect(link.getAttribute("href")).toBe("/hello-ts-abc123");
-    expect(link.className).toContain("bg-surface-100");
-    expect(link.className).toContain("hover:border-brand/30");
+    // The thumbnail is the snippet's own stored render.
+    expect(link.querySelector("img")?.getAttribute("src")).toBe(snippet.thumbnail_url);
   });
 
   it("shows language, date and view count", () => {
     render(<SnippetList snippets={[snippet]} />);
 
-    expect(screen.getByText("typescript")).toBeTruthy();
-    expect(screen.getByText("Jul 14, 2026")).toBeTruthy();
-    expect(screen.getByText("42 views")).toBeTruthy();
+    expect(screen.getByText("TypeScript")).toBeTruthy();
+    expect(screen.getByText(/Jul 14/)).toBeTruthy();
+    expect(screen.getByText(/42 views/)).toBeTruthy();
   });
 
   it("omits the view count when nothing has viewed the snippet yet", () => {
@@ -42,7 +43,7 @@ describe("SnippetList", () => {
   it("omits the language badge when the snippet has none", () => {
     render(<SnippetList snippets={[{ ...snippet, language: null }]} />);
 
-    expect(screen.queryByText("typescript")).toBeNull();
+    expect(screen.queryByText("TypeScript")).toBeNull();
     expect(screen.getByRole("link", { name: /hello\.ts/i })).toBeTruthy();
   });
 

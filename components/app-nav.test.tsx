@@ -63,12 +63,14 @@ describe("AppNav", () => {
     expect(screen.getByTestId("home-presence")).toBeTruthy();
   });
 
-  it("pads itself only when rendered full-bleed", () => {
-    const { unmount } = render(<AppNav fullBleed />);
-    expect(screen.getByTestId("app-nav").className).toContain("px-5");
-    unmount();
-
+  it("separates from the page by space, not a rule", () => {
     render(<AppNav />);
-    expect(screen.getByTestId("app-nav").className).not.toContain("px-5");
+    // Site spec: tone and space separate surfaces; the focus ring is the only line.
+    expect(screen.getByTestId("app-nav").className).not.toMatch(/\bborder-/);
+  });
+
+  it("folds the destinations into a menu on mobile", () => {
+    render(<AppNav />);
+    expect(screen.getByRole("button", { name: "Menu" }).className).toContain("md:hidden");
   });
 });

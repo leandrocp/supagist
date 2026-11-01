@@ -33,20 +33,9 @@ describe("SiteFooter", () => {
     );
   });
 
-  it("pads itself only when rendered full-bleed, matching AppNav", () => {
-    // On the home page the nav and composer span the viewport. A footer rule
-    // confined to the centred column stopped short at both ends.
-    const { unmount } = render(<SiteFooter fullBleed />);
-    expect(screen.getByTestId("site-footer").className).toContain("px-5");
-    unmount();
-
+  it("separates from the page by space, not a divider", () => {
     render(<SiteFooter />);
-    expect(screen.getByTestId("site-footer").className).not.toContain("px-5");
-  });
-
-  it("always carries the top divider", () => {
-    render(<SiteFooter />);
-    expect(screen.getByTestId("site-footer").className).toContain("border-t");
+    expect(screen.getByTestId("site-footer").className).not.toMatch(/\bborder-/);
   });
 
   it("opens outbound links safely and keeps internal ones in place", () => {

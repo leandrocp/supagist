@@ -334,10 +334,12 @@ export function ExportModal({
     if (!o) onClose();
   };
 
+  // Desktop: preview across the top, settings on the left and the actions in
+  // a quiet column on the right (site/v1 export-dialog). Mobile stacks them.
   const body = (
-    <>
+    <div className="grid gap-6 md:grid-cols-[minmax(0,1fr)_208px]">
       {/* Preview */}
-      <div className="flex min-h-52 items-center justify-center overflow-hidden rounded-lg">
+      <div className="flex min-h-52 items-center justify-center overflow-hidden rounded-[18px] bg-surf2 p-6 md:col-span-2">
         {previewLoading ? (
           <span className="flex items-center gap-2 text-sm text-muted-foreground">
             <Spinner className="size-4" />
@@ -364,10 +366,10 @@ export function ExportModal({
               title="None"
               onClick={() => onSettingsChange({ ...settings, background: null })}
               className={cn(
-                "flex size-7 items-center justify-center rounded-full border text-[11px] text-muted-foreground transition-all",
+                "flex size-7 items-center justify-center rounded-full bg-surf2 text-[11px] text-muted-foreground transition-all hover:text-foreground",
                 settings.background === null
-                  ? "border-foreground ring-2 ring-foreground ring-offset-2 ring-offset-background"
-                  : "border-border hover:border-foreground/50",
+                  ? "ring-2 ring-foreground ring-offset-2 ring-offset-background"
+                  : "",
               )}
             >
               ✕
@@ -381,7 +383,7 @@ export function ExportModal({
                 className={cn(
                   "size-7 rounded-full transition-all hover:scale-110",
                   settings.background === b.label
-                    ? "scale-110 ring-2 ring-white ring-offset-2 ring-offset-background"
+                    ? "scale-110 ring-2 ring-foreground ring-offset-2 ring-offset-background"
                     : "",
                 )}
                 style={{ background: `linear-gradient(135deg, ${b.from}, ${b.to})` }}
@@ -390,7 +392,7 @@ export function ExportModal({
             {/* Brand-flavoured gradients — separated by a thin divider so
                 they don't blend into the generic gradient row. The brand
                 logo doubles as the swatch's marker. */}
-            <span aria-hidden className="mx-1 h-7 w-px bg-border" />
+            <span aria-hidden className="w-2" />
             {EXPORT_BRAND_BACKGROUNDS.map((b) => (
               <button
                 key={b.label}
@@ -400,7 +402,7 @@ export function ExportModal({
                 className={cn(
                   "flex size-7 items-center justify-center overflow-hidden rounded-full transition-all hover:scale-110",
                   settings.background === b.label
-                    ? "scale-110 ring-2 ring-white ring-offset-2 ring-offset-background"
+                    ? "scale-110 ring-2 ring-foreground ring-offset-2 ring-offset-background"
                     : "",
                 )}
                 // When a pattern PNG exists (Tailwind beams, Resend folded
@@ -531,10 +533,10 @@ export function ExportModal({
                   type="button"
                   onClick={() => onSettingsChange({ ...settings, pixelRatio: s })}
                   className={cn(
-                    "h-11 rounded-md border px-3 text-sm transition-colors",
+                    "h-11 rounded-full px-3.5 text-sm font-medium transition-colors focus-visible:focus-ring",
                     settings.pixelRatio === s
-                      ? "border-foreground bg-foreground text-background"
-                      : "border-border text-muted-foreground hover:border-foreground/50",
+                      ? "bg-foreground text-background"
+                      : "bg-surf2 text-muted-foreground hover:text-foreground",
                   )}
                 >
                   {s}x
@@ -551,7 +553,7 @@ export function ExportModal({
             <select
               value={settings.language ?? ""}
               onChange={(e) => onSettingsChange({ ...settings, language: e.target.value || null })}
-              className="h-8 w-full rounded-md border border-input bg-background px-2 text-sm text-foreground outline-hidden transition focus-visible:ring-2 focus-visible:ring-ring"
+              className="h-11 w-full rounded-xl bg-surf2 px-3 text-sm text-foreground outline-hidden transition focus-visible:focus-ring"
             >
               {LANGUAGES.map((l) => (
                 <option key={l.id} value={l.id}>
@@ -566,7 +568,7 @@ export function ExportModal({
             <select
               value={settings.fontId}
               onChange={(e) => onSettingsChange({ ...settings, fontId: e.target.value })}
-              className="h-8 w-full rounded-md border border-input bg-background px-2 text-sm text-foreground outline-hidden transition focus-visible:ring-2 focus-visible:ring-ring"
+              className="h-11 w-full rounded-xl bg-surf2 px-3 text-sm text-foreground outline-hidden transition focus-visible:focus-ring"
               style={{ fontFamily: EXPORT_FONTS.find((f) => f.id === settings.fontId)?.family }}
             >
               {EXPORT_FONTS.map((f) => (
@@ -583,7 +585,7 @@ export function ExportModal({
               aria-label="Font size"
               value={String(normalizedFontSize)}
               onChange={(e) => onSettingsChange({ ...settings, fontSize: Number(e.target.value) })}
-              className="h-8 w-full rounded-md border border-input bg-background px-2 text-sm text-foreground outline-hidden transition focus-visible:ring-2 focus-visible:ring-ring"
+              className="h-11 w-full rounded-xl bg-surf2 px-3 text-sm text-foreground outline-hidden transition focus-visible:focus-ring"
             >
               {EXPORT_FONT_SIZE_VALUES.map((size) => (
                 <option key={size} value={size}>
@@ -613,10 +615,10 @@ export function ExportModal({
                   onSettingsChange({ ...settings, windowDecoration: value as WindowDecoration })
                 }
                 className={cn(
-                  "rounded-md border px-3 py-1 text-sm transition-colors",
+                  "min-h-11 rounded-full px-3.5 text-sm font-medium transition-colors focus-visible:focus-ring md:min-h-9",
                   settings.windowDecoration === value
-                    ? "border-foreground bg-foreground text-background"
-                    : "border-border text-muted-foreground hover:border-foreground/50",
+                    ? "bg-foreground text-background"
+                    : "bg-surf2 text-muted-foreground hover:text-foreground",
                 )}
               >
                 {label}
@@ -625,7 +627,7 @@ export function ExportModal({
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-6 border-t border-border pt-4">
+        <div className="flex flex-wrap items-center gap-x-6">
           <label className="flex min-h-11 items-center gap-3 text-sm font-medium">
             Lines
             <Switch
@@ -672,7 +674,7 @@ export function ExportModal({
 
         <section
           aria-labelledby="export-header-label"
-          className="flex flex-col gap-3 border-t border-border pt-4"
+          className="flex flex-col gap-3 rounded-[14px] bg-surf2 p-4"
         >
           <div className="flex min-h-11 items-center justify-between gap-4">
             <div>
@@ -753,7 +755,7 @@ export function ExportModal({
 
         <section
           aria-labelledby="export-footer-label"
-          className="flex flex-col gap-3 border-t border-border pt-4"
+          className="flex flex-col gap-3 rounded-[14px] bg-surf2 p-4"
         >
           <div className="flex min-h-11 items-center justify-between gap-4">
             <div>
@@ -839,7 +841,7 @@ export function ExportModal({
       </div>
 
       {/* Export actions */}
-      <div className="border-t border-border pt-1">
+      <div className="flex flex-col gap-1 self-start rounded-[14px] bg-surf2 p-1.5 md:sticky md:top-0 md:col-start-2 md:row-start-2">
         {EXPORT_ACTIONS.map(({ key, label, Icon, isAsync }) => {
           const handleClick =
             key === "png"
@@ -859,7 +861,7 @@ export function ExportModal({
               type="button"
               disabled={exporting}
               onClick={() => void handleClick()}
-              className="flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm transition-colors hover:bg-muted disabled:pointer-events-none disabled:opacity-40"
+              className="flex min-h-11 w-full items-center gap-3 rounded-[10px] px-3 py-2.5 text-sm font-medium transition-colors hover:bg-surf3 focus-visible:focus-ring disabled:pointer-events-none disabled:opacity-40"
             >
               {isWaiting ? (
                 <Spinner className="size-4 shrink-0 text-muted-foreground" />
@@ -873,15 +875,15 @@ export function ExportModal({
           );
         })}
       </div>
-    </>
+    </div>
   );
 
   if (isDesktop) {
     return (
       <Dialog open={open} onOpenChange={handleOpenChange}>
-        <DialogContent className="max-w-2xl gap-6">
+        <DialogContent className="max-h-[calc(100dvh-4rem)] gap-6 overflow-y-auto sm:max-w-[880px]">
           <DialogHeader>
-            <DialogTitle>Export</DialogTitle>
+            <DialogTitle className="font-display text-[32px] font-normal">Export</DialogTitle>
             <DialogDescription className="sr-only">
               Configure and download your code snippet as an image.
             </DialogDescription>
@@ -896,7 +898,7 @@ export function ExportModal({
     <Drawer open={open} onOpenChange={handleOpenChange}>
       <DrawerContent>
         <DrawerHeader>
-          <DrawerTitle>Export</DrawerTitle>
+          <DrawerTitle className="font-display text-[28px] font-normal">Export</DrawerTitle>
           <DrawerDescription className="sr-only">
             Configure and download your code snippet as an image.
           </DrawerDescription>

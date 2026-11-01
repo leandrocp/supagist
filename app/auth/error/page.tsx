@@ -1,37 +1,33 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import Link from "next/link";
 import { Suspense } from "react";
+import { AuthHeading } from "@/components/auth-heading";
+import { AuthShell } from "@/components/auth-shell";
+import { Button } from "@/components/ui/button";
 
 async function ErrorContent({ searchParams }: { searchParams: Promise<{ error: string }> }) {
   const params = await searchParams;
 
-  return (
-    <>
-      {params?.error ? (
-        <p className="text-sm text-muted-foreground">Code error: {params.error}</p>
-      ) : (
-        <p className="text-sm text-muted-foreground">An unspecified error occurred.</p>
-      )}
-    </>
-  );
+  return params?.error ? <>Code error: {params.error}</> : <>An unspecified error occurred.</>;
 }
 
 export default function Page({ searchParams }: { searchParams: Promise<{ error: string }> }) {
   return (
-    <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
-      <div className="w-full max-w-sm">
-        <div className="flex flex-col gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-2xl">Sorry, something went wrong.</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Suspense>
-                <ErrorContent searchParams={searchParams} />
-              </Suspense>
-            </CardContent>
-          </Card>
+    <AuthShell>
+      <div className="flex flex-col gap-8">
+        <AuthHeading eyebrow="Sign-in error" title="Sorry, something went wrong.">
+          <Suspense>
+            <ErrorContent searchParams={searchParams} />
+          </Suspense>
+        </AuthHeading>
+        <div className="flex flex-wrap gap-3">
+          <Button asChild>
+            <Link href="/auth/login">Try signing in again</Link>
+          </Button>
+          <Button asChild variant="secondary">
+            <Link href="/">Back to Supagist</Link>
+          </Button>
         </div>
       </div>
-    </div>
+    </AuthShell>
   );
 }

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { AuthShell } from "@/components/auth-shell";
 import { ConsentForm } from "./consent-form";
 
 export const metadata: Metadata = {
@@ -14,8 +15,8 @@ export default async function ConsentPage({
   const { authorization_id } = await searchParams;
   const id = typeof authorization_id === "string" ? authorization_id : "";
   return (
-    <main className="flex min-h-svh items-center justify-center p-6">
+    <AuthShell>
       <ConsentForm key={id} authorizationId={id} />
-    </main>
+    </AuthShell>
   );
 }

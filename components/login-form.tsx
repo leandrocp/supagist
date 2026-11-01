@@ -5,7 +5,9 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { GithubMark } from "@/components/github-mark";
-import { BrandDot } from "@/components/brand-dot";
+import { AuthHeading } from "@/components/auth-heading";
+import { Seal } from "@/components/brand/envelope";
+import { Spinner } from "@/components/ui/spinner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -72,25 +74,38 @@ export function LoginForm({ className, next = "/" }: { className?: string; next?
     }
   };
 
-  return (
-    <div className={cn("w-full max-w-sm space-y-6", className)}>
-      <div className="space-y-2 text-center">
-        <Link
-          href="/"
-          className="inline-flex items-center gap-2 text-lg font-medium tracking-tight hover:opacity-80"
-        >
-          <BrandDot />
-          Supagist
-        </Link>
-        <p className="font-mono text-xs uppercase tracking-code-label text-muted-foreground">
-          {mode === "signin" ? "Sign in to your account" : "Create an account"}
-        </p>
+  if (info) {
+    // Sign-up succeeded: Supabase sent a confirmation email.
+    return (
+      <div className={cn("flex flex-col items-start gap-6", className)}>
+        <Seal className="size-24" />
+        <AuthHeading title="Thank you for signing up!">
+          <p role="status">{info}</p>
+        </AuthHeading>
+        <Button asChild variant="secondary">
+          <Link href="/">Back to Supagist</Link>
+        </Button>
       </div>
+    );
+  }
 
-      <div className="space-y-4">
+  const switchMode = (nextMode: Mode) => {
+    setMode(nextMode);
+    setError(null);
+    setInfo(null);
+  };
+
+  return (
+    <div className={cn("flex w-full flex-col gap-8", className)}>
+      <AuthHeading title={mode === "signin" ? "Sign in to your account" : "Create an account"}>
+        Use GitHub or your email.
+      </AuthHeading>
+
+      <div className="flex flex-col gap-5">
         <Button
-          variant="outline"
-          className="w-full gap-2"
+          variant="ink"
+          size="lg"
+          className="w-full text-[15px]"
           onClick={() => void handleGitHub()}
           disabled={loading}
         >
@@ -98,78 +113,62 @@ export function LoginForm({ className, next = "/" }: { className?: string; next?
           Continue with GitHub
         </Button>
 
-        <div className="relative">
-          <div className="absolute inset-0 flex items-center">
-            <span className="w-full border-t border-border" />
-          </div>
-          <div className="relative flex justify-center text-xs">
-            <span className="bg-background px-2 text-muted-foreground">or</span>
-          </div>
-        </div>
+        <p className="eyebrow text-center text-[11px] text-faint">or</p>
 
-        <form onSubmit={(e) => void handleEmail(e)} className="space-y-4">
-          <div className="space-y-2">
+        <form onSubmit={(e) => void handleEmail(e)} className="flex flex-col gap-4">
+          <div className="flex flex-col gap-2">
             <Label htmlFor="email">Email</Label>
             <Input
               id="email"
               type="email"
+              autoComplete="email"
               placeholder="you@example.com"
               required
               value={email}
+              aria-invalid={error ? true : undefined}
               onChange={(e) => setEmail(e.target.value)}
             />
           </div>
-          <div className="space-y-2">
+          <div className="flex flex-col gap-2">
             <Label htmlFor="password">Password</Label>
             <Input
               id="password"
               type="password"
+              autoComplete={mode === "signin" ? "current-password" : "new-password"}
               required
               value={password}
+              aria-invalid={error ? true : undefined}
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
 
-          {error && <p className="text-sm text-destructive">{error}</p>}
-          {info && <p className="text-sm text-muted-foreground">{info}</p>}
+          {error && (
+            <p role="alert" className="text-sm text-wax-text">
+              {error}
+            </p>
+          )}
 
-          <Button type="submit" variant="pill" size="pill" className="w-full" disabled={loading}>
-            {loading ? "…" : mode === "signin" ? "Sign in" : "Create account"}
+          <Button type="submit" className="mt-2 w-full" disabled={loading}>
+            {loading ? <Spinner data-icon="inline-start" /> : null}
+            {loading
+              ? mode === "signin"
+                ? "Signing in…"
+                : "Creating account…"
+              : mode === "signin"
+                ? "Sign in"
+                : "Create account"}
           </Button>
         </form>
 
-        <p className="text-center text-sm text-muted-foreground">
-          {mode === "signin" ? (
-            <>
-              No account?{" "}
-              <button
-                type="button"
-                className="underline underline-offset-4 hover:text-foreground"
-                onClick={() => {
-                  setMode("signup");
-                  setError(null);
-                  setInfo(null);
-                }}
-              >
-                Sign up
-              </button>
-            </>
-          ) : (
-            <>
-              Have an account?{" "}
-              <button
-                type="button"
-                className="underline underline-offset-4 hover:text-foreground"
-                onClick={() => {
-                  setMode("signin");
-                  setError(null);
-                  setInfo(null);
-                }}
-              >
-                Sign in
-              </button>
-            </>
-          )}
+        <p className="text-center text-[15px] text-muted-foreground">
+          {mode === "signin" ? "Don't have an account? " : "Already have an account? "}
+          <button
+            type="button"
+            className="rounded-sm font-semibold text-postal hover:underline focus-visible:focus-ring"
+            onClick={() => switchMode(mode === "signin" ? "signup" : "signin")}
+          >
+            {mode === "signin" ? "Sign up" : "Sign in"}
+          </button>
         </p>
       </div>
     </div>

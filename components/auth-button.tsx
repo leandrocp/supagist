@@ -27,10 +27,11 @@ export async function AuthButton() {
   if (!isPersistentUser(user)) {
     return (
       <>
-        <Button asChild size="sm" variant="pill" className="px-5">
+        <Button asChild variant="pill" className="px-5">
           <LoginLink>Log in</LoginLink>
         </Button>
-        <ThemeSwitcher />
+        {/* Below md the theme choice lives in the nav's menu. */}
+        <ThemeSwitcher className="hidden md:inline-flex" />
       </>
     );
   }

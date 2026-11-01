@@ -14,7 +14,7 @@ export default function TermsPage() {
       subtitle="Simple terms for a simple tool."
       updated="October 31, 2026"
     >
-      <ol className="space-y-6 text-sm">
+      <ol className="space-y-10">
         <Clause n={1} title="Supagist is open source.">
           <p>
             The full source code is publicly available. You are free to inspect, fork, and run your

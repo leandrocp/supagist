@@ -58,18 +58,68 @@
   --color-brand-subtle: hsl(var(--brand-subtle));
   --color-brand-strong: hsl(var(--brand-strong));
 
+  --color-paper: hsl(var(--paper));
+  --color-surf: hsl(var(--surf));
+  --color-surf2: hsl(var(--surf2));
+  --color-surf3: hsl(var(--surf3));
+  --color-ink: hsl(var(--ink));
+  --color-muted-ink: hsl(var(--muted-ink));
+  --color-faint: hsl(var(--faint));
+  --color-wax: hsl(var(--wax));
+  --color-wax-hover: hsl(var(--wax-hover));
+  --color-wax-text: hsl(var(--wax-text));
+  --color-on-wax: hsl(var(--on-wax));
+  --color-postal: hsl(var(--postal));
+  --color-kraft: hsl(var(--kraft));
+  --color-ok: hsl(var(--ok));
+  --color-scrim: hsl(var(--scrim));
+
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 2px);
   --radius-sm: calc(var(--radius) - 4px);
 
-  --tracking-code-label: 0.1em;
+  --tracking-code-label: 0.14em;
+  --tracking-display: -0.02em;
 }
 
-/* `inline` because next/font defines --font-source-code-pro on <body>: a plain
-   @theme variable resolves on :root, where it does not exist yet, and every
-   `font-mono` silently fell back to the inherited sans font. */
+/* `inline` because next/font defines its variables on <body>: a plain @theme
+   variable resolves on :root, where they do not exist yet, and every
+   `font-mono` silently fell back to the inherited sans font.
+   Chrome only: code in the editor and the snippet view sets its own family
+   from the export font the author picked. */
 @theme inline {
-  --font-mono: var(--font-source-code-pro), ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+/* Fraunces at the brand's display settings: 600, opsz 144, SOFT 50, WONK 0. */
+@utility font-display {
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-weight: 600;
+  font-variation-settings:
+    "opsz" 144,
+    "SOFT" 50,
+    "WONK" 0;
+  letter-spacing: var(--tracking-display);
+}
+
+/* Small uppercase Plex label: eyebrows, meta, "On this page". */
+@utility eyebrow {
+  font-family: var(--font-plex-mono), ui-monospace, monospace;
+  font-weight: 500;
+  font-size: 0.8125rem;
+  line-height: 1.2;
+  letter-spacing: var(--tracking-code-label);
+  text-transform: uppercase;
+}
+
+/* The brand focus ring: a 2px bg gap, then 2px postal blue. The only "line"
+   the spec allows. */
+@utility focus-ring {
+  outline: none;
+  box-shadow:
+    0 0 0 2px hsl(var(--background)),
+    0 0 0 4px hsl(var(--ring));
 }
 
 /* Export fonts. Kept at the top level rather than inside a `@layer`: the v4
@@ -109,89 +159,88 @@
 }
 
 @layer base {
+  /* Supagist Paper (light) and Supagist Night (dark), from the brand/v3 site
+     spec. Surfaces separate by tone, never by lines: bg → surf (letter) →
+     surf2 (quiet panel, fields) → surf3 (tracks). The Supabase-style names
+     below are kept so every shadcn primitive picks the palette up. */
   :root {
-    /* Supabase Design System: semantic app background and surface hierarchy. */
-    --background: 0 0% 98.4%;
-    --background-alternative: 0 0% 99.2%;
-    --background-200: 0 0% 100%;
-    --surface-100: 0 0% 100%;
-    --surface-200: 0 0% 98%;
-    --surface-300: 0 0% 96.1%;
-    --foreground: 0 0% 6%;
-    --foreground-light: 0 0% 32.2%;
-    --foreground-lighter: 0 0% 43.9%;
-    --foreground-muted: 0 0% 43.9%;
-    --foreground-contrast: 0 0% 98.4%;
-    --card: var(--surface-100);
-    --card-foreground: var(--foreground);
-    --popover: var(--surface-100);
-    --popover-foreground: var(--foreground);
-    --primary: 156.5 86.5% 26.1%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: var(--surface-200);
-    --secondary-foreground: var(--foreground);
-    --muted: var(--surface-300);
-    --muted-foreground: var(--foreground-muted);
-    --accent: var(--surface-300);
-    --accent-foreground: var(--foreground);
-    --destructive: 10.2 77.9% 53.9%;
-    --destructive-foreground: 0 0% 100%;
-    --border: 0 0% 89.8%;
-    --border-strong: 0 0% 78%;
-    --border-control: 0 0% 84%;
-    --input: var(--border-control);
-    --ring: 153.1 60.2% 52.7%;
-    --chart-1: 153.1 60.2% 52.7%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
-    --radius: 0.5rem;
-    --brand: 153.1 60.2% 52.7%;
-    --brand-link: 156.5 86.5% 26.1%;
-    --brand-subtle: 147.6 72.5% 90%;
-    --brand-strong: 156.5 86.5% 26.1%;
+    /* Raw brand tokens. */
+    --paper: 39 47.6% 91.8%; /* #F4EDE0 bg */
+    --surf: 40 52.9% 96.7%; /* #FBF8F2 */
+    --surf2: 39.2 41.9% 87.8%; /* #EDE4D3 */
+    --surf3: 38.7 36.5% 83.3%; /* #E4D9C5 */
+    --ink: 36 9.8% 10%; /* #1C1A17 */
+    --muted-ink: 36.7 10.6% 33.3%; /* #5E574C */
+    --faint: 33 10.2% 38.4%; /* #6C6358 */
+    --wax: 4.2 64.5% 47.5%; /* #C7362B */
+    --wax-hover: 4.3 66% 41.6%; /* #B02E24 */
+    --wax-text: 4.4 68% 39.2%; /* #A82A20 */
+    --on-wax: 39 47.6% 91.8%; /* #F4EDE0 */
+    --postal: 215.6 54.4% 31%; /* #24477A */
+    --kraft: 30.4 42.2% 63.3%; /* #C9A27A */
+    --ok: 131 39% 30.2%; /* #2F6B3A */
+    --scrim: 36 9.8% 10% / 0.32;
+    --shadow-tint: 34 54% 19%; /* rgba(74,52,22) for envelope and card shadows */
+
+    --background: var(--paper);
+    --background-alternative: var(--surf);
+    --background-200: var(--surf);
+    --surface-100: var(--surf);
+    --surface-200: var(--surf2);
+    --surface-300: var(--surf3);
+    --foreground: var(--ink);
+    --foreground-light: var(--muted-ink);
+    --foreground-lighter: var(--muted-ink);
+    --foreground-muted: var(--faint);
+    --foreground-contrast: var(--paper);
+    --card: var(--surf);
+    --card-foreground: var(--ink);
+    --popover: var(--surf);
+    --popover-foreground: var(--ink);
+    --primary: var(--wax);
+    --primary-foreground: var(--on-wax);
+    --secondary: var(--surf2);
+    --secondary-foreground: var(--ink);
+    --muted: var(--surf2);
+    --muted-foreground: var(--muted-ink);
+    --accent: var(--surf2);
+    --accent-foreground: var(--ink);
+    --destructive: var(--wax-text);
+    --destructive-foreground: var(--on-wax);
+    /* Any border left in the chrome reads as a tone step, not a rule. */
+    --border: var(--surf2);
+    --border-strong: var(--surf3);
+    --border-control: var(--surf3);
+    --input: var(--surf2);
+    --ring: var(--postal);
+    --chart-1: var(--wax);
+    --chart-2: var(--postal);
+    --chart-3: var(--kraft);
+    --chart-4: var(--ok);
+    --chart-5: var(--faint);
+    --radius: 0.75rem;
+    --brand: var(--wax);
+    --brand-link: var(--postal);
+    --brand-subtle: var(--surf2);
+    --brand-strong: var(--wax-text);
   }
   .dark {
-    --background: 0 0% 7.1%;
-    --background-alternative: 0 0% 5.5%;
-    --background-200: 0 0% 9%;
-    --surface-100: 0 0% 9%;
-    --surface-200: 0 0% 11%;
-    --surface-300: 0 0% 13.5%;
-    --foreground: 0 0% 98%;
-    --foreground-light: 0 0% 70.6%;
-    --foreground-lighter: 0 0% 61%;
-    --foreground-muted: 0 0% 53.7%;
-    --foreground-contrast: 0 0% 8.6%;
-    --card: var(--surface-100);
-    --card-foreground: var(--foreground);
-    --popover: var(--surface-200);
-    --popover-foreground: var(--foreground);
-    --primary: 153.1 60.2% 52.7%;
-    --primary-foreground: 154 70% 7%;
-    --secondary: var(--surface-200);
-    --secondary-foreground: var(--foreground);
-    --muted: var(--surface-300);
-    --muted-foreground: var(--foreground-muted);
-    --accent: var(--surface-300);
-    --accent-foreground: var(--foreground);
-    --destructive: 10.2 77.9% 53.9%;
-    --destructive-foreground: 0 0% 100%;
-    --border: 0 0% 18%;
-    --border-strong: 0 0% 25%;
-    --border-control: 0 0% 22%;
-    --input: var(--border-control);
-    --ring: 153.1 60.2% 52.7%;
-    --chart-1: 153.1 60.2% 52.7%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
-    --brand: 153.1 60.2% 52.7%;
-    --brand-link: 153.1 60.2% 52.7%;
-    --brand-subtle: 155.1 100% 8%;
-    --brand-strong: 153.1 59.5% 70%;
+    --paper: 0 0% 7.1%; /* #121212 */
+    --surf: 40 5.7% 10.4%; /* #1C1B19 */
+    --surf2: 36 7.5% 13.1%; /* #24221F */
+    --surf3: 34.3 8.2% 16.7%; /* #2E2B27 */
+    --ink: 39.1 45.1% 90%; /* #F1E9DA */
+    --muted-ink: 37.1 10.7% 61.4%; /* #A79F92 */
+    --faint: 37.1 8.9% 53.9%; /* #948C7F */
+    --wax: 8 72.8% 55.3%; /* #E0503A */
+    --wax-hover: 7.8 78.6% 61.6%; /* #EA6450 */
+    --wax-text: 9.8 82.5% 66.5%; /* #F07A63 */
+    --on-wax: 0 0% 7.1%; /* #121212 */
+    --postal: 215.6 56.6% 72%; /* #8FB0E0 */
+    --kraft: 30.5 27.9% 42.9%; /* #8C6E4F */
+    --ok: 130.2 34% 62.5%; /* #7FC08A */
+    --scrim: 0 0% 0% / 0.6;
+    --shadow-tint: 0 0% 0%;
   }
 }
 

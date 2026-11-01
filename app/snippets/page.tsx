@@ -4,6 +4,7 @@ import { getMySnippets } from "@/app/actions/get-my-snippets";
 import { AppNav } from "@/components/app-nav";
 import { SiteFooter } from "@/components/site-footer";
 import { SnippetList } from "@/components/snippet-list";
+import { Envelope, Seal } from "@/components/brand/envelope";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/server";
 import { isPersistentUser } from "@/components/auth-button";
@@ -33,50 +34,65 @@ export default async function SnippetsPage() {
   const signedIn = await isSignedIn();
   const snippets = signedIn ? await getMySnippets() : [];
 
+  if (!signedIn) {
+    return (
+      <main className="flex min-h-screen flex-col bg-background">
+        <AppNav />
+        <section
+          data-testid="snippets-signed-out"
+          className="flex flex-1 flex-col items-center justify-center px-5 py-14 text-center md:px-12"
+        >
+          <Seal className="size-24" />
+          <h1 className="mt-8 font-display text-[34px] leading-tight text-foreground md:text-[44px]">
+            Your snippets
+          </h1>
+          <p className="mt-3 text-[15px] text-muted-foreground md:text-[17px]">
+            Log in to see the snippets you have published.
+          </p>
+          <Button asChild className="mt-7">
+            <Link href="/auth/login">Log in</Link>
+          </Button>
+        </section>
+        <SiteFooter />
+      </main>
+    );
+  }
+
   return (
     <main className="flex min-h-screen flex-col bg-background">
-      <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col px-5">
-        <AppNav />
+      <AppNav />
 
-        <section className="flex flex-1 flex-col gap-6 py-8 lg:py-10">
-          <div className="flex flex-col gap-1">
-            <h1 className="text-2xl font-semibold tracking-tight">Your snippets</h1>
-            <p className="text-sm text-foreground-lighter">
-              {signedIn && snippets.length > 0
-                ? `${snippets.length} published snippet${snippets.length === 1 ? "" : "s"}, newest first.`
-                : "Everything you publish shows up here."}
+      <section className="flex flex-1 flex-col gap-10 px-5 pt-[34px] md:px-12 md:pt-14">
+        <div className="flex flex-col gap-2">
+          <h1 className="font-display text-[44px] leading-tight text-foreground md:text-[52px]">
+            Your snippets
+          </h1>
+          {snippets.length > 0 ? (
+            <p className="text-[15px] text-muted-foreground md:text-[17px]">
+              {`${snippets.length} published snippet${snippets.length === 1 ? "" : "s"}, newest first.`}
             </p>
+          ) : null}
+        </div>
+
+        {snippets.length === 0 ? (
+          <div
+            data-testid="snippets-empty"
+            className="flex flex-1 flex-col items-center justify-center pb-14 text-center"
+          >
+            <Envelope className="w-[240px] md:w-[300px]" seal={70 / 300} sealOffset={[0, 0]} />
+            <p className="mt-10 text-[15px] text-muted-foreground md:text-[17px]">
+              You have not published anything yet.
+            </p>
+            <Button asChild className="mt-5">
+              <Link href="/">Create a snippet</Link>
+            </Button>
           </div>
+        ) : (
+          <SnippetList snippets={snippets} />
+        )}
+      </section>
 
-          {!signedIn ? (
-            <div
-              data-testid="snippets-signed-out"
-              className="flex flex-col items-start gap-4 rounded-lg border border-border bg-surface-100 px-6 py-8"
-            >
-              <p className="text-sm text-foreground-light">
-                Log in to see the snippets you have published.
-              </p>
-              <Button asChild size="sm" variant="pill" className="px-5">
-                <Link href="/auth/login">Log in</Link>
-              </Button>
-            </div>
-          ) : snippets.length === 0 ? (
-            <div
-              data-testid="snippets-empty"
-              className="flex flex-col items-start gap-4 rounded-lg border border-border bg-surface-100 px-6 py-8"
-            >
-              <p className="text-sm text-foreground-light">You have not published anything yet.</p>
-              <Button asChild size="sm" variant="pill" className="px-5">
-                <Link href="/">Create a snippet</Link>
-              </Button>
-            </div>
-          ) : (
-            <SnippetList snippets={snippets} />
-          )}
-        </section>
-
-        <SiteFooter />
-      </div>
+      <SiteFooter />
     </main>
   );
 }

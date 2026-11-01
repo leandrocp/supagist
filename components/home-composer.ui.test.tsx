@@ -107,11 +107,9 @@ afterEach(() => {
 });
 
 describe("HomeComposer controls", () => {
-  it("uses Supabase Studio semantic surfaces and a brand-primary publish action", () => {
+  it("uses the wax primary for Publish and keeps the preview gutter", () => {
     render(<HomeComposer />);
 
-    expect(screen.getByTestId("composer-shell").className).toContain("bg-background-alternative");
-    expect(screen.getByTestId("composer-workspace").className).toContain("bg-surface-100");
     expect(screen.getByTestId("code-preview").getAttribute("data-show-gutter")).toBe("true");
     expect(screen.getByTestId("code-preview").getAttribute("data-show-line-numbers")).toBe("false");
     expect(screen.getByRole("button", { name: "Publish" }).getAttribute("data-variant")).toBe(
@@ -137,7 +135,7 @@ describe("HomeComposer controls", () => {
   it("keeps the preview visible while customization scrolls independently", () => {
     render(<HomeComposer />);
 
-    expect(screen.getByTestId("composer-shell").className).toContain("h-[calc(100dvh-4rem)]");
+    expect(screen.getByTestId("composer-shell").className).toContain("lg:h-[clamp(");
     expect(screen.getByTestId("composer-main").className).toContain("lg:grid-cols-");
     expect(screen.getByTestId("preview-pane").className).toContain("overflow-auto");
     expect(screen.getByTestId("composer-workspace").className).toContain("overflow-hidden");

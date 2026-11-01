@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Check, ChevronsUpDown } from "lucide-react";
+import { Check, ChevronDown } from "lucide-react";
 import {
   Command,
   CommandEmpty,
@@ -116,7 +116,7 @@ export function BrandPicker({ value, onChange, className }: Props) {
           aria-label="Brand"
           aria-expanded={open}
           className={cn(
-            "flex h-11 min-w-0 items-center gap-2 rounded-md border border-border-control bg-surface-200 px-3 text-sm text-foreground outline-hidden transition hover:border-border-strong focus-visible:ring-2 focus-visible:ring-ring/50",
+            "flex h-11 min-w-0 items-center gap-2 rounded-xl bg-surf2 px-3.5 text-[15px] text-foreground outline-hidden transition-colors hover:bg-surf3 focus-visible:focus-ring",
             className,
           )}
         >
@@ -128,11 +128,9 @@ export function BrandPicker({ value, onChange, className }: Props) {
               <BrandSwatchLayers preset={active} />
               <BrandLogo preset={active} />
             </span>
-          ) : (
-            <span className="size-6 shrink-0 rounded-md border border-dashed border-border-strong" />
-          )}
+          ) : null}
           <span className="truncate">{active?.name ?? "Custom"}</span>
-          <ChevronsUpDown className="ml-auto size-3.5 shrink-0 text-foreground-muted" />
+          <ChevronDown className="ml-auto size-4 shrink-0 text-muted-foreground" />
         </button>
       </PopoverTrigger>
       <PopoverContent
@@ -140,7 +138,7 @@ export function BrandPicker({ value, onChange, className }: Props) {
         align="start"
         sideOffset={6}
         collisionPadding={12}
-        className="max-h-(--radix-popover-content-available-height) w-[min(92vw,380px)] overflow-hidden border-border bg-popover p-0 text-popover-foreground"
+        className="max-h-(--radix-popover-content-available-height) w-[min(92vw,380px)] overflow-hidden p-0"
       >
         <Command>
           <CommandInput
@@ -162,7 +160,7 @@ export function BrandPicker({ value, onChange, className }: Props) {
                   onChange(preset);
                   setOpen(false);
                 }}
-                className="h-16 min-w-0 cursor-pointer gap-2 rounded-md border border-transparent px-2 data-[selected=true]:border-border data-[selected=true]:bg-surface-200"
+                className="h-16 min-w-0 cursor-pointer gap-2 rounded-lg px-2 data-[selected=true]:bg-surf2"
               >
                 <span
                   className="relative flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-md border border-white/10 shadow-xs"
