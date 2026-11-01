@@ -151,6 +151,7 @@ describe("GET /api/options", () => {
     fetchMock.mockResolvedValue(
       Response.json({ brands: [{ id: "supabase" }], themes: ["dracula"] }),
     );
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY", "sb_publishable_test");
     const response = await GET(new Request("https://supagist.app/api/options"));
     expect(upstreamCall().url).toBe("https://project.supabase.co/functions/v1/render/options");
     expect(upstreamCall().init.method).toBe("GET");
@@ -160,6 +161,7 @@ describe("GET /api/options", () => {
       formats: ["svg", "png"],
       pixelRatios: { svg: [1, 2], png: [1, 2, 4, 6] },
       defaults: { format: "svg", pixelRatio: { svg: 1, png: 2 } },
+      supabase: { url: "https://project.supabase.co", publishableKey: "sb_publishable_test" },
     });
   });
 

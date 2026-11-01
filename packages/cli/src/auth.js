@@ -318,9 +318,15 @@ export async function logout(host, io) {
   let revoked = false;
   try {
     const token = await accessToken(host, io);
+    // Hosted Supabase Auth also wants the project's public apikey.
+    const { body: options } = await getJson(io, `${host}/api/options`);
+    const apikey = options?.supabase?.publishableKey;
     const response = await io.fetch(`${credentials.issuer.replace(/\/$/, "")}/logout?scope=local`, {
       method: "POST",
-      headers: { authorization: `Bearer ${token}` },
+      headers: {
+        authorization: `Bearer ${token}`,
+        ...(typeof apikey === "string" ? { apikey } : {}),
+      },
       signal: AbortSignal.timeout(30_000),
     });
     revoked = response.ok;

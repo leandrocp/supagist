@@ -122,7 +122,8 @@ too. On a 429, wait for `retryAfter` seconds instead of retrying in a loop.
 
 The CLI is a thin client for two endpoints, which you can also call directly:
 
-- `GET /api/options` returns the option catalog as JSON.
+- `GET /api/options` returns the option catalog as JSON, plus the public
+  Supabase project URL and publishable key under `supabase`.
 - `POST /api/render` takes a JSON body (`code` plus the fields above, as in the
   MCP `render_snippet` tool, and `format: "png"` with `pixelRatio`) and returns
   `image/svg+xml` or `image/png`. The image size is in the `X-Supagist-Width`
@@ -180,6 +181,7 @@ session: it registers itself, uses PKCE and receives the code on a
 Credentials live in `~/.config/supagist/<host>.json` (or under
 `$XDG_CONFIG_HOME`) with mode 0600, and refresh themselves. `--host` picks the
 server, so local and preview deployments keep separate sign-ins.
+`auth logout` ends the CLI's session on the server and deletes the local file.
 
 ## Develop
 

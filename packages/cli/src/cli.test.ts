@@ -551,11 +551,20 @@ describe("run", () => {
       expect(await cli("auth", "status")).toBe(0);
       expect(stdout.join("")).toBe(`Signed in to ${DEFAULT_HOST} as old@example.com.\n`);
 
-      fetchMock.mockResolvedValueOnce(new Response(null, { status: 204 }));
+      fetchMock.mockImplementation(async (input) =>
+        String(input) === `${DEFAULT_HOST}/api/options`
+          ? Response.json({ supabase: { publishableKey: "sb_publishable_test" } })
+          : new Response(null, { status: 204 }),
+      );
       stdout = [];
       expect(await cli("auth", "logout", "--json")).toBe(0);
       expect(json()).toEqual({ ok: true, host: DEFAULT_HOST, signedIn: false, revoked: true });
-      expect(sent().url).toBe(`${issuer}/logout?scope=local`);
+      // Hosted Supabase Auth rejects logout without the project's apikey.
+      const revoke = fetchMock.mock.calls.find(([url]) =>
+        String(url).endsWith("/logout?scope=local"),
+      );
+      expect(String(revoke![0])).toBe(`${issuer}/logout?scope=local`);
+      expect(new Headers(revoke![1]!.headers).get("apikey")).toBe("sb_publishable_test");
       await expect(stat(credentialsFile())).rejects.toThrow();
     });
   });
