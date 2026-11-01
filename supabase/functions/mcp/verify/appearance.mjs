@@ -38,7 +38,7 @@ assert.ok(catalog.backgrounds.includes("Supabase"));
 
 const skill = new URL("../../../../.agents/skills/supagist/", import.meta.url);
 const examples = [];
-for (const file of ["SKILL.md", "reference/features.md"]) {
+for (const file of ["SKILL.md", "reference/mcp.md", "reference/features.md"]) {
   const markdown = await readFile(new URL(file, skill), "utf8");
   for (const [, json] of markdown.matchAll(/```json\n([\s\S]*?)\n```/g))
     examples.push(JSON.parse(json));
