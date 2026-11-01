@@ -815,7 +815,9 @@ export function SnippetAnnotationsView({
     <div
       data-testid="snippet-card"
       className={cn(
-        "flex h-full min-h-0 flex-col overflow-hidden font-mono text-sm",
+        // relative: the publish stamp is pressed onto this corner when
+        // there is no canvas around the card.
+        "relative flex h-full min-h-0 flex-col overflow-hidden font-mono text-sm",
         // The composer card's shadow; a brand frame recipe overrides it below.
         "shadow-2xl",
         brandFrame ? "ring-0" : "ring-1 ring-black/10",

@@ -8,6 +8,7 @@ import { createClient } from "@/lib/supabase/server";
 import { AppNav } from "@/components/app-nav";
 import { SiteFooter } from "@/components/site-footer";
 import { SnippetOwnerActions } from "@/components/snippet-owner-actions";
+import { PublishStamp } from "@/components/publish-stamp";
 import { SnippetAnnotationsView } from "./snippet-annotations-view";
 import {
   parseSnippetParam,
@@ -304,6 +305,8 @@ export default async function SnippetPage({ params }: Props) {
             appearance={parseSnippetAppearance(snippet.appearance)}
           />
         </div>
+        {/* Plays once, right after this snippet was published from the composer. */}
+        <PublishStamp visibility={snippet.visibility} url={snippetUrl} />
       </section>
 
       <SiteFooter />

@@ -302,3 +302,225 @@
   animation: reaction-pulse 750ms ease-out forwards;
   pointer-events: none;
 }
+
+/* ── Motion ────────────────────────────────────────────────────────────────
+   Every animation here moves transform and opacity only, so nothing reflows.
+   The reduced-motion block at the end turns each one into a short fade (or
+   nothing). Exported images and server renders never load these classes. */
+
+/* The publish stamp: the seal drops in large and tilted, hits the card, squashes
+   and settles at its resting tilt (--stamp-rotate). */
+@keyframes stamp-press {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, -42%, 0) scale(2.1) rotate(calc(var(--stamp-rotate) - 16deg));
+  }
+  38% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(0.9) rotate(var(--stamp-rotate));
+  }
+  52% {
+    transform: scale(1.08, 0.9) rotate(var(--stamp-rotate));
+  }
+  70% {
+    transform: scale(0.97, 1.03) rotate(var(--stamp-rotate));
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(var(--stamp-rotate));
+  }
+}
+/* Ink (or warm wax) spreading out from the impact. */
+@keyframes stamp-ink {
+  0% {
+    opacity: 0;
+    transform: scale(0.55);
+  }
+  15% {
+    opacity: 0.55;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.9);
+  }
+}
+/* After a beat on the card the seal lifts away so the code is unobstructed. */
+@keyframes stamp-lift {
+  to {
+    opacity: 0;
+    transform: translate3d(0, -10px, 0) scale(1.04) rotate(var(--stamp-rotate));
+  }
+}
+.stamp-press {
+  animation:
+    stamp-press 620ms cubic-bezier(0.55, 0, 0.3, 1) both,
+    stamp-lift 420ms ease-in 2600ms forwards;
+}
+.stamp-ink {
+  animation: stamp-ink 760ms cubic-bezier(0.2, 0.6, 0.3, 1) 230ms both;
+}
+
+/* A reaction chip popping in when someone reacts (and the count changes). */
+@keyframes chip-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  55% {
+    opacity: 1;
+    transform: scale(1.18);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+.chip-pop,
+[data-chip-pop="1"] {
+  animation: chip-pop 380ms cubic-bezier(0.3, 1.4, 0.5, 1) both;
+}
+
+/* Gentle entrance: comments, list cards, the hero, the share-link pill. */
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.rise-in {
+  animation: rise-in 420ms cubic-bezier(0.2, 0.7, 0.3, 1) both;
+  /* Stagger with style={{ "--i": index }}; capped so long lists still land fast. */
+  animation-delay: calc(min(var(--i, 0), 8) * 45ms);
+}
+/* Transform-only rise for the largest element on a page: opacity would hold
+   back its first paint (and LCP). */
+@keyframes rise {
+  from {
+    transform: translate3d(0, 14px, 0);
+  }
+  to {
+    transform: none;
+  }
+}
+.rise {
+  animation: rise 520ms cubic-bezier(0.2, 0.7, 0.3, 1) both;
+}
+
+/* The home hero's card sliding out of the envelope (transform only). */
+@keyframes card-out {
+  from {
+    transform: translate3d(8%, -22%, 0);
+  }
+  to {
+    transform: none;
+  }
+}
+.card-out {
+  animation: card-out 760ms cubic-bezier(0.2, 0.75, 0.25, 1) 120ms both;
+}
+
+/* A soft wash that fades out: a live comment from someone else, a saved edit. */
+@keyframes arrive-glow {
+  0% {
+    opacity: 0;
+  }
+  18% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+.arrive-glow {
+  animation: arrive-glow 1600ms ease-out both;
+  pointer-events: none;
+}
+
+/* Small confirmation icon pop (Copied, Saved). */
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.5) rotate(-12deg);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.pop-in {
+  animation: pop-in 260ms cubic-bezier(0.3, 1.5, 0.5, 1) both;
+}
+
+/* Presence avatars joining the stack. Leaving uses the same curve reversed. */
+@keyframes avatar-join {
+  from {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.avatar-join {
+  animation: avatar-join 280ms cubic-bezier(0.3, 1.4, 0.5, 1) both;
+}
+.avatar-leave {
+  animation: avatar-join 220ms ease-in reverse both;
+}
+
+/* Tactile press on buttons. `scale` is its own property, so it composes with
+   any transform the button already has. */
+.press {
+  transition-property: color, background-color, border-color, opacity, scale;
+  transition-duration: 150ms;
+}
+.press:active:not(:disabled) {
+  scale: 0.95;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Fade-only fallbacks: the same moments, no movement. */
+  .stamp-press {
+    animation:
+      fade-in 200ms ease-out both,
+      fade-out 300ms ease-in 2600ms forwards;
+    transform: rotate(var(--stamp-rotate));
+  }
+  .rise-in,
+  .avatar-join,
+  .pop-in {
+    animation: fade-in 160ms ease-out both;
+  }
+  .avatar-leave {
+    animation: fade-out 160ms ease-in both;
+  }
+  .stamp-ink,
+  .card-out,
+  .chip-pop,
+  [data-chip-pop="1"],
+  .rise,
+  .reaction-pulse {
+    animation: none;
+  }
+  .reaction-pulse {
+    opacity: 0;
+  }
+  .press:active:not(:disabled) {
+    scale: none;
+  }
+}

@@ -83,6 +83,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { publishSnippet } from "@/app/actions/publish";
 import { WINDOW_DECORATIONS, parseSnippetAppearance } from "@/lib/snippet-appearance";
 import { toast } from "sonner";
+import { markJustPublished } from "@/lib/motion";
 import { ClipboardType, FileImage, FileText } from "lucide-react";
 import { copyRichText, createRichTextClipboard } from "@/lib/rich-text-export";
 
@@ -431,12 +432,17 @@ export function HomeComposer() {
       window.localStorage.removeItem(DRAFT_KEY);
       window.localStorage.removeItem(ANNOTATIONS_KEY);
 
+      let copied = false;
       try {
         await navigator.clipboard.writeText(`${window.location.origin}${result.path}`);
+        copied = true;
       } catch {
         // best-effort clipboard
       }
 
+      // The snippet page stamps the seal on arrival, so publish itself never
+      // waits on an animation.
+      markJustPublished(result.path!, copied);
       router.push(result.path!);
     } catch (error: unknown) {
       toast.error(error instanceof Error ? error.message : "Publish failed. Please try again.");
