@@ -6,7 +6,19 @@ import { usePathname } from "next/navigation";
 import { Check, ClipboardType, Copy, MessageSquarePlus, SmilePlus } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { EXPORT_FONTS } from "@/lib/export-utils";
+import {
+  EXPORT_FONTS,
+  estimateExportDimensions,
+  exportLineHeightForFontSize,
+  isBrandHeaderDecoration,
+} from "@/lib/export-utils";
+import { findExportBackground, type SnippetAppearance } from "@/lib/snippet-appearance";
+import {
+  BackgroundDecoration,
+  backgroundCanvasStyle,
+  backgroundFrameShadow,
+} from "@/components/brand-scene-decoration";
+import { BrandWindowHeader } from "@/components/brand-window-header";
 import { copyRichText, createRichTextClipboard } from "@/lib/rich-text-export";
 import { createClient } from "@/lib/supabase/client";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -26,6 +38,8 @@ import { ShareButton } from "./share-button";
 import { SnippetExportModal } from "./snippet-export-modal";
 
 const DEV_MODE = process.env.NODE_ENV !== "production";
+// Room for the card's Copy, Rich text, Export and Share actions on a canvas.
+const SAVED_CARD_MIN_WIDTH = 560;
 
 const REACTION_OPTIONS = [
   // positive / praise
@@ -199,6 +213,8 @@ type Props = {
   themeFg: string | null;
   currentUserId: string | null;
   author: Author;
+  /** How the author composed the snippet: canvas, frame, spacing, header. */
+  appearance: SnippetAppearance;
 };
 
 export function SnippetAnnotationsView({
@@ -216,6 +232,7 @@ export function SnippetAnnotationsView({
   themeFg,
   currentUserId,
   author,
+  appearance,
 }: Props) {
   const supabase = useMemo(() => createClient(), []);
   const pathname = usePathname();
@@ -226,11 +243,17 @@ export function SnippetAnnotationsView({
   // every theme, including ones whose fg isn't pure black or pure white.
   const fgMix = (alpha: number) =>
     themeFg ? `color-mix(in srgb, ${themeFg} ${Math.round(alpha * 100)}%, transparent)` : null;
+  // Same card as the composer preview: the brand frame's fill for the card and
+  // its header, and for the code too under the `lumis` / `markdown` bars.
+  const background = findExportBackground(appearance.background);
+  const brandFrame = background?.frame;
+  const cardFill = brandFrame?.cardFill ?? themeBg ?? base.bg;
+  const bodyFill = isBrandHeaderDecoration(appearance.windowDecoration) ? cardFill : null;
   const c = {
     ...base,
-    bg: themeBg ?? base.bg,
-    gutter: themeBg ?? base.gutter,
-    header: themeBg ?? base.header,
+    bg: bodyFill ?? themeBg ?? base.bg,
+    gutter: bodyFill ?? themeBg ?? base.gutter,
+    header: cardFill,
     headerText: fgMix(0.6) ?? base.headerText,
     lineNum: fgMix(0.45) ?? base.lineNum,
     icon: fgMix(0.45) ?? base.icon,
@@ -263,16 +286,23 @@ export function SnippetAnnotationsView({
 
   const [richCopied, setRichCopied] = useState(false);
   const handleCopyRichText = useCallback(() => {
-    copyRichText(createRichTextClipboard(code, filename, snippetTheme, { fontId, language })).then(
+    copyRichText(
+      createRichTextClipboard(code, filename, snippetTheme, {
+        fontId,
+        fontSize: appearance.fontSize,
+        language,
+      }),
+    ).then(
       () => {
         setRichCopied(true);
         setTimeout(() => setRichCopied(false), 2000);
       },
       () => toast.error("Could not copy to the clipboard."),
     );
-  }, [code, filename, snippetTheme, fontId, language]);
+  }, [code, filename, snippetTheme, fontId, appearance.fontSize, language]);
 
   const commentInputRef = useRef<HTMLTextAreaElement | null>(null);
+  const [canvasRef, renderedCanvasWidth] = useElementWidth<HTMLDivElement>();
 
   const lines = useMemo(() => code.split("\n"), [code]);
 
@@ -696,74 +726,167 @@ export function SnippetAnnotationsView({
   };
 
   // ── Render ─────────────────────────────────────────────────────────────────
-  return (
+  const fontFamily = (EXPORT_FONTS.find((font) => font.id === fontId) ?? EXPORT_FONTS[0]!).family;
+  const { header, windowDecoration } = appearance;
+  const lineHeight = exportLineHeightForFontSize(appearance.fontSize);
+  // Without line numbers the gutter only hosts the reaction and comment
+  // controls, so it drops its rule as the composer preview does.
+  const gutterRule = appearance.lineNumbers ? c.border : "transparent";
+  const filenamePosition = header.enabled && header.showFilename ? header.filenamePosition : null;
+  const filenameLabel = (
+    <span
+      className="block truncate text-xs font-medium"
+      style={{ color: c.headerText }}
+      title={filename}
+    >
+      {filename}
+    </span>
+  );
+  const languagePosition = header.enabled && header.showLanguage ? header.languagePosition : null;
+  const headerMeta = (position: "left" | "center" | "right") => (
+    <>
+      {filenamePosition === position ? filenameLabel : null}
+      {languagePosition === position ? (
+        <span className="shrink-0 text-xs" style={{ color: c.headerText }}>
+          {languageDisplayName(language)}
+        </span>
+      ) : null}
+    </>
+  );
+  const actions = (
+    <div className="flex items-center justify-end gap-1.5">
+      {windowDecoration === "windows" && header.enabled ? (
+        <div
+          className="flex items-center gap-3 pr-1 text-[11px] leading-none"
+          style={{ color: c.headerText }}
+        >
+          <span aria-hidden="true" className="opacity-55">
+            ─
+          </span>
+          <span aria-hidden="true" className="opacity-55">
+            □
+          </span>
+          <span aria-hidden="true" className="opacity-55">
+            ×
+          </span>
+        </div>
+      ) : null}
+      <button
+        type="button"
+        onClick={handleCopy}
+        title="Copy code"
+        aria-label="Copy code"
+        className="flex h-7 items-center gap-1.5 rounded-md px-2.5 text-xs font-medium transition-opacity hover:opacity-80"
+        style={{ color: c.buttonText }}
+      >
+        {copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
+        <span className="hidden sm:inline">{copied ? "Copied" : "Copy"}</span>
+      </button>
+      <button
+        type="button"
+        onClick={handleCopyRichText}
+        title="Copy as rich text"
+        aria-label="Copy as rich text"
+        className="flex h-7 items-center gap-1.5 rounded-md px-2.5 text-xs font-medium transition-opacity hover:opacity-80"
+        style={{ color: c.buttonText }}
+      >
+        {richCopied ? <Check className="size-3.5" /> : <ClipboardType className="size-3.5" />}
+        <span className="hidden sm:inline">{richCopied ? "Copied" : "Rich text"}</span>
+      </button>
+      <SnippetExportModal
+        code={code}
+        filename={filename}
+        theme={snippetTheme}
+        fontId={fontId}
+        language={language}
+        appearance={appearance}
+        authorUsername={author?.username ?? null}
+        authorAvatarUrl={author?.avatar_url ?? null}
+        reactions={exportReactions}
+        comments={exportComments}
+        sourceUrl={snippetUrl}
+        style={{ color: c.buttonText }}
+      />
+      <ShareButton url={snippetUrl} style={{ color: c.buttonText }} />
+    </div>
+  );
+
+  const card = (
     <div
-      className="flex h-full min-h-0 flex-col overflow-hidden font-mono text-sm"
+      data-testid="snippet-card"
+      className={cn(
+        "flex h-full min-h-0 flex-col overflow-hidden font-mono text-sm",
+        // The composer card's shadow; a brand frame recipe overrides it below.
+        "shadow-2xl",
+        brandFrame ? "ring-0" : "ring-1 ring-black/10",
+      )}
       style={{
-        backgroundColor: c.bg,
-        fontFamily: (EXPORT_FONTS.find((font) => font.id === fontId) ?? EXPORT_FONTS[0]!).family,
+        backgroundColor: cardFill,
+        fontFamily,
+        fontVariantLigatures: appearance.ligatures ? undefined : "none",
+        borderRadius: appearance.cornerRadius,
+        boxShadow: backgroundFrameShadow(background),
       }}
     >
-      {/* Window chrome — three-column grid so the centred title doesn't
-          shift when the right-side button changes width (Copy ↔ Copied). */}
-      <div
-        className="grid items-center border-b px-4 py-2.5"
-        style={{
-          backgroundColor: c.header,
-          borderColor: c.border,
-          gridTemplateColumns: "1fr auto 1fr",
-        }}
-      >
-        <div className="flex items-center gap-[7px]">
-          <span className="size-3 rounded-full bg-[#ff5f57]" />
-          <span className="size-3 rounded-full bg-[#febc2e]" />
-          <span className="size-3 rounded-full bg-[#28c840]" />
-        </div>
+      {isBrandHeaderDecoration(windowDecoration) && header.enabled ? (
+        <BrandWindowHeader
+          decoration={windowDecoration}
+          brandFrame={brandFrame}
+          header={header}
+          filename={filename}
+          language={language}
+          cardFill={cardFill}
+          borderColor={c.border}
+          fontSize={appearance.fontSize}
+          // Icon-only actions keep the brand bar's filename and label visible.
+          actions={<div className="[&_button>span]:hidden!">{actions}</div>}
+        />
+      ) : (
+        /* Window chrome — three-column grid so the centred title doesn't
+           shift when the right-side button changes width (Copy ↔ Copied). */
         <div
-          className="truncate px-3 text-center text-xs font-medium"
-          style={{ color: c.headerText }}
-          title={filename}
+          className="grid items-center gap-x-3 border-b px-4 py-2.5"
+          style={{
+            backgroundColor: c.header,
+            borderColor: brandFrame?.cardBorder?.color ?? c.border,
+            gridTemplateColumns: "1fr auto 1fr",
+          }}
         >
-          {filename}
+          <div className="flex min-w-0 items-center gap-[7px]">
+            {header.enabled && windowDecoration === "macos" ? (
+              <>
+                <span className="size-3 shrink-0 rounded-full bg-[#ff5f57]" />
+                <span className="size-3 shrink-0 rounded-full bg-[#febc2e]" />
+                <span className="size-3 shrink-0 rounded-full bg-[#28c840]" />
+              </>
+            ) : header.enabled && windowDecoration === "macos-subtle" ? (
+              <>
+                <span
+                  className="size-3 shrink-0 rounded-full"
+                  style={{ backgroundColor: c.headerText }}
+                />
+                <span
+                  className="size-3 shrink-0 rounded-full"
+                  style={{ backgroundColor: c.headerText }}
+                />
+                <span
+                  className="size-3 shrink-0 rounded-full"
+                  style={{ backgroundColor: c.headerText }}
+                />
+              </>
+            ) : null}
+            {headerMeta("left")}
+          </div>
+          <div className="flex min-w-0 items-center justify-center gap-2 px-3">
+            {headerMeta("center")}
+          </div>
+          <div className="flex min-w-0 items-center justify-end gap-1.5">
+            {headerMeta("right")}
+            {/* On a canvas the card is export-sized, so the actions go icon-only. */}
+            <div className={background ? "[&_button>span]:hidden!" : undefined}>{actions}</div>
+          </div>
         </div>
-        <div className="flex items-center justify-end gap-1.5">
-          <button
-            type="button"
-            onClick={handleCopy}
-            title="Copy code"
-            aria-label="Copy code"
-            className="flex h-7 items-center gap-1.5 rounded-md px-2.5 text-xs font-medium transition-opacity hover:opacity-80"
-            style={{ color: c.buttonText }}
-          >
-            {copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
-            <span className="hidden sm:inline">{copied ? "Copied" : "Copy"}</span>
-          </button>
-          <button
-            type="button"
-            onClick={handleCopyRichText}
-            title="Copy as rich text"
-            aria-label="Copy as rich text"
-            className="flex h-7 items-center gap-1.5 rounded-md px-2.5 text-xs font-medium transition-opacity hover:opacity-80"
-            style={{ color: c.buttonText }}
-          >
-            {richCopied ? <Check className="size-3.5" /> : <ClipboardType className="size-3.5" />}
-            <span className="hidden sm:inline">{richCopied ? "Copied" : "Rich text"}</span>
-          </button>
-          <SnippetExportModal
-            code={code}
-            filename={filename}
-            theme={snippetTheme}
-            fontId={fontId}
-            authorUsername={author?.username ?? null}
-            authorAvatarUrl={author?.avatar_url ?? null}
-            reactions={exportReactions}
-            comments={exportComments}
-            sourceUrl={snippetUrl}
-            style={{ color: c.buttonText }}
-          />
-          <ShareButton url={snippetUrl} style={{ color: c.buttonText }} />
-        </div>
-      </div>
+      )}
 
       {/* Editor body — per-row grid so gutter and code heights align naturally for wrapped lines.
           Caps at viewport height minus surrounding chrome so short snippets shrink to fit. */}
@@ -778,10 +901,14 @@ export function SnippetAnnotationsView({
           {/* Top padding row — gutter bg on the left matches the gutter column below */}
           <div className="grid" style={{ gridTemplateColumns: "56px 1fr" }}>
             <div
-              className="h-4 border-r"
-              style={{ backgroundColor: c.gutter, borderColor: c.border }}
+              className="border-r"
+              style={{
+                height: appearance.innerPadding,
+                backgroundColor: c.gutter,
+                borderColor: gutterRule,
+              }}
             />
-            <div className="h-4" />
+            <div style={{ height: appearance.innerPadding }} />
           </div>
           {lines.map((_, index) => {
             const ln = index + 1;
@@ -807,7 +934,7 @@ export function SnippetAnnotationsView({
                     the same affordance. */}
                 <div
                   className="flex min-h-6 items-start border-r pl-1 pr-1.5 select-none"
-                  style={{ backgroundColor: c.gutter, borderColor: c.border }}
+                  style={{ backgroundColor: c.gutter, borderColor: gutterRule }}
                 >
                   <div className="relative flex h-6 w-full items-center justify-end gap-1">
                     {/* Resting state: comment count + line number. Hidden on hover. */}
@@ -833,12 +960,14 @@ export function SnippetAnnotationsView({
                           {lineComments[ln]?.length ?? 1}
                         </button>
                       ) : null}
-                      <span
-                        className="text-right text-xs leading-6 tabular-nums"
-                        style={{ color: c.lineNum }}
-                      >
-                        {ln}
-                      </span>
+                      {appearance.lineNumbers ? (
+                        <span
+                          className="text-right text-xs leading-6 tabular-nums"
+                          style={{ color: c.lineNum }}
+                        >
+                          {ln}
+                        </span>
+                      ) : null}
                     </div>
 
                     {/* Hover state: [smile + comment] toolbar. Same hover
@@ -941,12 +1070,15 @@ export function SnippetAnnotationsView({
                     delegated via onClick on the cell — chips carry
                     data-chip-line + data-chip-emoji + data-chip-mine. */}
                 <div
-                  className="relative min-h-6 pl-4 pr-3 leading-6"
-                  style={
-                    selectedCommentLine === ln
+                  className="relative min-h-6 pr-3"
+                  style={{
+                    paddingLeft: appearance.innerPadding,
+                    fontSize: appearance.fontSize,
+                    lineHeight: `${lineHeight}px`,
+                    ...(selectedCommentLine === ln
                       ? { backgroundColor: c.selectedLine, borderRadius: "2px" }
-                      : undefined
-                  }
+                      : null),
+                  }}
                   onClick={(event) => {
                     // Event delegation for the embedded chip HTML. Each chip
                     // span carries data-chip-emoji + data-chip-mine; the
@@ -988,10 +1120,14 @@ export function SnippetAnnotationsView({
           {/* Bottom padding row — mirrors the top spacer */}
           <div className="grid" style={{ gridTemplateColumns: "56px 1fr" }}>
             <div
-              className="h-4 border-r"
-              style={{ backgroundColor: c.gutter, borderColor: c.border }}
+              className="border-r"
+              style={{
+                height: appearance.innerPadding,
+                backgroundColor: c.gutter,
+                borderColor: gutterRule,
+              }}
             />
-            <div className="h-4" />
+            <div style={{ height: appearance.innerPadding }} />
           </div>
         </div>
       </div>
@@ -1120,6 +1256,82 @@ export function SnippetAnnotationsView({
       </div>
     </div>
   );
+
+  if (!background) return card;
+
+  // The published canvas, sized and painted as the composer preview: the
+  // export's logical canvas (widened to 16:9 when set) with the card centred
+  // at its export width. The card keeps room for the saved view's actions.
+  const exportSize = estimateExportDimensions({
+    code,
+    filename,
+    language,
+    theme: snippetTheme,
+    background,
+    outerPadding: appearance.outerPadding,
+    lineNumbers: appearance.lineNumbers,
+    showFooter: appearance.footer.enabled,
+    header,
+    footer: appearance.footer,
+    footerAuthorUsername: author?.username,
+    windowDecoration,
+    innerPadding: appearance.innerPadding,
+    fontSize: appearance.fontSize,
+    compactReactions: true,
+  });
+  const cardWidth = Math.max(exportSize.width - appearance.outerPadding * 2, SAVED_CARD_MIN_WIDTH);
+  const canvasWidth = Math.max(
+    cardWidth + appearance.outerPadding * 2,
+    appearance.aspectRatio ? (exportSize.height * 16) / 9 : 0,
+  );
+  const canvasHeight = appearance.aspectRatio ? (canvasWidth * 9) / 16 : exportSize.height;
+  const canvasPadding = appearance.outerPadding > 0 ? `min(${appearance.outerPadding}px, 10vw)` : 0;
+  return (
+    <div
+      ref={canvasRef}
+      data-testid="snippet-canvas"
+      data-background={background.label}
+      className="relative isolate mx-auto flex min-h-0 max-w-full flex-col justify-center overflow-hidden rounded-sm"
+      style={
+        {
+          ...backgroundCanvasStyle(background, canvasPadding),
+          width: canvasWidth,
+          // Grows with comments and reactions, but never below 16:9.
+          minHeight: appearance.aspectRatio ? (renderedCanvasWidth * 9) / 16 : undefined,
+          "--preview-outer-padding": canvasPadding,
+        } as React.CSSProperties & { "--preview-outer-padding": string | number }
+      }
+    >
+      <BackgroundDecoration
+        background={background}
+        width={canvasWidth}
+        height={canvasHeight}
+        fontFamily={fontFamily}
+      />
+      <div
+        className="relative z-10 mx-auto flex min-h-0 max-w-full flex-col"
+        style={{ width: cardWidth }}
+      >
+        {card}
+      </div>
+    </div>
+  );
+}
+
+/** Tracks an element's rendered width, for the 16:9 canvas's minimum height. */
+function useElementWidth<T extends HTMLElement>() {
+  const ref = useRef<T | null>(null);
+  const [width, setWidth] = useState(0);
+  useEffect(() => {
+    const element = ref.current;
+    if (!element || typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver(([entry]) => {
+      setWidth(entry!.borderBoxSize?.[0]?.inlineSize ?? entry!.contentRect.width);
+    });
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
+  return [ref, width] as const;
 }
 
 // ── ReactionChip (HTML renderer) ─────────────────────────────────────────────

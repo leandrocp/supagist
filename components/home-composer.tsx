@@ -39,13 +39,16 @@ import {
 import { languageDisplayName, codePointLength } from "@/lib/snippet-utils";
 import { ThemePicker } from "@/components/theme-picker";
 import { BrandPicker } from "@/components/brand-picker";
-import { BrandDecorationLayers, BrandSceneDecoration } from "@/components/brand-scene-decoration";
+import {
+  BackgroundDecoration,
+  backgroundCanvasStyle,
+  backgroundFrameShadow,
+} from "@/components/brand-scene-decoration";
 import {
   applyBrandPreset,
   findMatchingBrandPreset,
   normalizeLegacyBrandTheme,
 } from "@/lib/brand-presets";
-import { createBrandCanvasBackground, createBrandFrameShadow } from "@/lib/brand-scenes";
 import {
   DEFAULT_FOOTER_SETTINGS,
   DEFAULT_HEADER_SETTINGS,
@@ -450,23 +453,7 @@ export function HomeComposer() {
     outerCanvasPadding,
   );
   const canvasStyle = selectedBackground
-    ? {
-        backgroundImage: selectedBackground.scene
-          ? createBrandCanvasBackground(
-              selectedBackground.scene,
-              selectedBackground.from,
-              selectedBackground.to,
-              selectedBackground.patternUrl,
-            )
-          : `linear-gradient(135deg, ${selectedBackground.from}, ${selectedBackground.to})`,
-        backgroundSize: selectedBackground.patternUrl ? "cover" : undefined,
-        backgroundPosition: "center",
-        borderRadius: selectedBackground.scene?.canvasRadius,
-        boxShadow: selectedBackground.scene
-          ? `inset 0 0 0 1px ${selectedBackground.scene.canvasBorder}, 0 24px 64px -36px rgba(0,0,0,0.62)`
-          : undefined,
-        padding: previewCanvasPadding,
-      }
+    ? backgroundCanvasStyle(selectedBackground, previewCanvasPadding)
     : { padding: 0 };
   const exportDimensions = estimateExportDimensions({
     code: draft.code,
@@ -500,16 +487,7 @@ export function HomeComposer() {
         justifyContent: "center",
       }
     : {};
-  const previewFrameBorder = selectedBackground?.frame?.cardBorder;
-  const previewFrameShadow = selectedBackground?.scene
-    ? createBrandFrameShadow(selectedBackground.scene)
-    : selectedBackground?.frame
-      ? previewFrameBorder
-        ? `0 0 0 ${previewFrameBorder.width}px ${previewFrameBorder.color}` +
-          // Layered brand canvases draw a flat card, as the export does.
-          (selectedBackground.decoration ? "" : ", 0 25px 50px -12px rgba(0,0,0,0.42)")
-        : "0 25px 50px -12px rgba(0,0,0,0.42)"
-      : undefined;
+  const previewFrameShadow = backgroundFrameShadow(selectedBackground);
   const previewCanvasWidth = draft.aspectRatio
     ? Math.max(exportDimensions.width, (exportDimensions.height * 16) / 9)
     : exportDimensions.width;
@@ -683,6 +661,8 @@ export function HomeComposer() {
           ) : null}
 
           <div
+            data-testid={selectedBackground ? "snippet-canvas" : undefined}
+            data-background={selectedBackground?.label}
             className={cn(
               "relative isolate box-border max-w-full overflow-hidden rounded-sm transition-all",
             )}
@@ -694,12 +674,9 @@ export function HomeComposer() {
               } as React.CSSProperties & { "--preview-outer-padding": string | number }
             }
           >
-            {selectedBackground?.scene ? (
-              <BrandSceneDecoration scene={selectedBackground.scene} />
-            ) : null}
-            {selectedBackground?.decoration ? (
-              <BrandDecorationLayers
-                layers={selectedBackground.decoration.layers}
+            {selectedBackground ? (
+              <BackgroundDecoration
+                background={selectedBackground}
                 width={previewCanvasWidth}
                 height={draft.aspectRatio ? (previewCanvasWidth * 9) / 16 : exportDimensions.height}
                 fontFamily={previewFontFamily}

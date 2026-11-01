@@ -2,34 +2,19 @@
 
 import { useState } from "react";
 import { Download } from "lucide-react";
+import { availableLanguages } from "@lumis-sh/lumis/client";
 import { ExportModal, type ExportSettings } from "@/components/export-modal";
-import { EXPORT_FONT_SIZE, EXPORT_INNER_PADDING } from "@/lib/export-utils";
-import { DEFAULT_FOOTER_SETTINGS, DEFAULT_HEADER_SETTINGS } from "@/lib/export-metadata";
-
-const DEFAULT_SETTINGS: ExportSettings = {
-  background: null,
-  outerPadding: 64,
-  innerPadding: EXPORT_INNER_PADDING,
-  cornerRadius: 12,
-  pixelRatio: 4,
-  lineNumbers: false,
-  showReactions: false,
-  showComments: false,
-  header: DEFAULT_HEADER_SETTINGS,
-  footer: DEFAULT_FOOTER_SETTINGS,
-  windowDecoration: "macos",
-  fontId: "system",
-  fontSize: EXPORT_FONT_SIZE,
-  language: null,
-  aspectRatio: null,
-  ligatures: true,
-};
+import type { SnippetAppearance } from "@/lib/snippet-appearance";
 
 type Props = {
   code: string;
   filename: string;
   theme: string;
   fontId: string;
+  /** The stored language, so exports highlight the code as the page does. */
+  language: string;
+  /** The published appearance; exports start from it. */
+  appearance: SnippetAppearance;
   authorUsername?: string | null;
   authorAvatarUrl?: string | null;
   reactions?: Record<number, import("@/lib/snippet-utils").ExportReactionChip[]>;
@@ -44,6 +29,8 @@ export function SnippetExportModal({
   filename,
   theme,
   fontId,
+  language,
+  appearance,
   authorUsername,
   authorAvatarUrl,
   reactions,
@@ -52,7 +39,12 @@ export function SnippetExportModal({
   style,
 }: Props) {
   const [open, setOpen] = useState(false);
-  const [settings, setSettings] = useState<ExportSettings>({ ...DEFAULT_SETTINGS, fontId });
+  const [settings, setSettings] = useState<ExportSettings>({
+    ...appearance,
+    fontId,
+    showComments: false,
+    language: availableLanguages().some((l) => l.id === language) ? language : null,
+  });
 
   return (
     <>

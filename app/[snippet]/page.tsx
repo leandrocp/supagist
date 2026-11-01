@@ -24,6 +24,7 @@ import { recordVisit } from "@/app/actions/record-visit";
 import { buildAppUrl, getRequestOrigin } from "@/lib/utils";
 import { cardSource, ogVersion } from "@/lib/og-image";
 import { fetchOgFacts } from "@/lib/og-render";
+import { parseSnippetAppearance } from "@/lib/snippet-appearance";
 
 // Module-level singleton — safe because this is server-only code. The Node
 // entry reads parsers from the installed @lumis-sh/wasm-* packages, so
@@ -40,6 +41,7 @@ type SnippetRow = {
   language: string | null;
   theme: string;
   font_id: string;
+  appearance: unknown;
   code: string;
   code_char_count: number;
   line_count: number;
@@ -269,10 +271,10 @@ export default async function SnippetPage({ params }: Props) {
           ) : null}
         </header>
 
-        {/* The collaborative code block keeps the snippet's own theme; only the
-            frame around it is site chrome. max-h caps the card to the viewport
-            so the chrome, body, comments and status bar stay visible. */}
-        <div className="flex max-h-[calc(100dvh-16rem)] min-h-0 flex-col overflow-hidden rounded-[14px] shadow-[0_30px_60px_-24px_hsl(var(--shadow-tint)/0.35),0_0_0_1px_rgb(0_0_0/0.05)] md:max-h-[calc(100dvh-13rem)]">
+        {/* The collaborative code block keeps the snippet's own theme and the
+            canvas and frame it was published with. max-h caps it to the
+            viewport so the chrome, body, comments and status bar stay visible. */}
+        <div className="flex max-h-[calc(100dvh-16rem)] min-h-0 flex-col md:max-h-[calc(100dvh-13rem)]">
           <SnippetAnnotationsView
             snippetId={snippet.id}
             filename={snippet.filename}
@@ -288,6 +290,7 @@ export default async function SnippetPage({ params }: Props) {
             themeFg={themeFg}
             currentUserId={currentUserId}
             author={author}
+            appearance={parseSnippetAppearance(snippet.appearance)}
           />
         </div>
       </section>

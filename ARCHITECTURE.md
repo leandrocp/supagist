@@ -156,7 +156,8 @@ supabase/
    - Validates code length (≤ 8,000 code points) and filename.
    - Normalizes CRLF line endings to LF before storing. Without this, snippets pasted from Windows-style sources kept their `\r\n` endings, which CSS `white-space: pre-wrap` treats as hard segment breaks — that pushed inline content (a reaction chip after the line) onto a fresh row.
    - Upserts the `profiles` row.
-   - Client-side has already generated `canonical.png`, `og.png`, and `canonical.svg` via Lumis WASM with the user's export settings.
+   - Client-side has already generated `canonical.png`, `og.png`, and `canonical.svg` via Lumis WASM with the user's export settings. `canonical.png` and `canonical.svg` come from the same calls as the composer's Save as PNG / SVG.
+   - Snaps the composer's appearance (background, padding, corners, window chrome, header, footer, line numbers, font size, 16:9, ligatures) to the supported options with `parseSnippetAppearance` and stores it in `snippets.appearance`. Theme, font and language keep their own columns; the language is the one the author picked, else the detected one.
    - Uploads the four assets to `snippet-images` in parallel.
    - Inserts the immutable `snippets` row. Storage cleanup runs if the insert throws.
 4. On success: navigates to `/[slug]-[short_id]`. The share URL is already on the clipboard.
@@ -166,9 +167,10 @@ supabase/
 1. Server component fetches snippet + author in one round-trip (deduped via `cache()`).
 2. `recordVisit()` fires-and-forgets, calling the bounded `record_snippet_view` RPC.
 3. Lumis highlights the code server-side using `loadTheme(snippet.theme)`, which resolves brand themes from the local registry first and falls through to `@lumis-sh/themes/<name>`. The page uses Lumis's Node entry, which reads parsers from the installed `@lumis-sh/wasm-*` packages through its native addon, so rendering never reaches a CDN; `next.config.ts` keeps `@lumis-sh/lumis` external and adds those packages to the route's file trace. `preRenderedLines` is passed to the client as a prop, so the browser doesn't load WASM just to view.
-4. `SnippetAnnotationsView` subscribes to RLS-backed Postgres Changes for live line reactions and comments; forgeable Broadcast payloads are not treated as persisted UI truth.
-5. `SnippetPresenceFooter` joins the Presence channel — the visitor stack updates in real time.
-6. `generateMetadata` produces a three-line social-card description (`<filename> by @<author>` / `<lang> | <theme> | <lines> lines | <chars> / 8,000` / `# Supagist. Comment, react, share, export.`) and an `og:image:alt` to match. Slack and X show it on link unfurl.
+4. `SnippetAnnotationsView` draws the snippet as published: `snippets.appearance` gives the canvas (the same `backgroundCanvasStyle` and `BackgroundDecoration` as the composer preview), the brand frame's card fill and rim, the window bar (`BrandWindowHeader` for `lumis` and `markdown`), font size, padding and ligatures, and the export modal starts from it. Snippets from before the column existed read as the default appearance.
+5. `SnippetAnnotationsView` subscribes to RLS-backed Postgres Changes for live line reactions and comments; forgeable Broadcast payloads are not treated as persisted UI truth.
+6. `SnippetPresenceFooter` joins the Presence channel — the visitor stack updates in real time.
+7. `generateMetadata` produces a three-line social-card description (`<filename> by @<author>` / `<lang> | <theme> | <lines> lines | <chars> / 8,000` / `# Supagist. Comment, react, share, export.`) and an `og:image:alt` to match. Slack and X show it on link unfurl.
 
 ## Export
 

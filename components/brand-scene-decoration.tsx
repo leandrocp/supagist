@@ -1,7 +1,76 @@
 import { useId } from "react";
 import type { BrandDecorationLayer } from "@/lib/brand-presets";
-import type { BrandScenePreset } from "@/lib/brand-scenes";
-import { renderBrandLayers } from "@/lib/export-utils";
+import {
+  createBrandCanvasBackground,
+  createBrandFrameShadow,
+  type BrandScenePreset,
+} from "@/lib/brand-scenes";
+import { renderBrandLayers, type ExportBackground } from "@/lib/export-utils";
+
+/** The canvas behind the card, as the composer preview paints it. The home
+ *  composer and the saved snippet view share it so both look the same. */
+export function backgroundCanvasStyle(
+  background: ExportBackground,
+  padding: string | number,
+): React.CSSProperties {
+  return {
+    backgroundImage: background.scene
+      ? createBrandCanvasBackground(
+          background.scene,
+          background.from,
+          background.to,
+          background.patternUrl,
+        )
+      : `linear-gradient(135deg, ${background.from}, ${background.to})`,
+    backgroundSize: background.patternUrl ? "cover" : undefined,
+    backgroundPosition: "center",
+    borderRadius: background.scene?.canvasRadius,
+    boxShadow: background.scene
+      ? `inset 0 0 0 1px ${background.scene.canvasBorder}, 0 24px 64px -36px rgba(0,0,0,0.62)`
+      : undefined,
+    padding,
+  };
+}
+
+/** The card's rim and drop shadow on a background canvas. */
+export function backgroundFrameShadow(background: ExportBackground | null): string | undefined {
+  if (background?.scene) return createBrandFrameShadow(background.scene);
+  if (!background?.frame) return undefined;
+  const border = background.frame.cardBorder;
+  if (!border) return "0 25px 50px -12px rgba(0,0,0,0.42)";
+  return (
+    `0 0 0 ${border.width}px ${border.color}` +
+    // Layered brand canvases draw a flat card, as the export does.
+    (background.decoration ? "" : ", 0 25px 50px -12px rgba(0,0,0,0.42)")
+  );
+}
+
+/** A background's scene guides or brand layers, over a `width`×`height` canvas. */
+export function BackgroundDecoration({
+  background,
+  width,
+  height,
+  fontFamily,
+}: {
+  background: ExportBackground;
+  width: number;
+  height: number;
+  fontFamily?: string;
+}) {
+  return (
+    <>
+      {background.scene ? <BrandSceneDecoration scene={background.scene} /> : null}
+      {background.decoration ? (
+        <BrandDecorationLayers
+          layers={background.decoration.layers}
+          width={width}
+          height={height}
+          fontFamily={fontFamily}
+        />
+      ) : null}
+    </>
+  );
+}
 
 function FadedLine({ className }: { className: string }) {
   return (
