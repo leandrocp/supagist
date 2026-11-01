@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
-import { access, readFile, writeFile } from "node:fs/promises";
-import { basename, extname, join } from "node:path";
+import { access, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { basename, extname, join, resolve } from "node:path";
 import { UsageError, parseArgs, parseLineRange, renderFields } from "./args.js";
 import { AuthError, accessToken, loadCredentials, login, logout, tokenClaims } from "./auth.js";
 
@@ -36,6 +37,9 @@ Output
                           image goes to stdout as SVG
       --format svg|png    Output format (default: from --out, else as above)
       --lines <a-b>       Render only lines a to b of the file
+      --copy              Copy the PNG (or the published link) to the clipboard
+      --open              Open the image (or the published snippet)
+      --from-clipboard    Render the code on the clipboard
       --json              Machine-readable output and errors on stdout
       --publish           Save an unlisted snippet to your account instead
       --title <text>      Page title of the published snippet
@@ -65,6 +69,9 @@ Rendering creates nothing on the server. --publish creates an unlisted snippet
  *   env: Record<string, string | undefined>,
  *   fetch: typeof fetch,
  *   openUrl?: (url: string) => unknown,
+ *   copyImage?: (path: string) => Promise<unknown>,
+ *   copyText?: (text: string) => Promise<unknown>,
+ *   readClipboard?: () => Promise<string>,
  *   now?: () => number,
  *   cwd?: string,
  * }} Io
@@ -93,7 +100,9 @@ export async function run(argv, io) {
     if (args.command === "options") return await options(host, args.flags, io);
     if (args.command === "auth")
       return await auth(host, /** @type {string} */ (args.action), args.flags, io);
-    if (args.file === undefined && io.stdin.isTTY) throw new UsageError(SHORT_HELP);
+    if (args.file === undefined && io.stdin.isTTY && !args.flags["from-clipboard"]) {
+      throw new UsageError(SHORT_HELP);
+    }
     return await render(host, args.file ?? "-", args.flags, io);
   } catch (error) {
     const usage = error instanceof UsageError;
@@ -211,13 +220,21 @@ async function options(host, flags, io) {
  */
 async function render(host, file, flags, io) {
   const out = /** @type {string | undefined} */ (flags.out);
+  const copy = Boolean(flags.copy) && !flags.publish;
   // In a terminal, an image is a file: PNG next to you, never over another
+  // file. --copy alone sends it to the clipboard instead, and --open needs a
   // file. Piped or redirected, it stays on stdout (SVG unless --format png).
-  const autoFile = !out && Boolean(io.stdout.isTTY) && !flags.json;
+  const autoFile =
+    !out && (Boolean(flags.open) || (!copy && Boolean(io.stdout.isTTY) && !flags.json));
   const format = outputFormat(
-    /** @type {string | undefined} */ (flags.format ?? (autoFile ? "png" : undefined)),
+    /** @type {string | undefined} */ (flags.format ?? (autoFile || copy ? "png" : undefined)),
     out,
   );
+  if (copy && format !== "png")
+    throw new UsageError("--copy copies a PNG image; drop --format svg.");
+  if (flags["from-clipboard"] && file !== "-") {
+    throw new UsageError(`Render ${file} or --from-clipboard, not both.`);
+  }
 
   const source = file === "-" ? { file } : await locate(file);
   if (source.lines && flags.lines !== undefined) {
@@ -228,7 +245,9 @@ async function render(host, file, flags, io) {
   const range = typeof lines === "string" ? parseLineRange(lines) : undefined;
   let code =
     file === "-"
-      ? await readStdin(io.stdin)
+      ? flags["from-clipboard"]
+        ? await readClipboard(io)
+        : await readStdin(io.stdin)
       : source.url
         ? await download(source.url, io)
         : await readSource(file);
@@ -254,26 +273,33 @@ async function render(host, file, flags, io) {
   const width = Number(response.headers.get("x-supagist-width")) || undefined;
   const height = Number(response.headers.get("x-supagist-height")) || undefined;
 
+  const size = width ? ` (${width}×${height})` : "";
+  /** @type {string | undefined} */
+  let path = out;
   if (autoFile) {
     const stem = basename(String(flags.filename ?? (file === "-" ? "snippet" : file)));
-    const path = await writeNewFile(
+    path = await writeNewFile(
       io.cwd ?? process.cwd(),
       stem.slice(0, stem.length - extname(stem).length) || stem,
       format,
       bytes,
     );
-    io.stderr.write(`Saved ${path}${width ? ` (${width}×${height})` : ""}\n`);
-    return EXIT.ok;
-  }
-  if (out) {
+  } else if (out) {
     await writeFile(out, bytes);
+  }
+  if (path || copy) {
+    if (copy) await copyPng(bytes, path, io);
+    if (path && flags.open) io.openUrl?.(resolve(io.cwd ?? process.cwd(), path));
     if (flags.json) {
+      const result = { ok: true, ...(path ? { path } : {}), ...(copy ? { copied: true } : {}) };
       return print(
         io,
-        `${JSON.stringify({ ok: true, path: out, format, width, height, bytes: bytes.length })}\n`,
+        `${JSON.stringify({ ...result, format, width, height, bytes: bytes.length })}\n`,
       );
     }
-    io.stderr.write(`Saved ${out}${width ? ` (${width}×${height})` : ""}\n`);
+    io.stderr.write(
+      path ? `Saved ${path}${size}${copy ? " and copied it" : ""}\n` : `Copied the image${size}\n`,
+    );
     return EXIT.ok;
   }
   if (flags.json) {
@@ -285,6 +311,33 @@ async function render(host, file, flags, io) {
   }
   io.stdout.write(bytes);
   return EXIT.ok;
+}
+
+/**
+ * Puts the PNG on the clipboard. The system tools copy from a file, so a
+ * clipboard-only render goes through a temporary one.
+ * @param {Uint8Array} bytes @param {string | undefined} path @param {Io} io
+ */
+async function copyPng(bytes, path, io) {
+  if (!io.copyImage) throw new Error("Copying isn't available here.");
+  if (path) return await io.copyImage(resolve(io.cwd ?? process.cwd(), path));
+  const dir = await mkdtemp(join(tmpdir(), "supagist-"));
+  try {
+    await writeFile(join(dir, "image.png"), bytes);
+    await io.copyImage(join(dir, "image.png"));
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+}
+
+/** @param {Io} io */
+async function readClipboard(io) {
+  if (!io.readClipboard) throw new Error("Reading the clipboard isn't available here.");
+  try {
+    return await io.readClipboard();
+  } catch (error) {
+    throw new Error(`Can't read the clipboard: ${error?.message ?? error}`);
+  }
 }
 
 /**
@@ -477,13 +530,26 @@ async function publish(host, fields, flags, io) {
     visibility: result.visibility,
     redactions: result.redactions,
   };
-  if (flags.json) return print(io, `${JSON.stringify(output)}\n`);
+  if (flags.json) {
+    if (flags.copy) await io.copyText?.(result.url);
+    if (flags.open) io.openUrl?.(result.url);
+    return print(io, `${JSON.stringify({ ...output, ...(flags.copy ? { copied: true } : {}) })}\n`);
+  }
   const redacted = result.redactions?.redacted ?? 0;
   const kinds = Object.entries(result.redactions?.kinds ?? {})
     .map(([kind, count]) => `${count} ${kind}`)
     .join(", ");
+  // A person at a terminal wants the link in the clipboard; scripts opt in.
+  let copied = false;
+  if ((flags.copy || io.stdout.isTTY) && io.copyText) {
+    copied = await io.copyText(result.url).then(
+      () => true,
+      () => false,
+    );
+  }
+  if (flags.open) io.openUrl?.(result.url);
   io.stderr.write(
-    `Published as ${result.visibility}: anyone with the link can view it.\n` +
+    `Published as ${result.visibility}: anyone with the link can view it.${copied ? " Link copied." : ""}\n` +
       (redacted
         ? `Replaced ${redacted} secret${redacted === 1 ? "" : "s"} with [REDACTED:kind] (${kinds}).\n`
         : ""),

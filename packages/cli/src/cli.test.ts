@@ -101,6 +101,8 @@ describe("run", () => {
   let tty: boolean;
   let stdinTty: boolean;
   let openUrl: ((url: string) => unknown) | undefined;
+  let copied: { image?: Uint8Array; text?: string };
+  let clipboard: string;
 
   beforeEach(async () => {
     dir = await mkdtemp(join(tmpdir(), "supagist-cli-"));
@@ -113,6 +115,8 @@ describe("run", () => {
     tty = false;
     stdinTty = false;
     openUrl = undefined;
+    copied = {};
+    clipboard = "";
   });
   afterEach(() => rm(dir, { recursive: true, force: true }));
 
@@ -136,6 +140,13 @@ describe("run", () => {
       openUrl,
       now: () => NOW,
       cwd: dir,
+      copyImage: async (path: string) => {
+        copied.image = new Uint8Array(await readFile(path));
+      },
+      copyText: async (text: string) => {
+        copied.text = text;
+      },
+      readClipboard: async () => clipboard,
     });
   const svgResponse = () =>
     new Response("<svg>card</svg>", {
@@ -210,6 +221,37 @@ describe("run", () => {
     fetchMock.mockResolvedValueOnce(new Response("nope", { status: 404 }));
     expect(await cli("https://github.com/o/private/blob/main/a.ts")).toBe(1);
     expect(stderr.join("")).toContain("HTTP 404. For a private repository, clone it");
+  });
+
+  it("copies the PNG without saving, or saves, copies and opens it", async () => {
+    const png = new Uint8Array([0x89, 0x50, 0x4e, 0x47]);
+    fetchMock.mockImplementation(async () => new Response(png));
+    expect(await cli(join(dir, "auth.ts"), "--copy")).toBe(0);
+    expect(sent().body).toMatchObject({ format: "png" });
+    expect(copied.image).toEqual(png);
+    expect(stderr.join("")).toBe("Copied the image\n");
+    expect(stdout).toEqual([]);
+    await expect(stat(join(dir, "auth.png"))).rejects.toThrow();
+
+    const opened: string[] = [];
+    openUrl = (url) => opened.push(url);
+    stderr = [];
+    copied = {};
+    expect(await cli(join(dir, "auth.ts"), "--copy", "--open")).toBe(0);
+    expect(stderr.join("")).toBe("Saved auth.png and copied it\n");
+    expect(copied.image).toEqual(png);
+    expect(opened).toEqual([join(dir, "auth.png")]);
+
+    expect(await cli(join(dir, "auth.ts"), "--copy", "--format", "svg")).toBe(2);
+  });
+
+  it("renders the code on the clipboard", async () => {
+    fetchMock.mockResolvedValue(svgResponse());
+    clipboard = "fn main() {}\n";
+    stdinTty = true;
+    expect(await cli("--from-clipboard", "--filename", "main.rs")).toBe(0);
+    expect(sent().body).toMatchObject({ code: "fn main() {}", filename: "main.rs" });
+    expect(await cli(join(dir, "auth.ts"), "--from-clipboard")).toBe(2);
   });
 
   it("reads piped code without -, and explains itself when nothing is piped", async () => {
@@ -572,6 +614,25 @@ describe("run", () => {
         refreshToken: "refresh-2",
         expiresAt: NOW + 60_000,
       });
+    });
+
+    it("copies the published link in a terminal, and opens it with --open", async () => {
+      await saveCredentials(NOW + 3_600_000);
+      fetchMock.mockResolvedValue(
+        Response.json({
+          jsonrpc: "2.0",
+          id: 1,
+          result: { content: [{ type: "text", text: JSON.stringify(published) }] },
+        }),
+      );
+      const opened: string[] = [];
+      openUrl = (url) => opened.push(url);
+      tty = true;
+      expect(await cli(join(dir, "auth.ts"), "--publish", "--open")).toBe(0);
+      expect(copied.text).toBe(published.url);
+      expect(opened).toEqual([published.url]);
+      expect(stderr.join("")).toContain("Link copied.");
+      expect(stdout.join("")).toBe(`${published.url}\n`);
     });
 
     it("reports a publish as JSON and tool errors as failures", async () => {

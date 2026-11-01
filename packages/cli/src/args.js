@@ -53,6 +53,9 @@ const RENDER_FLAGS = {
   format: { type: "string" },
   lines: { type: "string" },
   publish: { type: "boolean" },
+  copy: { type: "boolean" },
+  open: { type: "boolean" },
+  "from-clipboard": { type: "boolean" },
   title: { type: "string" },
 };
 const ALIASES = { o: "out", h: "help", v: "version" };
