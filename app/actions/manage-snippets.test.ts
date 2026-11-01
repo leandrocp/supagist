@@ -13,6 +13,7 @@ function makeSupabase({
   user = USER as object | null,
   result = { data: [{ id: ID }], error: null } as { data: unknown; error: unknown },
   rpcError = null as object | null,
+  files = [] as { name: string }[],
 } = {}) {
   const calls: [string, ...unknown[]][] = [];
   // A real promise of the result that also exposes the builder methods.
@@ -24,9 +25,11 @@ function makeSupabase({
       return chain;
     };
   const remove = vi.fn().mockResolvedValue({ data: [], error: null });
+  const list = vi.fn().mockResolvedValue({ data: files, error: null });
   return {
     calls,
     remove,
+    list,
     client: {
       from: (table: string) => {
         calls.push(["from", table]);
@@ -37,7 +40,7 @@ function makeSupabase({
         signOut: vi.fn().mockResolvedValue({ error: null }),
       },
       rpc: vi.fn().mockResolvedValue({ error: rpcError }),
-      storage: { from: () => ({ remove }) },
+      storage: { from: () => ({ remove, list }) },
     },
   };
 }
@@ -114,8 +117,10 @@ describe("updateSnippet", () => {
 describe("deleteSnippet", () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it("deletes the owner's row and removes its stored files", async () => {
+  it("deletes the owner's row and removes its recorded and unrecorded files", async () => {
     const supabase = makeSupabase({
+      // card.png has no column; canonical.svg is both recorded and listed.
+      files: [{ name: "card.png" }, { name: "canonical.svg" }],
       result: {
         data: [
           {
@@ -131,9 +136,12 @@ describe("deleteSnippet", () => {
     mockCreateClient.mockResolvedValue(supabase.client);
     expect(await deleteSnippet(ID)).toEqual({ ok: true });
     expect(supabase.calls).toContainEqual(["eq", "author_id", "user-1"]);
+    expect(supabase.list).toHaveBeenCalledWith(`user-1/snippets/${ID}`);
     expect(supabase.remove).toHaveBeenCalledWith([
       "user-1/snippets/s/canonical.png",
       "user-1/snippets/s/canonical.svg",
+      `user-1/snippets/${ID}/card.png`,
+      `user-1/snippets/${ID}/canonical.svg`,
     ]);
   });
 
@@ -153,6 +161,7 @@ describe("deleteAccount", () => {
       result: {
         data: [
           {
+            id: "a",
             canonical_image_path: "user-1/snippets/a/canonical.png",
             og_image_path: "snippets/legacy/og.png",
             svg_path: null,

@@ -17,6 +17,25 @@ type Result = { ok: true; error?: never } | { ok?: never; error: string };
 
 const BUCKET = "snippet-images";
 
+/**
+ * Removes a snippet's stored files right away: the recorded paths plus
+ * everything in the owner's folder for it (such as card.png, or files a
+ * previous edit replaced). The queued cleanup retries anything this misses.
+ */
+async function removeSnippetFiles(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  folder: string,
+  paths: (string | null)[],
+) {
+  const bucket = supabase.storage.from(BUCKET);
+  const { data: files } = await bucket.list(folder);
+  const all = new Set([
+    ...paths.filter((path): path is string => typeof path === "string"),
+    ...(files ?? []).map((file) => `${folder}/${file.name}`),
+  ]);
+  if (all.size > 0) await bucket.remove([...all]);
+}
+
 async function persistentUser() {
   const supabase = await createClient();
   const {
@@ -86,11 +105,12 @@ export async function deleteSnippet(snippetId: string): Promise<Result> {
   const row = data?.[0];
   if (!row) return { error: "Snippet not found, or it isn't yours." };
 
-  const paths = [row.canonical_image_path, row.og_image_path, row.svg_path, row.raw_path].filter(
-    (path): path is string => typeof path === "string",
-  );
-  // The queued cleanup retries anything this misses.
-  if (paths.length > 0) await supabase.storage.from(BUCKET).remove(paths);
+  await removeSnippetFiles(supabase, `${user.id}/snippets/${snippetId}`, [
+    row.canonical_image_path,
+    row.og_image_path,
+    row.svg_path,
+    row.raw_path,
+  ]);
   return { ok: true };
 }
 
@@ -106,16 +126,25 @@ export async function deleteAccount(): Promise<Result> {
   // longer accepts its session. The database queues the same paths anyway.
   const { data: snippets } = await supabase
     .from("snippets")
-    .select("canonical_image_path, og_image_path, svg_path, raw_path")
+    .select("id, canonical_image_path, og_image_path, svg_path, raw_path")
     .eq("author_id", user.id);
 
   const { error } = await supabase.rpc("delete_own_account");
   if (error) return { error: "Could not delete your account. Please try again." };
 
-  const paths = (snippets ?? [])
-    .flatMap((row) => [row.canonical_image_path, row.og_image_path, row.svg_path, row.raw_path])
-    .filter((path): path is string => typeof path === "string" && path.startsWith(`${user.id}/`));
-  if (paths.length > 0) await supabase.storage.from(BUCKET).remove(paths);
+  // Only the user's own prefix is removable with their session; the database
+  // queued every object under it (and any legacy paths) for cleanup anyway.
+  const own = (path: string | null) => (path?.startsWith(`${user.id}/`) ? path : null);
+  await Promise.all(
+    (snippets ?? []).map((row) =>
+      removeSnippetFiles(supabase, `${user.id}/snippets/${row.id}`, [
+        own(row.canonical_image_path),
+        own(row.og_image_path),
+        own(row.svg_path),
+        own(row.raw_path),
+      ]),
+    ),
+  );
 
   await supabase.auth.signOut({ scope: "local" });
   return { ok: true };

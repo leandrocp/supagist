@@ -318,6 +318,14 @@ test("a user deletes their account and all their data", async ({ browser }) => {
   await page.getByRole("button", { name: /^publish$/i }).click();
   await page.waitForURL(/\/[a-z0-9-]+-[a-z0-9]{6}$/);
   const path = new URL(page.url()).pathname;
+  const { data: published } = await admin
+    .from("snippets")
+    .select("id")
+    .eq("short_id", path.slice(-6))
+    .single();
+  const folder = `${created.user!.id}/snippets/${published!.id}`;
+  const { data: stored } = await admin.storage.from("snippet-images").list(folder);
+  expect(stored!.length).toBeGreaterThan(0);
 
   await page.getByRole("button", { name: `Account menu for ${username}` }).click();
   await page.getByRole("menuitem", { name: "Account" }).click();
@@ -339,5 +347,8 @@ test("a user deletes their account and all their data", async ({ browser }) => {
     .select("*", { count: "exact", head: true })
     .eq("author_id", created.user!.id);
   expect(count).toBe(0);
+  // Every stored file goes right away, including ones without a column (card.png).
+  const { data: left } = await admin.storage.from("snippet-images").list(folder);
+  expect(left).toEqual([]);
   await context.close();
 });

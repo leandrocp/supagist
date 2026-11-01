@@ -141,8 +141,15 @@ export async function deleteSnippet(
     .select("canonical_image_path, og_image_path, svg_path, raw_path")
     .maybeSingle<Record<string, string | null>>();
   if (error || !data) throw new Error("Could not delete the snippet.");
-  const paths = Object.values(data).filter((path): path is string => typeof path === "string");
-  // Remove the caller's files now; the queued cleanup retries anything missed.
-  if (paths.length > 0) await supabase.storage.from(BUCKET).remove(paths);
+  // Remove the caller's files now: the recorded paths plus everything in the
+  // snippet's folder (files an edit replaced). Queued cleanup retries misses.
+  const folder = `${userId}/snippets/${snippet.id}`;
+  const bucket = supabase.storage.from(BUCKET);
+  const { data: files } = await bucket.list(folder);
+  const paths = new Set([
+    ...Object.values(data).filter((path): path is string => typeof path === "string"),
+    ...(files ?? []).map((file: { name: string }) => `${folder}/${file.name}`),
+  ]);
+  if (paths.size > 0) await bucket.remove([...paths]);
   return { deleted: `${APP_ORIGIN}/${snippet.slug}-${snippet.short_id}` };
 }
