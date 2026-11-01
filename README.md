@@ -102,17 +102,32 @@ Rendering, searching and listing options save nothing. Every tool is rate limite
 
 ### CLI
 
-The `supagist` CLI renders a file or stdin to an SVG or PNG image from the terminal. It is not published to npm yet, so run it from a clone of this repository (Node.js 22 or later, no install step):
+The `supagist` CLI renders a file or stdin to an SVG or PNG image from the terminal, and publishes it as an unlisted snippet when you want a link. Node.js 22 or later, no runtime dependencies.
+
+**npm (coming soon).** The package isn't on npm yet. Once it is:
+
+```sh
+npx supagist src/lib/auth.ts --lines 12-40 --brand supabase --out auth.png
+```
+
+**From a clone (works today):**
 
 ```sh
 git clone https://github.com/leandrocp/supagist
 cd supagist
-node packages/cli/bin/supagist.js packages/cli/src/args.js --lines 1-20 --brand supabase --out code.png
-cat main.rs | node packages/cli/bin/supagist.js - --filename main.rs --theme dracula --out card.svg
-node packages/cli/bin/supagist.js options
+node packages/cli packages/cli/src/args.js --lines 1-20 --brand supabase --out code.png
+cat main.rs | node packages/cli - --filename main.rs --theme dracula --out card.svg
+node packages/cli options
 ```
 
-See the [CLI README](./packages/cli/README.md) for every flag, JSON output and limits. Your code is sent to the Supagist render API to be drawn and nothing is stored, but don't render secrets.
+Rendering stores nothing. To get a shareable link instead, sign in once and add `--publish`:
+
+```sh
+node packages/cli auth login
+node packages/cli src/app.ts --lines 1-20 --brand supabase --publish
+```
+
+Published snippets are unlisted (anyone with the link can view them, nothing lists or indexes them), and common secrets are replaced with `[REDACTED:kind]` before anything is stored. See the [CLI README](./packages/cli/README.md) for every flag, JSON output and limits.
 
 ### Agent skill
 
@@ -120,7 +135,7 @@ See the [CLI README](./packages/cli/README.md) for every flag, JSON output and l
 npx skills add leandrocp/supagist --skill supagist
 ```
 
-The [skill](./.agents/skills/supagist/SKILL.md) teaches your coding agent to connect to the MCP server, save SVGs as real files, and convert them to PNG locally.
+The [skill](./.agents/skills/supagist/SKILL.md) teaches your coding agent to make good code images: pick the right lines, match a brand preset to your project, render with the CLI or the MCP server, check the result, and publish a link only when you ask.
 
 ## Contributing
 
