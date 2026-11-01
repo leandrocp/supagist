@@ -29,6 +29,16 @@ import { Textarea } from "@/components/ui/textarea";
 import { BRAND_THEMES } from "@/lib/brand-themes";
 import { createClient } from "@/lib/supabase/client";
 import { codePointLength, normalizeSnippetCode } from "@/lib/snippet-utils";
+import { play } from "@/lib/motion";
+
+/** The snippet on screen: its card in a list, or the canvas on its own page. */
+function snippetSurface(snippetId: string): Element | null {
+  return (
+    document.querySelector(`[data-snippet-card="${snippetId}"]`) ??
+    document.querySelector('[data-testid="snippet-canvas"]') ??
+    document.querySelector('[data-testid="snippet-card"]')
+  );
+}
 
 type Props = {
   snippetId: string;
@@ -126,7 +136,24 @@ function DeleteSnippetModal({
       }
       onClose();
       toast.success("Snippet deleted.");
+      // A playful but clear exit: the card tips over and drops away. The
+      // snippet page navigates at once; a list waits for the exit (≈ 0.4 s)
+      // so the card doesn't blink back before the refresh removes it.
+      const exit = play(
+        snippetSurface(snippetId),
+        [
+          { transform: "none", opacity: 1 },
+          {
+            transform: "translate3d(0, -6px, 0) rotate(-2deg) scale(1.02)",
+            opacity: 1,
+            offset: 0.25,
+          },
+          { transform: "translate3d(0, 48px, 0) rotate(7deg) scale(0.85)", opacity: 0 },
+        ],
+        { duration: 420, easing: "cubic-bezier(0.5, 0, 0.75, 0)", fill: "forwards" },
+      );
       if (afterDelete === "snippets") router.push("/snippets");
+      else if (exit) await exit.finished.catch(() => undefined);
       router.refresh();
     });
 
@@ -211,6 +238,16 @@ function EditSnippetModal({ snippetId, onClose }: { snippetId: string; onClose: 
       onClose();
       toast.success("Changes saved.");
       router.refresh();
+      // A small confirmation on the snippet itself: it settles back in.
+      play(
+        snippetSurface(snippetId),
+        [
+          { transform: "scale(0.985)" },
+          { transform: "scale(1.006)", offset: 0.6 },
+          { transform: "none" },
+        ],
+        { duration: 460, easing: "ease-out", delay: 120 },
+      );
     });
 
   return (

@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import Link from "next/link";
 import { SnippetOwnerActions } from "@/components/snippet-owner-actions";
 import type { SnippetSummary } from "@/app/actions/get-my-snippets";
@@ -16,8 +17,13 @@ function formatDate(iso: string): string {
 export function SnippetList({ snippets }: { snippets: SnippetSummary[] }) {
   return (
     <ul className="grid gap-x-8 gap-y-9 sm:grid-cols-2 lg:grid-cols-3">
-      {snippets.map((s) => (
-        <li key={s.short_id} className="relative">
+      {snippets.map((s, index) => (
+        <li
+          key={s.short_id}
+          data-snippet-card={s.id}
+          className="rise-in relative"
+          style={{ "--i": index } as CSSProperties}
+        >
           <Link
             href={`/${s.slug}-${s.short_id}`}
             className="group flex flex-col gap-3 rounded-[18px] focus-visible:focus-ring"

@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 // panel tone, ghost and link in postal blue. Pills everywhere (radius 999), no
 // borders, and the brand focus ring.
 const buttonVariants = cva(
-  "inline-flex shrink-0 items-center justify-center gap-2 rounded-full text-sm font-semibold whitespace-nowrap transition-colors outline-hidden focus-visible:focus-ring disabled:pointer-events-none disabled:opacity-40 aria-invalid:shadow-[inset_0_0_0_1.5px_hsl(var(--wax-text))] [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  "press inline-flex shrink-0 items-center justify-center gap-2 rounded-full text-sm font-semibold whitespace-nowrap transition-colors outline-hidden focus-visible:focus-ring disabled:pointer-events-none disabled:opacity-40 aria-invalid:shadow-[inset_0_0_0_1.5px_hsl(var(--wax-text))] [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   {
     variants: {
       variant: {

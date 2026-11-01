@@ -27,10 +27,10 @@ export function ShareButton({ url, style }: { url: string; style?: React.CSSProp
       onClick={() => void handleCopy()}
       title="Copy link"
       aria-label="Copy link"
-      className="flex h-7 items-center gap-1.5 rounded-md px-2.5 text-xs font-medium transition-opacity hover:opacity-80"
+      className="press flex h-7 items-center gap-1.5 rounded-md px-2.5 text-xs font-medium transition-opacity hover:opacity-80"
       style={style}
     >
-      {copied ? <Check className="size-3.5" /> : <Share2 className="size-3.5" />}
+      {copied ? <Check className="pop-in size-3.5" /> : <Share2 className="size-3.5" />}
       {/* Icon-only below sm so the window toolbar fits a 375px viewport. */}
       <span className="hidden sm:inline">{copied ? "Copied" : "Share"}</span>
     </button>

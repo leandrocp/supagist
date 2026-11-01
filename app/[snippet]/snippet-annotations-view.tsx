@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Check, ClipboardType, Copy, MessageSquarePlus, SmilePlus } from "lucide-react";
 import { toast } from "sonner";
+import { CHIP_EXIT, play } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 import {
   EXPORT_FONTS,
@@ -33,7 +34,7 @@ import { nameToColor, nameToInitials } from "@/lib/presence-utils";
 import { UserAvatar } from "@/components/user-avatar";
 import { formatCommentTimestamp, formatReactorList } from "@/lib/format-utils";
 import { buildLoginUrl } from "@/lib/auth-redirect";
-import { SnippetPresenceInline } from "./snippet-presence";
+import { SnippetPresenceInline, type PresenceLines } from "./snippet-presence";
 import { ShareButton } from "./share-button";
 import { SnippetExportModal } from "./snippet-export-modal";
 
@@ -277,6 +278,35 @@ export function SnippetAnnotationsView({
   const [reactionPulses, setReactionPulses] = useState<
     Array<{ key: string; line: number; emoji: string }>
   >([]);
+  // The chip that just changed (`line:emoji`): it pops once, then the marker
+  // clears so later re-renders don't replay it.
+  const [poppedChip, setPoppedChip] = useState<string | null>(null);
+  const popTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const popChip = useCallback((line: number, emoji: string) => {
+    if (popTimer.current) clearTimeout(popTimer.current);
+    setPoppedChip(`${line}:${emoji}`);
+    popTimer.current = setTimeout(() => setPoppedChip(null), 500);
+  }, []);
+  // Comments that arrived during this visit rise in; someone else's also get
+  // a soft wash on their line so a live reply is noticed without a toast.
+  const [freshComments, setFreshComments] = useState<
+    Record<string, { line: number; remote: boolean }>
+  >({});
+  const markFreshComment = useCallback((id: string, line: number, remote: boolean) => {
+    setFreshComments((prev) => ({ ...prev, [id]: { line, remote } }));
+    setTimeout(() => {
+      setFreshComments(({ [id]: _done, ...rest }) => rest);
+    }, 1800);
+  }, []);
+  const freshRemoteLines = useMemo(
+    () =>
+      new Set(
+        Object.values(freshComments)
+          .filter((fresh) => fresh.remote)
+          .map((fresh) => fresh.line),
+      ),
+    [freshComments],
+  );
   const handleCopy = useCallback(() => {
     void navigator.clipboard.writeText(code).then(() => {
       setCopied(true);
@@ -301,6 +331,27 @@ export function SnippetAnnotationsView({
     );
   }, [code, filename, snippetTheme, fontId, appearance.fontSize, language]);
 
+  // Presence: tell other viewers which line you're on (the open comment or
+  // reaction line, else the hovered one), debounced and kept in refs so
+  // hovering never re-renders the view; their lines get a soft highlight.
+  const trackLineRef = useRef<((line: number | null) => void) | null>(null);
+  const hoverLineRef = useRef<number | null>(null);
+  const openLineRef = useRef<number | null>(null);
+  const sentLineRef = useRef<number | null>(null);
+  const trackTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const sendFocusLine = useCallback(() => {
+    if (trackTimer.current) clearTimeout(trackTimer.current);
+    trackTimer.current = setTimeout(() => {
+      const line = openLineRef.current ?? hoverLineRef.current;
+      if (line === sentLineRef.current) return;
+      sentLineRef.current = line;
+      trackLineRef.current?.(line);
+    }, 250);
+  }, []);
+  const [presenceLines, setPresenceLines] = useState<PresenceLines>({});
+  // The last colour on each line, so a highlight fades out in its own colour.
+  const presenceColors = useRef<Record<number, string>>({});
+
   const commentInputRef = useRef<HTMLTextAreaElement | null>(null);
   const [canvasRef, renderedCanvasWidth] = useElementWidth<HTMLDivElement>();
 
@@ -315,6 +366,12 @@ export function SnippetAnnotationsView({
       commentInputRef.current?.focus();
     }
   }, [selectedCommentLine]);
+
+  useEffect(() => {
+    openLineRef.current = selectedCommentLine ?? selectedReactionLine;
+    sendFocusLine();
+  }, [selectedCommentLine, selectedReactionLine, sendFocusLine]);
+  useEffect(() => () => clearTimeout(trackTimer.current ?? undefined), []);
 
   // ── Initial load ───────────────────────────────────────────────────────────
   useEffect(() => {
@@ -440,6 +497,7 @@ export function SnippetAnnotationsView({
           }));
 
           if (row.author_id !== currentUserId) {
+            popChip(row.line_number, row.emoji);
             const pulseKey = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
             setReactionPulses((prev) => [
               ...prev,
@@ -474,6 +532,9 @@ export function SnippetAnnotationsView({
           }
 
           const profile = await loadProfile(row.author_id);
+          if (payload.eventType === "INSERT" && row.author_id !== currentUserId) {
+            markFreshComment(row.id, row.line_number, true);
+          }
           setLineComments((prev) => ({
             ...prev,
             [row.line_number]: [
@@ -495,7 +556,7 @@ export function SnippetAnnotationsView({
     return () => {
       void supabase.removeChannel(channel);
     };
-  }, [supabase, snippetId, currentUserId]);
+  }, [supabase, snippetId, currentUserId, popChip, markFreshComment]);
 
   // ── Derived display ────────────────────────────────────────────────────────
   const displayReactions = useMemo(() => {
@@ -555,10 +616,12 @@ export function SnippetAnnotationsView({
       const ln = idx + 1;
       const groups = displayReactionGroups[ln];
       if (!groups || groups.length === 0) return html;
-      const chipMarkup = groups.map((g) => renderChipHtml(g, c, ln)).join("");
+      const chipMarkup = groups
+        .map((g) => renderChipHtml(g, c, ln, poppedChip === `${ln}:${g.emoji}`))
+        .join("");
       return (html || " ") + chipMarkup;
     });
-  }, [preRenderedLines, displayReactionGroups, c]);
+  }, [preRenderedLines, displayReactionGroups, c, poppedChip]);
 
   const displayComments = useMemo(() => {
     const result: Record<number, { author: string; body: string }> = {};
@@ -583,8 +646,9 @@ export function SnippetAnnotationsView({
   };
 
   // ── Mutations ──────────────────────────────────────────────────────────────
-  const handlePickReaction = async (line: number, emoji: string) => {
-    if (!requireAuth()) return;
+  /** Resolves true when the reaction change landed. */
+  const handlePickReaction = async (line: number, emoji: string): Promise<boolean> => {
+    if (!requireAuth()) return false;
     setSelectedReactionLine(null);
 
     if (!currentUserId) {
@@ -610,7 +674,8 @@ export function SnippetAnnotationsView({
           ],
         };
       });
-      return;
+      if (emoji) popChip(line, emoji);
+      return true;
     }
 
     if (!emoji) {
@@ -625,7 +690,7 @@ export function SnippetAnnotationsView({
         .select("id");
       if (error || !deleted?.length) {
         toast.error("Could not remove your reaction. Please try again.");
-        return;
+        return false;
       }
 
       const deletedIds = new Set(deleted.map((row) => row.id));
@@ -633,7 +698,7 @@ export function SnippetAnnotationsView({
         ...prev,
         [line]: (prev[line] ?? []).filter((reaction) => !deletedIds.has(reaction.id)),
       }));
-      return;
+      return true;
     }
 
     const { data, error } = await supabase
@@ -660,7 +725,24 @@ export function SnippetAnnotationsView({
           },
         ],
       }));
+      popChip(line, emoji);
     }
+    return Boolean(data?.id);
+  };
+
+  /**
+   * Take your reaction off a line. A chip that was only yours shrinks away
+   * while the delete runs (and comes back if it fails); a shared chip ticks
+   * once it has one reactor fewer.
+   */
+  const removeReaction = async (line: number, chip: HTMLElement | null) => {
+    const shared = Number(chip?.dataset.chipCount ?? "1") > 1;
+    const exit = shared
+      ? null
+      : play(chip, CHIP_EXIT, { duration: 160, easing: "ease-in", fill: "forwards" });
+    const removed = await handlePickReaction(line, "");
+    if (!removed) exit?.cancel();
+    else if (shared && chip?.dataset.chipEmoji) popChip(line, chip.dataset.chipEmoji);
   };
 
   const handleSaveComment = async () => {
@@ -676,6 +758,8 @@ export function SnippetAnnotationsView({
 
     if (!currentUserId) {
       // dev mode only — give each comment a unique id so multiple posts work
+      const devId = `dev-${Date.now()}`;
+      markFreshComment(devId, line, false);
       setLineComments((prev) => {
         const existing = prev[line] ?? [];
         return {
@@ -683,7 +767,7 @@ export function SnippetAnnotationsView({
           [line]: [
             ...existing,
             {
-              id: `dev-${Date.now()}`,
+              id: devId,
               authorId: "dev-user",
               authorUsername: "you",
               authorAvatarUrl: null,
@@ -708,6 +792,7 @@ export function SnippetAnnotationsView({
     }
 
     if (data?.id) {
+      markFreshComment(data.id, line, false);
       setLineComments((prev) => ({
         ...prev,
         [line]: [
@@ -776,10 +861,10 @@ export function SnippetAnnotationsView({
         onClick={handleCopy}
         title="Copy code"
         aria-label="Copy code"
-        className="flex h-7 items-center gap-1.5 rounded-md px-2.5 text-xs font-medium transition-opacity hover:opacity-80"
+        className="press flex h-7 items-center gap-1.5 rounded-md px-2.5 text-xs font-medium transition-opacity hover:opacity-80"
         style={{ color: c.buttonText }}
       >
-        {copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
+        {copied ? <Check className="pop-in size-3.5" /> : <Copy className="size-3.5" />}
         <span className="hidden sm:inline">{copied ? "Copied" : "Copy"}</span>
       </button>
       <button
@@ -787,10 +872,14 @@ export function SnippetAnnotationsView({
         onClick={handleCopyRichText}
         title="Copy as rich text"
         aria-label="Copy as rich text"
-        className="flex h-7 items-center gap-1.5 rounded-md px-2.5 text-xs font-medium transition-opacity hover:opacity-80"
+        className="press flex h-7 items-center gap-1.5 rounded-md px-2.5 text-xs font-medium transition-opacity hover:opacity-80"
         style={{ color: c.buttonText }}
       >
-        {richCopied ? <Check className="size-3.5" /> : <ClipboardType className="size-3.5" />}
+        {richCopied ? (
+          <Check className="pop-in size-3.5" />
+        ) : (
+          <ClipboardType className="size-3.5" />
+        )}
         <span className="hidden sm:inline">{richCopied ? "Copied" : "Rich text"}</span>
       </button>
       <SnippetExportModal
@@ -899,7 +988,19 @@ export function SnippetAnnotationsView({
         className="min-h-0 flex-1 overflow-auto"
         style={{ backgroundColor: c.bg, color: themeFg ?? undefined }}
       >
-        <div>
+        <div
+          onMouseMove={(event) => {
+            const row = (event.target as HTMLElement).closest<HTMLElement>("[data-line]");
+            const line = row ? Number(row.dataset.line) : null;
+            if (line === hoverLineRef.current) return;
+            hoverLineRef.current = line;
+            sendFocusLine();
+          }}
+          onMouseLeave={() => {
+            hoverLineRef.current = null;
+            sendFocusLine();
+          }}
+        >
           {/* Top padding row — gutter bg on the left matches the gutter column below */}
           <div className="grid" style={{ gridTemplateColumns: "56px 1fr" }}>
             <div
@@ -927,6 +1028,7 @@ export function SnippetAnnotationsView({
             return (
               <div
                 key={ln}
+                data-line={ln}
                 className="group/gutterline relative grid"
                 style={{ gridTemplateColumns: "56px 1fr" }}
               >
@@ -949,8 +1051,12 @@ export function SnippetAnnotationsView({
                     >
                       {comment ? (
                         <button
+                          key={lineComments[ln]?.length ?? 1}
                           type="button"
-                          className="flex h-4 items-center gap-0.5 rounded-sm px-1 text-[10px] font-semibold tabular-nums text-blue-400 transition-opacity hover:opacity-70"
+                          className={cn(
+                            "flex h-4 items-center gap-0.5 rounded-sm px-1 text-[10px] font-semibold tabular-nums text-blue-400 transition-opacity hover:opacity-70",
+                            freshRemoteLines.has(ln) && "chip-pop",
+                          )}
                           onClick={() => {
                             setSelectedReactionLine(null);
                             setSelectedCommentLine(ln);
@@ -1025,7 +1131,14 @@ export function SnippetAnnotationsView({
                               type="button"
                               className="mb-1 w-full rounded px-2 py-0.5 text-left text-xs transition-colors hover:bg-red-500/10 hover:text-red-500"
                               style={{ color: c.lineNum }}
-                              onClick={() => void handlePickReaction(ln, "")}
+                              onClick={() =>
+                                void removeReaction(
+                                  ln,
+                                  document.querySelector<HTMLElement>(
+                                    `[data-chip-line="${ln}"][data-chip-mine="1"]`,
+                                  ),
+                                )
+                              }
                             >
                               Remove reaction
                             </button>
@@ -1092,9 +1205,21 @@ export function SnippetAnnotationsView({
                     const emoji = el.dataset.chipEmoji ?? "";
                     const mine = el.dataset.chipMine === "1";
                     if (!emoji) return;
-                    void handlePickReaction(ln, mine ? "" : emoji);
+                    if (mine) void removeReaction(ln, el);
+                    else void handlePickReaction(ln, emoji);
                   }}
                 >
+                  <PresenceLineHighlight
+                    viewers={presenceLines[ln]}
+                    colors={presenceColors.current}
+                    line={ln}
+                  />
+                  {freshRemoteLines.has(ln) ? (
+                    <span
+                      aria-hidden="true"
+                      className="arrive-glow absolute inset-0 rounded-sm bg-blue-400/10"
+                    />
+                  ) : null}
                   <div
                     className="whitespace-pre-wrap wrap-break-word"
                     dangerouslySetInnerHTML={{ __html: lineHtml[index] || " " }}
@@ -1148,7 +1273,19 @@ export function SnippetAnnotationsView({
             .slice()
             .sort((a, b) => a.createdAt.localeCompare(b.createdAt))
             .map((cmt) => (
-              <div key={cmt.id} className="flex gap-2 font-sans text-sm">
+              <div
+                key={cmt.id}
+                className={cn(
+                  "relative isolate flex gap-2 font-sans text-sm",
+                  freshComments[cmt.id] && "rise-in",
+                )}
+              >
+                {freshComments[cmt.id]?.remote ? (
+                  <span
+                    aria-hidden="true"
+                    className="arrive-glow absolute -inset-1.5 -z-10 rounded-lg bg-blue-400/15"
+                  />
+                ) : null}
                 <UserAvatar
                   username={cmt.authorUsername}
                   avatarUrl={cmt.authorAvatarUrl}
@@ -1254,7 +1391,13 @@ export function SnippetAnnotationsView({
         <span>{snippetTheme}</span>
         <span>{lines.length} lines</span>
         <span>{codePointLength(code).toLocaleString()} / 8,000</span>
-        <SnippetPresenceInline snippetId={snippetId} author={author} textColor={c.headerText} />
+        <SnippetPresenceInline
+          snippetId={snippetId}
+          author={author}
+          textColor={c.headerText}
+          trackLineRef={trackLineRef}
+          onLinesChange={setPresenceLines}
+        />
       </div>
     </div>
   );
@@ -1320,6 +1463,37 @@ export function SnippetAnnotationsView({
   );
 }
 
+/**
+ * A soft wash, in the viewer's colour, on a line someone else is looking at.
+ * Always mounted so it fades both in and out (opacity only).
+ */
+function PresenceLineHighlight({
+  viewers,
+  colors,
+  line,
+}: {
+  viewers: PresenceLines[number] | undefined;
+  colors: Record<number, string>;
+  line: number;
+}) {
+  if (viewers?.length) colors[line] = nameToColor(viewers[0]!.name);
+  const color = colors[line];
+  if (!color) return null;
+  return (
+    <span
+      aria-hidden="true"
+      data-presence-line={viewers?.length ? "1" : undefined}
+      title={viewers?.map((v) => v.name).join(", ")}
+      className="pointer-events-none absolute inset-0 rounded-sm transition-opacity duration-300 motion-reduce:transition-none"
+      style={{
+        opacity: viewers?.length ? 1 : 0,
+        backgroundColor: `color-mix(in srgb, ${color} 12%, transparent)`,
+        boxShadow: `inset 2px 0 0 ${color}`,
+      }}
+    />
+  );
+}
+
 /** Tracks an element's rendered width, for the 16:9 canvas's minimum height. */
 function useElementWidth<T extends HTMLElement>() {
   const ref = useRef<T | null>(null);
@@ -1368,7 +1542,12 @@ function escapeAttr(value: string): string {
  * code text and only wrap when the wrapped paragraph genuinely runs out of
  * width.
  */
-function renderChipHtml(group: ReactionGroup, chrome: Chrome, lineNumber: number): string {
+function renderChipHtml(
+  group: ReactionGroup,
+  chrome: Chrome,
+  lineNumber: number,
+  pop = false,
+): string {
   const visibleReactors = group.reactors.slice(0, 3);
   const overflow = group.reactors.length - visibleReactors.length;
   const names = group.reactors.map((r) => r.authorUsername);
@@ -1443,6 +1622,9 @@ function renderChipHtml(group: ReactionGroup, chrome: Chrome, lineNumber: number
     `data-chip-line="${lineNumber}" ` +
     `data-chip-emoji="${escapeAttr(group.emoji)}" ` +
     `data-chip-mine="${group.mine ? "1" : "0"}" ` +
+    `data-chip-count="${group.reactors.length}" ` +
+    // Pops once when someone reacts with this emoji (globals.css).
+    (pop ? `data-chip-pop="1" ` : "") +
     `title="${escapeAttr(tooltip)}" ` +
     `aria-label="${escapeAttr(tooltip)}" ` +
     `style="${chipStyle}">` +

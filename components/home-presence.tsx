@@ -159,7 +159,7 @@ export function HomePresence() {
             username={v.name}
             avatarUrl={v.avatarUrl}
             size="xs"
-            className="ring-2 ring-background"
+            className="avatar-join ring-2 ring-background"
           />
         ))}
         {overflow > 0 ? (

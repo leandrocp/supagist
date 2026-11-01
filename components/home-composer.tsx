@@ -83,7 +83,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { publishSnippet } from "@/app/actions/publish";
 import { WINDOW_DECORATIONS, parseSnippetAppearance } from "@/lib/snippet-appearance";
 import { toast } from "sonner";
-import { markJustPublished } from "@/lib/motion";
+import { markJustPublished, play } from "@/lib/motion";
 import { ClipboardType, FileImage, FileText } from "lucide-react";
 import { copyRichText, createRichTextClipboard } from "@/lib/rich-text-export";
 
@@ -339,6 +339,20 @@ export function HomeComposer() {
   );
   const selectedBackground = backgroundOptions.find((b) => b.label === draft.background) ?? null;
   const selectedBrand = findMatchingBrandPreset(draft);
+
+  // Theme, brand and background changes fade the preview in instead of
+  // snapping (opacity only; none with reduced motion).
+  const previewCanvasRef = useRef<HTMLDivElement | null>(null);
+  const previewLook = `${draft.theme}|${draft.background ?? ""}|${selectedBrand?.id ?? ""}`;
+  const lastPreviewLook = useRef(previewLook);
+  useEffect(() => {
+    if (lastPreviewLook.current === previewLook) return;
+    lastPreviewLook.current = previewLook;
+    play(previewCanvasRef.current, [{ opacity: 0.35 }, { opacity: 1 }], {
+      duration: 320,
+      easing: "ease-out",
+    });
+  }, [previewLook]);
   const outerCanvasPadding = selectedBackground ? draft.outerPadding : 0;
   const exportReactions = useMemo(
     () =>
@@ -504,6 +518,16 @@ export function HomeComposer() {
   const previewCardWidth = exportDimensions.width - outerCanvasPadding * 2;
   const previewCardMaxWidth = selectedBackground ? "100%" : "calc(100vw - 4rem)";
 
+  // The Export button shows a check for a moment after a download starts.
+  const [exported, setExported] = useState(false);
+  const exportedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => clearTimeout(exportedTimer.current ?? undefined), []);
+  const flashExported = () => {
+    clearTimeout(exportedTimer.current ?? undefined);
+    setExported(true);
+    exportedTimer.current = setTimeout(() => setExported(false), 1400);
+  };
+
   const handleExportPng = async () => {
     setExportMenuOpen(false);
     setIsExporting(true);
@@ -516,6 +540,7 @@ export function HomeComposer() {
         viewerAvatar,
       );
       triggerDownload(URL.createObjectURL(file), file.name, true);
+      flashExported();
     } catch (error: unknown) {
       toast.error(error instanceof Error ? error.message : "Export failed. Please try again.");
     } finally {
@@ -540,6 +565,7 @@ export function HomeComposer() {
         toPngFilename(draft.filename).replace(".png", ".svg"),
         true,
       );
+      flashExported();
     } catch (error: unknown) {
       toast.error(error instanceof Error ? error.message : "Export failed. Please try again.");
     } finally {
@@ -670,6 +696,7 @@ export function HomeComposer() {
           ) : null}
 
           <div
+            ref={previewCanvasRef}
             data-testid={selectedBackground ? "snippet-canvas" : undefined}
             data-background={selectedBackground?.label}
             className={cn(
@@ -1381,6 +1408,8 @@ export function HomeComposer() {
                 <Button variant="outline" disabled={busy} className={actionButtonClass}>
                   {isExporting ? (
                     <Spinner data-icon="inline-start" />
+                  ) : exported ? (
+                    <Check data-icon="inline-start" className="pop-in" />
                   ) : (
                     <Download data-icon="inline-start" />
                   )}
@@ -1401,7 +1430,7 @@ export function HomeComposer() {
                     className={menuItemClass}
                   >
                     {copied ? (
-                      <Check data-icon="inline-start" />
+                      <Check data-icon="inline-start" className="pop-in" />
                     ) : (
                       <Copy data-icon="inline-start" />
                     )}

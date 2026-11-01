@@ -124,6 +124,14 @@ export function ExportModal({
   const [previewLoading, setPreviewLoading] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [richCopied, setRichCopied] = useState(false);
+  // The action that just finished shows a check for a moment (tactile feedback).
+  const [doneKey, setDoneKey] = useState<string | null>(null);
+  const doneTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const flashDone = (key: string) => {
+    if (doneTimer.current) clearTimeout(doneTimer.current);
+    setDoneKey(key);
+    doneTimer.current = setTimeout(() => setDoneKey(null), 1400);
+  };
   const prevPreviewUrl = useRef<string | null>(null);
 
   const bg: ExportBackground | null =
@@ -254,6 +262,7 @@ export function ExportModal({
         settings.ligatures,
       );
       triggerDownload(URL.createObjectURL(file), file.name, true);
+      flashDone("png");
     } finally {
       setExporting(false);
     }
@@ -298,6 +307,7 @@ export function ExportModal({
         toPngFilename(filename).replace(".png", ".svg"),
         true,
       );
+      flashDone("svg");
     } finally {
       setExporting(false);
     }
@@ -852,6 +862,7 @@ export function ExportModal({
                   ? handleRichText
                   : handleRaw;
           const copied = key === "rich" && richCopied;
+          const done = copied || doneKey === key;
           const displayLabel =
             key === "raw" ? `${label} ${filename || "snippet"}` : copied ? "Copied" : label;
           const isWaiting = exporting && isAsync;
@@ -861,12 +872,12 @@ export function ExportModal({
               type="button"
               disabled={exporting}
               onClick={() => void handleClick()}
-              className="flex min-h-11 w-full items-center gap-3 rounded-[10px] px-3 py-2.5 text-sm font-medium transition-colors hover:bg-surf3 focus-visible:focus-ring disabled:pointer-events-none disabled:opacity-40"
+              className="press flex min-h-11 w-full items-center gap-3 rounded-[10px] px-3 py-2.5 text-sm font-medium transition-colors hover:bg-surf3 focus-visible:focus-ring disabled:pointer-events-none disabled:opacity-40"
             >
               {isWaiting ? (
                 <Spinner className="size-4 shrink-0 text-muted-foreground" />
-              ) : copied ? (
-                <Check className="size-4 shrink-0 text-muted-foreground" />
+              ) : done ? (
+                <Check className="pop-in size-4 shrink-0 text-muted-foreground" />
               ) : (
                 <Icon className="size-4 shrink-0 text-muted-foreground" />
               )}

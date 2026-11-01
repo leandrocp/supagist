@@ -7,18 +7,41 @@ import { generateGuestName } from "@/lib/presence-utils";
 import { UserAvatar } from "@/components/user-avatar";
 
 type Author = { id: string; username: string; avatar_url: string } | null;
-type PresenceUser = { key: string; name: string; avatarUrl?: string };
+type PresenceUser = { key: string; name: string; avatarUrl?: string; line?: number | null };
+
+/** Who else is looking at each line: line number → viewers (never yourself). */
+export type PresenceLines = Record<number, Array<{ key: string; name: string }>>;
 
 type Props = {
   snippetId: string;
   author: Author;
   textColor: string;
+  /** Set by this component: call it with the line you are looking at (or null). */
+  trackLineRef?: React.RefObject<((line: number | null) => void) | null>;
+  /** Called with the lines other viewers are looking at. */
+  onLinesChange?: (lines: PresenceLines) => void;
 };
 
-export function SnippetPresenceInline({ snippetId, author, textColor }: Props) {
+/** A leaving avatar stays a little past its 220 ms exit (globals.css .avatar-leave). */
+const LEAVE_MS = 260;
+
+export function SnippetPresenceInline({
+  snippetId,
+  author,
+  textColor,
+  trackLineRef,
+  onLinesChange,
+}: Props) {
   const supabase = useMemo(() => createClient(), []);
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   const [visitors, setVisitors] = useState<PresenceUser[]>([]);
+  // Viewers who just left stay a moment so their avatar can shrink away.
+  const [leaving, setLeaving] = useState<PresenceUser[]>([]);
+  const visitorsRef = useRef<PresenceUser[]>([]);
+  const onLinesChangeRef = useRef(onLinesChange);
+  useEffect(() => {
+    onLinesChangeRef.current = onLinesChange;
+  }, [onLinesChange]);
 
   useEffect(() => {
     let isActive = true;
@@ -55,24 +78,53 @@ export function SnippetPresenceInline({ snippetId, author, textColor }: Props) {
       });
       channelRef.current = channel;
 
-      type PresencePayload = { online_at: string; name: string; avatar_url?: string };
+      type PresencePayload = {
+        online_at: string;
+        name: string;
+        avatar_url?: string;
+        line?: number | null;
+      };
+      const presence = {
+        online_at: new Date().toISOString(),
+        name: username ?? guestName,
+        avatar_url: avatarUrl,
+      };
 
       channel
         .on("presence", { event: "sync" }, () => {
           const state = channel.presenceState<PresencePayload>();
           const users: PresenceUser[] = Object.entries(state).map(([key, presences]) => {
             const p = presences[0];
-            return { key, name: p?.name ?? generateGuestName(key), avatarUrl: p?.avatar_url };
+            return {
+              key,
+              name: p?.name ?? generateGuestName(key),
+              avatarUrl: p?.avatar_url,
+              line: p?.line ?? null,
+            };
           });
+          const gone = visitorsRef.current.filter((v) => !users.some((u) => u.key === v.key));
+          visitorsRef.current = users;
           setVisitors(users);
+          if (gone.length) {
+            setLeaving((prev) => [...prev, ...gone]);
+            setTimeout(() => {
+              setLeaving((prev) => prev.filter((v) => !gone.some((g) => g.key === v.key)));
+            }, LEAVE_MS);
+          }
+
+          const lines: PresenceLines = {};
+          for (const user of users) {
+            if (user.key === presenceKey || typeof user.line !== "number") continue;
+            (lines[user.line] ??= []).push({ key: user.key, name: user.name });
+          }
+          onLinesChangeRef.current?.(lines);
         })
         .subscribe(async (status) => {
           if (status !== "SUBSCRIBED") return;
-          await channel.track({
-            online_at: new Date().toISOString(),
-            name: username ?? guestName,
-            avatar_url: avatarUrl,
-          });
+          await channel.track(presence);
+          if (trackLineRef) {
+            trackLineRef.current = (line) => void channel.track({ ...presence, line });
+          }
         });
     }
 
@@ -95,15 +147,17 @@ export function SnippetPresenceInline({ snippetId, author, textColor }: Props) {
 
       const ch = channelRef.current;
       channelRef.current = null;
+      if (trackLineRef) trackLineRef.current = null;
       if (ch) {
         void ch.untrack();
         void supabase.removeChannel(ch);
       }
     };
-  }, [supabase, snippetId]);
+  }, [supabase, snippetId, trackLineRef]);
 
   const visible = visitors.slice(0, 6);
   const overflow = visitors.length - visible.length;
+  const leavingVisible = leaving.filter((v) => !visitors.some((u) => u.key === v.key));
 
   return (
     <>
@@ -132,7 +186,16 @@ export function SnippetPresenceInline({ snippetId, author, textColor }: Props) {
                 username={v.name}
                 avatarUrl={v.avatarUrl}
                 size="xs"
-                className="ring-1 ring-background"
+                className="avatar-join ring-1 ring-background"
+              />
+            ))}
+            {leavingVisible.map((v) => (
+              <UserAvatar
+                key={`leaving-${v.key}`}
+                username={v.name}
+                avatarUrl={v.avatarUrl}
+                size="xs"
+                className="avatar-leave ring-1 ring-background"
               />
             ))}
             {overflow > 0 && (

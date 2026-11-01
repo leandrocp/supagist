@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Check, Copy, MessageSquarePlus, SmilePlus } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { exitThen } from "@/lib/motion";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { clientHighlighterPromise as highlighterPromise } from "@/lib/lumis-client";
 import {
@@ -411,6 +412,24 @@ export function InlineCodeBlock({
     if (selectedReactionLine !== null) onSelectReactionLine(null);
   };
 
+  // The line whose chip just changed pops once (globals.css), matching the
+  // saved view; removing a reaction shrinks the chip away first.
+  const [poppedLine, setPoppedLine] = useState<number | null>(null);
+  const popTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => clearTimeout(popTimer.current ?? undefined), []);
+  const pickReaction = (lineNumber: number, emoji: string) => {
+    if (!emoji) {
+      exitThen(document.querySelector(`[data-composer-chip="${lineNumber}"]`), () =>
+        onPickReaction(lineNumber, ""),
+      );
+      return;
+    }
+    onPickReaction(lineNumber, emoji);
+    clearTimeout(popTimer.current ?? undefined);
+    setPoppedLine(lineNumber);
+    popTimer.current = setTimeout(() => setPoppedLine(null), 500);
+  };
+
   const renderAnnotationToolbar = (lineNumber: number, reaction?: string) => {
     const isPickerOpen = selectedReactionLine === lineNumber;
 
@@ -453,7 +472,7 @@ export function InlineCodeBlock({
                 type="button"
                 className="mb-1 w-full rounded px-2 py-0.5 text-left text-xs transition-colors hover:bg-red-500/10 hover:text-red-500"
                 style={{ color: c.lineNum }}
-                onClick={() => onPickReaction(lineNumber, "")}
+                onClick={() => pickReaction(lineNumber, "")}
               >
                 Remove reaction
               </button>
@@ -469,7 +488,7 @@ export function InlineCodeBlock({
                       ? "bg-blue-500/10 ring-2 ring-inset ring-blue-500/40"
                       : "hover:bg-black/5 dark:hover:bg-white/10",
                   )}
-                  onClick={() => onPickReaction(lineNumber, emoji)}
+                  onClick={() => pickReaction(lineNumber, emoji)}
                 >
                   {emoji}
                 </button>
@@ -822,6 +841,8 @@ export function InlineCodeBlock({
                       : " "}
                     {reaction ? (
                       <span
+                        data-composer-chip={ln}
+                        data-chip-pop={poppedLine === ln ? "1" : undefined}
                         className="ml-2 inline-flex h-5 items-center gap-1 rounded-full border px-1.5 align-middle text-[11px] leading-none"
                         style={{
                           borderColor: c.buttonBorder,

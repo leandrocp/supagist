@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import { AppNav } from "@/components/app-nav";
 import { Envelope } from "@/components/brand/envelope";
 import { HomeComposer } from "@/components/home-composer";
@@ -38,20 +39,28 @@ export default function Home() {
         className="relative grid items-center gap-10 overflow-x-clip px-5 pt-[34px] pb-14 md:px-12 lg:grid-cols-[minmax(0,40rem)_minmax(0,1fr)] lg:gap-6 lg:pt-14 lg:pb-[90px] lg:pl-16"
       >
         <div className="flex flex-col">
-          <p className="eyebrow text-wax-text">Your code, sealed and sent</p>
+          {/* Light entrance. The h1 only moves (no fade) so its first paint,
+              the page's LCP, is not held back. */}
+          <p className="eyebrow rise-in text-wax-text">Your code, sealed and sent</p>
           <h1
             id="hero-title"
-            className="mt-4 font-display text-[44px] leading-[0.98] text-foreground md:mt-[22px] md:text-[76px] xl:text-[96px]"
+            className="rise mt-4 font-display text-[44px] leading-[0.98] text-foreground md:mt-[22px] md:text-[76px] xl:text-[96px]"
           >
             Code worth
             <br />
             sending.
           </h1>
-          <p className="mt-4 max-w-[540px] text-[17px] leading-normal text-muted-foreground md:mt-[26px] md:text-[21px]">
+          <p
+            style={{ "--i": 1 } as CSSProperties}
+            className="rise-in mt-4 max-w-[540px] text-[17px] leading-normal text-muted-foreground md:mt-[26px] md:text-[21px]"
+          >
             Turn a snippet into a beautiful, branded card. Seal it, share it, or render it straight
             from your agent.
           </p>
-          <div className="mt-6 flex flex-wrap items-center gap-x-[22px] gap-y-3 md:mt-[34px]">
+          <div
+            style={{ "--i": 2 } as CSSProperties}
+            className="rise-in mt-6 flex flex-wrap items-center gap-x-[22px] gap-y-3 md:mt-[34px]"
+          >
             <Button asChild size="lg">
               <a href="#composer">Create a snippet</a>
             </Button>
@@ -73,7 +82,8 @@ export default function Home() {
             left, as if it just came out. Decorative: the h1 says it. */}
         <div aria-hidden="true" className="relative pb-[16%] lg:pb-[12%]">
           <Envelope className="ml-auto w-[min(100%,660px)]">
-            <div className="absolute top-[62%] left-0 w-[71%] rotate-3 lg:-left-[2%]">
+            {/* The card slides out of the envelope (transform only). */}
+            <div className="card-out absolute top-[62%] left-0 w-[71%] rotate-3 lg:-left-[2%]">
               {/* A real render of the default card (github_light, macOS
                   window) from the Supagist renderer, at 2×. */}
               <img
