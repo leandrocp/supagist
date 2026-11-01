@@ -161,7 +161,9 @@ describe.skipIf(skip)("owner edit/delete RLS and account deletion", () => {
       raw_path: null,
     });
     expect(await queuedPaths(id)).toEqual(
-      ["canonical.png", "canonical.svg", "og.png", "raw.ts"].map((file) => `${prefix}/${file}`),
+      ["canonical.png", "canonical.svg", "card.png", "og.png", "raw.ts"].map(
+        (file) => `${prefix}/${file}`,
+      ),
     );
 
     // Line 3 no longer exists; line 1 still does.
@@ -237,7 +239,9 @@ describe.skipIf(skip)("owner edit/delete RLS and account deletion", () => {
     ]);
     expect([comments, reactions]).toEqual([0, 0]);
     expect(await queuedPaths(id)).toEqual(
-      ["canonical.png", "canonical.svg", "og.png", "raw.ts"].map((file) => `${prefix}/${file}`),
+      ["canonical.png", "canonical.svg", "card.png", "og.png", "raw.ts"].map(
+        (file) => `${prefix}/${file}`,
+      ),
     );
   });
 
@@ -284,7 +288,7 @@ describe.skipIf(skip)("owner edit/delete RLS and account deletion", () => {
     expect(counts).toEqual([0, 0, 0, 0, 0, 0]);
     const { data: authUser } = await admin.auth.admin.getUserById(carol.id);
     expect(authUser.user).toBeNull();
-    expect(await queuedPaths(own.id)).toHaveLength(4);
+    expect(await queuedPaths(own.id)).toHaveLength(5);
 
     // Alice's snippet is untouched.
     const { count } = await admin

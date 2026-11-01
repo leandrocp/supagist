@@ -10,6 +10,7 @@ import {
   getRawFileExtension,
   codePointLength,
 } from "@/lib/snippet-utils";
+import { snippetCardPath } from "@/lib/og-image";
 
 type PublishResult = { path: string; error?: never } | { error: string; path?: never };
 
@@ -33,6 +34,9 @@ export async function publishSnippet(formData: FormData): Promise<PublishResult>
   const canonicalImage = formData.get("canonical_image");
   const ogImage = formData.get("og_image");
   const svgBlob = formData.get("svg");
+  // The card alone, with no background, for the share image. Optional so a
+  // browser still running the previous bundle can publish during a deploy.
+  const cardImage = formData.get("card_image");
   const reactionsJson = formData.get("reactions");
   const commentsJson = formData.get("comments");
 
@@ -134,10 +138,12 @@ export async function publishSnippet(formData: FormData): Promise<PublishResult>
   const svgPath = `${assetPrefix}/canonical.svg`;
   const rawExt = getRawFileExtension(filename);
   const rawPath = `${assetPrefix}/raw.${rawExt}`;
+  const cardPath = cardImage instanceof Blob ? snippetCardPath(user.id, snippetId) : null;
+  const assetPaths = [canonicalPath, ogPath, svgPath, rawPath, ...(cardPath ? [cardPath] : [])];
 
   // Upload all assets in parallel
   const rawBuffer = Buffer.from(normalizedCode, "utf-8");
-  const [canonicalRes, ogRes, svgRes, rawRes] = await Promise.all([
+  const [canonicalRes, ogRes, svgRes, rawRes, cardRes] = await Promise.all([
     supabase.storage
       .from("snippet-images")
       .upload(canonicalPath, canonicalImage, { contentType: "image/png" }),
@@ -148,11 +154,17 @@ export async function publishSnippet(formData: FormData): Promise<PublishResult>
     supabase.storage
       .from("snippet-images")
       .upload(rawPath, rawBuffer, { contentType: "text/plain" }),
+    cardPath && cardImage instanceof Blob
+      ? supabase.storage
+          .from("snippet-images")
+          .upload(cardPath, cardImage, { contentType: "image/png" })
+      : Promise.resolve({ error: null }),
   ]);
 
-  const uploadError = canonicalRes.error ?? ogRes.error ?? svgRes.error ?? rawRes.error;
+  const uploadError =
+    canonicalRes.error ?? ogRes.error ?? svgRes.error ?? rawRes.error ?? cardRes.error;
   if (uploadError) {
-    await supabase.storage.from("snippet-images").remove([canonicalPath, ogPath, svgPath, rawPath]);
+    await supabase.storage.from("snippet-images").remove(assetPaths);
     return { error: `Failed to upload assets: ${uploadError.message}` };
   }
 
@@ -175,7 +187,7 @@ export async function publishSnippet(formData: FormData): Promise<PublishResult>
   });
 
   if (insertError) {
-    await supabase.storage.from("snippet-images").remove([canonicalPath, ogPath, svgPath, rawPath]);
+    await supabase.storage.from("snippet-images").remove(assetPaths);
 
     if (insertError.message.includes("publish_hour_rate_limit")) {
       return { error: "Too many snippets in the last hour. Try again later." };

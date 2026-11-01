@@ -21,6 +21,8 @@ import { UserAvatar } from "@/components/user-avatar";
 import { Badge } from "@/components/ui/badge";
 import { recordVisit } from "@/app/actions/record-visit";
 import { buildAppUrl, getRequestOrigin } from "@/lib/utils";
+import { cardSource, ogVersion } from "@/lib/og-image";
+import { fetchOgFacts } from "@/lib/og-render";
 
 // Module-level singleton — safe because this is server-only code. The Node
 // entry reads parsers from the installed @lumis-sh/wasm-* packages, so
@@ -40,6 +42,10 @@ type SnippetRow = {
   code: string;
   code_char_count: number;
   line_count: number;
+  view_count: number;
+  author_id: string | null;
+  canonical_image_path: string | null;
+  svg_path: string | null;
   og_image_path: string | null;
   title: string | null;
   created_at: string;
@@ -67,11 +73,34 @@ export async function generateMetadata({ params }: Props) {
   const snippet = await getSnippet(parsed.slug, parsed.shortId);
   if (!snippet) return {};
 
-  // MCP publishes store no PNG; they use the site's default share image.
+  // The live share image (app/[snippet]/og.png). `?v=` changes exactly when
+  // the picture would, which also busts X, Slack and Discord preview caches.
+  // If the facts can't be read, fall back to the publish-time og.png, then to
+  // the site default.
   const supabase = await createClient();
-  const ogImage = snippet.og_image_path
-    ? supabase.storage.from("snippet-images").getPublicUrl(snippet.og_image_path).data.publicUrl
-    : null;
+  let ogImage: string | null = null;
+  try {
+    const facts = await fetchOgFacts(supabase, snippet.id);
+    const v = ogVersion({
+      viewCount: snippet.view_count,
+      reactionEmojis: facts.reactionEmojis,
+      commentCount: facts.commentCount,
+      theme: snippet.theme,
+      unlisted: snippet.visibility === "unlisted",
+      lineCount: snippet.line_count,
+      language: snippet.language,
+      author: snippet.author
+        ? { username: snippet.author.username, avatarUrl: snippet.author.avatar_url }
+        : null,
+      card: cardSource(snippet),
+    });
+    ogImage = `/${param}/og.png?v=${v}`;
+  } catch (error) {
+    console.error(`Share image facts failed for snippet ${snippet.id}`, error);
+    ogImage = snippet.og_image_path
+      ? supabase.storage.from("snippet-images").getPublicUrl(snippet.og_image_path).data.publicUrl
+      : null;
+  }
 
   // Short, screen-reader-friendly description used as the og:image alt and
   // the social-card description — see buildSnippetSocialAlt for the shape.
@@ -87,7 +116,7 @@ export async function generateMetadata({ params }: Props) {
 
   // A page's openGraph replaces the layout's, so name the default share image.
   const images = ogImage
-    ? [{ url: ogImage, alt }]
+    ? [{ url: ogImage, width: 1200, height: 630, alt }]
     : [{ url: "/og-image.png", width: 1200, height: 630 }];
   const title = `${snippet.title ?? snippet.filename} — Supagist`;
   return {

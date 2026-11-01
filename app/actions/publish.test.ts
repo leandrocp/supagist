@@ -229,6 +229,33 @@ describe("publishSnippet — happy path", () => {
     );
   });
 
+  it("stores the card-only render next to the other assets when the client sends one", async () => {
+    const supabase = makeMockSupabase();
+    mockCreateClient.mockResolvedValue(supabase);
+
+    const fd = makeFormData();
+    fd.set("card_image", new Blob(["png"], { type: "image/png" }));
+    await publishSnippet(fd);
+
+    const uploadedPaths = supabase._.mockUpload.mock.calls.map(([path]) => path as string);
+    expect(uploadedPaths).toHaveLength(5);
+    const card = uploadedPaths.find((path) => path.endsWith("/card.png"));
+    const canonical = uploadedPaths.find((path) => path.endsWith("/canonical.png"));
+    expect(card?.replace("card.png", "")).toBe(canonical?.replace("canonical.png", ""));
+  });
+
+  it("removes the card too when the snippet insert fails", async () => {
+    const supabase = makeMockSupabase({ insertError: { message: "unique constraint" } });
+    mockCreateClient.mockResolvedValue(supabase);
+
+    const fd = makeFormData();
+    fd.set("card_image", new Blob(["png"], { type: "image/png" }));
+    await publishSnippet(fd);
+
+    const removed = supabase._.mockRemove.mock.calls[0]![0] as string[];
+    expect(removed.some((path) => path.endsWith("/card.png"))).toBe(true);
+  });
+
   it("inserts reactions when provided", async () => {
     const supabase = makeMockSupabase();
     mockCreateClient.mockResolvedValue(supabase);
