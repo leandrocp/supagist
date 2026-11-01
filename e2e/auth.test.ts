@@ -3,6 +3,7 @@
  * Requires a saved session at e2e/.auth/user.json — run auth.setup.ts first.
  */
 import { test, expect } from "@playwright/test";
+import { createClient } from "@supabase/supabase-js";
 
 // ── Snippet creation golden path ──────────────────────────────────────────────
 
@@ -72,6 +73,40 @@ test("published snippet page shows the code", async ({ page }) => {
   await page.waitForURL(/\/[a-z0-9-]+-[a-z0-9]{6}$/);
 
   await expect(page.getByText("SELECT id FROM users;")).toBeVisible();
+});
+
+test("web publishes stay public; unlisted snippets show the indicator and noindex", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.locator("textarea").fill("const unlisted = true;");
+  await page.getByLabel("Filename").fill("unlisted.ts");
+  await page.getByRole("button", { name: /^publish$/i }).click();
+  await page.waitForURL(/\/[a-z0-9-]+-[a-z0-9]{6}$/);
+  const robots = page.locator('meta[name="robots"]');
+  await expect(page.getByRole("heading", { name: "unlisted.ts" })).toBeVisible();
+  await expect(robots).toHaveCount(0);
+  await expect(page.getByText("Unlisted", { exact: true })).toHaveCount(0);
+
+  // Visibility has no client write path yet; flip it as a trusted admin.
+  const shortId = new URL(page.url()).pathname.split("-").pop()!;
+  const admin = createClient(process.env.E2E_SUPABASE_URL!, process.env.E2E_SUPABASE_SERVICE_KEY!, {
+    auth: { persistSession: false },
+  });
+  const { error } = await admin
+    .from("snippets")
+    .update({ visibility: "unlisted" })
+    .eq("short_id", shortId);
+  expect(error).toBeNull();
+
+  await page.reload();
+  await expect(page.getByText("Unlisted", { exact: true })).toBeVisible();
+  await expect(robots).toHaveAttribute("content", "noindex, nofollow");
+  await expect(page.getByText("const unlisted")).toBeVisible();
+
+  // The owner still finds it under /snippets.
+  await page.goto("/snippets");
+  await expect(page.locator(`a[href$="-${shortId}"]`).first()).toBeVisible();
 });
 
 test("authenticated user can add a reaction to a line", async ({ page }) => {

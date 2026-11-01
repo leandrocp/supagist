@@ -17,6 +17,7 @@ import {
 import { loadTheme } from "@/lib/theme-loader";
 import { highlightHtmlLines, loadLanguageOrPlaintext } from "@/lib/lumis-lines";
 import { UserAvatar } from "@/components/user-avatar";
+import { Badge } from "@/components/ui/badge";
 import { recordVisit } from "@/app/actions/record-visit";
 import { buildAppUrl, getRequestOrigin } from "@/lib/utils";
 
@@ -29,15 +30,30 @@ type Props = {
   params: Promise<{ snippet: string }>;
 };
 
+type SnippetRow = {
+  id: string;
+  filename: string;
+  language: string | null;
+  theme: string;
+  font_id: string;
+  code: string;
+  code_char_count: number;
+  line_count: number;
+  og_image_path: string;
+  created_at: string;
+  visibility: "public" | "unlisted";
+  author: { id: string; username: string; avatar_url: string } | null;
+};
+
 // Deduped per request — generateMetadata and SnippetPage share one DB round-trip.
 const getSnippet = cache(async (slug: string, shortId: string) => {
   const supabase = await createClient();
+  // The link is the capability: table reads never return other people's
+  // unlisted snippets, so look the snippet up by its exact slug + short_id.
   const { data } = await supabase
-    .from("snippets")
+    .rpc("get_snippet_by_link", { p_slug: slug, p_short_id: shortId })
     .select("*, author:author_id(id, username, avatar_url)")
-    .eq("slug", slug)
-    .eq("short_id", shortId)
-    .single();
+    .maybeSingle<SnippetRow>();
   return data;
 });
 
@@ -68,6 +84,8 @@ export async function generateMetadata({ params }: Props) {
 
   return {
     title: `${snippet.filename} — Supagist`,
+    // Unlisted links are shareable, but search engines must not index them.
+    ...(snippet.visibility === "unlisted" ? { robots: { index: false, follow: false } } : {}),
     description: alt,
     openGraph: {
       title: `${snippet.filename} — Supagist`,
@@ -183,6 +201,11 @@ export default async function SnippetPage({ params }: Props) {
                     />
                     <span>@{author.username}</span>
                   </Link>
+                ) : null}
+                {snippet.visibility === "unlisted" ? (
+                  <Badge variant="outline" title="Only people with the link can see this snippet">
+                    Unlisted
+                  </Badge>
                 ) : null}
                 <span>{snippet.theme}</span>
                 {snippet.language ? <span>{snippet.language}</span> : null}
