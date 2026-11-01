@@ -26,15 +26,15 @@ Your code is sent to the Supagist render API to be drawn, so don't render secret
 supagist <file|-> [options]
 ```
 
-| Option              | Meaning                                                                                                                               |
-| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| `-o, --out <file>`  | Write to a file. The extension (`.svg` or `.png`) picks the format. Without it, the image goes to stdout.                             |
-| `--format svg\|png` | Choose the format when writing to stdout or to a file with another extension. Default `svg`.                                          |
-| `--lines <a-b>`     | Render only lines a to b (1-based, inclusive), or one line with `--lines 7`. A range past the end of the file stops at the last line. |
-| `--json`            | Print a JSON result, or a JSON error, on stdout.                                                                                      |
-| `--host <url>`      | Use another server, such as `http://localhost:3000` or a preview deployment. Also `SUPAGIST_HOST`. Default `https://supagist.app`.    |
-| `-h, --help`        | Show help.                                                                                                                            |
-| `-v, --version`     | Show the version.                                                                                                                     |
+| Option              | Meaning                                                                                                                                                                                                            |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `-o, --out <file>`  | Write to a file. The extension (`.svg` or `.png`) picks the format. Without it, a terminal gets `<name>.png` in the current directory (`<name>-2.png` if taken, never overwritten), and a pipe gets SVG on stdout. |
+| `--format svg\|png` | Choose the format when writing to stdout or to a file with another extension. Default `svg`.                                                                                                                       |
+| `--lines <a-b>`     | Render only lines a to b (1-based, inclusive), or one line with `--lines 7`. A range past the end of the file stops at the last line.                                                                              |
+| `--json`            | Print a JSON result, or a JSON error, on stdout.                                                                                                                                                                   |
+| `--host <url>`      | Use another server, such as `http://localhost:3000` or a preview deployment. Also `SUPAGIST_HOST`. Default `https://supagist.app`.                                                                                 |
+| `-h, --help`        | Show help.                                                                                                                                                                                                         |
+| `-v, --version`     | Show the version.                                                                                                                                                                                                  |
 
 Use `-` to read the code from stdin. The language is detected from the file
 name (or `--filename`) and the code, unless you pass `--language`.

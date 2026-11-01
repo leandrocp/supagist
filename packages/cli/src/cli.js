@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { readFile, writeFile } from "node:fs/promises";
-import { basename, extname } from "node:path";
+import { basename, extname, join } from "node:path";
 import { UsageError, parseArgs, parseLineRange, renderFields } from "./args.js";
 import { AuthError, accessToken, loadCredentials, login, logout, tokenClaims } from "./auth.js";
 
@@ -20,8 +20,10 @@ Usage
   supagist auth login|logout|status Sign the CLI in to publish (opens a browser)
 
 Output
-  -o, --out <file>        Write to a .svg or .png file (default: stdout)
-      --format svg|png    Output format (default: from --out, else svg)
+  -o, --out <file>        Write to a .svg or .png file. In a terminal the default
+                          is <name>.png here (never overwritten); piped, the
+                          image goes to stdout as SVG
+      --format svg|png    Output format (default: from --out, else as above)
       --lines <a-b>       Render only lines a to b of the file
       --json              Machine-readable output and errors on stdout
       --publish           Save an unlisted snippet to your account instead
@@ -53,6 +55,7 @@ Rendering creates nothing on the server. --publish creates an unlisted snippet
  *   fetch: typeof fetch,
  *   openUrl?: (url: string) => unknown,
  *   now?: () => number,
+ *   cwd?: string,
  * }} Io
  */
 
@@ -196,10 +199,13 @@ async function options(host, flags, io) {
  */
 async function render(host, file, flags, io) {
   const out = /** @type {string | undefined} */ (flags.out);
-  const format = outputFormat(/** @type {string | undefined} */ (flags.format), out);
-  if (!out && format === "png" && io.stdout.isTTY && !flags.json) {
-    throw new UsageError("Refusing to write PNG to a terminal. Use --out file.png.");
-  }
+  // In a terminal, an image is a file: PNG next to you, never over another
+  // file. Piped or redirected, it stays on stdout (SVG unless --format png).
+  const autoFile = !out && Boolean(io.stdout.isTTY) && !flags.json;
+  const format = outputFormat(
+    /** @type {string | undefined} */ (flags.format ?? (autoFile ? "png" : undefined)),
+    out,
+  );
 
   const range = typeof flags.lines === "string" ? parseLineRange(flags.lines) : undefined;
   let code = file === "-" ? await readStdin(io.stdin) : await readSource(file);
@@ -225,6 +231,17 @@ async function render(host, file, flags, io) {
   const width = Number(response.headers.get("x-supagist-width")) || undefined;
   const height = Number(response.headers.get("x-supagist-height")) || undefined;
 
+  if (autoFile) {
+    const stem = basename(String(flags.filename ?? (file === "-" ? "snippet" : file)));
+    const path = await writeNewFile(
+      io.cwd ?? process.cwd(),
+      stem.slice(0, stem.length - extname(stem).length) || stem,
+      format,
+      bytes,
+    );
+    io.stderr.write(`Saved ${path}${width ? ` (${width}×${height})` : ""}\n`);
+    return EXIT.ok;
+  }
   if (out) {
     await writeFile(out, bytes);
     if (flags.json) {
@@ -245,6 +262,23 @@ async function render(host, file, flags, io) {
   }
   io.stdout.write(bytes);
   return EXIT.ok;
+}
+
+/**
+ * Writes name.ext in dir, or name-2.ext, name-3.ext… when taken, and returns
+ * the name written. "wx" fails instead of replacing, even in a race.
+ * @param {string} dir @param {string} name @param {string} ext @param {Uint8Array} bytes
+ */
+async function writeNewFile(dir, name, ext, bytes) {
+  for (let n = 1; ; n++) {
+    const file = `${name}${n === 1 ? "" : `-${n}`}.${ext}`;
+    try {
+      await writeFile(join(dir, file), bytes, { flag: "wx" });
+      return file;
+    } catch (error) {
+      if (error?.code !== "EEXIST") throw error;
+    }
+  }
 }
 
 /** @param {string | undefined} format @param {string | undefined} out */

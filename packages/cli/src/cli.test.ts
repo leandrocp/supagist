@@ -131,6 +131,7 @@ describe("run", () => {
       fetch: fetchMock,
       openUrl,
       now: () => NOW,
+      cwd: dir,
     });
   const svgResponse = () =>
     new Response("<svg>card</svg>", {
@@ -284,10 +285,29 @@ describe("run", () => {
     expect(stderr.join("")).toContain(message);
   });
 
-  it("refuses to print PNG bytes to a terminal", async () => {
+  it("saves <name>.png in a terminal, never over an existing file", async () => {
     tty = true;
-    expect(await cli(join(dir, "auth.ts"), "--format", "png")).toBe(2);
-    expect(fetchMock).not.toHaveBeenCalled();
+    const png = () =>
+      new Response(new Uint8Array([0x89, 0x50]), {
+        headers: { "x-supagist-width": "600", "x-supagist-height": "400" },
+      });
+    fetchMock.mockImplementation(async () => png());
+    await writeFile(join(dir, "auth.png"), "mine");
+
+    expect(await cli(join(dir, "auth.ts"))).toBe(0);
+    expect(sent().body).toMatchObject({ format: "png" });
+    expect(stderr.join("")).toBe("Saved auth-2.png (600×400)\n");
+    expect(stdout).toEqual([]);
+    expect(await readFile(join(dir, "auth.png"), "utf8")).toBe("mine");
+    expect(new Uint8Array(await readFile(join(dir, "auth-2.png")))).toEqual(
+      new Uint8Array([0x89, 0x50]),
+    );
+
+    // stdin is named after --filename, else "snippet"; --format still applies.
+    stdin = ["x"];
+    stderr = [];
+    expect(await cli("-", "--format", "svg")).toBe(0);
+    expect(stderr.join("")).toBe("Saved snippet.svg (600×400)\n");
   });
 
   it("uses SUPAGIST_HOST unless --host is given, and validates both", async () => {
