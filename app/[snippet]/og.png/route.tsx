@@ -3,12 +3,13 @@ import { parseSnippetParam, languageDisplayName, normalizeSnippetCode } from "@/
 import { loadTheme } from "@/lib/theme-loader";
 import { cardSource } from "@/lib/og-image";
 import { fetchOgFacts, loadAvatar, loadCardPng, renderOgPng } from "@/lib/og-render";
+import { renderSnippetPng } from "@/lib/snippet-render";
 
 // Satori, resvg and the bundled assets need Node, not Edge.
 export const runtime = "nodejs";
 
-// The `?v=` hash in the page metadata changes whenever the picture would, so
-// a cached copy is always the right picture for its URL.
+// The `?v=` hash in the page metadata changes whenever the picture would and
+// on every edit, so a cached copy is always the right picture for its URL.
 const CACHE = "public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800";
 
 type SnippetRow = {
@@ -18,6 +19,8 @@ type SnippetRow = {
   language: string | null;
   theme: string;
   code: string;
+  font_id: string;
+  appearance: unknown;
   view_count: number;
   created_at: string;
   visibility: "public" | "unlisted";
@@ -52,7 +55,22 @@ export async function GET(request: Request, { params }: { params: Promise<{ snip
     const [facts, theme, card, avatar] = await Promise.all([
       fetchOgFacts(supabase, snippet.id),
       loadTheme(snippet.theme).catch(() => null),
-      loadCardPng(supabase, cardSource(snippet)).catch(() => null),
+      loadCardPng(supabase, cardSource(snippet))
+        .catch(() => null)
+        // An edit drops the stored renders: draw the card from the live row.
+        // Unlisted cards keep the author out of third-party caches (spec §4).
+        .then(
+          (stored) =>
+            stored ??
+            renderSnippetPng(
+              { ...snippet, author: unlisted ? null : snippet.author },
+              { card: true },
+            ),
+        )
+        .catch((error) => {
+          console.error(`Share card render failed for snippet ${snippet.id}`, error);
+          return null;
+        }),
       unlisted ? null : loadAvatar(snippet.author?.avatar_url ?? null),
     ]);
     const png = await renderOgPng({

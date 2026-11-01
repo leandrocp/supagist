@@ -108,6 +108,12 @@ export async function generateMetadata({ params }: Props) {
         ? { username: snippet.author.username, avatarUrl: snippet.author.avatar_url }
         : null,
       card: cardSource(snippet),
+      edit: {
+        code: snippet.code,
+        title: snippet.title,
+        fontId: snippet.font_id,
+        appearance: snippet.appearance,
+      },
     });
     ogImage = `/${param}/og.png?v=${v}`;
   } catch (error) {

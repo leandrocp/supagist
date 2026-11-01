@@ -205,6 +205,12 @@ describe("ogVersion", () => {
     language: "tsx",
     author: { username: "leandrocp", avatarUrl: null },
     card: { kind: "none" } as const,
+    edit: {
+      code: "const a = 1;",
+      title: null,
+      fontId: "jetbrains",
+      appearance: { background: null },
+    },
   };
 
   it("ignores views inside a bucket and reaction order", () => {
@@ -224,6 +230,20 @@ describe("ogVersion", () => {
       { lineCount: 12 },
     ]) {
       expect(ogVersion({ ...facts, ...change })).not.toBe(base);
+    }
+  });
+
+  // Same line count, same theme: before, an edit like this kept the URL, so
+  // WhatsApp and the CDN kept serving the pre-edit picture.
+  it("changes on every owner edit, even one that keeps the line count", () => {
+    const base = ogVersion(facts);
+    for (const edit of [
+      { code: "const b = 2;" },
+      { title: "Renamed" },
+      { fontId: "fira" },
+      { appearance: { background: "Lumis" } },
+    ]) {
+      expect(ogVersion({ ...facts, edit: { ...facts.edit, ...edit } })).not.toBe(base);
     }
   });
 });

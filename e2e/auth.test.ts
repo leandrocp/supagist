@@ -320,6 +320,59 @@ test("people delete their own comments after confirming, and only their own", as
   }
 });
 
+/** The page's og:image URL, its PNG and the RGB of one pixel (decoded by resvg). */
+async function shareImage(page: import("@playwright/test").Page, x: number, y: number) {
+  const url = await page.locator('meta[property="og:image"]').getAttribute("content");
+  const res = await page.request.get(url!);
+  expect(res.status()).toBe(200);
+  const png = await res.body();
+  const { Resvg } = await import("@resvg/resvg-js");
+  const href = `data:image/png;base64,${png.toString("base64")}`;
+  const image = new Resvg(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630"><image href="${href}" width="1200" height="630"/></svg>`,
+  ).render();
+  const at = (y * image.width + x) * 4;
+  const rgb = [...image.pixels.subarray(at, at + 3)].map((c) => c.toString(16).padStart(2, "0"));
+  return { url, png, pixel: `#${rgb.join("")}` };
+}
+
+// The reported bug: after an edit the share image showed the envelope and
+// seal with no code card, and kept the pre-edit URL.
+test("the share image shows the edited code after a web edit", async ({ page }) => {
+  test.setTimeout(120_000);
+  await page.goto("/");
+  await page.locator("textarea").fill("const before = 1;\nconsole.log(before);");
+  await page.getByLabel("Filename").fill("og-edit.ts");
+  await expect(page.getByText("const", { exact: true })).toHaveCSS("color", "rgb(207, 34, 46)");
+  await page.getByRole("button", { name: /^publish$/i }).click();
+  await page.waitForURL(/\/[a-z0-9-]+-[a-z0-9]{6}$/, { timeout: 60_000 });
+
+  // github_light: right of the short lines the card body is white, where the
+  // envelope alone would be cream.
+  const published = await shareImage(page, 1100, 330);
+  expect(published.pixel).toBe("#ffffff");
+
+  const editCode = async (code: string) => {
+    await page.getByRole("button", { name: "Edit", exact: true }).click();
+    const dialog = page.getByRole("dialog", { name: "Edit snippet" });
+    await dialog.getByLabel("Code").fill(code);
+    await dialog.getByRole("button", { name: "Save changes" }).click();
+    await expect(dialog).toBeHidden();
+    await page.reload();
+    return shareImage(page, 1100, 330);
+  };
+
+  const edited = await editCode("const after = 2;\nconsole.log(after);");
+  expect(edited.url, "a new URL, so crawlers fetch the new picture").not.toBe(published.url);
+  expect(edited.pixel, "the card is still in the envelope").toBe("#ffffff");
+
+  // Same lines, theme and filename: only the code differs.
+  const again = await editCode("const again = 3;\nconsole.log(again);");
+  expect(again.url).not.toBe(edited.url);
+  expect(again.pixel).toBe("#ffffff");
+  expect(again.png.equals(edited.png), "the card shows the edited code").toBe(false);
+});
+
 test("the owner deletes a snippet from its page; the link stops working", async ({ page }) => {
   const path = await openSeeded(page, "const doomed = 1;", "delete-me.ts");
 

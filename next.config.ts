@@ -1,5 +1,12 @@
 import type { NextConfig } from "next";
 
+// Read at request time by lib/snippet-render.ts.
+const SNIPPET_RENDER_FILES = [
+  "./node_modules/@lumis-sh/wasm-*/**/*",
+  "./supabase/functions/mcp/assets/*.ttf",
+  "./public/brands/**/*",
+];
+
 export function buildContentSecurityPolicy(environment: string | undefined): string {
   const isProduction = environment === "production";
   const connectSources = [
@@ -59,8 +66,10 @@ const nextConfig: NextConfig = {
   outputFileTracingIncludes: {
     "/\\[snippet\\]": ["./node_modules/@lumis-sh/wasm-*/**/*"],
     // The share image reads its fonts, envelope layers and Noto emoji at
-    // request time (lib/og-render.tsx).
-    "/\\[snippet\\]/og.png": ["./assets/og/**/*"],
+    // request time (lib/og-render.tsx). It and the live thumbnail also render
+    // edited snippets with the parsers, TTF faces and brand images
+    // (lib/snippet-render.ts).
+    "/\\[snippet\\]/og.png": ["./assets/og/**/*", ...SNIPPET_RENDER_FILES],
     // Read at request time; see lib/google-connected-apps.ts.
     "/.well-known/google-connected-apps": ["./google-connected-apps.json"],
   },

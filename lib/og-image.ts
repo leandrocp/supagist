@@ -301,7 +301,8 @@ export function buildOgModel(
  * snippets published before it existed only have the canonical PNG; MCP
  * publishes store only the SVG. An owner edit nulls the stored paths, and the
  * derived `card.png` is stale with them, so it counts only while
- * `canonical_image_path` is set.
+ * `canonical_image_path` is set. With no stored render (`none`), or when the
+ * file is gone, the route renders the card from the live row instead.
  */
 export type CardSource =
   | { kind: "card"; path: string; fallback: string }
@@ -326,11 +327,19 @@ export function cardSource(snippet: {
 }
 
 /**
- * `?v=` for the image URL: changes exactly when the picture would. Platforms
- * cache previews by URL, so this is also what busts X, Slack and Discord when
- * a snippet gains reactions, is edited or turns unlisted.
+ * `?v=` for the image URL: changes whenever the picture would, and on every
+ * owner edit. Platforms cache previews by URL, so this is also what busts
+ * WhatsApp, X, Slack and Discord when a snippet gains reactions, is edited or
+ * turns unlisted.
  */
 export function ogVersion(facts: {
+  /** Every owner-editable field, so each edit gets a fresh URL. */
+  edit: {
+    code: string;
+    title: string | null;
+    fontId: string;
+    appearance: unknown;
+  };
   viewCount: number;
   reactionEmojis: string[];
   commentCount: number;
@@ -354,6 +363,7 @@ export function ogVersion(facts: {
     facts.author?.username ?? null,
     facts.author?.avatarUrl ?? null,
     facts.card.kind === "none" ? null : facts.card.path,
+    facts.edit,
   ]);
   return createHash("sha256").update(key).digest("hex").slice(0, 12);
 }

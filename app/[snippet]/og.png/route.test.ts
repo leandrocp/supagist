@@ -42,6 +42,18 @@ vi.mock("@supabase/supabase-js", () => ({
 }));
 
 const { GET } = await import("./route");
+const { loadTheme } = await import("@/lib/theme-loader");
+
+/** RGB of one pixel of a 1200×630 PNG, decoded by resvg. */
+async function pixelAt(png: Uint8Array, x: number, y: number) {
+  const { Resvg } = await import("@resvg/resvg-js");
+  const href = `data:image/png;base64,${Buffer.from(png).toString("base64")}`;
+  const image = new Resvg(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630"><image href="${href}" width="1200" height="630"/></svg>`,
+  ).render();
+  const at = (y * image.width + x) * 4;
+  return [...image.pixels.subarray(at, at + 3)];
+}
 
 const CARD = new Uint8Array(
   readFileSync(new URL("../../../public/brand/hero-card.png", import.meta.url)),
@@ -120,13 +132,39 @@ describe("GET /[snippet]/og.png", () => {
     expect(db.downloads).toEqual(["u1/snippets/s1/card.png", "u1/snippets/s1/canonical.png"]);
   }, 30_000);
 
-  it("still renders the envelope when no stored render can be read", async () => {
-    db.snippet = row({ canonical_image_path: null, svg_path: null, author: null });
-    db.reactions = [];
-    db.comments = 0;
+  // The reported bug: an owner edit nulls the stored image paths, and the
+  // share image lost its card (envelope and seal only).
+  it("draws the edited code from the live row once an edit dropped the stored renders", async () => {
+    const edited = (code: string) =>
+      row({
+        code,
+        theme: "lumis-dusk",
+        // The composer's default, which names no font file.
+        font_id: "system",
+        appearance: null,
+        canonical_image_path: null,
+        og_image_path: null,
+        svg_path: null,
+      });
+    // card.png from before the edit is still in Storage, but stale.
+    db.snippet = edited("const before = 1;\nconst after = 2;");
+    const first = new Uint8Array(await (await get()).arrayBuffer());
+    db.snippet = edited("const edited = 3;\nconst again = 4;");
     const res = await get();
     expect(res.status).toBe(200);
+    const second = new Uint8Array(await res.arrayBuffer());
+
     expect(db.downloads).toEqual([]);
+    expect(networkCalls).toEqual([]);
+    // The card sits in the envelope: right of the short lines, its body is the
+    // theme's editor colour (the envelope alone is grey there).
+    const { data: theme } = await loadTheme("lumis-dusk");
+    const bg = (theme.highlights.normal as { bg: string }).bg;
+    const pixel = await pixelAt(second, 1100, 330);
+    expect(pixel.map((c) => c.toString(16).padStart(2, "0")).join("")).toBe(bg.slice(1));
+    // Same filename, lines, theme and date: only the code differs, so the
+    // pictures differ only if the card shows the live code.
+    expect(Buffer.from(first).equals(Buffer.from(second))).toBe(false);
   }, 30_000);
 
   it("marks unlisted images noindex and skips the avatar", async () => {
