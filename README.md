@@ -1,6 +1,7 @@
-# Supagist
-
-Share a code snippet. Reactions and comments on every line.
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="./assets/brand/readme/readme-banner-dark.png">
+  <img alt="Supagist. Share a code snippet. Reactions and comments on every line." src="./assets/brand/readme/readme-banner.png" width="1280">
+</picture>
 
 ![supagist](./public/supagist.png)
 
