@@ -75,6 +75,10 @@ export type RenderResult = {
   contentType: "image/svg+xml";
   width: number;
   height: number;
+  /** Resolved appearance, after brand defaults and auto-detection. */
+  theme: string;
+  language: string;
+  fontId: string;
   logicalWidth: number;
   logicalHeight: number;
   timings: {
@@ -241,6 +245,9 @@ export async function renderSnippet(rawInput: RenderInput): Promise<RenderResult
     contentType: "image/svg+xml",
     width,
     height,
+    theme,
+    language,
+    fontId,
     logicalWidth,
     logicalHeight,
     timings,

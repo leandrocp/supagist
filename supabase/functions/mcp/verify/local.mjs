@@ -110,9 +110,11 @@ async function main() {
   assert.equal(tools.response.status, 200);
   assert.deepEqual(tools.data.result.tools.map((tool) => tool.name).sort(), [
     "list_options",
+    "publish_snippet",
     "render_snippet",
   ]);
-  assert.ok(tools.data.result.tools.every((tool) => tool.annotations.readOnlyHint));
+  for (const tool of tools.data.result.tools)
+    assert.equal(tool.annotations.readOnlyHint, tool.name !== "publish_snippet");
   const options = await rpc(endpoint, token, "tools/call", { name: "list_options", arguments: {} });
   assert.ok(JSON.parse(options.data.result.content[0].text).languages.includes("javascript"));
   for (const [index, input] of [

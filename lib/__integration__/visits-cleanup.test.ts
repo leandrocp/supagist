@@ -191,6 +191,29 @@ describe.skipIf(skip)("bounded visits and queued Storage cleanup", () => {
     for (const path of paths) storagePaths.delete(path);
   });
 
+  it("queues stale SVG-only snippets (no PNG paths) with just their real paths", async () => {
+    const suffix = randomUUID();
+    const staleAt = new Date(Date.now() - 190 * 24 * 60 * 60 * 1000).toISOString();
+    const svgPath = `${user.id}/snippets/${suffix}/canonical.svg`;
+    const row = {
+      ...snippetRow(user.id, suffix, staleAt),
+      canonical_image_path: null,
+      og_image_path: null,
+      svg_path: svgPath,
+    };
+    const { data: snippet, error } = await admin.from("snippets").insert(row).select("id").single();
+    if (error || !snippet) throw new Error(`svg-only snippet insert failed: ${error?.message}`);
+    snippetIds.add(snippet.id);
+
+    const queued = await admin.rpc("queue_old_snippets_for_cleanup", { p_limit: 100 });
+    expect(queued.error).toBeNull();
+    const entry = queued.data?.find((e: { snippet_id: string }) => e.snippet_id === snippet.id) as
+      | { id: string; paths: string[] }
+      | undefined;
+    expect(entry?.paths).toEqual([svgPath]);
+    if (entry) await admin.from("storage_cleanup_queue").delete().eq("id", entry.id);
+  });
+
   it("does not queue untrusted paths that point outside the snippet namespace", async () => {
     const suffix = randomUUID();
     const targetPath = `${randomUUID()}/snippets/${randomUUID()}/canonical.png`;

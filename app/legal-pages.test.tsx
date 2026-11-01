@@ -35,6 +35,9 @@ describe("legal pages", () => {
       expect(screen.getAllByText(processor).length).toBeGreaterThan(0);
     expect(screen.getByText(/not been viewed for six months are deleted/)).toBeTruthy();
     expect(screen.getByText(/We do not sell your data, we do not show ads/)).toBeTruthy();
+    // MCP publishing: unlisted is described honestly and redaction never keeps originals.
+    expect(screen.getByText(/so unlisted does not mean private/)).toBeTruthy();
+    expect(screen.getByText(/does not store or\s+log the original values/)).toBeTruthy();
     expect(screen.getByRole("link", { name: "Managing your data" }).getAttribute("href")).toBe(
       "/help/data",
     );

@@ -7,7 +7,7 @@ import { createServer } from "./server.ts";
 Deno.serve(
   pipeline(
     [withOAuthProtectedResource(), withSupabase({ auth: "user" })],
-    async (req, { jwtClaims, userClaims, supabaseAdmin }) => {
+    async (req, { jwtClaims, userClaims, supabase, supabaseAdmin }) => {
       // Supabase anonymous Auth sessions are authenticated JWTs, but are not sign-in.
       if (jwtClaims?.is_anonymous === true) {
         return Response.json(
@@ -26,7 +26,8 @@ Deno.serve(
       const denied = await enforceRateLimits(req, userClaims!.id, supabaseAdmin);
       if (denied) return denied;
 
-      return createMcpHandler(createServer).fetch(req);
+      const caller = { userId: userClaims!.id, supabase };
+      return createMcpHandler(() => createServer(caller)).fetch(req);
     },
   ),
 );

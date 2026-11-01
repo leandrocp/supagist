@@ -4,7 +4,7 @@ import { createServer, SERVER_INSTRUCTIONS } from "./server.ts";
 
 // Exercise the same handler index.ts serves, through JSON-RPC over HTTP.
 async function rpc(method: string, params: Record<string, unknown> = {}) {
-  const response = await createMcpHandler(createServer).fetch(
+  const response = await createMcpHandler(() => createServer()).fetch(
     new Request("http://localhost/mcp", {
       method: "POST",
       headers: {
@@ -40,7 +40,7 @@ Deno.test("initialize advertises the supagist name, version and instructions", a
 Deno.test("tool descriptions never name other tools or local-only workflows", async () => {
   const { tools } = await rpc("tools/list");
   const names = tools.map((tool: { name: string }) => tool.name).sort();
-  assert.deepEqual(names, ["list_options", "render_snippet"]);
+  assert.deepEqual(names, ["list_options", "publish_snippet", "render_snippet"]);
   for (const text of [
     SERVER_INSTRUCTIONS,
     ...tools.map((t: { description: string }) => t.description),
@@ -49,4 +49,20 @@ Deno.test("tool descriptions never name other tools or local-only workflows", as
     for (const banned of ["PNG", "locally", "benchmark", "fixture"])
       assert.ok(!text.includes(banned), `${banned} in: ${text}`);
   }
+});
+
+Deno.test("publish_snippet writes, never destroys, and takes appearance but not annotations", async () => {
+  const { tools } = await rpc("tools/list");
+  const byName = Object.fromEntries(tools.map((t: { name: string }) => [t.name, t]));
+  const publish = byName.publish_snippet;
+  assert.equal(publish.annotations.readOnlyHint, false);
+  assert.equal(publish.annotations.destructiveHint, false);
+  for (const name of ["render_snippet", "list_options"])
+    assert.equal(byName[name].annotations.readOnlyHint, true);
+  const fields = Object.keys(publish.inputSchema.properties);
+  assert.ok(fields.includes("title") && fields.includes("brand") && fields.includes("code"));
+  for (const renderOnly of ["reactions", "comments", "author", "fixture", "pixelRatio"])
+    assert.ok(!fields.includes(renderOnly), renderOnly);
+  for (const promise of ["unlisted", "redacted", "noindex"])
+    assert.ok(publish.description.includes(promise), promise);
 });

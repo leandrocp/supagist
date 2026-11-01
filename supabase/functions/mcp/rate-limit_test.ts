@@ -3,6 +3,8 @@ import { enforceRateLimits } from "./rate-limit.ts";
 
 const minuteMessage =
   "Rate limit reached. Try again in up to 1 minute. Need more? Contact supagist@leandro.io";
+const hourMessage =
+  "Rate limit reached. Try again in up to 1 hour. Need more? Contact supagist@leandro.io";
 const dayMessage =
   "Rate limit reached. Try again in up to 24 hours. Need more? Contact supagist@leandro.io";
 const ownerId = "288417c7-4c03-4277-988f-24f3c2fc814b";
@@ -48,7 +50,10 @@ async function limited(response: Response | null, retry: number, id: unknown = "
   assert.deepEqual(await response.json(), {
     jsonrpc: "2.0",
     id,
-    error: { code: -32300, message: retry === 60 ? minuteMessage : dayMessage },
+    error: {
+      code: -32300,
+      message: retry === 60 ? minuteMessage : retry === 3600 ? hourMessage : dayMessage,
+    },
   });
 }
 
@@ -59,6 +64,9 @@ for (const [key, cap, retry, tool] of [
   ["mcp:ip:192.0.2.1:user:alice:d", 300, 86400, "list_options"],
   ["mcp:render:alice:m", 3, 60, "render_snippet"],
   ["mcp:render:alice:d", 20, 86400, "render_snippet"],
+  ["mcp:publish:alice:m", 3, 60, "publish_snippet"],
+  ["mcp:publish:alice:h", 10, 3600, "publish_snippet"],
+  ["mcp:publish:alice:d", 20, 86400, "publish_snippet"],
 ] as const) {
   Deno.test(`${key}: under/at cap allowed, next denied with HTTP and MCP error`, async () => {
     const db = fakeRpc();
@@ -111,6 +119,16 @@ Deno.test("many users behind one shared egress IP never throttle each other", as
   const denied = await enforceRateLimits(setupRequest(setupBodies[0]), "flooder", db);
   await limited(denied, 60, 5);
   assert.equal(await enforceRateLimits(request(), "user-0", db), null);
+});
+
+Deno.test("publish and render quotas are independent buckets", async () => {
+  const db = fakeRpc();
+  db.seed("mcp:render:alice:d", 20);
+  assert.equal(await enforceRateLimits(request("publish_snippet"), "alice", db), null);
+  db.seed("mcp:publish:alice:d", 20);
+  await limited(await enforceRateLimits(request("publish_snippet"), "alice", db), 86400);
+  db.seed("mcp:render:alice:d", 0);
+  assert.equal(await enforceRateLimits(request("render_snippet"), "alice", db), null);
 });
 
 Deno.test("render quota is tighter, does not block other tools, and still consumes global quotas", async () => {

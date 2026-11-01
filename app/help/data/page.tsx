@@ -15,7 +15,7 @@ export default function DataHelpPage() {
     <LegalPage
       title="Managing your data"
       subtitle="How to view, change and delete your snippets and account."
-      updated="October 31, 2026"
+      updated="November 1, 2026"
     >
       <Section title="See your snippets">
         <p>
@@ -23,8 +23,8 @@ export default function DataHelpPage() {
           <Link href="/snippets" className={link}>
             Your snippets
           </Link>{" "}
-          (/snippets). It lists your 20 most recent snippets with their language, date and view
-          count. For older snippets, or a full list, email us.
+          (/snippets). It lists your 20 most recent snippets, public and unlisted, with their
+          language, date and view count. For older snippets, or a full list, email us.
         </p>
       </Section>
 
@@ -65,9 +65,12 @@ export default function DataHelpPage() {
 
       <Section title="AI assistants and MCP">
         <p>
-          The Supagist MCP tools only render images; they do not save or read your snippets. To stop
-          an assistant from using your account, disconnect Supagist in that assistant. To revoke its
-          access on our side as well, email us.
+          An assistant connected to Supagist&apos;s MCP server can render images and publish new
+          snippets as you. Published snippets are unlisted, and common secrets in the code are
+          replaced with placeholders before anything is stored. The assistant cannot read, edit or
+          delete your existing snippets; to delete one it published, follow Delete a snippet above.
+          To stop an assistant from using your account, disconnect Supagist in that assistant. To
+          revoke its access on our side as well, email us.
         </p>
       </Section>
 

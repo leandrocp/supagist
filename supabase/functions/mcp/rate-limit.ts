@@ -3,7 +3,8 @@
 export const USER_RATE_LIMITED = -32300;
 
 export function rateLimitMessage(retryAfter: number) {
-  const wait = retryAfter >= RATE_LIMITS.windows.day ? "24 hours" : "1 minute";
+  const { day, hour } = RATE_LIMITS.windows;
+  const wait = retryAfter >= day ? "24 hours" : retryAfter >= hour ? "1 hour" : "1 minute";
   return `Rate limit reached. Try again in up to ${wait}. Need more? Contact supagist@leandro.io`;
 }
 
@@ -13,9 +14,14 @@ export const UNLIMITED_USER_ID = "288417c7-4c03-4277-988f-24f3c2fc814b";
 export const RATE_LIMITS = {
   user: { minute: 5, day: 100 },
   render: { minute: 3, day: 20 },
+  // Render's sizes, plus an hour cap that stays inside the snippets INSERT
+  // trigger's 10/hour, so MCP-only publishing is always refused here first.
+  publish: { minute: 3, hour: 10, day: 20 },
   ip: { minute: 20, day: 300 },
-  windows: { minute: 60, day: 86400 },
+  windows: { minute: 60, hour: 3600, day: 86400 },
 } as const;
+
+type Window = keyof typeof RATE_LIMITS.windows;
 
 type RateLimitAdmin = {
   rpc(
@@ -45,7 +51,7 @@ export async function enforceRateLimits(
           .catch(() => null)
       : null;
   const toolCall = message?.method === "tools/call";
-  const buckets =
+  const buckets: { key: string; limits: Partial<Record<Window, number>> }[] =
     userId === UNLIMITED_USER_ID
       ? []
       : [
@@ -59,6 +65,9 @@ export async function enforceRateLimits(
           ...(toolCall && message.params?.name === "render_snippet"
             ? [{ key: `mcp:render:${userId}`, limits: RATE_LIMITS.render }]
             : []),
+          ...(toolCall && message.params?.name === "publish_snippet"
+            ? [{ key: `mcp:publish:${userId}`, limits: RATE_LIMITS.publish }]
+            : []),
         ];
 
   try {
@@ -66,11 +75,11 @@ export async function enforceRateLimits(
     // atomic; no process-local state or read-then-write race across isolates.
     const checks = await Promise.all(
       buckets.flatMap(({ key, limits }) =>
-        (["minute", "day"] as const).map(async (window) => {
+        (Object.entries(limits) as [Window, number][]).map(async ([window, max]) => {
           const seconds = RATE_LIMITS.windows[window];
           const { data, error } = await admin.rpc("check_rate_limit", {
-            p_key: `${key}:${window === "minute" ? "m" : "d"}`,
-            p_max: limits[window],
+            p_key: `${key}:${window[0]}`,
+            p_max: max,
             p_window: `${seconds} seconds`,
           });
           if (error || typeof data !== "boolean") throw new Error("Rate limit RPC failed");

@@ -39,7 +39,8 @@ type SnippetRow = {
   code: string;
   code_char_count: number;
   line_count: number;
-  og_image_path: string;
+  og_image_path: string | null;
+  title: string | null;
   created_at: string;
   visibility: "public" | "unlisted";
   author: { id: string; username: string; avatar_url: string } | null;
@@ -65,10 +66,11 @@ export async function generateMetadata({ params }: Props) {
   const snippet = await getSnippet(parsed.slug, parsed.shortId);
   if (!snippet) return {};
 
+  // MCP publishes store no PNG; they use the site's default share image.
   const supabase = await createClient();
-  const { data: ogUrl } = supabase.storage
-    .from("snippet-images")
-    .getPublicUrl(snippet.og_image_path);
+  const ogImage = snippet.og_image_path
+    ? supabase.storage.from("snippet-images").getPublicUrl(snippet.og_image_path).data.publicUrl
+    : null;
 
   // Short, screen-reader-friendly description used as the og:image alt and
   // the social-card description — see buildSnippetSocialAlt for the shape.
@@ -82,21 +84,26 @@ export async function generateMetadata({ params }: Props) {
     charCount: snippet.code_char_count,
   });
 
+  // A page's openGraph replaces the layout's, so name the default share image.
+  const images = ogImage
+    ? [{ url: ogImage, alt }]
+    : [{ url: "/og-image.png", width: 1200, height: 630 }];
+  const title = `${snippet.title ?? snippet.filename} — Supagist`;
   return {
-    title: `${snippet.filename} — Supagist`,
+    title,
     // Unlisted links are shareable, but search engines must not index them.
     ...(snippet.visibility === "unlisted" ? { robots: { index: false, follow: false } } : {}),
     description: alt,
     openGraph: {
-      title: `${snippet.filename} — Supagist`,
+      title,
       description: alt,
-      images: [{ url: ogUrl.publicUrl, alt }],
+      images,
     },
     twitter: {
       card: "summary_large_image",
-      title: `${snippet.filename} — Supagist`,
+      title,
       description: alt,
-      images: [{ url: ogUrl.publicUrl, alt }],
+      images,
     },
   };
 }
@@ -185,7 +192,9 @@ export default async function SnippetPage({ params }: Props) {
           {/* Header */}
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div className="space-y-1">
-              <h1 className="text-2xl font-semibold tracking-tight">{snippet.filename}</h1>
+              <h1 className="text-2xl font-semibold tracking-tight">
+                {snippet.title ?? snippet.filename}
+              </h1>
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
                 {author ? (
                   <Link

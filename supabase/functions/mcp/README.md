@@ -56,9 +56,17 @@ Apps traffic) never throttle each other. Each `tools/call` also consumes the
 user quota (5/minute, 100/day); connection setup (initialize, notifications,
 lists, GET) does not, so many clients on one account cannot exhaust it before
 their first tool call. `render_snippet` also consumes a separate user quota
-(3/minute, 20/day). Constants live in
+(3/minute, 20/day), and `publish_snippet` its own (3/minute, 10/hour, 20/day;
+the hour cap stays inside the snippets INSERT trigger's 10/hour, so MCP-only
+publishing is refused with -32300 before the trigger fires). Constants live in
 `rate-limit.ts`. All checks call the existing `public.check_rate_limit` RPC using
-`ctx.supabaseAdmin`; no schema, function, or grant change is required.
+`ctx.supabaseAdmin`.
+
+`publish_snippet` (2026-11-01) redacts secrets (`redact.ts`), renders the SVG,
+then uploads it and inserts the snippet with the caller-scoped client, so RLS,
+Storage policies and the publish trigger apply as the signed-in user. Snippets
+are `unlisted` and store no PNGs. `verify/publish.mjs` checks the contract
+against local Supabase in CI.
 
 The sole exception is leandro@leandro.io, matched by its verified auth user ID
 in `rate-limit.ts`: that account bypasses all user, render, and IP quota checks.

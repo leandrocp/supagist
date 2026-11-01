@@ -139,6 +139,9 @@ jobs:
           version: 2.117.0
       - name: Start local Supabase
         run: supabase start
+      # publish_snippet uploads to the snippet-images bucket.
+      - name: Seed local buckets
+        run: supabase seed buckets
       - name: Serve the MCP function
         run: |
           nohup supabase functions serve mcp > "$RUNNER_TEMP/functions.log" 2>&1 &
@@ -154,6 +157,8 @@ jobs:
       # OAuth-protected HTTP, tool schema, catalog, skill examples, 16:9 and
       # ligatures, each render as a disposable local user.
       - run: node supabase/functions/mcp/verify/appearance.mjs
+      # Auth, unlisted + redacted storage, RLS visibility and -32300.
+      - run: node supabase/functions/mcp/verify/publish.mjs
       - name: Function logs
         if: failure()
         run: cat "$RUNNER_TEMP/functions.log"
