@@ -1,11 +1,7 @@
 import type { NextConfig } from "next";
 
 // Read at request time by lib/snippet-render.ts.
-const SNIPPET_RENDER_FILES = [
-  "./node_modules/@lumis-sh/wasm-*/**/*",
-  "./supabase/functions/mcp/assets/*.ttf",
-  "./public/brands/**/*",
-];
+const SNIPPET_RENDER_FILES = ["./supabase/functions/mcp/assets/*.ttf", "./public/brands/**/*"];
 
 export function buildContentSecurityPolicy(environment: string | undefined): string {
   const isProduction = environment === "production";
@@ -59,7 +55,10 @@ const nextConfig: NextConfig = {
   // bundlers cannot place; Node must load the package itself
   // (leandrocp/lumis#1589).
   // resvg (PNG for /api/render) is a native addon too.
-  serverExternalPackages: ["@lumis-sh/lumis", "@resvg/resvg-js"],
+  // The parser bundle stays external so server routes that import the export
+  // renderer (the share image, the live thumbnail) don't also get Turbopack's
+  // copy of every parser, which put them over Vercel's 250 MB limit.
+  serverExternalPackages: ["@lumis-sh/lumis", "@resvg/resvg-js", "@lumis-sh/wasm-bundle-full"],
   // It also finds the installed @lumis-sh/wasm-* parsers at runtime, from the
   // project directory, which file tracing cannot follow. Without these the
   // deployed saved view would fall back to plain text for every snippet.
@@ -67,7 +66,7 @@ const nextConfig: NextConfig = {
     "/\\[snippet\\]": ["./node_modules/@lumis-sh/wasm-*/**/*"],
     // The share image reads its fonts, envelope layers and Noto emoji at
     // request time (lib/og-render.tsx). It and the live thumbnail also render
-    // edited snippets with the parsers, TTF faces and brand images
+    // snippets with no stored image using the TTF faces and brand images
     // (lib/snippet-render.ts).
     "/\\[snippet\\]/og.png": ["./assets/og/**/*", ...SNIPPET_RENDER_FILES],
     "/\\[snippet\\]/image.png": SNIPPET_RENDER_FILES,

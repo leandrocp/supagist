@@ -146,6 +146,8 @@ describe("GET /[snippet]/og.png", () => {
         og_image_path: null,
         svg_path: null,
       });
+    // Offline here, the parser fetch fails and the code draws as plain text.
+    vi.spyOn(console, "warn").mockImplementation(() => {});
     // card.png from before the edit is still in Storage, but stale.
     db.snippet = edited("const before = 1;\nconst after = 2;");
     const first = new Uint8Array(await (await get()).arrayBuffer());
@@ -155,7 +157,13 @@ describe("GET /[snippet]/og.png", () => {
     const second = new Uint8Array(await res.arrayBuffer());
 
     expect(db.downloads).toEqual([]);
-    expect(networkCalls).toEqual([]);
+    // Only the pinned parser, as the browser and the MCP renderer load it.
+    expect(networkCalls.length).toBeGreaterThan(0);
+    for (const url of networkCalls) {
+      expect(url).toMatch(
+        /^https:\/\/cdn\.jsdelivr\.net\/npm\/@lumis-sh\/wasm-tsx@[\d.]+\/tree-sitter-tsx\.wasm$/,
+      );
+    }
     // The card sits in the envelope: right of the short lines, its body is the
     // theme's editor colour (the envelope alone is grey there).
     const { data: theme } = await loadTheme("lumis-dusk");

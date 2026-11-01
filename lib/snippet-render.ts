@@ -4,6 +4,7 @@ import { join } from "node:path";
 import { createHighlightedSvg, EXPORT_WIDTH, type ExportRuntime } from "@/lib/export-utils";
 import { rasterizeSvg } from "@/lib/render-api";
 import { findExportBackground, parseSnippetAppearance } from "@/lib/snippet-appearance";
+import parsers from "@/supabase/functions/mcp/spike/generated/parser-packages.json";
 
 /**
  * Renders a saved snippet from its live row on the server, with the same
@@ -48,14 +49,24 @@ export function renderVersion(snippet: Omit<RenderableSnippet, "author">): strin
 let highlighter: ExportRuntime["highlighter"] | null = null;
 
 const runtime: ExportRuntime = {
-  // The Node entry reads parsers from the installed @lumis-sh/wasm-* packages.
-  // Loaded on first render, so importing renderVersion stays light.
+  // Like the browser and the MCP renderer, fetch only the parser a snippet
+  // needs, pinned to the installed version and digest. Bundling them all
+  // would put this function over Vercel's 250 MB limit.
   get highlighter() {
-    highlighter ??= Promise.all([
-      import("@lumis-sh/lumis"),
-      import("@lumis-sh/lumis/bundles/full"),
-    ]).then(([{ createHighlighter }, { bundledLanguages }]) =>
-      createHighlighter({ languages: [bundledLanguages] }),
+    highlighter ??= import("@lumis-sh/lumis/client").then(({ createHighlighter }) =>
+      createHighlighter({
+        languagePackageResolver(packageName: string) {
+          const metadata = (parsers as Record<string, unknown>)[packageName];
+          if (!metadata) throw new Error(`Unknown parser package: ${packageName}`);
+          return `data:application/json,${encodeURIComponent(JSON.stringify(metadata))}`;
+        },
+        wasmResolver(
+          _language: string,
+          wasm: { packageName: string; name: string; version: string },
+        ) {
+          return `https://cdn.jsdelivr.net/npm/${wasm.packageName}@${wasm.version}/${wasm.name}.wasm`;
+        },
+      }),
     );
     return highlighter;
   },
