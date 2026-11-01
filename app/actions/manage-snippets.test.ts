@@ -131,9 +131,11 @@ describe("updateSnippet", () => {
       expect(uploaded).toContain(update[key]);
     }
     expect(update.raw_path.endsWith(".ts")).toBe(true);
-    // card.png keeps its derived name: the old one is removed, then replaced.
-    expect(supabase.remove).toHaveBeenCalledWith([`${folder}/card.png`]);
-    expect(uploaded.at(-1)).toBe(`${folder}/card.png`);
+    // The share card sits beside the new canonical PNG under the same
+    // version, uploaded before the row points at it; nothing is replaced.
+    expect(uploaded).toContain(update.canonical_image_path.replace("/canonical-", "/card-"));
+    expect(uploaded).not.toContain(`${folder}/card.png`);
+    expect(supabase.remove).not.toHaveBeenCalled();
   });
 
   it("removes the uploaded re-render when the edit is refused", async () => {
@@ -145,9 +147,8 @@ describe("updateSnippet", () => {
 
     expect((await updateSnippet(ID, edit, images)).error).toMatch(/isn't yours/);
     const uploaded = supabase.upload.mock.calls.map(([path]) => path);
-    expect(uploaded).toHaveLength(4);
+    expect(uploaded).toHaveLength(5);
     expect(supabase.remove).toHaveBeenCalledWith(expect.arrayContaining(uploaded));
-    expect(uploaded).not.toContain(`user-1/snippets/${ID}/card.png`);
   });
 
   it("does not upload anything for someone else's snippet", async () => {

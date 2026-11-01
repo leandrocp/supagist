@@ -169,8 +169,6 @@ describe("buildOgModel", () => {
 
 describe("cardSource", () => {
   const row = {
-    id: "s1",
-    author_id: "u1",
     canonical_image_path: "u1/snippets/s1/canonical.png",
     svg_path: "u1/snippets/s1/canonical.svg",
   };
@@ -180,6 +178,16 @@ describe("cardSource", () => {
       kind: "card",
       path: "u1/snippets/s1/card.png",
       fallback: "u1/snippets/s1/canonical.png",
+    });
+  });
+
+  it("finds a web edit's card beside its versioned canonical PNG", () => {
+    expect(
+      cardSource({ ...row, canonical_image_path: "u1/snippets/s1/canonical-1a2b3c4d.png" }),
+    ).toEqual({
+      kind: "card",
+      path: "u1/snippets/s1/card-1a2b3c4d.png",
+      fallback: "u1/snippets/s1/canonical-1a2b3c4d.png",
     });
   });
 

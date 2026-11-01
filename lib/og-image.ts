@@ -11,12 +11,21 @@ import { createHash } from "node:crypto";
 export const OG_SIZE = { width: 1200, height: 630 } as const;
 
 /**
- * Where publish stores the card-only render (no background) that the share
- * image lays into the envelope. Derived rather than stored in a column, so
- * snippets published before it existed, or through MCP, simply have none.
+ * Where the card-only render (no background) that the share image lays into
+ * the envelope sits: beside its canonical PNG, under the same version
+ * (`canonical.png` -> `card.png`, `canonical-<v>.png` -> `card-<v>.png`).
+ * Derived rather than stored in a column, so snippets published before it
+ * existed, or through MCP, simply have none. Cleanup derives it the same way
+ * (`private.snippet_card_path`).
  */
-export function snippetCardPath(authorId: string, snippetId: string): string {
-  return `${authorId}/snippets/${snippetId}/card.png`;
+export function cardPathFor(canonicalPath: string): string {
+  const slash = canonicalPath.lastIndexOf("/");
+  const name = canonicalPath.slice(slash + 1);
+  const version =
+    name.startsWith("canonical") && name.endsWith(".png")
+      ? name.slice("canonical".length, -".png".length)
+      : "";
+  return `${canonicalPath.slice(0, slash + 1)}card${version}.png`;
 }
 
 // ── Fonts ───────────────────────────────────────────────────────────────────
@@ -297,12 +306,11 @@ export function buildOgModel(
 
 /**
  * Which stored render becomes the card (spec §5), cheapest and truest first.
- * Web publishes store `card.png` (no background) beside `canonical.png`;
- * snippets published before it existed only have the canonical PNG; MCP
- * publishes store only the SVG. An owner edit nulls the stored paths, and the
- * derived `card.png` is stale with them, so it counts only while
- * `canonical_image_path` is set. With no stored render (`none`), or when the
- * file is gone, the route renders the card from the live row instead.
+ * Web publishes and web edits store the card (no background) beside their
+ * canonical PNG (`cardPathFor`); snippets published before it existed only
+ * have the canonical PNG; MCP publishes store only the SVG. An MCP edit nulls
+ * the stored paths. With no stored render (`none`), or when the file is gone,
+ * the route renders the card from the live row instead.
  */
 export type CardSource =
   | { kind: "card"; path: string; fallback: string }
@@ -310,15 +318,13 @@ export type CardSource =
   | { kind: "none" };
 
 export function cardSource(snippet: {
-  id: string;
-  author_id: string | null;
   canonical_image_path: string | null;
   svg_path: string | null;
 }): CardSource {
-  if (snippet.canonical_image_path && snippet.author_id) {
+  if (snippet.canonical_image_path) {
     return {
       kind: "card",
-      path: snippetCardPath(snippet.author_id, snippet.id),
+      path: cardPathFor(snippet.canonical_image_path),
       fallback: snippet.canonical_image_path,
     };
   }

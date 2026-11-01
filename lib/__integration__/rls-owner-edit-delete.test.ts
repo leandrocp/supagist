@@ -212,9 +212,18 @@ describe.skipIf(skip)("owner edit/delete RLS and account deletion", () => {
       svg_path: null,
       raw_path: `${prefix}/raw-v2.ts`,
     });
-    // card.png stays: the editor replaces it in place.
+    // The replaced version's card goes with its canonical PNG; the new one
+    // (card-v2.png) sits beside canonical-v2.png.
     expect(await queuedPaths(id)).toEqual(
-      ["canonical.png", "canonical.svg", "og.png", "raw.ts"].map((file) => `${prefix}/${file}`),
+      ["canonical.png", "canonical.svg", "card.png", "og.png", "raw.ts"].map(
+        (file) => `${prefix}/${file}`,
+      ),
+    );
+
+    // A later edit retires card-v2.png with canonical-v2.png.
+    await alice.client.from("snippets").update({ code: "cleared" }).eq("id", id);
+    expect(await queuedPaths(id)).toEqual(
+      expect.arrayContaining([`${prefix}/canonical-v2.png`, `${prefix}/card-v2.png`]),
     );
   });
 

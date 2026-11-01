@@ -11,7 +11,7 @@ import {
   codePointLength,
   normalizeSnippetCode,
 } from "@/lib/snippet-utils";
-import { snippetCardPath } from "@/lib/og-image";
+import { cardPathFor } from "@/lib/og-image";
 import { parseSnippetAppearance } from "@/lib/snippet-appearance";
 
 type PublishResult = { path: string; error?: never } | { error: string; path?: never };
@@ -141,7 +141,7 @@ export async function publishSnippet(formData: FormData): Promise<PublishResult>
   const svgPath = `${assetPrefix}/canonical.svg`;
   const rawExt = getRawFileExtension(filename);
   const rawPath = `${assetPrefix}/raw.${rawExt}`;
-  const cardPath = cardImage instanceof Blob ? snippetCardPath(user.id, snippetId) : null;
+  const cardPath = cardImage instanceof Blob ? cardPathFor(canonicalPath) : null;
   const assetPaths = [canonicalPath, ogPath, svgPath, rawPath, ...(cardPath ? [cardPath] : [])];
 
   // Upload all assets in parallel

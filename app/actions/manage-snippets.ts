@@ -4,7 +4,7 @@ import { availableLanguages, availableThemes } from "@lumis-sh/lumis/client";
 import { isBrandThemeId } from "@/lib/brand-themes";
 import { createClient } from "@/lib/supabase/server";
 import { codePointLength, getRawFileExtension, normalizeSnippetCode } from "@/lib/snippet-utils";
-import { snippetCardPath } from "@/lib/og-image";
+import { cardPathFor } from "@/lib/og-image";
 
 export type SnippetEdit = {
   code: string;
@@ -55,7 +55,10 @@ type StoredImages = {
 /**
  * Stores the images the editor re-rendered for an edit, under new names in
  * the snippet's folder: Storage has no overwrite policy, and a new URL is
- * never served stale from the CDN. Returns null when there are none to store.
+ * never served stale from the CDN. The share image's card goes beside the
+ * canonical PNG under the same version (`cardPathFor`), before the row points
+ * at it, so a new share URL never finds an old card. Returns the columns to
+ * set and every file uploaded, or null when there are none to store.
  */
 async function uploadEditImages(
   supabase: Awaited<ReturnType<typeof createClient>>,
@@ -63,7 +66,7 @@ async function uploadEditImages(
   filename: string,
   code: string,
   images: FormData | undefined,
-): Promise<StoredImages | null> {
+): Promise<{ columns: StoredImages; files: string[] } | null> {
   const canonical = images?.get("canonical_image");
   const og = images?.get("og_image");
   const svg = images?.get("svg");
@@ -76,18 +79,25 @@ async function uploadEditImages(
     svg_path: `${folder}/canonical-${version}.svg`,
     raw_path: `${folder}/raw-${version}.${getRawFileExtension(filename)}`,
   };
+  const card = images?.get("card_image");
+  const cardPath = card instanceof Blob ? cardPathFor(paths.canonical_image_path) : null;
+  const files = [...Object.values(paths), ...(cardPath ? [cardPath] : [])];
   const bucket = supabase.storage.from(BUCKET);
   const results = await Promise.all([
     bucket.upload(paths.canonical_image_path, canonical, { contentType: "image/png" }),
     bucket.upload(paths.og_image_path, og, { contentType: "image/png" }),
     bucket.upload(paths.svg_path, svg, { contentType: "image/svg+xml" }),
     bucket.upload(paths.raw_path, Buffer.from(code, "utf-8"), { contentType: "text/plain" }),
+    // Optional: without it the share image falls back to the canonical PNG.
+    cardPath && card instanceof Blob
+      ? bucket.upload(cardPath, card, { contentType: "image/png" })
+      : { error: null },
   ]);
-  if (results.some((result) => result.error)) {
-    await bucket.remove(Object.values(paths));
+  if (results.slice(0, 4).some((result) => result.error)) {
+    await bucket.remove(files);
     return null;
   }
-  return paths;
+  return { columns: paths, files };
 }
 
 /**
@@ -140,13 +150,13 @@ export async function updateSnippet(
       language: edit.language,
       theme: edit.theme,
       visibility: edit.visibility,
-      ...stored,
+      ...stored?.columns,
     })
     .eq("id", snippetId)
     .eq("author_id", user.id)
     .select("id");
   if (error || !data?.length) {
-    if (stored) await supabase.storage.from(BUCKET).remove(Object.values(stored));
+    if (stored) await supabase.storage.from(BUCKET).remove(stored.files);
   }
   if (error?.message.includes("edit_hour_rate_limit")) {
     return { error: "Too many edits in the last hour. Try again later." };
@@ -154,15 +164,6 @@ export async function updateSnippet(
   if (error) return { error: "Could not save your changes. Please try again." };
   if (!data?.length) return { error: "Snippet not found, or it isn't yours." };
 
-  // card.png (the share image's card) has a fixed name, so replace it in
-  // place. If the upload fails, the share image falls back to canonical.png.
-  const card = images?.get("card_image");
-  if (stored && card instanceof Blob) {
-    const bucket = supabase.storage.from(BUCKET);
-    const cardPath = snippetCardPath(user.id, snippetId);
-    await bucket.remove([cardPath]);
-    await bucket.upload(cardPath, card, { contentType: "image/png" });
-  }
   return { ok: true };
 }
 
