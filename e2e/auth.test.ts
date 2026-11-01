@@ -84,8 +84,16 @@ for (const font of [
     await page.setViewportSize({ width: 375, height: 812 });
     await expect(code).toHaveCSS("font-family", font.family);
     await expect(code).toBeVisible();
+    // The snippet is sealed: Export has no font picker and keeps the published font.
     await page.getByRole("button", { name: "Export", exact: true }).click();
-    await expect(page.locator('select:has(option[value="jetbrains"])')).toHaveValue(font.id);
+    await expect(page.getByRole("combobox", { name: "Font" })).toHaveCount(0);
+    const downloadPromise = page.waitForEvent("download");
+    await page.getByRole("button", { name: "Save as SVG" }).click();
+    const stream = await (await downloadPromise).createReadStream();
+    const chunks: Buffer[] = [];
+    for await (const chunk of stream!) chunks.push(Buffer.from(chunk));
+    const svg = Buffer.concat(chunks).toString("utf8");
+    expect(svg.includes("JetBrains Mono")).toBe(font.id === "jetbrains");
   });
 }
 
