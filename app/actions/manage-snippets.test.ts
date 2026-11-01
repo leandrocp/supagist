@@ -14,6 +14,7 @@ function makeSupabase({
   result = { data: [{ id: ID }], error: null } as { data: unknown; error: unknown },
   rpcError = null as object | null,
   files = [] as { name: string }[],
+  snippet = { filename: "a.ts" } as object | null,
 } = {}) {
   const calls: [string, ...unknown[]][] = [];
   // A real promise of the result that also exposes the builder methods.
@@ -24,12 +25,15 @@ function makeSupabase({
       calls.push([method, ...args]);
       return chain;
     };
+  chain.maybeSingle = () => Promise.resolve({ data: snippet, error: null });
   const remove = vi.fn().mockResolvedValue({ data: [], error: null });
   const list = vi.fn().mockResolvedValue({ data: files, error: null });
+  const upload = vi.fn().mockResolvedValue({ data: {}, error: null });
   return {
     calls,
     remove,
     list,
+    upload,
     client: {
       from: (table: string) => {
         calls.push(["from", table]);
@@ -40,7 +44,7 @@ function makeSupabase({
         signOut: vi.fn().mockResolvedValue({ error: null }),
       },
       rpc: vi.fn().mockResolvedValue({ error: rpcError }),
-      storage: { from: () => ({ remove, list }) },
+      storage: { from: () => ({ remove, list, upload }) },
     },
   };
 }
@@ -104,6 +108,55 @@ describe("updateSnippet", () => {
   it("says when nothing was updated, which is what RLS does for someone else's snippet", async () => {
     mockCreateClient.mockResolvedValue(makeSupabase({ result: { data: [], error: null } }).client);
     expect((await updateSnippet(ID, edit)).error).toMatch(/isn't yours/);
+  });
+
+  it("stores the editor's re-render under new names and points the snippet at them", async () => {
+    const supabase = makeSupabase();
+    mockCreateClient.mockResolvedValue(supabase.client);
+    const images = new FormData();
+    for (const name of ["canonical_image", "og_image", "svg", "card_image"])
+      images.set(name, new Blob([name]));
+
+    expect(await updateSnippet(ID, edit, images)).toEqual({ ok: true });
+
+    const folder = `user-1/snippets/${ID}`;
+    const uploaded = supabase.upload.mock.calls.map(([path]) => path as string);
+    const update = supabase.calls.find(([method]) => method === "update")![1] as Record<
+      string,
+      string
+    >;
+    // New, never-reused names, so a CDN-cached old image is never served for them.
+    for (const key of ["canonical_image_path", "og_image_path", "svg_path", "raw_path"]) {
+      expect(update[key]).toMatch(new RegExp(`^${folder}/[a-z]+-[0-9a-f]{8}\\.(png|svg|ts)$`));
+      expect(uploaded).toContain(update[key]);
+    }
+    expect(update.raw_path.endsWith(".ts")).toBe(true);
+    // card.png keeps its derived name: the old one is removed, then replaced.
+    expect(supabase.remove).toHaveBeenCalledWith([`${folder}/card.png`]);
+    expect(uploaded.at(-1)).toBe(`${folder}/card.png`);
+  });
+
+  it("removes the uploaded re-render when the edit is refused", async () => {
+    const supabase = makeSupabase({ result: { data: [], error: null } });
+    mockCreateClient.mockResolvedValue(supabase.client);
+    const images = new FormData();
+    for (const name of ["canonical_image", "og_image", "svg", "card_image"])
+      images.set(name, new Blob([name]));
+
+    expect((await updateSnippet(ID, edit, images)).error).toMatch(/isn't yours/);
+    const uploaded = supabase.upload.mock.calls.map(([path]) => path);
+    expect(uploaded).toHaveLength(4);
+    expect(supabase.remove).toHaveBeenCalledWith(expect.arrayContaining(uploaded));
+    expect(uploaded).not.toContain(`user-1/snippets/${ID}/card.png`);
+  });
+
+  it("does not upload anything for someone else's snippet", async () => {
+    const supabase = makeSupabase({ snippet: null });
+    mockCreateClient.mockResolvedValue(supabase.client);
+    const images = new FormData();
+    images.set("canonical_image", new Blob(["x"]));
+    expect((await updateSnippet(ID, edit, images)).error).toMatch(/isn't yours/);
+    expect(supabase.upload).not.toHaveBeenCalled();
   });
 
   it("maps the edit rate limit", async () => {

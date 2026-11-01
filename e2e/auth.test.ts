@@ -253,6 +253,16 @@ test("the owner edits a snippet from its page and the change persists", async ({
   await expect(page.getByRole("heading", { name: "Edited title" })).toBeVisible();
   await expect(page.getByText("const after")).toBeVisible();
   await expect(page.getByText("const before")).toHaveCount(0);
+
+  // The edit re-renders the stored images, so the list keeps a thumbnail.
+  await page.goto("/snippets");
+  const thumbnail = page.locator(`a[href="${path}"] img`);
+  await expect(thumbnail).toHaveAttribute("src", /\/canonical-[0-9a-f]{8}\.png$/);
+  // Fetched rather than checked in the page: the CSP only allows hosted
+  // Storage images, so a local Storage URL never paints here.
+  const image = await page.request.get((await thumbnail.getAttribute("src"))!);
+  expect(image.headers()["content-type"]).toBe("image/png");
+  expect((await image.body()).length).toBeGreaterThan(1000);
 });
 
 test("the owner deletes a snippet from its page; the link stops working", async ({ page }) => {

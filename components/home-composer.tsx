@@ -6,7 +6,6 @@ import { availableThemes, availableLanguages } from "@lumis-sh/lumis/client";
 import { Check, ChevronDown, Copy, Download, Lock, Shuffle, Upload } from "lucide-react";
 import { useRouter } from "next/navigation";
 import {
-  EXPORT_WIDTH,
   EXPORT_MAX_LINES,
   EXPORT_INNER_PADDING,
   EXPORT_BACKGROUNDS,
@@ -26,12 +25,9 @@ import {
   normalizeExportInnerPadding,
   normalizeExportOuterPadding,
   toPngFilename,
-  createHighlightedSvg,
-  renderToFile,
   inferLanguage,
   triggerDownload,
   estimateExportDimensions,
-  type ExportBackground,
   EXPORT_CANVAS_16_9,
   type ExportAspectRatio,
   type WindowDecoration,
@@ -81,6 +77,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { publishSnippet } from "@/app/actions/publish";
+import { createDraftPng, createDraftSvg, createSnippetImages } from "@/lib/snippet-images";
 import { WINDOW_DECORATIONS, parseSnippetAppearance } from "@/lib/snippet-appearance";
 import { toast } from "sonner";
 import { markJustPublished, play } from "@/lib/motion";
@@ -413,13 +410,13 @@ export function HomeComposer() {
       const reactorUsername = effectiveViewerLabel || "you";
       // The canonical PNG and SVG are exactly what Save as PNG / SVG would
       // download, so the published files match the preview.
-      const [canonicalFile, ogFile, svgString, cardFile] = await Promise.all([
-        createDraftPng(draft, selectedBackground, exportReactions, reactorUsername, viewerAvatar),
-        createOgImage(draft, reactorUsername, viewerAvatar),
-        createDraftSvg(draft, selectedBackground, exportReactions, reactorUsername, viewerAvatar),
-        createCardImage(draft, reactorUsername, viewerAvatar),
-      ]);
-      const svgBlob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
+      const images = await createSnippetImages(
+        draft,
+        selectedBackground,
+        exportReactions,
+        reactorUsername,
+        viewerAvatar,
+      );
 
       const formData = new FormData();
       formData.set("code", publishedCode);
@@ -430,10 +427,10 @@ export function HomeComposer() {
       formData.set("language", draft.languageOverride ?? language);
       formData.set("font_id", draft.fontId);
       formData.set("appearance", JSON.stringify(parseSnippetAppearance(draft)));
-      formData.set("canonical_image", canonicalFile);
-      formData.set("og_image", ogFile);
-      formData.set("svg", svgBlob);
-      formData.set("card_image", cardFile);
+      formData.set("canonical_image", images.canonical);
+      formData.set("og_image", images.og);
+      formData.set("svg", images.svg);
+      formData.set("card_image", images.card);
       formData.set("reactions", JSON.stringify(annotations.reactions));
       formData.set("comments", JSON.stringify({}));
 
@@ -1491,148 +1488,5 @@ export function HomeComposer() {
         </div>
       </div>
     </section>
-  );
-}
-
-// ── image generation ──────────────────────────────────────────────────────────
-
-type DraftReactions = Record<number, import("@/lib/snippet-utils").ExportReactionChip[]>;
-
-/** Save as PNG, and the published canonical.png. */
-async function createDraftPng(
-  draft: Draft,
-  background: ExportBackground | null,
-  reactions: DraftReactions | null,
-  authorUsername: string | null,
-  authorAvatarUrl: string | null,
-): Promise<File> {
-  return renderToFile(
-    draft.code,
-    draft.filename,
-    draft.theme,
-    EXPORT_WIDTH,
-    undefined,
-    toPngFilename(draft.filename),
-    draft.pixelRatio,
-    background,
-    background ? draft.outerPadding : 0,
-    draft.lineNumbers,
-    draft.fontId,
-    draft.languageOverride,
-    reactions,
-    draft.showReactions,
-    draft.header.enabled && draft.header.showFilename,
-    draft.footer.enabled,
-    authorUsername,
-    authorAvatarUrl,
-    undefined,
-    false,
-    undefined,
-    draft.windowDecoration,
-    draft.cornerRadius,
-    draft.innerPadding,
-    draft.header,
-    draft.footer,
-    draft.fontSize,
-    draft.aspectRatio,
-    draft.ligatures,
-  );
-}
-
-/** Save as SVG, and the published canonical.svg. */
-async function createDraftSvg(
-  draft: Draft,
-  background: ExportBackground | null,
-  reactions: DraftReactions,
-  authorUsername: string | null,
-  authorAvatarUrl: string | null,
-): Promise<string> {
-  return createHighlightedSvg(
-    draft.code,
-    draft.filename,
-    draft.theme,
-    EXPORT_WIDTH,
-    undefined,
-    background,
-    background ? draft.outerPadding : 0,
-    draft.lineNumbers,
-    draft.fontId,
-    draft.languageOverride,
-    reactions,
-    draft.showReactions,
-    draft.header.enabled && draft.header.showFilename,
-    draft.footer.enabled,
-    authorUsername,
-    authorAvatarUrl,
-    undefined,
-    false,
-    undefined,
-    draft.windowDecoration,
-    draft.cornerRadius,
-    draft.innerPadding,
-    draft.header,
-    draft.footer,
-    draft.fontSize,
-    false,
-    draft.aspectRatio,
-    draft.ligatures,
-  );
-}
-
-/**
- * The card alone (no background, no reactions) at 2×, for the per-snippet
- * share image: the server lays it into the envelope instead of re-running
- * Lumis. Same frame, header and footer as the author's export.
- */
-async function createCardImage(
-  draft: Draft,
-  authorUsername: string,
-  authorAvatarUrl: string | null,
-): Promise<File> {
-  return createDraftPng(
-    { ...draft, pixelRatio: 2, showReactions: false, aspectRatio: null },
-    null,
-    null,
-    authorUsername,
-    authorAvatarUrl,
-  );
-}
-
-async function createOgImage(
-  draft: Draft,
-  authorUsername: string,
-  authorAvatarUrl: string | null,
-): Promise<File> {
-  // OG images must be exactly 1200×630 — no retina scaling or platforms reject them.
-  // Metadata selections mirror the canonical export so shared previews stay
-  // faithful to the composition the author configured.
-  return renderToFile(
-    draft.code,
-    draft.filename,
-    draft.theme,
-    1200,
-    630,
-    toPngFilename(draft.filename, "-og"),
-    1,
-    null, // no background
-    undefined, // outer padding default
-    true, // lineNumbers
-    draft.fontId,
-    draft.languageOverride,
-    null, // no reactions in OG
-    false, // showReactions
-    draft.header.enabled && draft.header.showFilename,
-    draft.footer.enabled,
-    authorUsername,
-    authorAvatarUrl,
-    undefined,
-    false,
-    undefined,
-    draft.windowDecoration,
-    draft.cornerRadius,
-    draft.innerPadding,
-    draft.header,
-    draft.footer,
-    draft.fontSize,
   );
 }

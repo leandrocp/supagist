@@ -191,14 +191,44 @@ describe.skipIf(skip)("owner edit/delete RLS and account deletion", () => {
     expect(await queuedPaths(id)).toEqual([]);
   });
 
-  it("the owner cannot change identity, counters or asset paths", async () => {
-    const { id } = await insertSnippet(alice);
+  it("an edit that brings re-rendered images keeps them and queues only what it replaced", async () => {
+    const { id, prefix } = await insertSnippet(alice);
+    const { data, error } = await alice.client
+      .from("snippets")
+      .update({
+        code: "re-rendered",
+        canonical_image_path: `${prefix}/canonical-v2.png`,
+        og_image_path: `${prefix}/og-v2.png`,
+        raw_path: `${prefix}/raw-v2.ts`,
+      })
+      .eq("id", id)
+      .select("canonical_image_path, og_image_path, svg_path, raw_path")
+      .single();
+    expect(error).toBeNull();
+    // The SVG was not replaced, so it is stale and cleared.
+    expect(data).toEqual({
+      canonical_image_path: `${prefix}/canonical-v2.png`,
+      og_image_path: `${prefix}/og-v2.png`,
+      svg_path: null,
+      raw_path: `${prefix}/raw-v2.ts`,
+    });
+    // card.png stays: the editor replaces it in place.
+    expect(await queuedPaths(id)).toEqual(
+      ["canonical.png", "canonical.svg", "og.png", "raw.ts"].map((file) => `${prefix}/${file}`),
+    );
+  });
+
+  it("the owner cannot change identity, counters or point assets outside the snippet's folder", async () => {
+    const { id, prefix } = await insertSnippet(alice);
     for (const change of [
       { author_id: bob.id },
       { short_id: "hijack" },
       { view_count: 1_000_000 },
       { svg_path: `${alice.id}/snippets/${randomUUID()}/canonical.svg` },
-      // The stored images were rendered from it; edits do not re-render them.
+      { svg_path: `${bob.id}/snippets/${id}/canonical.svg` },
+      { canonical_image_path: `${prefix}/nested/canonical.png` },
+      { canonical_image_path: `${prefix}/` },
+      // Fixed at publish: an edit re-renders the images with it.
       { appearance: { background: "Lumis" } },
     ]) {
       const { error } = await alice.client.from("snippets").update(change).eq("id", id);

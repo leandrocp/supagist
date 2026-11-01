@@ -30,6 +30,11 @@ import { BRAND_THEMES } from "@/lib/brand-themes";
 import { createClient } from "@/lib/supabase/client";
 import { codePointLength, normalizeSnippetCode } from "@/lib/snippet-utils";
 import { play } from "@/lib/motion";
+import {
+  findExportBackground,
+  parseSnippetAppearance,
+  type SnippetAppearance,
+} from "@/lib/snippet-appearance";
 
 /** The snippet on screen: its card in a list, or the canvas on its own page. */
 function snippetSurface(snippetId: string): Element | null {
@@ -188,9 +193,64 @@ const visibilities = [
   { id: "unlisted", label: "Unlisted", hint: "Only people with the link can open it." },
 ] as const;
 
+/** What the stored images were rendered from, beyond the editable fields. */
+type RenderContext = {
+  original: SnippetEdit;
+  fontId: string;
+  appearance: SnippetAppearance;
+  author: { username: string; avatar_url: string | null } | null;
+};
+
+/**
+ * Re-renders the stored images for an edit that changes them, exactly as a
+ * publish renders them, so the snippet keeps its thumbnail and share card.
+ * Returns undefined when nothing they show changed, or when rendering fails:
+ * the edit still saves and the database clears the stale images.
+ */
+async function renderEditImages(
+  edit: SnippetEdit & { filename: string },
+  { original, fontId, appearance, author }: RenderContext,
+): Promise<FormData | undefined> {
+  const code = normalizeSnippetCode(edit.code);
+  if (
+    code === original.code &&
+    edit.language === original.language &&
+    edit.theme === original.theme
+  ) {
+    return undefined;
+  }
+  try {
+    // Loaded on demand: list pages that only show the menu skip the renderer.
+    const { createSnippetImages } = await import("@/lib/snippet-images");
+    const images = await createSnippetImages(
+      {
+        ...appearance,
+        filename: edit.filename,
+        code,
+        theme: edit.theme,
+        fontId,
+        languageOverride: edit.language,
+      },
+      findExportBackground(appearance.background),
+      {},
+      author?.username ?? "",
+      author?.avatar_url ?? null,
+    );
+    const form = new FormData();
+    form.set("canonical_image", images.canonical);
+    form.set("og_image", images.og);
+    form.set("svg", images.svg);
+    form.set("card_image", images.card);
+    return form;
+  } catch {
+    return undefined;
+  }
+}
+
 function EditSnippetModal({ snippetId, onClose }: { snippetId: string; onClose: () => void }) {
   const router = useRouter();
   const [draft, setDraft] = useState<SnippetEdit & { filename: string }>();
+  const [context, setContext] = useState<RenderContext>();
   const [loadError, setLoadError] = useState(false);
   const [pending, startTransition] = useTransition();
   const themes = useMemo(
@@ -207,18 +267,27 @@ function EditSnippetModal({ snippetId, onClose }: { snippetId: string; onClose: 
   useEffect(() => {
     void createClient()
       .from("snippets")
-      .select("code, title, filename, language, theme, visibility")
+      .select(
+        "code, title, filename, language, theme, visibility, font_id, appearance, author:author_id(username, avatar_url)",
+      )
       .eq("id", snippetId)
       .single()
       .then(({ data, error }) => {
         if (error || !data) return setLoadError(true);
-        setDraft({
+        const loaded = {
           code: data.code,
           title: data.title ?? "",
           filename: data.filename,
           language: data.language ?? "plaintext",
           theme: data.theme,
           visibility: data.visibility,
+        };
+        setDraft(loaded);
+        setContext({
+          original: loaded,
+          fontId: data.font_id ?? "system",
+          appearance: parseSnippetAppearance(data.appearance),
+          author: Array.isArray(data.author) ? (data.author[0] ?? null) : data.author,
         });
       });
   }, [snippetId]);
@@ -228,9 +297,10 @@ function EditSnippetModal({ snippetId, onClose }: { snippetId: string; onClose: 
 
   const save = () =>
     startTransition(async () => {
-      if (!draft) return;
+      if (!draft || !context) return;
       const { filename: _filename, ...edit } = draft;
-      const result = await updateSnippet(snippetId, edit);
+      const images = await renderEditImages(draft, context);
+      const result = await updateSnippet(snippetId, edit, images);
       if (result.error) {
         toast.error(result.error);
         return;
