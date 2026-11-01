@@ -86,6 +86,22 @@ describe("richTextHtml", () => {
     );
   });
 
+  it("keeps exactly 30 lines like the image, then marks the cut with an ellipsis", () => {
+    const rows = (count: number) =>
+      parse(
+        richTextHtml(
+          Array.from({ length: count }, (_, i) => [{ text: `line ${i + 1}`, scope: "" }]),
+          { theme: githubLight },
+        ),
+      ).rows.map((row) => row.textContent);
+    expect(rows(30)).toHaveLength(30);
+    expect(rows(30).at(-1)).toBe("line 30");
+    const cut = rows(31);
+    expect(cut).toHaveLength(31);
+    expect(cut.at(-2)).toBe("line 30");
+    expect(cut.at(-1)).toBe("…");
+  });
+
   it("carries bold, italic and per-token backgrounds that differ from the editor", () => {
     const out = richTextHtml(
       [

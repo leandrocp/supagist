@@ -3,9 +3,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Check, Copy, MessageSquarePlus, SmilePlus } from "lucide-react";
+import { Check, ClipboardType, Copy, MessageSquarePlus, SmilePlus } from "lucide-react";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { EXPORT_FONTS } from "@/lib/export-utils";
+import { copyRichText, createRichTextClipboard } from "@/lib/rich-text-export";
 import { createClient } from "@/lib/supabase/client";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
@@ -258,6 +260,17 @@ export function SnippetAnnotationsView({
       setTimeout(() => setCopied(false), 2000);
     });
   }, [code]);
+
+  const [richCopied, setRichCopied] = useState(false);
+  const handleCopyRichText = useCallback(() => {
+    copyRichText(createRichTextClipboard(code, filename, snippetTheme, { fontId, language })).then(
+      () => {
+        setRichCopied(true);
+        setTimeout(() => setRichCopied(false), 2000);
+      },
+      () => toast.error("Could not copy to the clipboard."),
+    );
+  }, [code, filename, snippetTheme, fontId, language]);
 
   const commentInputRef = useRef<HTMLTextAreaElement | null>(null);
 
@@ -716,6 +729,17 @@ export function SnippetAnnotationsView({
           >
             {copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
             <span className="hidden sm:inline">{copied ? "Copied" : "Copy"}</span>
+          </button>
+          <button
+            type="button"
+            onClick={handleCopyRichText}
+            title="Copy as rich text"
+            aria-label="Copy as rich text"
+            className="flex h-7 items-center gap-1.5 rounded-md px-2.5 text-xs font-medium transition-opacity hover:opacity-80"
+            style={{ color: c.buttonText }}
+          >
+            {richCopied ? <Check className="size-3.5" /> : <ClipboardType className="size-3.5" />}
+            <span className="hidden sm:inline">{richCopied ? "Copied" : "Rich text"}</span>
           </button>
           <SnippetExportModal
             code={code}

@@ -334,3 +334,28 @@ test("Copy as rich text puts highlighted, editable HTML and plain text on the cl
   expect(pasted.keywordColor).toBe("rgb(207, 34, 46)");
   expect(pasted.background).toBe("rgb(255, 255, 255)");
 });
+
+test("Copy as rich text stops at the same 30 lines as the image", async ({ page, context }) => {
+  await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+  await page.goto("/");
+  await page.getByLabel("Filename", { exact: true }).fill("lines.py");
+  const lines = Array.from({ length: 35 }, (_, i) => `x${i + 1} = ${i + 1}`);
+  await page.getByLabel("Code", { exact: true }).fill(lines.join("\n"));
+  await expect(page.getByTestId("source-line-35")).toHaveText("x35 = 35");
+
+  await page.getByRole("button", { name: "Export", exact: true }).click();
+  await page.getByRole("button", { name: "Copy as rich text", exact: true }).click();
+  await expect(page.getByText("Copied as rich text")).toBeVisible();
+
+  const clipboard = await page.evaluate(async () => {
+    const [item] = await navigator.clipboard.read();
+    return {
+      html: await (await item!.getType("text/html")).text(),
+      text: await (await item!.getType("text/plain")).text(),
+    };
+  });
+  expect(clipboard.text).toBe(lines.slice(0, 30).join("\n"));
+  expect(clipboard.html).toContain(">30<");
+  expect(clipboard.html).not.toContain("x31");
+  expect(clipboard.html).toContain("<div>…</div>");
+});

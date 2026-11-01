@@ -8,6 +8,7 @@ import {
 import {
   EXPORT_FONT_SIZE,
   EXPORT_FONTS,
+  EXPORT_MAX_LINES,
   escapeXml,
   exportLineHeightForFontSize,
   inferLanguage,
@@ -61,7 +62,8 @@ export function richTextHtml(
   const font = EXPORT_FONTS.find((f) => f.id === fontId) ?? EXPORT_FONTS[0]!;
   const family = font.file ? `"${font.family}",${PASTE_FALLBACK_FONTS}` : font.family;
 
-  const rows = lines.map((tokens) => {
+  // Same cap as the image: the first EXPORT_MAX_LINES rows, then a "…" row.
+  const rows = lines.slice(0, EXPORT_MAX_LINES).map((tokens) => {
     if (tokens.length === 0) return "<div><br></div>";
     const spans = tokens.map(({ text, style }) => {
       const decoration = style ? textDecoration(style) : "none";
@@ -79,6 +81,7 @@ export function richTextHtml(
     });
     return `<div>${spans.join("")}</div>`;
   });
+  if (lines.length > EXPORT_MAX_LINES) rows.push("<div>…</div>");
 
   const block = css([
     ["background-color", bg],
@@ -93,8 +96,8 @@ export function richTextHtml(
 
 /**
  * Highlights `code` with the same Lumis highlighter, theme and language
- * resolution as the image export and returns both clipboard flavours. Every
- * line is included: unlike the image, pasted text has no card height to fit.
+ * resolution as the image export and returns both clipboard flavours, cut to
+ * the same first EXPORT_MAX_LINES lines as the image.
  */
 export async function createRichTextClipboard(
   code: string,
@@ -117,7 +120,7 @@ export async function createRichTextClipboard(
   const lines = highlightTokenLines(highlighter, code, language, theme);
   return {
     html: richTextHtml(lines, { theme, fontId: options.fontId, fontSize: options.fontSize }),
-    text: code.replace(/\r\n/g, "\n"),
+    text: code.split(/\r?\n/).slice(0, EXPORT_MAX_LINES).join("\n"),
   };
 }
 
