@@ -42,6 +42,13 @@ describe("local Supabase configuration", () => {
     expect(ci).not.toContain("2.109.1");
   });
 
+  it("gives each push to main its own CI concurrency group", () => {
+    // A ref-wide group let every push cancel the previous run's e2e jobs.
+    const ci = readFileSync(".github/workflows/ci.yml", "utf8");
+    const group = /concurrency:\n\s+group: (.+)\n/.exec(ci)?.[1];
+    expect(group).toBe("ci-${{ github.event_name == 'pull_request' && github.ref || github.sha }}");
+  });
+
   it("keeps the public view RPC invoker-safe and its privileged implementation private", () => {
     expect(viewRpcMigration).toContain(
       "alter function public.record_snippet_view(uuid) set schema private",
