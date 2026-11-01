@@ -24,6 +24,7 @@ export const HELP = `supagist ${VERSION}: turn code into a Supagist image
 
 Usage
   supagist <file[:a-b]> [options]   Render a file, or lines a to b of it
+  supagist <github-file-link>       Render a GitHub file, with its #L12-L40 lines
   supagist [options] < file         Render piped code (or name stdin with -)
   supagist <file|-> --publish       Publish an unlisted snippet and print its link
   supagist options [--json]         List brands, themes, fonts, languages and more
@@ -225,7 +226,12 @@ async function render(host, file, flags, io) {
   file = source.file;
   const lines = source.lines ?? flags.lines;
   const range = typeof lines === "string" ? parseLineRange(lines) : undefined;
-  let code = file === "-" ? await readStdin(io.stdin) : await readSource(file);
+  let code =
+    file === "-"
+      ? await readStdin(io.stdin)
+      : source.url
+        ? await download(source.url, io)
+        : await readSource(file);
   if (range) code = cropLines(code, range);
   // A final newline is not a line of the image.
   code = code.replace(/\r?\n$/, "");
@@ -319,9 +325,10 @@ function outputFormat(format, out) {
  * Splits "path:12-40" (the form editors and stack traces print) into the
  * file and its lines, unless a file with that whole name exists.
  * @param {string} spec
- * @returns {Promise<{ file: string, lines?: string }>}
+ * @returns {Promise<{ file: string, lines?: string, url?: string }>}
  */
 async function locate(spec) {
+  if (spec.startsWith("https://") || spec.startsWith("http://")) return fromUrl(spec);
   const colon = spec.lastIndexOf(":");
   if (colon <= 0 || (await exists(spec))) return { file: spec };
   const lines = spec.slice(colon + 1);
@@ -331,6 +338,54 @@ async function locate(spec) {
     return { file: spec };
   }
   return { file: spec.slice(0, colon), lines };
+}
+
+/**
+ * A GitHub file link (github.com/o/r/blob/<ref>/<path>#L12-L40) becomes its raw
+ * file and lines; any other URL is fetched as is. The file name comes from
+ * the path, so language detection and the header work like a local file.
+ * @param {string} spec
+ */
+function fromUrl(spec) {
+  const url = new URL(spec);
+  const [owner, repo, kind, ...rest] = url.pathname.split("/").slice(1);
+  /** @type {string | undefined} */
+  let lines;
+  if (url.hostname === "github.com" && kind === "blob" && rest.length > 1) {
+    url.hostname = "raw.githubusercontent.com";
+    url.pathname = `/${owner}/${repo}/${rest.join("/")}`;
+    const [start, end] = url.hash.slice(1).split("-");
+    if (start?.startsWith("L")) {
+      lines = end?.startsWith("L") ? `${start.slice(1)}-${end.slice(1)}` : start.slice(1);
+      parseLineRange(lines);
+    }
+  }
+  url.hash = "";
+  url.search = url.hostname === "raw.githubusercontent.com" ? "" : url.search;
+  return {
+    file: decodeURIComponent(url.pathname.split("/").pop() || "snippet"),
+    url: url.href,
+    lines,
+  };
+}
+
+/** @param {string} url @param {Io} io */
+async function download(url, io) {
+  let response;
+  try {
+    response = await io.fetch(url, {
+      headers: { "user-agent": `supagist-cli/${VERSION}` },
+      signal: AbortSignal.timeout(30_000),
+    });
+  } catch (error) {
+    throw new Error(`Can't fetch ${url}: ${error?.cause?.message ?? error?.message ?? error}.`);
+  }
+  if (!response.ok) {
+    const hint =
+      response.status === 404 ? " For a private repository, clone it and pass the path." : "";
+    throw new Error(`Can't fetch ${url}: HTTP ${response.status}.${hint}`);
+  }
+  return await response.text();
 }
 
 /** @param {string} path */

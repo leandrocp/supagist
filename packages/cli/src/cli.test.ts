@@ -190,6 +190,28 @@ describe("run", () => {
     expect(stderr.join("")).toContain("Give the lines once");
   });
 
+  it("renders a GitHub file link with its lines, and any other URL as is", async () => {
+    fetchMock.mockImplementation(async (input) =>
+      String(input).endsWith("/api/render")
+        ? svgResponse()
+        : new Response("one\ntwo\nthree\nfour\n"),
+    );
+    const link = "https://github.com/leandrocp/supagist/blob/main/packages/cli/src/args.js#L2-L3";
+    expect(await cli(link)).toBe(0);
+    expect(sent(0).url).toBe(
+      "https://raw.githubusercontent.com/leandrocp/supagist/main/packages/cli/src/args.js",
+    );
+    expect(sent(1).body).toMatchObject({ code: "two\nthree", filename: "args.js" });
+
+    expect(await cli("https://example.com/code/main.rs?x=1")).toBe(0);
+    expect(sent(2).url).toBe("https://example.com/code/main.rs?x=1");
+    expect(sent(3).body).toMatchObject({ code: "one\ntwo\nthree\nfour", filename: "main.rs" });
+
+    fetchMock.mockResolvedValueOnce(new Response("nope", { status: 404 }));
+    expect(await cli("https://github.com/o/private/blob/main/a.ts")).toBe(1);
+    expect(stderr.join("")).toContain("HTTP 404. For a private repository, clone it");
+  });
+
   it("reads piped code without -, and explains itself when nothing is piped", async () => {
     fetchMock.mockResolvedValue(svgResponse());
     stdin = ["const a = 1;\n"];
