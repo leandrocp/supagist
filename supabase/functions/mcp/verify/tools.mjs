@@ -15,10 +15,12 @@ const call = async (name, args, bearer) =>
 
 const tools = (await rpc(endpoint, token, "tools/list")).data.result.tools;
 assert.deepEqual(tools.map((tool) => tool.name).sort(), [
+  "delete_snippet",
   "list_options",
   "publish_snippet",
   "render_snippet",
   "search_themes",
+  "update_snippet",
 ]);
 const render = tools.find((tool) => tool.name === "render_snippet").inputSchema;
 assert.deepEqual(render.properties.format.enum, ["svg", "png"]);
