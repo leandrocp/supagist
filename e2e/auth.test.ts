@@ -40,7 +40,7 @@ test("authenticated user can publish a snippet", async ({ page }) => {
   await editor.fill("const hello = 'world';\nconsole.log(hello);");
 
   // Set a filename (aria-label="Filename", placeholder="snippet.tsx")
-  const filenameInput = page.getByLabel("Filename");
+  const filenameInput = page.getByLabel("Filename", { exact: true });
   await filenameInput.fill("hello.ts");
   const keyword = page.getByText("const", { exact: true });
   await expect(keyword).toHaveCSS("color", "rgb(207, 34, 46)");
@@ -70,7 +70,7 @@ for (const font of [
   test(`published snippets retain ${font.label} in the saved view and export`, async ({ page }) => {
     await page.goto("/compose");
     await page.locator("textarea").fill("const font = 'saved';\nconsole.log(font);");
-    await page.getByLabel("Filename").fill("font.ts");
+    await page.getByLabel("Filename", { exact: true }).fill("font.ts");
     await page.getByRole("combobox", { name: "Font", exact: true }).click();
     await page.getByRole("option", { name: font.label, exact: true }).click();
     await expect(page.locator("textarea")).toHaveCSS("font-family", font.family);
@@ -117,7 +117,7 @@ test("web publishes stay public; unlisted snippets show the indicator and noinde
 }) => {
   await page.goto("/");
   await page.locator("textarea").fill("const unlisted = true;");
-  await page.getByLabel("Filename").fill("unlisted.ts");
+  await page.getByLabel("Filename", { exact: true }).fill("unlisted.ts");
   await page.getByRole("button", { name: /^publish$/i }).click();
   await page.waitForURL(/\/[a-z0-9-]+-[a-z0-9]{6}$/);
   const robots = page.locator('meta[name="robots"]');

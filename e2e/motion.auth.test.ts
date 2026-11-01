@@ -30,7 +30,7 @@ async function signInFreshUser(page: Page) {
 async function publish(page: Page) {
   await page.goto("/");
   await page.locator("textarea").fill(CODE);
-  await page.getByLabel("Filename").fill("greet.ts");
+  await page.getByLabel("Filename", { exact: true }).fill("greet.ts");
   await page.getByRole("button", { name: /^publish$/i }).click();
   await page.waitForURL(/\/[a-z0-9-]+-[a-z0-9]{6}$/, { timeout: 60_000 });
   const shortId = new URL(page.url()).pathname.split("-").pop()!;
@@ -138,7 +138,7 @@ test("deleting from the list plays the exit, then the snippet is gone", async ({
   await publish(page);
   await page.goto("/");
   await page.locator("textarea").fill(`${CODE}\n// keep`);
-  await page.getByLabel("Filename").fill("keep.ts");
+  await page.getByLabel("Filename", { exact: true }).fill("keep.ts");
   await page.getByRole("button", { name: /^publish$/i }).click();
   await page.waitForURL(/\/keep-ts-[a-z0-9]{6}$/, { timeout: 60_000 });
 

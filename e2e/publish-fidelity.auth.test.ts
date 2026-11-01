@@ -193,7 +193,7 @@ for (const preset of BRAND_PRESETS) {
   }) => {
     await page.goto("/compose");
     await page.locator("textarea").fill(CODE);
-    await page.getByLabel("Filename").fill("greet.ts");
+    await page.getByLabel("Filename", { exact: true }).fill("greet.ts");
     await page.getByRole("button", { name: "Brand", exact: true }).click();
     await page.getByPlaceholder("Search brands…").fill(preset.name);
     await page.getByRole("option", { name: preset.name, exact: true }).click();
@@ -343,7 +343,7 @@ for (const { name, draft } of OPTION_CASES) {
 test("options set through the composer controls are published", async ({ page }) => {
   await page.goto("/compose");
   await page.locator("textarea").fill(CODE);
-  await page.getByLabel("Filename").fill("greet.ts");
+  await page.getByLabel("Filename", { exact: true }).fill("greet.ts");
 
   await page.getByRole("button", { name: "None", exact: true }).click();
   await page.getByRole("button", { name: "Raindrop" }).click();
@@ -386,7 +386,7 @@ test("every saved view action works on a branded snippet", async ({ page, contex
   await context.grantPermissions(["clipboard-read", "clipboard-write"]);
   await page.goto("/");
   await page.locator("textarea").fill(CODE);
-  await page.getByLabel("Filename").fill("greet.ts");
+  await page.getByLabel("Filename", { exact: true }).fill("greet.ts");
   await page.getByRole("button", { name: "Brand", exact: true }).click();
   await page.getByPlaceholder("Search brands…").fill("Lumis Dark");
   await page.getByRole("option", { name: "Lumis Dark", exact: true }).click();
@@ -405,15 +405,12 @@ test("every saved view action works on a branded snippet", async ({ page, contex
   });
   expect(html).toContain("greet");
 
-  // The export starts from the published appearance.
+  // The snippet is sealed: Export offers no styling controls and exports the
+  // published appearance (Lumis Dark's 16:9 canvas).
   await page.getByRole("button", { name: "Export", exact: true }).click();
-  await expect(page.getByRole("slider", { name: "Outer padding" })).toHaveAttribute(
-    "aria-valuetext",
-    "128 pixels",
-  );
-  await expect(page.getByRole("switch", { name: "Font ligatures" })).not.toBeChecked();
-  await expect(page.getByRole("switch", { name: "16:9 canvas (1600×900)" })).toBeChecked();
-  await expect(page.getByTitle("Lumis Dark", { exact: true })).toHaveClass(/ring-2/);
+  await expect(page.getByRole("button", { name: "Save as SVG" })).toBeVisible();
+  await expect(page.getByRole("slider")).toHaveCount(0);
+  await expect(page.getByRole("switch", { name: "16:9 canvas (1600×900)" })).toHaveCount(0);
   const svg = await download(page, () => page.getByRole("button", { name: "Save as SVG" }).click());
   const [, svgWidth, svgHeight] = /<svg[^>]* width="([\d.]+)" height="([\d.]+)"/.exec(
     svg.toString(),
