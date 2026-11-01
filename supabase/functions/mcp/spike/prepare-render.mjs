@@ -58,7 +58,7 @@ for (const name of [
     if (start < 0 || end < 0) throw new Error("Asset seams drifted");
     source =
       source.slice(0, start) +
-      'import { loadFontBase64, loadImageDataUrl } from "../assets.ts";\nconst loadAvatarDataUrl = loadImageDataUrl;\n\n' +
+      'import { loadFontBase64, loadImageDataUrl } from "../assets.ts";\n\n' +
       source.slice(end);
     source = replaceOnce(source, "data:font/woff2;base64,", "data:font/ttf;base64,");
     source = replaceOnce(source, "format('woff2')", "format('truetype')");

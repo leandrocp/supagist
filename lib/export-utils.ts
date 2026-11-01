@@ -1,3 +1,4 @@
+import type { Highlighter } from "@lumis-sh/lumis";
 import {
   inferLanguage,
   languageDisplayName,
@@ -501,10 +502,6 @@ async function loadImageDataUrl(url: string): Promise<string | null> {
     return null;
   }
 }
-
-// Backwards-compat alias — this used to be avatar-specific, but the body is
-// the same so we now reuse it for brand pattern PNGs as well.
-const loadAvatarDataUrl = loadImageDataUrl;
 
 // Pick a readable text colour for a known card-fill colour. Brand frames
 // override `cardFill` with a fixed hex (Vercel #000, Stripe #0c2e4e, etc.),
@@ -1037,6 +1034,16 @@ export function wrapTokenLine(tokens: SvgToken[], maxChars: number): SvgToken[][
   return lines;
 }
 
+/**
+ * Where the renderer gets its parser, fonts and images. The browser default
+ * fetches them from the app; the server passes its own (lib/snippet-render.ts).
+ */
+export type ExportRuntime = {
+  highlighter: Promise<Pick<Highlighter, "loadLanguage" | "highlight" | "highlightIter">>;
+  loadFontBase64(file: string): Promise<string>;
+  loadImageDataUrl(url: string): Promise<string | null>;
+};
+
 // height: when provided (e.g. OG image), clips to fit and keeps the passed width.
 //         when undefined, both dimensions are computed from the code content.
 export async function createHighlightedSvg(
@@ -1068,16 +1075,19 @@ export async function createHighlightedSvg(
   wordDiff = false,
   aspectRatio?: ExportAspectRatio | null,
   ligatures = true,
+  runtime?: ExportRuntime,
 ): Promise<string> {
   code = normalizeSnippetCode(code);
   const language = languageOverride || inferLanguage(filename, code);
-  const [{ clientHighlighterPromise }, { loadTheme }] = await Promise.all([
-    import("@/lib/lumis-client"),
+  const [highlighter, { loadTheme }] = await Promise.all([
+    runtime?.highlighter ??
+      import("@/lib/lumis-client").then((module) => module.clientHighlighterPromise),
     import("@/lib/theme-loader"),
   ]);
+  const loadFont = runtime?.loadFontBase64 ?? loadFontBase64;
+  const loadImage = runtime?.loadImageDataUrl ?? loadImageDataUrl;
   const loaded = await loadTheme(theme);
   const themeData = loaded.data;
-  const highlighter = await clientHighlighterPromise;
   const highlightedLanguage = await loadLanguageOrPlaintext(highlighter, language);
 
   const editorBg: string =
@@ -1095,7 +1105,7 @@ export async function createHighlightedSvg(
     : exportFont.family;
   let fontStyleBlock = "";
   if (exportFont.file) {
-    const b64 = await loadFontBase64(exportFont.file);
+    const b64 = await loadFont(exportFont.file);
     fontStyleBlock = `<style>@font-face{font-family:'${exportFont.family}';font-style:normal;font-weight:400;src:url('data:font/woff2;base64,${b64}') format('woff2')}</style>`;
   }
 
@@ -1161,7 +1171,7 @@ export async function createHighlightedSvg(
   const avatarDataUrls = new Map<string, string>();
   await Promise.all(
     Array.from(avatarUrls).map(async (u) => {
-      const data = await loadAvatarDataUrl(u);
+      const data = await loadImage(u);
       if (data) avatarDataUrls.set(u, data);
       return data;
     }),
@@ -1538,9 +1548,7 @@ export async function createHighlightedSvg(
   // can ALSO ship a `brandId` that drives extra inline SVG decoration
   // (Vercel registration brackets, Stripe diagonal stripes, etc.) — the
   // equivalent of ray.so's per-brand Frame components.
-  const patternDataUrl = background?.patternUrl
-    ? await loadImageDataUrl(background.patternUrl)
-    : null;
+  const patternDataUrl = background?.patternUrl ? await loadImage(background.patternUrl) : null;
 
   const scene = background?.scene;
   const brandDecoration =
@@ -1694,7 +1702,7 @@ export async function createHighlightedSvg(
         chromeColor,
         markDataUrl:
           brandHeader === "lumis" && frame?.headerMark
-            ? await loadImageDataUrl(frame.headerMark.src)
+            ? await loadImage(frame.headerMark.src)
             : null,
       })
     : "";
