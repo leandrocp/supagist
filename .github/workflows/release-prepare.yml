@@ -1,0 +1,90 @@
+name: Prepare CLI release
+
+# Every push to main plans the next supagist release from commits that touched
+# the shipped CLI files since the last cli/v* tag, then opens, updates or
+# closes the release/cli pull request. Labelling that pull request
+# release:minor or release:major changes the bump (default patch). Merging it
+# lets release.yml tag and publish. See packages/cli/README.md, "Release".
+on:
+  push:
+    branches: [main]
+  pull_request_target:
+    branches: [main]
+    types: [labeled, unlabeled]
+  workflow_dispatch:
+
+concurrency:
+  group: release-prepare
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  prepare:
+    # pull_request_target runs this workflow from main, never from the pull
+    # request, and only reads the label names.
+    if: >-
+      github.event_name != 'pull_request_target' ||
+      (github.event.pull_request.head.repo.full_name == github.repository &&
+       github.event.pull_request.head.ref == 'release/cli' &&
+       startsWith(github.event.label.name, 'release:'))
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      # CI_TOKEN, when set, is a token whose pushes and pull requests start CI.
+      # GITHUB_TOKEN works too, but GitHub runs no workflows for what it creates.
+      - uses: actions/checkout@v7.0.1
+        with:
+          ref: main
+          fetch-depth: 0
+          token: ${{ secrets.CI_TOKEN || github.token }}
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version: 22
+      - name: Open, update or close the release pull request
+        env:
+          GH_TOKEN: ${{ secrets.CI_TOKEN || github.token }}
+        run: |
+          set -euo pipefail
+          labels="$(gh pr list --head release/cli --base main --state open --json labels \
+            --jq '[.[0].labels[]?.name] | join(" ")')"
+          bump=patch
+          case " $labels " in
+            *" release:major "*) bump=major ;;
+            *" release:minor "*) bump=minor ;;
+          esac
+
+          node packages/cli/scripts/release.mjs plan --bump "$bump" | tee "$RUNNER_TEMP/plan.json"
+          if [ "$(jq -r .status "$RUNNER_TEMP/plan.json")" != release ]; then
+            # Nothing to release, or a merged release is waiting for its tag.
+            # Deleting the branch closes a stale pull request.
+            if git ls-remote --exit-code --heads origin release/cli >/dev/null; then
+              git push origin --delete release/cli
+            fi
+            exit 0
+          fi
+          version="$(jq -r .version "$RUNNER_TEMP/plan.json")"
+          title="chore(release): cli $version"
+
+          git switch -C release/cli
+          node packages/cli/scripts/release.mjs prepare --bump "$bump" > "$RUNNER_TEMP/notes.md"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add packages/cli/package.json packages/cli/CHANGELOG.md
+          git commit -q -m "$title"
+          git push --force origin release/cli
+
+          {
+            cat "$RUNNER_TEMP/notes.md"
+            echo
+            echo "Merging publishes \`supagist@$version\` to npm. The bump is **$bump**;" \
+              "label this pull request \`release:minor\` or \`release:major\` to change it."
+          } > "$RUNNER_TEMP/body.md"
+          if [ -n "$(gh pr list --head release/cli --base main --state open --json number --jq '.[].number')" ]; then
+            gh pr edit release/cli --title "$title" --body-file "$RUNNER_TEMP/body.md"
+          else
+            gh pr create --base main --head release/cli --title "$title" --body-file "$RUNNER_TEMP/body.md"
+          fi

@@ -198,8 +198,17 @@ npx playwright test e2e/cli.test.ts --project=chromium   # against the local ser
 
 ## Release
 
-0.1.0 was published by hand. For later versions, bump `version` in
-`packages/cli/package.json`, merge to `main`, then push a matching tag such as
-`cli-v0.1.1`. The Release CLI workflow tests the package
-and publishes it to npm with provenance, using the `NPM_TOKEN` repository
-secret.
+Releases go through a release pull request, like Lumis:
+
+1. Every push to `main` that changed shipped CLI files (`bin`, `src`,
+   `README.md`, `LICENSE`, `CHANGELOG.md`, `package.json`; not tests) since
+   the last `cli/v*` tag opens or updates the `chore(release): cli <version>`
+   pull request from `release/cli`. It bumps `package.json` and adds the
+   commits to `CHANGELOG.md`.
+2. The bump is patch by default. Label the pull request `release:minor` or
+   `release:major` to change it; the pull request is rebuilt.
+3. Merging it makes `release.yml` tag `cli/v<version>` and publish to npm with
+   provenance through npm trusted publishing (no token).
+
+`packages/cli/scripts/release.mjs plan` shows what the next release would be.
+0.1.0 was published by hand and tagged `cli/v0.1.0` afterwards.

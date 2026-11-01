@@ -27,6 +27,7 @@
     "bin",
     "src/*.js",
     "README.md",
+    "CHANGELOG.md",
     "LICENSE"
   ],
   "type": "module",

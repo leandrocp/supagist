@@ -154,7 +154,7 @@ npx vitest run packages/cli
 npx playwright test e2e/cli.test.ts --project=chromium    # against the local server
 ```
 
-The CLI is published to npm as [`supagist`](https://www.npmjs.com/package/supagist). Only the maintainer releases it; see [Release](./packages/cli/README.md#release).
+The CLI is published to npm as [`supagist`](https://www.npmjs.com/package/supagist). Releases happen by merging the `chore(release): cli` pull request that CI keeps up to date; see [Release](./packages/cli/README.md#release).
 
 ## Run the MCP server locally
 

@@ -1,0 +1,104 @@
+name: Release CLI
+
+# Tags and publishes supagist when main declares a CLI version that has no
+# cli/v* tag yet, which is what merging the release/cli pull request does,
+# whether it is squashed, merged or rebased.
+on:
+  push:
+    branches: [main]
+    paths: [packages/cli/package.json]
+  workflow_dispatch:
+
+# Keyed by commit: each run tags only the commit it was started for.
+concurrency:
+  group: release-${{ github.sha }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      version: ${{ steps.tag.outputs.version }}
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          fetch-depth: 0
+      - name: Tag the declared version
+        id: tag
+        run: |
+          set -euo pipefail
+          version="$(jq -r .version packages/cli/package.json)"
+          tag="cli/v$version"
+          if git rev-parse -q --verify "refs/tags/$tag" >/dev/null; then
+            echo "$tag already exists at $(git rev-parse "$tag^{commit}")"
+          else
+            git tag "$tag" "$GITHUB_SHA"
+            git push origin "refs/tags/$tag"
+            echo "Tagged $tag" >> "$GITHUB_STEP_SUMMARY"
+          fi
+          # Publishing continues until npm has the version, so rerunning this
+          # workflow finishes a release whose tag landed but publish failed.
+          if npm view "supagist@$version" version >/dev/null 2>&1; then
+            echo "supagist@$version is already on npm"
+            exit 0
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+  # Installs dependencies, tests and packs, with no publishing credential.
+  stage:
+    needs: tag
+    if: needs.tag.outputs.version != ''
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx vitest run packages/cli
+      - name: Pack
+        working-directory: packages/cli
+        run: mkdir -p "$RUNNER_TEMP/tarball" && npm pack --pack-destination "$RUNNER_TEMP/tarball"
+      - uses: actions/upload-artifact@v7.0.2
+        with:
+          name: npm-tarball
+          path: ${{ runner.temp }}/tarball/*.tgz
+          if-no-files-found: error
+          retention-days: 1
+
+  # The only job that can publish. It holds no source tree and no token:
+  # npm trusted publishing exchanges this workflow's OIDC identity for a
+  # short-lived publish token, because the package names release.yml as its
+  # trusted publisher.
+  publish:
+    needs: [tag, stage]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v8.0.2
+        with:
+          name: npm-tarball
+          path: tarball
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+      # Trusted publishing needs npm 11.5.1 or later; Node 22 bundles npm 10.
+      - run: npm install --global npm@12
+      - name: Publish with provenance
+        env:
+          VERSION: ${{ needs.tag.outputs.version }}
+        run: |
+          set -euo pipefail
+          npm publish tarball/supagist-"$VERSION".tgz --access public --provenance
+          echo "Published supagist@$VERSION" >> "$GITHUB_STEP_SUMMARY"
