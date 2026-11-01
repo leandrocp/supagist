@@ -9,6 +9,11 @@ Read at request time by `app/[snippet]/og.png/route.tsx`. They live outside
 - `seal-r3-256.png`: the brand-row seal (from `assets/brand/logo/mark/seal-r3-2048.png`).
 - `fonts/`: static Latin subsets of Fraunces (SemiBold, opsz 144, SOFT 50),
   Geist (Medium, SemiBold) and IBM Plex Mono (Medium). SIL OFL 1.1.
+- `fonts/NotoEmoji.ttf`: monochrome Noto Emoji (variable, drawn at its
+  default weight), the emoji fallback when `lib/snippet-render.ts` draws a
+  snippet on the server; resvg cannot draw color emoji fonts. From
+  [google/fonts](https://github.com/google/fonts) `ofl/notoemoji/NotoEmoji[wght].ttf`
+  at commit `b979dba`. SIL OFL 1.1.
 - `emoji/`: Noto Emoji 72 px PNGs for exactly the reactions the database allows
   (`public.is_allowed_reaction`), named by code point without U+FE0F. From
   [googlefonts/noto-emoji](https://github.com/googlefonts/noto-emoji) tag

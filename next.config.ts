@@ -1,7 +1,11 @@
 import type { NextConfig } from "next";
 
 // Read at request time by lib/snippet-render.ts.
-const SNIPPET_RENDER_FILES = ["./supabase/functions/mcp/assets/*.ttf", "./public/brands/**/*"];
+const SNIPPET_RENDER_FILES = [
+  "./supabase/functions/mcp/assets/*.ttf",
+  "./assets/og/fonts/NotoEmoji.ttf",
+  "./public/brands/**/*",
+];
 
 export function buildContentSecurityPolicy(environment: string | undefined): string {
   const isProduction = environment === "production";

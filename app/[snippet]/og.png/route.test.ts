@@ -175,6 +175,27 @@ describe("GET /[snippet]/og.png", () => {
     expect(Buffer.from(first).equals(Buffer.from(second))).toBe(false);
   }, 30_000);
 
+  // The reported edit added 😀: resvg has no color emoji, and without a
+  // fallback face the glyph went missing from the card.
+  it("draws emoji in a live card", async () => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    const edited = (code: string) =>
+      row({
+        code,
+        theme: "lumis-dusk",
+        font_id: "system",
+        appearance: null,
+        canonical_image_path: null,
+        og_image_path: null,
+        svg_path: null,
+      });
+    db.snippet = edited("const greeting = 1; // 😀");
+    const grin = Buffer.from(await (await get()).arrayBuffer());
+    db.snippet = edited("const greeting = 1; // 🚀");
+    const rocket = Buffer.from(await (await get()).arrayBuffer());
+    expect(grin.equals(rocket)).toBe(false);
+  }, 30_000);
+
   it("marks unlisted images noindex and skips the avatar", async () => {
     db.snippet = row({
       visibility: "unlisted",

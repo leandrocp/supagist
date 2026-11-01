@@ -31,6 +31,10 @@ const TTF = new Map([
   ["/fonts/hack.woff2", "Hack.ttf"],
 ]);
 const FONT_DIR = join(process.cwd(), "supabase/functions/mcp/assets");
+// resvg-js cannot draw color emoji fonts, so emoji fall back to monochrome
+// Noto Emoji rather than going missing.
+const EMOJI_FONT = join(process.cwd(), "assets/og/fonts/NotoEmoji.ttf");
+let emojiFace: Promise<string> | null = null;
 const PUBLIC_DIR = join(process.cwd(), "public");
 
 /** `?v=` for a live render: changes whenever the row's picture would. */
@@ -135,9 +139,14 @@ export async function renderSnippetPng(
     appearance.ligatures,
     runtime,
   );
+  emojiFace ??= readFile(EMOJI_FONT).then(
+    (bytes) =>
+      `@font-face{font-family:'Noto Emoji';src:url('data:font/ttf;base64,${bytes.toString("base64")}') format('truetype')}`,
+  );
   const ttf = svg
     .replace("data:font/woff2;base64,", "data:font/ttf;base64,")
-    .replace("format('woff2')", "format('truetype')");
+    .replace("format('woff2')", "format('truetype')")
+    .replace("</style>", `${await emojiFace}</style>`);
   const { png } = await rasterizeSvg(ttf, 2);
   return new Uint8Array(png);
 }
