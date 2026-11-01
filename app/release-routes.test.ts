@@ -3,7 +3,10 @@ import { describe, expect, it } from "vitest";
 
 describe("release route surface", () => {
   it("does not publish a provider-specific connection URL in the public agent skill", () => {
-    const skill = readFileSync(".agents/skills/supagist/SKILL.md", "utf8");
+    // SKILL.md routes agents to the MCP guide, which holds the connect command.
+    const skill = ["SKILL.md", "reference/mcp.md"]
+      .map((file) => readFileSync(`.agents/skills/supagist/${file}`, "utf8"))
+      .join("\n");
     expect(skill).not.toContain(".supabase.co");
     expect(skill).not.toContain("/functions/v1/mcp");
     expect(skill).toContain(

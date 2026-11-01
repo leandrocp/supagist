@@ -1,14 +1,19 @@
 # Supagist features and MCP parameters
 
+This guide is for the MCP tools. The CLI takes the same settings as flags;
+see [cli.md](cli.md).
+
 ## Choose the correct surface
 
 | Goal                                                             | Surface                                                             |
 | ---------------------------------------------------------------- | ------------------------------------------------------------------- |
 | Syntax-highlighted image with a brand or custom appearance       | MCP `render_snippet` → SVG file                                     |
-| Discover exact styles and supported languages                    | MCP `list_options`                                                  |
-| PNG, including the web app's 2×/4×/6× scale                      | Convert the saved SVG locally; default 2000px wide unless specified |
+| Discover exact styles and supported languages                    | MCP `list_options`; find theme ids with `search_themes`             |
+| PNG straight from a shell                                        | CLI `npx supagist file --out image.png` (see cli.md)                |
+| PNG file over MCP, including the web app's 2×/4×/6× scale        | Convert the saved SVG locally; default 2000px wide unless specified |
 | Copy/download raw source                                         | Save the user's original code locally; an SVG is not a source file  |
-| Edit interactively, preview, publish a shareable snippet         | Web composer at https://supagist.app                                |
+| Shareable unlisted link                                          | CLI `--publish` or MCP `publish_snippet`, after the user confirms   |
+| Edit interactively and preview                                   | Web composer at https://supagist.app                                |
 | Saved snippets, live comments/reactions, presence, notifications | Web app; not MCP tools                                              |
 
 Rendering is read-only: it neither publishes code nor retrieves saved snippets.
@@ -74,12 +79,11 @@ with its defaults; omitted flags do not reset the rest of a preset.
 | `showReactions`, `showComments` | Booleans; default true when corresponding annotation data is supplied; false hides it                                  |
 | `aspectRatio`                   | Default from brand, otherwise fit to the card; `"16:9"` centers the card on a 1600×900 canvas filled by the background |
 | `ligatures`                     | Default from brand, otherwise `true`; `false` draws operator sequences such as `\|>` and `->` as separate characters   |
-| `format`                        | Only `svg`                                                                                                             |
-| `pixelRatio`                    | Keep 1; legacy 2 is accepted but is not the local PNG scale setting                                                    |
-| `fixture`                       | Omit or `plain`; `vercel`/`avatars` are legacy benchmarks, incompatible with `brand`                                   |
+| `format`                        | `svg` (default) or `png`: an inline PNG preview, not a file to save                                                    |
+| `pixelRatio`                    | 1 or 2; default 1 for SVG and 2 for PNG. Not the local converter's 2×/4×/6× scale                                      |
 
 `aspectRatio: "16:9"` keeps the card's layout, frames it 16:9 and scales that
-frame to 1600×900 (3200×1800 with legacy `pixelRatio: 2`). `outerPadding` is
+frame to 1600×900 (3200×1800 with `pixelRatio: 2`). `outerPadding` is
 the margin on the tighter axis. With `background: null` the card touches that
 axis and the rest of the canvas is transparent. Convert at that exact size with the converter's `1` scale or
 `--width 1600`; the 2000px default keeps 16:9 at 2000×1125.
@@ -184,8 +188,9 @@ For an explicitly annotated custom image:
   include Supagist source attribution. Desktop export is a dialog, mobile a drawer.
 - **Publish:** requires sign-in and at most 8000 code points; creates saved source,
   image assets and a shareable snippet URL, clears the draft and best-effort copies
-  the link. Publishing is an external write requiring user authorization; there
-  is currently no publish MCP tool.
+  the link. Publishing is an external write requiring user authorization. From an
+  agent, CLI `--publish` and MCP `publish_snippet` create unlisted snippets with
+  secrets redacted.
 - **Saved snippet:** public read-only code and metadata, copy code, copy share link,
   exports and social-link preview. Signed-in users add/remove their own reactions
   or add per-line comments (up to 2000 characters). Reactions and threaded comments
