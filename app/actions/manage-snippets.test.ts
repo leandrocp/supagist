@@ -46,7 +46,7 @@ function makeSupabase({
 }
 
 const edit = {
-  code: "const a = 1;\r\nconst b = 2;",
+  code: "const a = 1;  \r\nconst b = 2;\r\n\r\n",
   title: "  Hello  ",
   language: "typescript",
   theme: "github_dark",

@@ -101,6 +101,18 @@ test("published snippet page shows the code", async ({ page }) => {
   await expect(page.getByText("SELECT id FROM users;")).toBeVisible();
 });
 
+test("snippets never show trailing whitespace, published or already stored", async ({ page }) => {
+  await page.goto("/");
+  await page.locator("textarea").fill("SELECT 1;  \n\t\n\n");
+  await page.getByRole("button", { name: /^publish$/i }).click();
+  await page.waitForURL(/\/[a-z0-9-]+-[a-z0-9]{6}$/);
+  await expect(page.getByText("1 lines", { exact: true })).toBeVisible();
+
+  // Rows stored before trimming keep their code; the page trims at display.
+  await page.goto(await seedSnippet("const a = 1;\t\n\nconst b = 2;  \n\n  \n", "trailing.ts"));
+  await expect(page.getByText("3 lines", { exact: true })).toBeVisible();
+});
+
 test("web publishes stay public; unlisted snippets show the indicator and noindex", async ({
   page,
 }) => {

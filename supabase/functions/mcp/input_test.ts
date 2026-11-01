@@ -2,8 +2,8 @@ import { z } from "zod";
 import { renderInput } from "./input.ts";
 
 Deno.test("render input preserves Unicode code points, normalizes newlines, and bounds output scale", () => {
-  const input = renderInput.parse({ code: "a\r\nb\rc" });
-  if (input.code !== "a\nb\nc" || input.pixelRatio !== undefined || input.format !== "svg") {
+  const input = renderInput.parse({ code: "a \r\n\tb\t\rc\r\n\n  \n" });
+  if (input.code !== "a\n\tb\nc" || input.pixelRatio !== undefined || input.format !== "svg") {
     throw new Error("Normalization or defaults changed");
   }
   for (const code of ["x".repeat(8000), "😀".repeat(8000)]) {
@@ -11,6 +11,7 @@ Deno.test("render input preserves Unicode code points, normalizes newlines, and 
   }
   for (const invalid of [
     { code: "" },
+    { code: " \n\t\n" },
     { code: "x".repeat(8001) },
     { code: "😀".repeat(8001) },
     { code: "x", pixelRatio: 0 },

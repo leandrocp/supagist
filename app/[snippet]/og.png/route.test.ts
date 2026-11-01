@@ -53,7 +53,9 @@ const row = (overrides: Record<string, unknown> = {}) => ({
   filename: "seal-button.tsx",
   language: "tsx",
   theme: "github_light",
-  line_count: 11,
+  // A row stored before trimming, with trailing blank lines.
+  code: "const a = 1;\nconst b = 2;\n\n",
+  line_count: 4,
   view_count: 137,
   created_at: "2026-10-31T12:00:00Z",
   visibility: "public",

@@ -36,7 +36,7 @@ import {
   type ExportAspectRatio,
   type WindowDecoration,
 } from "@/lib/export-utils";
-import { languageDisplayName, codePointLength } from "@/lib/snippet-utils";
+import { languageDisplayName, codePointLength, normalizeSnippetCode } from "@/lib/snippet-utils";
 import { ThemePicker } from "@/components/theme-picker";
 import { BrandPicker } from "@/components/brand-picker";
 import {
@@ -320,10 +320,13 @@ export function HomeComposer() {
   }, []);
 
   // ── derived ───────────────────────────────────────────────────────────────────
-  const lineCount = useMemo(() => draft.code.split("\n").length, [draft.code]);
+  // The editor keeps what the author typed; images, counts and the published
+  // snippet use the trimmed code.
+  const publishedCode = useMemo(() => normalizeSnippetCode(draft.code), [draft.code]);
+  const lineCount = publishedCode.split("\n").length;
   // Counts Unicode code points so the footer matches Postgres char_length()
   // — see codePointLength docs.
-  const charCount = useMemo(() => codePointLength(draft.code), [draft.code]);
+  const charCount = codePointLength(publishedCode);
   const language = useMemo(
     () => inferLanguage(draft.filename, draft.code),
     [draft.filename, draft.code],
@@ -404,7 +407,7 @@ export function HomeComposer() {
       const svgBlob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
 
       const formData = new FormData();
-      formData.set("code", draft.code);
+      formData.set("code", publishedCode);
       formData.set("filename", draft.filename);
       formData.set("theme", draft.theme);
       // The saved view highlights with this, so a picked language must win

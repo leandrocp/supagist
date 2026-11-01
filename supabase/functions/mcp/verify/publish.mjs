@@ -35,7 +35,8 @@ assert.deepEqual(tool.annotations, {
 });
 
 const published = await call({
-  code,
+  // Trailing whitespace is trimmed, never stored or drawn.
+  code: `${code.replace("{", "{  ")}\r\n\r\n\t\n`,
   language: "typescript",
   filename: "config.ts",
   title: "Deploy config",
@@ -63,6 +64,7 @@ assert.equal(own.author_id, user.user.id);
 assert.equal(own.visibility, "unlisted");
 assert.equal(own.title, "Deploy config");
 assert.equal(own.line_count, 5);
+assert.ok(own.code.startsWith("export const config = {\n") && own.code.endsWith("};"));
 assert.equal(own.font_id, "geist");
 // The saved view draws the brand canvas and frame from the stored appearance.
 assert.equal(own.appearance.background, "Supabase");

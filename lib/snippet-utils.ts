@@ -55,6 +55,19 @@ export function codePointLength(value: string): number {
   return count;
 }
 
+/**
+ * The one shape snippet code is rendered, stored and counted in: LF line
+ * endings, no spaces or tabs at the end of a line and no blank lines at the
+ * end. Leading indentation and blank lines between code stay, so line N is
+ * the same line before and after.
+ */
+export function normalizeSnippetCode(code: string): string {
+  return code
+    .replace(/\r\n?/g, "\n")
+    .replace(/[ \t]+$/gm, "")
+    .replace(/\n+$/, "");
+}
+
 /** Friendly display name for a Lumis language id (e.g. "elixir" → "Elixir"). */
 export function languageDisplayName(id: string): string {
   if (!id) return "Text";

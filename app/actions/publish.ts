@@ -9,6 +9,7 @@ import {
   buildCommentRows,
   getRawFileExtension,
   codePointLength,
+  normalizeSnippetCode,
 } from "@/lib/snippet-utils";
 import { snippetCardPath } from "@/lib/og-image";
 import { parseSnippetAppearance } from "@/lib/snippet-appearance";
@@ -67,13 +68,10 @@ export async function publishSnippet(formData: FormData): Promise<PublishResult>
     { author: string; body: string }
   >;
 
-  // Normalize line endings to LF so the rendered HTML doesn't carry
-  // trailing \r characters into the per-line spans. With CRLF endings the
-  // chunk passed to spanInline ends in \r, and `white-space: pre-wrap`
-  // treats \r as a segment break — the trailing reaction chip then drops
-  // onto a fresh visual row even when there's plenty of horizontal space.
-  // Normalising at write time keeps every row of the snippet table sane.
-  const normalizedCode = code.replace(/\r\n?/g, "\n");
+  // LF endings, no trailing spaces or blank lines — the same code the
+  // images were rendered from. A stray \r would also make `pre-wrap` drop the
+  // trailing reaction chip onto its own row in the saved view.
+  const normalizedCode = normalizeSnippetCode(code);
 
   // Use code-point length to match Postgres char_length(). The
   // snippets_code_char_count_check constraint compares the column we insert

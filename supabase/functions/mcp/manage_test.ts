@@ -20,7 +20,12 @@ Deno.test("an update needs at least one change and keeps publish's code limits",
   assert.equal(updateInput.safeParse({ snippet }).success, false);
   assert.equal(updateInput.safeParse({ snippet, title: "" }).success, true);
   assert.equal(updateInput.safeParse({ snippet, visibility: "private" }).success, false);
-  assert.equal(updateInput.safeParse({ snippet, code: "x\n".repeat(30) }).success, false);
+  assert.equal(updateInput.safeParse({ snippet, code: "x\n".repeat(31) }).success, false);
+  // A trailing newline is not a line: 30 lines plus one is still 30.
+  assert.equal(
+    updateInput.safeParse({ snippet, code: "x\n".repeat(30) }).data?.code,
+    Array(30).fill("x").join("\n"),
+  );
   assert.equal(updateInput.safeParse({ snippet, code: "a\r\nb" }).data?.code, "a\nb");
   assert.equal(updateInput.safeParse({ snippet, author_id: "x", title: "t" }).success, false);
 });

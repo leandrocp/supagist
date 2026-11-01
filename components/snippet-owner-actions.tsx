@@ -28,7 +28,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
 import { BRAND_THEMES } from "@/lib/brand-themes";
 import { createClient } from "@/lib/supabase/client";
-import { codePointLength } from "@/lib/snippet-utils";
+import { codePointLength, normalizeSnippetCode } from "@/lib/snippet-utils";
 
 type Props = {
   snippetId: string;
@@ -196,7 +196,7 @@ function EditSnippetModal({ snippetId, onClose }: { snippetId: string; onClose: 
       });
   }, [snippetId]);
 
-  const length = draft ? codePointLength(draft.code.replace(/\r\n?/g, "\n")) : 0;
+  const length = draft ? codePointLength(normalizeSnippetCode(draft.code)) : 0;
   const tooLong = length > 8000;
 
   const save = () =>

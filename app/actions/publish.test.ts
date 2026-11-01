@@ -291,23 +291,29 @@ describe("publishSnippet — happy path", () => {
     expect(result.error).toBeUndefined();
   });
 
-  it("normalizes CRLF line endings to LF before storing the snippet", async () => {
+  it("stores LF-only code without trailing spaces or trailing blank lines", async () => {
     // Regression: snippets pasted from Windows-style sources kept their
     // \r\n endings, and rendering each token chunk with `text.split('\n')`
     // left a trailing \r in the per-line spans. CSS `white-space: pre-wrap`
     // treats \r as a segment break, so the trailing reaction chip dropped
     // onto a fresh visual row even when there was room. Stored code must
-    // be LF-only.
+    // be LF-only, and trailing whitespace is never part of a snippet.
     const supabase = makeMockSupabase();
     mockCreateClient.mockResolvedValue(supabase);
-    await publishSnippet(makeFormData({ code: "line1\r\nline2\r\nline3" }));
+    await publishSnippet(makeFormData({ code: "line1  \r\n\tline2\t\r\nline3\r\n\r\n  \n" }));
     const insertCall = supabase._.mockInsert.mock.calls.find(
       (c) => !Array.isArray(c[0]) && (c[0] as { code?: string })?.code,
     );
     expect(insertCall).toBeDefined();
     const row = insertCall![0] as { code: string; line_count: number };
-    expect(row.code).toBe("line1\nline2\nline3");
+    expect(row.code).toBe("line1\n\tline2\nline3");
     expect(row.line_count).toBe(3);
+  });
+
+  it("rejects whitespace-only code", async () => {
+    mockCreateClient.mockResolvedValue(makeMockSupabase());
+    const result = await publishSnippet(makeFormData({ code: " \n\t\r\n\n" }));
+    expect(result.error).toMatch(/1–8,000 characters \(got 0\)/);
   });
 
   it("inserts code_char_count by Unicode code point so it matches Postgres char_length", async () => {

@@ -681,6 +681,14 @@ describe("createHighlightedSvg", () => {
     expect(svg).toMatch(/<\/svg>$/);
   });
 
+  it("draws the same image whether or not the code ends in trailing whitespace", async () => {
+    const render = (code: string) =>
+      createHighlightedSvg(code, "test.ts", "github_light", 1200, undefined, null, 0, true);
+    const trimmed = await render("const x = 1;\nconst y = 2;");
+    expect(await render("const x = 1;  \r\nconst y = 2;\t\r\n\n  \n")).toBe(trimmed);
+    expect(trimmed).not.toContain(">3<");
+  });
+
   it("paints a token with the style Lumis resolved, not a raw theme lookup", async () => {
     // The mocked theme has no `keyword.import` entry; Lumis resolves the scope
     // through language-specific and parent fallbacks and hands the result over.

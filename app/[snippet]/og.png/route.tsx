@@ -1,5 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
-import { parseSnippetParam, languageDisplayName } from "@/lib/snippet-utils";
+import { parseSnippetParam, languageDisplayName, normalizeSnippetCode } from "@/lib/snippet-utils";
 import { loadTheme } from "@/lib/theme-loader";
 import { cardSource } from "@/lib/og-image";
 import { fetchOgFacts, loadAvatar, loadCardPng, renderOgPng } from "@/lib/og-render";
@@ -17,7 +17,7 @@ type SnippetRow = {
   filename: string;
   language: string | null;
   theme: string;
-  line_count: number;
+  code: string;
   view_count: number;
   created_at: string;
   visibility: "public" | "unlisted";
@@ -60,7 +60,8 @@ export async function GET(request: Request, { params }: { params: Promise<{ snip
         filename: snippet.filename,
         language: snippet.language,
         languageName: snippet.language ? languageDisplayName(snippet.language) : null,
-        lineCount: snippet.line_count,
+        // Counted from the trimmed code, as the snippet page does.
+        lineCount: normalizeSnippetCode(snippet.code).split("\n").length,
         viewCount: snippet.view_count,
         createdAt: snippet.created_at,
         unlisted,

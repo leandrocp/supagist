@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { BRAND_PRESETS } from "./spike/generated/brand-presets.js";
+import { normalizeSnippetCode } from "./spike/generated/snippet-utils.js";
 import {
   EXPORT_BACKGROUNDS,
   EXPORT_BRAND_BACKGROUNDS,
@@ -31,7 +32,7 @@ const renderShape = {
   code: z
     .string()
     .max(16000)
-    .transform((code) => code.replace(/\r\n?/g, "\n"))
+    .transform((code): string => normalizeSnippetCode(code))
     .refine(
       (code) => Array.from(code).length >= 1 && Array.from(code).length <= 8000,
       "code must contain 1–8000 Unicode code points",

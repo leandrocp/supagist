@@ -14,6 +14,7 @@ import {
   buildCommentRows,
   firstReactionPerLine,
   codePointLength,
+  normalizeSnippetCode,
   lineReactionsToExportChips,
   buildSnippetSocialAlt,
 } from "./snippet-utils";
@@ -68,6 +69,43 @@ describe("parseSnippetParam", () => {
       slug: "snippet",
       shortId: "000000",
     });
+  });
+});
+
+// ── normalizeSnippetCode ─────────────────────────────────────────────────────
+
+describe("normalizeSnippetCode", () => {
+  it("drops every trailing newline and trailing blank line", () => {
+    expect(normalizeSnippetCode("a\n")).toBe("a");
+    expect(normalizeSnippetCode("a\n\n\n")).toBe("a");
+    expect(normalizeSnippetCode("a\n  \n\t\n")).toBe("a");
+  });
+
+  it("converts CRLF and lone CR to LF before trimming", () => {
+    expect(normalizeSnippetCode("a \r\n\tb\t\r\n\r\n")).toBe("a\n\tb");
+    expect(normalizeSnippetCode("a\rb\r")).toBe("a\nb");
+  });
+
+  it("strips trailing spaces and tabs from each line, keeping indentation and inner blank lines", () => {
+    const code = "  if (x) { \t\n\n\t\treturn 1;   \n  }\t";
+    const normalized = normalizeSnippetCode(code);
+    expect(normalized).toBe("  if (x) {\n\n\t\treturn 1;\n  }");
+    // Lines keep their numbers: line 3 is still the return.
+    expect(normalized.split("\n")[2]).toBe("\t\treturn 1;");
+  });
+
+  it("keeps leading blank lines and non-space trailing characters", () => {
+    expect(normalizeSnippetCode("\n\nx = 1 \u00a0")).toBe("\n\nx = 1 \u00a0");
+  });
+
+  it("returns an empty string for whitespace-only input", () => {
+    expect(normalizeSnippetCode(" \t\r\n  \n\n")).toBe("");
+    expect(normalizeSnippetCode("")).toBe("");
+  });
+
+  it("leaves code without trailing whitespace unchanged", () => {
+    const code = "const a = 1;\n\nconst b = 2;";
+    expect(normalizeSnippetCode(code)).toBe(code);
   });
 });
 

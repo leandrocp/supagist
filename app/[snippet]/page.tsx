@@ -15,6 +15,8 @@ import {
   groupExportReactions,
   buildSnippetSocialAlt,
   languageDisplayName,
+  normalizeSnippetCode,
+  codePointLength,
 } from "@/lib/snippet-utils";
 import { loadTheme } from "@/lib/theme-loader";
 import { highlightHtmlLines, loadLanguageOrPlaintext } from "@/lib/lumis-lines";
@@ -65,7 +67,16 @@ const getSnippet = cache(async (slug: string, shortId: string) => {
     .rpc("get_snippet_by_link", { p_slug: slug, p_short_id: shortId })
     .select("*, author:author_id(id, username, avatar_url)")
     .maybeSingle<SnippetRow>();
-  return data;
+  if (!data) return data;
+  // Older rows may end in spaces or blank lines; show them trimmed without
+  // rewriting what is stored.
+  const code = normalizeSnippetCode(data.code);
+  return {
+    ...data,
+    code,
+    line_count: code.split("\n").length,
+    code_char_count: codePointLength(code),
+  };
 });
 
 export async function generateMetadata({ params }: Props) {

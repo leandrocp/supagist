@@ -3,7 +3,7 @@
 import { availableLanguages, availableThemes } from "@lumis-sh/lumis/client";
 import { isBrandThemeId } from "@/lib/brand-themes";
 import { createClient } from "@/lib/supabase/server";
-import { codePointLength } from "@/lib/snippet-utils";
+import { codePointLength, normalizeSnippetCode } from "@/lib/snippet-utils";
 
 export type SnippetEdit = {
   code: string;
@@ -46,7 +46,7 @@ async function persistentUser() {
 
 /** Owner-only edit. RLS and a database trigger enforce ownership and editable fields. */
 export async function updateSnippet(snippetId: string, edit: SnippetEdit): Promise<Result> {
-  const code = edit.code.replace(/\r\n?/g, "\n");
+  const code = normalizeSnippetCode(edit.code);
   const length = codePointLength(code);
   if (length === 0 || length > 8000) {
     return { error: `Code must be 1–8,000 characters (got ${length.toLocaleString()}).` };

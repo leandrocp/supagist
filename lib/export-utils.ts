@@ -2,6 +2,7 @@ import {
   inferLanguage,
   languageDisplayName,
   codePointLength,
+  normalizeSnippetCode,
   type ExportReactionChip,
 } from "@/lib/snippet-utils";
 import {
@@ -840,6 +841,7 @@ export function estimateExportDimensions({
   fontSize?: number;
   compactReactions?: boolean;
 }) {
+  code = normalizeSnippetCode(code);
   const rawLines = code.split(/\r?\n/);
   const innerPaddingPx = normalizeExportInnerPadding(innerPadding);
   const codeLineHeight = exportLineHeightForFontSize(fontSize);
@@ -1067,6 +1069,7 @@ export async function createHighlightedSvg(
   aspectRatio?: ExportAspectRatio | null,
   ligatures = true,
 ): Promise<string> {
+  code = normalizeSnippetCode(code);
   const language = languageOverride || inferLanguage(filename, code);
   const [{ clientHighlighterPromise }, { loadTheme }] = await Promise.all([
     import("@/lib/lumis-client"),
