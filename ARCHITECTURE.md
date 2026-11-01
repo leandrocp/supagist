@@ -142,7 +142,7 @@ public/brands/                 SVG logos + raster patterns for the 25 Brand pres
 proxy.ts                       Next.js middleware entry — calls updateSession()
 
 supabase/
-  migrations/                  All schema changes — apply with `supabase db push`
+  migrations/                  All schema changes — applied to production on push to `main`
   config.toml                  Local config — bucket definitions, auth providers
 ```
 

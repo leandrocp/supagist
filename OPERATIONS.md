@@ -7,7 +7,7 @@ The repository owner is the release and incident owner. A production deployment 
 1. A clean, reviewed release commit.
 2. Green lint, format, unit, coverage, build, local Supabase integration, smoke E2E, and authenticated E2E checks.
 3. `npm run audit:prod` with no high or critical findings.
-4. A reviewed `supabase db push --linked --dry-run --include-all` result.
+4. Reviewed migrations: pushing to `main` applies every new file in `supabase/migrations` to the hosted database (Supabase GitHub integration, production branch `main`).
 5. Every required GitHub Actions job green for the exact release SHA.
 
 Never deploy from an uncommitted working tree.
@@ -22,16 +22,20 @@ npm run fmt:check
 npm test
 npm run test:coverage
 npm run build
-
-supabase db push --linked --dry-run --include-all
-# Review the exact migration list before the mutating command:
-supabase db push --linked --include-all
-supabase functions deploy cleanup
 ```
+
+Pushing to `main` then deploys everything: Vercel builds the app, and Supabase's GitHub integration applies new migrations and deploys the Edge Functions. Confirm the hosted database caught up:
+
+```bash
+supabase migration list --linked
+supabase db push --linked --dry-run --include-all   # expect "Remote database is up to date."
+```
+
+Run `supabase db push --linked --include-all` by hand only to recover from a failed integration deploy, after reviewing the dry-run list.
 
 After deploying the `cleanup` function, configure the Supabase Cron integration to invoke it nightly at `0 2 * * *` using a **secret/service** API key. Never commit or place that key in browser-visible environment variables. The function queues stale snippets transactionally and removes assets through the Storage API; `storage_cleanup_queue` retains failures for retry.
 
-Deploy the application only after database migrations and the Edge Function succeed. Verify:
+Vercel and the Supabase integration deploy in parallel, so keep migrations backward-compatible with the app version still serving. Verify:
 
 ```bash
 curl --fail --silent --show-error https://supagist.app/api/health

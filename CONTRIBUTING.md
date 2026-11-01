@@ -66,7 +66,7 @@ supabase migration new <name>   # create a new migration file
 supabase db reset               # rebuild the local database from all migrations
 ```
 
-Do not run `supabase db push` against the hosted project yourself. See [Workflow](#workflow).
+Pushing a migration to `main` applies it to the hosted project, so test it with `supabase db reset` and the integration suite first. Do not run `supabase db push` against the hosted project yourself. See [Workflow](#workflow).
 
 ## Run the web app
 
@@ -247,8 +247,8 @@ More detail:
 
 - Keep commits small and focused, with a plain message that says what changed and why.
 - Run `npm run lint`, `npm run fmt:check`, `npm run typecheck` and `npm test` before you push. CI runs them, plus the build and the end-to-end suites.
-- Pushes to `main` deploy automatically: the web app to Vercel, and Edge Functions through Supabase's GitHub integration. Treat `main` as production.
-- Hosted Supabase migrations (`supabase db push`) need the maintainer's OK. Write and test them locally, and ask before applying them to the hosted project.
+- Pushes to `main` deploy automatically: the web app to Vercel, and migrations and Edge Functions through Supabase's GitHub integration. Treat `main` as production.
+- A migration on `main` is applied to the hosted database, so a migration needs the maintainer's OK before it lands on `main`. Write and test it locally first. Migrations are forward-only: fix a bad one with a new migration, never by editing an applied one.
 - Never commit secrets. Keep them in `.env.local`.
 
 ## Brand assets
