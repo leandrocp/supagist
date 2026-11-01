@@ -12,31 +12,6 @@ type Visibility = "public" | "unlisted";
 
 /** How long the share-link pill stays before it slides away on its own. */
 const LINK_VISIBLE_MS = 12_000;
-/** When the seal starts to lift (globals.css .stamp-press). */
-const SEAL_LIFT_MS = 2600;
-
-/**
- * The publish moment for this page load. The marker is claimed here, once,
- * rather than in component state: the page can remount the stamp right after
- * hydration, and a remount must resume the same moment, not lose it.
- */
-let moment: { path: string; copied: boolean; startedAt: number } | null = null;
-
-function claimMoment(path: string): { copied: boolean; elapsed: number } | null {
-  const now = Date.now();
-  if (moment?.path === path && now - moment.startedAt < LINK_VISIBLE_MS) {
-    return { copied: moment.copied, elapsed: now - moment.startedAt };
-  }
-  const marker = takeJustPublished(path);
-  if (!marker) return null;
-  moment = { path, copied: marker.copied, startedAt: now };
-  return { copied: marker.copied, elapsed: 0 };
-}
-
-/** Test hook: forget the claimed moment (a fresh page load). */
-export function resetPublishMoment() {
-  moment = null;
-}
 
 /**
  * The publish moment. When the composer has just published this snippet (see
@@ -54,35 +29,28 @@ export function PublishStamp({ visibility, url }: { visibility: Visibility; url:
     copied: boolean;
     reduced: boolean;
     target: Element;
-    /** ms since the stamp started; > 0 when a remount resumes it. */
-    elapsed: number;
   } | null>(null);
   const [linkOpen, setLinkOpen] = useState(false);
   const [copied, setCopied] = useState(false);
 
+  // Read (and clear) the marker once. Under Strict Mode's double effect run
+  // the second read finds nothing and leaves the state alone.
   useEffect(() => {
-    const marker = claimMoment(window.location.pathname);
+    const marker = takeJustPublished(window.location.pathname);
     if (!marker) return;
     // The seal is pressed onto the canvas (or the bare card) corner.
     const target =
       document.querySelector('[data-testid="snippet-canvas"]') ??
       document.querySelector('[data-testid="snippet-card"]');
     if (!target) return;
-    setState({
-      copied: marker.copied,
-      reduced: prefersReducedMotion(),
-      target,
-      elapsed: marker.elapsed,
-    });
+    setState({ copied: marker.copied, reduced: prefersReducedMotion(), target });
     setCopied(marker.copied);
   }, []);
 
   useEffect(() => {
     if (!state) return;
-    const at = (ms: number) => Math.max(0, ms - state.elapsed);
     // The card gives a little under the impact (transform only).
     const shake = window.setTimeout(() => {
-      if (state.elapsed > 230) return;
       play(
         state.target,
         [
@@ -94,9 +62,9 @@ export function PublishStamp({ visibility, url }: { visibility: Visibility; url:
         ],
         { duration: 340, easing: "ease-out" },
       );
-    }, at(230));
-    const reveal = window.setTimeout(() => setLinkOpen(true), state.reduced ? 0 : at(650));
-    const hide = window.setTimeout(() => setLinkOpen(false), at(LINK_VISIBLE_MS));
+    }, 230);
+    const reveal = window.setTimeout(() => setLinkOpen(true), state.reduced ? 0 : 650);
+    const hide = window.setTimeout(() => setLinkOpen(false), LINK_VISIBLE_MS);
     return () => {
       window.clearTimeout(shake);
       window.clearTimeout(reveal);
@@ -107,7 +75,6 @@ export function PublishStamp({ visibility, url }: { visibility: Visibility; url:
   if (!state) return null;
 
   const unlisted = visibility === "unlisted";
-  const resumed = state.elapsed > 0;
 
   const copy = async () => {
     try {
@@ -138,19 +105,10 @@ export function PublishStamp({ visibility, url }: { visibility: Visibility; url:
                 ? "bg-[radial-gradient(closest-side,hsl(var(--wax)/0.3),hsl(var(--wax)/0))]"
                 : "bg-[radial-gradient(closest-side,hsl(var(--wax)/0.5),hsl(var(--wax)/0))]",
             )}
-            style={resumed ? { animationDelay: `${230 - state.elapsed}ms` } : undefined}
           />
           <div
             className="stamp-press absolute inset-0"
-            style={
-              {
-                "--stamp-rotate": unlisted ? "8deg" : "0deg",
-                // A remount picks the press and lift up where they were.
-                ...(resumed
-                  ? { animationDelay: `${-state.elapsed}ms, ${SEAL_LIFT_MS - state.elapsed}ms` }
-                  : null),
-              } as React.CSSProperties
-            }
+            style={{ "--stamp-rotate": unlisted ? "8deg" : "0deg" } as React.CSSProperties}
           >
             {unlisted ? (
               // The brand's one-colour wax seal, pressed flat like a rubber

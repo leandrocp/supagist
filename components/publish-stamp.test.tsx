@@ -2,7 +2,7 @@
 import { act, cleanup, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { markJustPublished } from "@/lib/motion";
-import { PublishStamp, resetPublishMoment } from "./publish-stamp";
+import { PublishStamp } from "./publish-stamp";
 
 const PATH = "/greet-ts-abc123";
 const URL_ = `https://supagist.app${PATH}`;
@@ -34,7 +34,6 @@ afterEach(() => {
   cleanup();
   vi.useRealTimers();
   window.sessionStorage.clear();
-  resetPublishMoment();
 });
 
 describe("PublishStamp", () => {
@@ -93,34 +92,14 @@ describe("PublishStamp", () => {
     expect(screen.getByTestId("publish-link")).toBeTruthy();
   });
 
-  it("plays once: a later visit to the page shows nothing", () => {
+  it("plays once: a second visit to the page shows nothing", () => {
     markJustPublished(PATH, true);
     renderStamp();
     expect(screen.getByTestId("publish-stamp")).toBeTruthy();
     cleanup();
 
-    // A reload is a fresh page: the marker is gone.
-    resetPublishMoment();
     renderStamp();
     expect(screen.queryByTestId("publish-stamp")).toBeNull();
-  });
-
-  it("resumes, not restarts, when the page remounts it mid-stamp", () => {
-    // Regression: production remounts the stamp right after hydration, and
-    // the remount used to find the marker gone and render nothing.
-    markJustPublished(PATH, true);
-    renderStamp();
-    act(() => vi.advanceTimersByTime(400));
-    cleanup();
-
-    renderStamp();
-    const press = screen.getByTestId("publish-stamp").querySelector<HTMLElement>(".stamp-press")!;
-    expect(press.style.animationDelay).toBe("-400ms, 2200ms");
-    // The link still arrives on the original schedule (650 ms after the start).
-    act(() => vi.advanceTimersByTime(200));
-    expect(screen.queryByTestId("publish-link")).toBeNull();
-    act(() => vi.advanceTimersByTime(100));
-    expect(screen.getByTestId("publish-link")).toBeTruthy();
   });
 
   it("doesn't stamp a different snippet than the one just published", () => {
@@ -138,7 +117,6 @@ describe("PublishStamp", () => {
     expect(screen.queryByTestId("publish-link")).toBeNull();
 
     cleanup();
-    resetPublishMoment();
     markJustPublished(PATH, true);
     renderStamp();
     act(() => vi.advanceTimersByTime(12_100));
