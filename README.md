@@ -38,7 +38,7 @@ Open [supagist.app](https://supagist.app), paste your code, and share the link. 
 
 ### MCP
 
-The Supagist MCP server renders code as SVG from your coding agent. It speaks Streamable HTTP and signs you in with OAuth, so there is no API key to copy. Endpoint:
+The Supagist MCP server renders code as SVG or PNG from your coding agent, and can publish it as an unlisted link. It speaks Streamable HTTP and signs you in with OAuth, so there is no API key to copy. Endpoint:
 
 ```text
 https://supagist.app/mcp
@@ -89,12 +89,14 @@ codex mcp login supagist
 
 Tools:
 
-| Tool             | What it does                                                                                                                      |
-| ---------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| `render_snippet` | Renders code as an SVG code image. Supports brand presets, themes, fonts, backgrounds, window chrome, line numbers and more.      |
-| `list_options`   | Lists every supported language, theme, brand, background, font and limit. Call it first if you are unsure which values are valid. |
+| Tool              | What it does                                                                                                                                     |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `render_snippet`  | Renders code as an SVG, or as a PNG the model can see. Supports brand presets, themes, fonts, backgrounds, window chrome, line numbers and more. |
+| `search_themes`   | Searches the syntax themes by name, family (for example `catppuccin` or `nightfox`) and light or dark, a page at a time.                         |
+| `list_options`    | Lists every supported format, language, theme, brand, background, font and limit. Call it first if you are unsure which values are valid.        |
+| `publish_snippet` | Saves the code to your account as an unlisted Supagist link, with secrets redacted first. Your agent should ask you before it publishes.         |
 
-Rendering publishes nothing and is rate limited per account.
+Rendering, searching and listing options save nothing. Every tool is rate limited per account.
 
 ### CLI
 

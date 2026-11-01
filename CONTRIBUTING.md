@@ -115,7 +115,7 @@ The Edge Function tests use Deno, as in [`.github/workflows/ci.yml`](./.github/w
 deno test --config supabase/functions/mcp/deno.json --allow-read --allow-net --allow-env \
   supabase/functions/mcp/input_test.ts supabase/functions/mcp/rate-limit_test.ts \
   supabase/functions/mcp/redact_test.ts supabase/functions/mcp/server_test.ts \
-  supabase/functions/mcp/spike/render.deno.ts
+  supabase/functions/mcp/themes_test.ts supabase/functions/mcp/spike/render.deno.ts
 deno test --config supabase/functions/render/deno.json --allow-read --allow-net --allow-env \
   supabase/functions/render/handler_test.ts
 ```
@@ -162,9 +162,12 @@ The MCP server is the Supabase Edge Function in [`supabase/functions/mcp`](./sup
 
 ```sh
 supabase start
-supabase functions serve mcp                        # http://127.0.0.1:54321/functions/v1/mcp
-npm run dev                                         # serves /oauth/consent on http://localhost:3000
+echo 'SUPAGIST_RENDER_API_URL=http://host.docker.internal:3000/api/render' > /tmp/functions.env
+supabase functions serve --env-file /tmp/functions.env  # mcp at http://127.0.0.1:54321/functions/v1/mcp
+npm run dev -- -H 0.0.0.0                           # /oauth/consent and /api/render on :3000
 ```
+
+SVG renders inside the MCP function. PNG does not: the function forwards the request, with the caller's own token, to the web app's `/api/render`, which renders the SVG through the `render` function and rasterizes it with resvg on Node. That is why the local setup serves every function, and why the web app listens on `0.0.0.0`, where the function's container can reach it through `host.docker.internal`. Without `SUPAGIST_RENDER_API_URL`, the function sends PNG requests to production.
 
 Check that it answers. An unauthenticated call returns `401`:
 
@@ -186,11 +189,15 @@ npx @modelcontextprotocol/inspector
 
 In the Inspector choose transport **Streamable HTTP**, enter the local URL, and complete the OAuth sign-in. Use a local account (sign up with email on `http://localhost:3000`; confirmation is off locally).
 
-The scripted check that CI runs against the local function, using a disposable local user:
+The scripted checks that CI runs against the local functions, each using disposable local users:
 
 ```sh
-node supabase/functions/mcp/verify/appearance.mjs
+node supabase/functions/mcp/verify/appearance.mjs   # schema, catalog, skill examples
+node supabase/functions/mcp/verify/publish.mjs      # publish, redaction, unlisted, rate limit
+node supabase/functions/mcp/verify/tools.mjs        # search_themes, PNG, legacy inputs
 ```
+
+The tools are `render_snippet` (SVG or PNG), `search_themes`, `list_options` and `publish_snippet`. Their descriptions and the server instructions live in `server.ts`. They must not name other tools. That rule comes from Google Connected Apps, which snapshots them at registration, and `server_test.ts` enforces it.
 
 For the production endpoint, rate limits and the OAuth setup, see [`supabase/functions/mcp/README.md`](./supabase/functions/mcp/README.md).
 
