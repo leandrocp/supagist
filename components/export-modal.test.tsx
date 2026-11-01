@@ -87,151 +87,6 @@ describe("ExportModal", () => {
     expect(await (await item.items["text/plain"]!).text()).toBe("plain");
   });
 
-  it("supports zero outer padding through the slider", async () => {
-    const onSettingsChange = vi.fn();
-    const settingsWithBackground = { ...settings, background: "Forest" };
-
-    render(
-      <ExportModal
-        open
-        onClose={vi.fn()}
-        code="console.log('hello')"
-        filename="snippet.ts"
-        theme="github_dark"
-        settings={settingsWithBackground}
-        onSettingsChange={onSettingsChange}
-      />,
-    );
-
-    const outerPaddingSlider = screen.getByRole("slider", { name: "Outer padding" });
-    fireEvent.keyDown(outerPaddingSlider, { key: "Home" });
-
-    await waitFor(() => {
-      expect(onSettingsChange).toHaveBeenCalledWith({
-        ...settingsWithBackground,
-        outerPadding: 0,
-      });
-    });
-  });
-
-  it("supports configurable inner padding independently", async () => {
-    const onSettingsChange = vi.fn();
-
-    render(
-      <ExportModal
-        open
-        onClose={vi.fn()}
-        code="console.log('hello')"
-        filename="snippet.ts"
-        theme="github_dark"
-        settings={settings}
-        onSettingsChange={onSettingsChange}
-      />,
-    );
-
-    const innerPaddingSlider = screen.getByRole("slider", { name: "Inner padding" });
-    fireEvent.keyDown(innerPaddingSlider, { key: "End" });
-
-    await waitFor(() => {
-      expect(onSettingsChange).toHaveBeenCalledWith({
-        ...settings,
-        innerPadding: 48,
-      });
-    });
-  });
-
-  it("supports square corners through the radius slider", async () => {
-    const onSettingsChange = vi.fn();
-
-    render(
-      <ExportModal
-        open
-        onClose={vi.fn()}
-        code="console.log('hello')"
-        filename="snippet.ts"
-        theme="github_dark"
-        settings={settings}
-        onSettingsChange={onSettingsChange}
-      />,
-    );
-
-    const radiusSlider = screen.getByRole("slider", { name: "Corner radius" });
-    expect(radiusSlider.getAttribute("aria-valuemax")).toBe("4");
-    fireEvent.keyDown(radiusSlider, { key: "Home" });
-
-    await waitFor(() => {
-      expect(onSettingsChange).toHaveBeenCalledWith({
-        ...settings,
-        cornerRadius: 0,
-      });
-    });
-  });
-
-  it("customizes header and footer metadata independently", async () => {
-    const onSettingsChange = vi.fn();
-
-    render(
-      <ExportModal
-        open
-        onClose={vi.fn()}
-        code="console.log('hello')"
-        filename="snippet.ts"
-        theme="github_dark"
-        settings={settings}
-        onSettingsChange={onSettingsChange}
-      />,
-    );
-
-    fireEvent.click(screen.getByRole("switch", { name: "Show header language" }));
-    expect(onSettingsChange).toHaveBeenCalledWith({
-      ...settings,
-      header: { ...settings.header, showLanguage: false },
-    });
-
-    fireEvent.click(screen.getByRole("radio", { name: "left aligned filename" }));
-    expect(onSettingsChange).toHaveBeenCalledWith({
-      ...settings,
-      header: { ...settings.header, filenamePosition: "left" },
-    });
-
-    fireEvent.click(screen.getByRole("radio", { name: "center aligned language" }));
-    expect(onSettingsChange).toHaveBeenCalledWith({
-      ...settings,
-      header: { ...settings.header, languagePosition: "center" },
-    });
-
-    fireEvent.click(screen.getByRole("switch", { name: "Show footer" }));
-    expect(onSettingsChange).toHaveBeenCalledWith({
-      ...settings,
-      footer: { ...settings.footer, enabled: true },
-    });
-  });
-
-  it("changes the code font size alongside the font picker", async () => {
-    const onSettingsChange = vi.fn();
-
-    render(
-      <ExportModal
-        open
-        onClose={vi.fn()}
-        code="console.log('hello')"
-        filename="snippet.ts"
-        theme="github_dark"
-        settings={settings}
-        onSettingsChange={onSettingsChange}
-      />,
-    );
-
-    const fontSize = screen.getByLabelText("Font size") as HTMLSelectElement;
-    expect(fontSize.value).toBe("14");
-
-    fireEvent.change(fontSize, { target: { value: "20" } });
-
-    await waitFor(() => {
-      expect(onSettingsChange).toHaveBeenCalledWith({ ...settings, fontSize: 20 });
-    });
-  });
-
   it("renders the export preview at the selected font size", async () => {
     const { createHighlightedSvg } = await import("@/lib/export-utils");
 
@@ -249,35 +104,6 @@ describe("ExportModal", () => {
 
     await waitFor(() => {
       expect(vi.mocked(createHighlightedSvg).mock.calls.at(-1)?.[24]).toBe(20);
-    });
-  });
-
-  it("toggles ligatures and the 16:9 canvas and renders the preview with them", async () => {
-    const { createHighlightedSvg } = await import("@/lib/export-utils");
-    const onSettingsChange = vi.fn();
-    const props = {
-      onClose: vi.fn(),
-      code: "x |> y",
-      filename: "demo.ex",
-      theme: "github_dark",
-      onSettingsChange,
-    };
-    const { rerender } = render(<ExportModal open {...props} settings={settings} />);
-
-    fireEvent.click(screen.getByRole("switch", { name: "Font ligatures" }));
-    expect(onSettingsChange).toHaveBeenLastCalledWith({ ...settings, ligatures: false });
-    fireEvent.click(screen.getByRole("switch", { name: "16:9 canvas (1600×900)" }));
-    expect(onSettingsChange).toHaveBeenLastCalledWith({ ...settings, aspectRatio: "16:9" });
-
-    rerender(
-      <ExportModal
-        open
-        {...props}
-        settings={{ ...settings, aspectRatio: "16:9", ligatures: false }}
-      />,
-    );
-    await waitFor(() => {
-      expect(vi.mocked(createHighlightedSvg).mock.calls.at(-1)?.slice(26)).toEqual(["16:9", false]);
     });
   });
 
@@ -312,31 +138,48 @@ describe("ExportModal", () => {
     });
   });
 
-  it("updates the saved export window decoration setting", async () => {
+  it("keeps the sealed appearance and only offers scale and comments", async () => {
+    // A published snippet is sealed: Export must not restyle it.
+    const { createHighlightedSvg, renderToFile } = await import("@/lib/export-utils");
+    const sealed: ExportSettings = {
+      ...settings,
+      background: "Forest",
+      aspectRatio: "16:9",
+      ligatures: false,
+      windowDecoration: "windows",
+    };
     const onSettingsChange = vi.fn();
+    const props = {
+      onClose: vi.fn(),
+      code: "x |> y",
+      filename: "demo.ex",
+      theme: "github_dark",
+      comments: { 1: { author: "dev", body: "note" } },
+      onSettingsChange,
+    };
+    const { rerender } = render(<ExportModal open {...props} settings={sealed} />);
 
-    render(
-      <ExportModal
-        open
-        onClose={vi.fn()}
-        code="console.log('hello')"
-        filename="snippet.ts"
-        theme="github_dark"
-        settings={settings}
-        onSettingsChange={onSettingsChange}
-      />,
-    );
+    expect(screen.queryAllByRole("slider")).toHaveLength(0);
+    expect(screen.queryByRole("switch", { name: "Show line numbers" })).toBeNull();
+    expect(screen.queryByRole("switch", { name: "Show footer" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Minimal" })).toBeNull();
+    expect(screen.queryByLabelText("Font size")).toBeNull();
+    expect(screen.getByRole("switch", { name: "Show comments" })).toBeTruthy();
 
-    expect(screen.getByRole("button", { name: "Minimal" })).toBeTruthy();
-    expect(screen.getByRole("button", { name: "macOS Subtle" })).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "2x" }));
+    expect(onSettingsChange).toHaveBeenLastCalledWith({ ...sealed, pixelRatio: 2 });
 
-    fireEvent.click(screen.getByRole("button", { name: "None" }));
-
+    rerender(<ExportModal open {...props} settings={{ ...sealed, pixelRatio: 2 }} />);
     await waitFor(() => {
-      expect(onSettingsChange).toHaveBeenCalledWith({
-        ...settings,
-        windowDecoration: "none",
-      });
+      expect(vi.mocked(createHighlightedSvg).mock.calls.at(-1)?.slice(26)).toEqual(["16:9", false]);
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Save as PNG" }));
+    await waitFor(() => {
+      const call = vi.mocked(renderToFile).mock.calls.at(-1)!;
+      expect(call[6]).toBe(2);
+      expect(call[7]?.label).toBe("Forest");
+      expect(call[21]).toBe("windows");
+      expect(call.slice(27)).toEqual(["16:9", false]);
     });
   });
 });

@@ -9,22 +9,13 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Check, ClipboardType, FileImage, FileText, ImageIcon } from "lucide-react";
-import { availableLanguages } from "@lumis-sh/lumis/client";
 import {
   EXPORT_WIDTH,
   EXPORT_INNER_PADDING,
   EXPORT_BACKGROUNDS,
   EXPORT_BRAND_BACKGROUNDS,
-  EXPORT_FONTS,
   EXPORT_FONT_SIZE,
-  EXPORT_FONT_SIZE_VALUES,
   normalizeExportFontSize,
-  exportCornerRadiusFromSliderIndex,
-  exportCornerRadiusToSliderIndex,
-  exportInnerPaddingFromSliderIndex,
-  exportInnerPaddingToSliderIndex,
-  exportOuterPaddingFromSliderIndex,
-  exportOuterPaddingToSliderIndex,
   normalizeExportCornerRadius,
   normalizeExportInnerPadding,
   normalizeExportOuterPadding,
@@ -42,7 +33,6 @@ import { copyRichText, createRichTextClipboard } from "@/lib/rich-text-export";
 import { cn } from "@/lib/utils";
 import type { ExportReactionChip } from "@/lib/snippet-utils";
 import { Spinner } from "@/components/ui/spinner";
-import { Slider } from "@/components/ui/slider";
 import {
   Drawer,
   DrawerContent,
@@ -52,13 +42,7 @@ import {
 } from "@/components/ui/drawer";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { Switch } from "@/components/ui/switch";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import type { ExportFooterSettings, ExportHeaderSettings } from "@/lib/export-metadata";
-
-const LANGUAGES = [
-  { id: "", name: "Auto-Detect" },
-  ...availableLanguages().map((l) => ({ id: l.id, name: l.id })),
-];
 
 const SIZE_OPTIONS = [2, 4, 6] as const;
 
@@ -344,12 +328,19 @@ export function ExportModal({
     if (!o) onClose();
   };
 
-  // Desktop: preview across the top, settings on the left and the actions in
-  // a quiet column on the right (site/v1 export-dialog). Mobile stacks them.
+  // Desktop is a full-screen view: the preview fills the left and stays in
+  // sight while the settings scroll in their own column on the right, with
+  // the actions pinned under them. Mobile stacks preview, settings, actions.
   const body = (
-    <div className="grid gap-6 md:grid-cols-[minmax(0,1fr)_208px]">
+    <div
+      data-testid="export-body"
+      className="grid gap-6 md:min-h-0 md:flex-1 md:grid-cols-[minmax(0,1fr)_18rem] md:grid-rows-[minmax(0,1fr)_auto]"
+    >
       {/* Preview */}
-      <div className="flex min-h-52 items-center justify-center overflow-hidden rounded-[18px] bg-surf2 p-6 md:col-span-2">
+      <div
+        data-testid="export-preview"
+        className="flex min-h-52 items-center justify-center overflow-hidden rounded-[18px] bg-surf2 p-6 md:row-span-2 md:min-h-0 md:p-10"
+      >
         {previewLoading ? (
           <span className="flex items-center gap-2 text-sm text-muted-foreground">
             <Spinner className="size-4" />
@@ -360,498 +351,58 @@ export function ExportModal({
           <img
             src={previewSrc}
             alt="Export preview"
-            className="max-h-72 max-w-full rounded object-contain shadow-md"
+            className="max-h-72 max-w-full rounded object-contain shadow-md md:max-h-full"
           />
         ) : null}
       </div>
 
       {/* Controls */}
-      <div className="space-y-5">
-        {/* Row 1: Background */}
-        <div className="space-y-2.5">
-          <p className="text-sm font-medium">Background</p>
-          <div className="flex flex-wrap items-center gap-2.5">
-            <button
-              type="button"
-              title="None"
-              onClick={() => onSettingsChange({ ...settings, background: null })}
-              className={cn(
-                "flex size-7 items-center justify-center rounded-full bg-surf2 text-[11px] text-muted-foreground transition-all hover:text-foreground",
-                settings.background === null
-                  ? "ring-2 ring-foreground ring-offset-2 ring-offset-background"
-                  : "",
-              )}
-            >
-              ✕
-            </button>
-            {EXPORT_BACKGROUNDS.map((b) => (
+      <div
+        data-testid="export-settings"
+        className="space-y-5 md:col-start-2 md:row-start-1 md:min-h-0 md:overflow-y-auto"
+      >
+        {/* A published snippet is sealed: exports keep its published look.
+            Only choices about the exported file itself are offered here. */}
+        <p className="text-sm text-muted-foreground">
+          Exports use the snippet exactly as it was sealed.
+        </p>
+
+        <div className="flex flex-col gap-2.5">
+          <p className="text-sm font-medium">Scale</p>
+          <div className="flex items-center gap-1.5">
+            {SIZE_OPTIONS.map((s) => (
               <button
-                key={b.label}
+                key={s}
                 type="button"
-                title={b.label}
-                onClick={() => onSettingsChange({ ...settings, background: b.label })}
+                onClick={() => onSettingsChange({ ...settings, pixelRatio: s })}
+                aria-pressed={settings.pixelRatio === s}
                 className={cn(
-                  "size-7 rounded-full transition-all hover:scale-110",
-                  settings.background === b.label
-                    ? "scale-110 ring-2 ring-foreground ring-offset-2 ring-offset-background"
-                    : "",
-                )}
-                style={{ background: `linear-gradient(135deg, ${b.from}, ${b.to})` }}
-              />
-            ))}
-            {/* Brand-flavoured gradients — separated by a thin divider so
-                they don't blend into the generic gradient row. The brand
-                logo doubles as the swatch's marker. */}
-            <span aria-hidden className="w-2" />
-            {EXPORT_BRAND_BACKGROUNDS.map((b) => (
-              <button
-                key={b.label}
-                type="button"
-                title={b.label}
-                onClick={() => onSettingsChange({ ...settings, background: b.label })}
-                className={cn(
-                  "flex size-7 items-center justify-center overflow-hidden rounded-full transition-all hover:scale-110",
-                  settings.background === b.label
-                    ? "scale-110 ring-2 ring-foreground ring-offset-2 ring-offset-background"
-                    : "",
-                )}
-                // When a pattern PNG exists (Tailwind beams, Resend folded
-                // paper), use it as the swatch background so the picker
-                // looks like ray.so's. Falls back to the gradient otherwise.
-                style={
-                  b.patternUrl
-                    ? {
-                        backgroundImage: `url(${b.patternUrl}), linear-gradient(135deg, ${b.from}, ${b.to})`,
-                        backgroundSize: "cover, cover",
-                        backgroundPosition: "center, center",
-                      }
-                    : { background: `linear-gradient(135deg, ${b.from}, ${b.to})` }
-                }
-              >
-                {b.logoUrl ? (
-                  // CSS mask so the logo's color is controlled here, not
-                  // baked into the SVG. White reads on every brand swatch
-                  // (all of them have dark `from`/`to` gradients).
-                  <span
-                    aria-hidden
-                    style={{
-                      width: 14,
-                      height: 14,
-                      backgroundColor: "white",
-                      maskImage: `url(${b.logoUrl})`,
-                      WebkitMaskImage: `url(${b.logoUrl})`,
-                      maskRepeat: "no-repeat",
-                      WebkitMaskRepeat: "no-repeat",
-                      maskSize: "contain",
-                      WebkitMaskSize: "contain",
-                      maskPosition: "center",
-                      WebkitMaskPosition: "center",
-                    }}
-                  />
-                ) : null}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Row 2: Outer padding | Inner padding | Corners | Size */}
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="flex flex-col gap-2.5">
-            <div className="flex items-center justify-between gap-2">
-              <p
-                className={cn(
-                  "text-sm font-medium",
-                  !settings.background && "text-muted-foreground/40",
-                )}
-              >
-                Outer padding
-              </p>
-              <output className="text-xs text-muted-foreground">{normalizedOuterPadding}px</output>
-            </div>
-            <Slider
-              aria-label="Outer padding"
-              aria-valuetext={
-                settings.outerPadding === 0 ? "No outer padding" : `${settings.outerPadding} pixels`
-              }
-              value={[exportOuterPaddingToSliderIndex(normalizedOuterPadding)]}
-              onValueChange={([index = 0]) =>
-                onSettingsChange({
-                  ...settings,
-                  outerPadding: exportOuterPaddingFromSliderIndex(index),
-                })
-              }
-              min={0}
-              max={5}
-              step={1}
-              disabled={!settings.background}
-              className="h-11"
-            />
-          </div>
-
-          <div className="flex flex-col gap-2.5">
-            <div className="flex items-center justify-between gap-2">
-              <p className="text-sm font-medium">Inner padding</p>
-              <output className="text-xs text-muted-foreground">{normalizedInnerPadding}px</output>
-            </div>
-            <Slider
-              aria-label="Inner padding"
-              aria-valuetext={`${normalizedInnerPadding} pixels`}
-              value={[exportInnerPaddingToSliderIndex(normalizedInnerPadding)]}
-              onValueChange={([index = 0]) =>
-                onSettingsChange({
-                  ...settings,
-                  innerPadding: exportInnerPaddingFromSliderIndex(index),
-                })
-              }
-              min={0}
-              max={5}
-              step={1}
-              className="h-11"
-            />
-          </div>
-
-          <div className="flex flex-col gap-2.5">
-            <div className="flex items-center justify-between gap-2">
-              <p className="text-sm font-medium">Corners</p>
-              <output className="text-xs text-muted-foreground">{normalizedCornerRadius}px</output>
-            </div>
-            <Slider
-              aria-label="Corner radius"
-              aria-valuetext={
-                normalizedCornerRadius === 0 ? "Square corners" : `${normalizedCornerRadius} pixels`
-              }
-              value={[exportCornerRadiusToSliderIndex(normalizedCornerRadius)]}
-              onValueChange={([index = 0]) =>
-                onSettingsChange({
-                  ...settings,
-                  cornerRadius: exportCornerRadiusFromSliderIndex(index),
-                })
-              }
-              min={0}
-              max={4}
-              step={1}
-              className="h-11"
-            />
-          </div>
-
-          <div className="flex flex-col gap-2.5">
-            <p className="text-sm font-medium">Size</p>
-            <div className="flex items-center gap-1.5">
-              {SIZE_OPTIONS.map((s) => (
-                <button
-                  key={s}
-                  type="button"
-                  onClick={() => onSettingsChange({ ...settings, pixelRatio: s })}
-                  className={cn(
-                    "h-11 rounded-full px-3.5 text-sm font-medium transition-colors focus-visible:focus-ring",
-                    settings.pixelRatio === s
-                      ? "bg-foreground text-background"
-                      : "bg-surf2 text-muted-foreground hover:text-foreground",
-                  )}
-                >
-                  {s}x
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Row 3: Language | Font | Font size */}
-        <div className="grid grid-cols-2 gap-5 sm:grid-cols-3">
-          <div className="space-y-2.5">
-            <p className="text-sm font-medium">Language</p>
-            <select
-              value={settings.language ?? ""}
-              onChange={(e) => onSettingsChange({ ...settings, language: e.target.value || null })}
-              className="h-11 w-full rounded-xl bg-surf2 px-3 text-sm text-foreground outline-hidden transition focus-visible:focus-ring"
-            >
-              {LANGUAGES.map((l) => (
-                <option key={l.id} value={l.id}>
-                  {l.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="space-y-2.5">
-            <p className="text-sm font-medium">Font</p>
-            <select
-              value={settings.fontId}
-              onChange={(e) => onSettingsChange({ ...settings, fontId: e.target.value })}
-              className="h-11 w-full rounded-xl bg-surf2 px-3 text-sm text-foreground outline-hidden transition focus-visible:focus-ring"
-              style={{ fontFamily: EXPORT_FONTS.find((f) => f.id === settings.fontId)?.family }}
-            >
-              {EXPORT_FONTS.map((f) => (
-                <option key={f.id} value={f.id} style={{ fontFamily: f.family }}>
-                  {f.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="space-y-2.5">
-            <p className="text-sm font-medium">Font size</p>
-            <select
-              aria-label="Font size"
-              value={String(normalizedFontSize)}
-              onChange={(e) => onSettingsChange({ ...settings, fontSize: Number(e.target.value) })}
-              className="h-11 w-full rounded-xl bg-surf2 px-3 text-sm text-foreground outline-hidden transition focus-visible:focus-ring"
-            >
-              {EXPORT_FONT_SIZE_VALUES.map((size) => (
-                <option key={size} value={size}>
-                  {size}px
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        <div className="space-y-2.5">
-          <p className="text-sm font-medium">Window</p>
-          <div className="flex flex-wrap gap-1.5">
-            {[
-              ["macOS", "macos"],
-              ["macOS Subtle", "macos-subtle"],
-              ["Windows", "windows"],
-              ["Minimal", "minimal"],
-              ["None", "none"],
-              ["Lumis", "lumis"],
-              ["Markdown", "markdown"],
-            ].map(([label, value]) => (
-              <button
-                key={value}
-                type="button"
-                onClick={() =>
-                  onSettingsChange({ ...settings, windowDecoration: value as WindowDecoration })
-                }
-                className={cn(
-                  "min-h-11 rounded-full px-3.5 text-sm font-medium transition-colors focus-visible:focus-ring md:min-h-9",
-                  settings.windowDecoration === value
+                  "h-11 rounded-full px-3.5 text-sm font-medium transition-colors focus-visible:focus-ring",
+                  settings.pixelRatio === s
                     ? "bg-foreground text-background"
                     : "bg-surf2 text-muted-foreground hover:text-foreground",
                 )}
               >
-                {label}
+                {s}x
               </button>
             ))}
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-x-6">
-          <label className="flex min-h-11 items-center gap-3 text-sm font-medium">
-            Lines
-            <Switch
-              checked={settings.lineNumbers}
-              onCheckedChange={(lineNumbers) => onSettingsChange({ ...settings, lineNumbers })}
-              aria-label="Show line numbers"
-            />
-          </label>
-          <label className="flex min-h-11 items-center gap-3 text-sm font-medium">
-            Reactions
-            <Switch
-              checked={settings.showReactions}
-              onCheckedChange={(showReactions) => onSettingsChange({ ...settings, showReactions })}
-              aria-label="Show reactions"
-            />
-          </label>
-          <label className="flex min-h-11 items-center gap-3 text-sm font-medium">
-            Ligatures
-            <Switch
-              checked={settings.ligatures}
-              onCheckedChange={(ligatures) => onSettingsChange({ ...settings, ligatures })}
-              aria-label="Font ligatures"
-            />
-          </label>
-          <label className="flex min-h-11 items-center gap-3 text-sm font-medium">
-            16:9
-            <Switch
-              checked={settings.aspectRatio === "16:9"}
-              onCheckedChange={(wide) =>
-                onSettingsChange({ ...settings, aspectRatio: wide ? "16:9" : null })
-              }
-              aria-label="16:9 canvas (1600×900)"
-            />
-          </label>
-          <label className="flex min-h-11 items-center gap-3 text-sm font-medium">
-            Comments
+        {comments && Object.keys(comments).length > 0 ? (
+          <label className="flex min-h-11 items-center justify-between gap-3 text-sm font-medium">
+            Include comments
             <Switch
               checked={settings.showComments}
               onCheckedChange={(showComments) => onSettingsChange({ ...settings, showComments })}
               aria-label="Show comments"
             />
           </label>
-        </div>
-
-        <section
-          aria-labelledby="export-header-label"
-          className="flex flex-col gap-3 rounded-[14px] bg-surf2 p-4"
-        >
-          <div className="flex min-h-11 items-center justify-between gap-4">
-            <div>
-              <h3 id="export-header-label" className="text-sm font-medium">
-                Header
-              </h3>
-              <p className="text-xs text-muted-foreground">Window chrome and labels</p>
-            </div>
-            <Switch
-              checked={settings.header.enabled}
-              onCheckedChange={(enabled) =>
-                onSettingsChange({
-                  ...settings,
-                  header: { ...settings.header, enabled },
-                })
-              }
-              aria-label="Show header"
-            />
-          </div>
-          <div
-            className={cn(
-              "flex flex-col gap-2 pl-2",
-              !settings.header.enabled && "pointer-events-none opacity-45",
-            )}
-          >
-            {(
-              [
-                ["Filename", "showFilename", "filenamePosition"],
-                ["Language", "showLanguage", "languagePosition"],
-              ] as const
-            ).map(([label, visibilityKey, positionKey]) => (
-              <div
-                key={visibilityKey}
-                className="grid min-w-0 grid-cols-[auto_minmax(0,1fr)] items-center gap-3"
-              >
-                <label className="flex min-h-11 w-28 items-center justify-between gap-2 text-sm">
-                  {label}
-                  <Switch
-                    checked={settings.header[visibilityKey]}
-                    onCheckedChange={(checked) =>
-                      onSettingsChange({
-                        ...settings,
-                        header: { ...settings.header, [visibilityKey]: checked },
-                      })
-                    }
-                    aria-label={`Show header ${label.toLowerCase()}`}
-                  />
-                </label>
-                <ToggleGroup
-                  type="single"
-                  variant="outline"
-                  value={settings.header[positionKey]}
-                  onValueChange={(position) => {
-                    if (!position) return;
-                    onSettingsChange({
-                      ...settings,
-                      header: { ...settings.header, [positionKey]: position },
-                    });
-                  }}
-                  aria-label={`${label} position`}
-                  className="grid w-full grid-cols-3"
-                >
-                  {(["left", "center", "right"] as const).map((position) => (
-                    <ToggleGroupItem
-                      key={position}
-                      value={position}
-                      aria-label={`${position} aligned ${label.toLowerCase()}`}
-                      className="h-11 capitalize"
-                    >
-                      {position}
-                    </ToggleGroupItem>
-                  ))}
-                </ToggleGroup>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <section
-          aria-labelledby="export-footer-label"
-          className="flex flex-col gap-3 rounded-[14px] bg-surf2 p-4"
-        >
-          <div className="flex min-h-11 items-center justify-between gap-4">
-            <div>
-              <h3 id="export-footer-label" className="text-sm font-medium">
-                Footer
-              </h3>
-              <p className="text-xs text-muted-foreground">Select the metadata to include</p>
-            </div>
-            <Switch
-              checked={settings.footer.enabled}
-              onCheckedChange={(enabled) =>
-                onSettingsChange({
-                  ...settings,
-                  footer: { ...settings.footer, enabled },
-                })
-              }
-              aria-label="Show footer"
-            />
-          </div>
-          <div
-            className={cn(
-              "flex flex-col gap-3 pl-2",
-              !settings.footer.enabled && "pointer-events-none opacity-45",
-            )}
-          >
-            <div className="flex flex-wrap items-center gap-x-5 gap-y-1">
-              {[
-                ["Language", "showLanguage"],
-                ["Theme", "showTheme"],
-                ["Line count", "showLineCount"],
-                ["Characters", "showCharCount"],
-                ["Author", "showAuthor"],
-              ].map(([label, key]) => (
-                <label key={key} className="flex min-h-11 items-center gap-3 text-sm">
-                  {label}
-                  <Switch
-                    checked={
-                      settings.footer[
-                        key as
-                          | "showLanguage"
-                          | "showTheme"
-                          | "showLineCount"
-                          | "showCharCount"
-                          | "showAuthor"
-                      ]
-                    }
-                    onCheckedChange={(checked) =>
-                      onSettingsChange({
-                        ...settings,
-                        footer: { ...settings.footer, [key]: checked },
-                      })
-                    }
-                    aria-label={`Show footer ${label.toLowerCase()}`}
-                  />
-                </label>
-              ))}
-            </div>
-            <ToggleGroup
-              type="single"
-              variant="outline"
-              value={settings.footer.alignment}
-              onValueChange={(alignment) => {
-                if (!alignment) return;
-                onSettingsChange({
-                  ...settings,
-                  footer: {
-                    ...settings.footer,
-                    alignment: alignment as ExportFooterSettings["alignment"],
-                  },
-                });
-              }}
-              aria-label="Footer position"
-              className="grid w-full grid-cols-3"
-            >
-              {(["left", "center", "right"] as const).map((alignment) => (
-                <ToggleGroupItem key={alignment} value={alignment} className="h-11 capitalize">
-                  {alignment}
-                </ToggleGroupItem>
-              ))}
-            </ToggleGroup>
-          </div>
-        </section>
+        ) : null}
       </div>
 
       {/* Export actions */}
-      <div className="flex flex-col gap-1 self-start rounded-[14px] bg-surf2 p-1.5 md:sticky md:top-0 md:col-start-2 md:row-start-2">
+      <div className="flex flex-col gap-1 rounded-[14px] bg-surf2 p-1.5 md:col-start-2 md:row-start-2">
         {EXPORT_ACTIONS.map(({ key, label, Icon, isAsync }) => {
           const handleClick =
             key === "png"
@@ -881,7 +432,9 @@ export function ExportModal({
               ) : (
                 <Icon className="size-4 shrink-0 text-muted-foreground" />
               )}
-              <span className="flex-1 text-left">{isWaiting ? "Exporting…" : displayLabel}</span>
+              <span className="min-w-0 flex-1 truncate text-left">
+                {isWaiting ? "Exporting…" : displayLabel}
+              </span>
             </button>
           );
         })}
@@ -892,7 +445,7 @@ export function ExportModal({
   if (isDesktop) {
     return (
       <Dialog open={open} onOpenChange={handleOpenChange}>
-        <DialogContent className="max-h-[calc(100dvh-4rem)] gap-6 overflow-y-auto sm:max-w-[880px]">
+        <DialogContent className="flex h-[calc(100dvh-2rem)] max-w-[calc(100vw-2rem)] flex-col gap-6 sm:max-w-[calc(100vw-2rem)]">
           <DialogHeader>
             <DialogTitle className="font-display text-[32px] font-normal">Export</DialogTitle>
             <DialogDescription className="sr-only">
