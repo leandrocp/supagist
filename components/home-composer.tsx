@@ -390,37 +390,13 @@ export function HomeComposer() {
       // can show every unique reaction with the reactor's avatar. Lift the
       // draft into chip shape using the viewer's own username as the reactor.
       const reactorUsername = effectiveViewerLabel || "you";
+      // The canonical PNG and SVG are exactly what Save as PNG / SVG would
+      // download, so the published files match the preview.
       const [canonicalFile, ogFile, svgString, cardFile] = await Promise.all([
-        createPreviewImage(draft, selectedBackground, exportReactions),
+        createDraftPng(draft, selectedBackground, exportReactions, reactorUsername, viewerAvatar),
         createOgImage(draft, reactorUsername, viewerAvatar),
-        createHighlightedSvg(
-          draft.code,
-          draft.filename,
-          draft.theme,
-          EXPORT_WIDTH,
-          undefined,
-          selectedBackground,
-          outerCanvasPadding,
-          draft.lineNumbers,
-          draft.fontId,
-          draft.languageOverride,
-          exportReactions,
-          draft.showReactions,
-          draft.header.enabled && draft.header.showFilename,
-          draft.footer.enabled,
-          reactorUsername,
-          viewerAvatar,
-          undefined,
-          false,
-          undefined,
-          draft.windowDecoration,
-          draft.cornerRadius,
-          draft.innerPadding,
-          draft.header,
-          draft.footer,
-          draft.fontSize,
-        ),
-        createCardImage(draft),
+        createDraftSvg(draft, selectedBackground, exportReactions, reactorUsername, viewerAvatar),
+        createCardImage(draft, reactorUsername, viewerAvatar),
       ]);
       const svgBlob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
 
@@ -545,36 +521,12 @@ export function HomeComposer() {
     setExportMenuOpen(false);
     setIsExporting(true);
     try {
-      const file = await renderToFile(
-        draft.code,
-        draft.filename,
-        draft.theme,
-        EXPORT_WIDTH,
-        undefined,
-        toPngFilename(draft.filename),
-        draft.pixelRatio,
+      const file = await createDraftPng(
+        draft,
         selectedBackground,
-        outerCanvasPadding,
-        draft.lineNumbers,
-        draft.fontId,
-        draft.languageOverride,
         exportReactions,
-        draft.showReactions,
-        draft.header.enabled && draft.header.showFilename,
-        draft.footer.enabled,
         effectiveViewerLabel || "you",
         viewerAvatar,
-        undefined,
-        false,
-        undefined,
-        draft.windowDecoration,
-        draft.cornerRadius,
-        draft.innerPadding,
-        draft.header,
-        draft.footer,
-        draft.fontSize,
-        draft.aspectRatio,
-        draft.ligatures,
       );
       triggerDownload(URL.createObjectURL(file), file.name, true);
     } catch (error: unknown) {
@@ -588,35 +540,12 @@ export function HomeComposer() {
     setExportMenuOpen(false);
     setIsExporting(true);
     try {
-      const svg = await createHighlightedSvg(
-        draft.code,
-        draft.filename,
-        draft.theme,
-        EXPORT_WIDTH,
-        undefined,
+      const svg = await createDraftSvg(
+        draft,
         selectedBackground,
-        outerCanvasPadding,
-        draft.lineNumbers,
-        draft.fontId,
-        draft.languageOverride,
         exportReactions,
-        draft.showReactions,
-        draft.header.enabled && draft.header.showFilename,
-        draft.footer.enabled,
         effectiveViewerLabel || "you",
         viewerAvatar,
-        undefined,
-        false,
-        undefined,
-        draft.windowDecoration,
-        draft.cornerRadius,
-        draft.innerPadding,
-        draft.header,
-        draft.footer,
-        draft.fontSize,
-        false,
-        draft.aspectRatio,
-        draft.ligatures,
       );
       const blob = new Blob([svg], { type: "image/svg+xml;charset=utf-8" });
       triggerDownload(
@@ -1552,10 +1481,15 @@ export function HomeComposer() {
 
 // ── image generation ──────────────────────────────────────────────────────────
 
-async function createPreviewImage(
+type DraftReactions = Record<number, import("@/lib/snippet-utils").ExportReactionChip[]>;
+
+/** Save as PNG, and the published canonical.png. */
+async function createDraftPng(
   draft: Draft,
-  background?: ExportBackground | null,
-  reactions?: Record<number, import("@/lib/snippet-utils").ExportReactionChip[]>,
+  background: ExportBackground | null,
+  reactions: DraftReactions | null,
+  authorUsername: string | null,
+  authorAvatarUrl: string | null,
 ): Promise<File> {
   return renderToFile(
     draft.code,
@@ -1566,7 +1500,7 @@ async function createPreviewImage(
     toPngFilename(draft.filename),
     draft.pixelRatio,
     background,
-    background ? draft.outerPadding : undefined,
+    background ? draft.outerPadding : 0,
     draft.lineNumbers,
     draft.fontId,
     draft.languageOverride,
@@ -1574,8 +1508,8 @@ async function createPreviewImage(
     draft.showReactions,
     draft.header.enabled && draft.header.showFilename,
     draft.footer.enabled,
-    undefined,
-    undefined,
+    authorUsername,
+    authorAvatarUrl,
     undefined,
     false,
     undefined,
@@ -1585,6 +1519,48 @@ async function createPreviewImage(
     draft.header,
     draft.footer,
     draft.fontSize,
+    draft.aspectRatio,
+    draft.ligatures,
+  );
+}
+
+/** Save as SVG, and the published canonical.svg. */
+async function createDraftSvg(
+  draft: Draft,
+  background: ExportBackground | null,
+  reactions: DraftReactions,
+  authorUsername: string | null,
+  authorAvatarUrl: string | null,
+): Promise<string> {
+  return createHighlightedSvg(
+    draft.code,
+    draft.filename,
+    draft.theme,
+    EXPORT_WIDTH,
+    undefined,
+    background,
+    background ? draft.outerPadding : 0,
+    draft.lineNumbers,
+    draft.fontId,
+    draft.languageOverride,
+    reactions,
+    draft.showReactions,
+    draft.header.enabled && draft.header.showFilename,
+    draft.footer.enabled,
+    authorUsername,
+    authorAvatarUrl,
+    undefined,
+    false,
+    undefined,
+    draft.windowDecoration,
+    draft.cornerRadius,
+    draft.innerPadding,
+    draft.header,
+    draft.footer,
+    draft.fontSize,
+    false,
+    draft.aspectRatio,
+    draft.ligatures,
   );
 }
 
@@ -1593,8 +1569,18 @@ async function createPreviewImage(
  * share image: the server lays it into the envelope instead of re-running
  * Lumis. Same frame, header and footer as the author's export.
  */
-async function createCardImage(draft: Draft): Promise<File> {
-  return createPreviewImage({ ...draft, pixelRatio: 2, showReactions: false }, null);
+async function createCardImage(
+  draft: Draft,
+  authorUsername: string,
+  authorAvatarUrl: string | null,
+): Promise<File> {
+  return createDraftPng(
+    { ...draft, pixelRatio: 2, showReactions: false, aspectRatio: null },
+    null,
+    null,
+    authorUsername,
+    authorAvatarUrl,
+  );
 }
 
 async function createOgImage(
