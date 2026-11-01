@@ -31,16 +31,21 @@ export default function DataHelpPage() {
 
       <Section title="Edit a snippet">
         <p>
-          Published snippets cannot be edited. To change one, publish a new snippet from the home
-          page and ask us to delete the old one.
+          Open the snippet while signed in and choose Edit, or choose Edit from its menu in{" "}
+          <Link href="/snippets" className={link}>
+            Your snippets
+          </Link>
+          . You can change the code, title, language, theme and visibility (public or unlisted); the
+          link stays the same. Changing the code, language or theme removes the images stored for
+          the old version.
         </p>
       </Section>
 
       <Section title="Delete a snippet">
         <p>
-          There is no delete button yet. Email <ContactLink /> from the address on your account with
-          the link of each snippet to delete. We delete the snippet together with its images,
-          comments, reactions and view records.
+          Open the snippet while signed in and choose Delete, or choose Delete from its menu in Your
+          snippets, then confirm. We delete the snippet together with its images, comments,
+          reactions and view records. There is no recovery.
         </p>
         <p>
           Snippets that nobody has viewed for six months are also deleted automatically, with no
@@ -68,19 +73,22 @@ export default function DataHelpPage() {
         <p>
           An assistant connected to Supagist&apos;s MCP server can render images and publish new
           snippets as you. Published snippets are unlisted, and common secrets in the code are
-          replaced with placeholders before anything is stored. The assistant cannot read, edit or
-          delete your existing snippets; to delete one it published, follow Delete a snippet above.
-          To stop an assistant from using your account, disconnect Supagist in that assistant. To
-          revoke its access on our side as well, email us.
+          replaced with placeholders before anything is stored. It can also edit or delete snippets
+          you own, and never anyone else&apos;s. To stop an assistant from using your account,
+          disconnect Supagist in that assistant. To revoke its access on our side as well, email us.
         </p>
       </Section>
 
       <Section title="Delete your account">
         <p>
-          There is no self-serve account deletion yet. Email <ContactLink /> from the address on
-          your account and ask us to delete it. We delete your account and profile together with
-          your snippets, comments, reactions and view records. You can also ask for a copy of the
-          data we hold about you.
+          Sign in, open{" "}
+          <Link href="/account" className={link}>
+            Account
+          </Link>{" "}
+          in the menu under your avatar, choose Delete account and confirm. We delete your account
+          and profile right away, together with your snippets, comments, reactions and view records.
+          If you cannot sign in, email <ContactLink /> from the address on your account instead. You
+          can also ask for a copy of the data we hold about you.
         </p>
         <p>
           Log out (in the menu under your avatar) ends your session but does not delete anything.

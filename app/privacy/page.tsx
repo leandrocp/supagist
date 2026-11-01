@@ -109,13 +109,14 @@ export default function PrivacyPage() {
           authentication provider, and the assistant receives tokens that let it use these tools as
           you. The MCP tools render code into SVG images, list the available options, and publish
           snippets. Code sent only to be rendered is not stored. Publishing saves a new unlisted
-          snippet under your account, as described above; the tools do not read, change or delete
-          your existing snippets. Before a published snippet is stored, the server replaces common
-          secrets (such as API keys and tokens, private keys, passwords in connection strings and
-          password or secret assignments) with visible placeholders, and Supagist does not store or
-          log the original values. Detection covers common formats only, so check code before you
-          publish it. We log technical details such as the language, image size and render time, not
-          the code. MCP requests count toward the rate-limit counters described above.
+          snippet under your account, as described above. The tools can also edit or delete snippets
+          you own, and never anyone else&apos;s. Before a published snippet is stored, the server
+          replaces common secrets (such as API keys and tokens, private keys, passwords in
+          connection strings and password or secret assignments) with visible placeholders, and
+          Supagist does not store or log the original values. Detection covers common formats only,
+          so check code before you publish it. We log technical details such as the language, image
+          size and render time, not the code. MCP requests count toward the rate-limit counters
+          described above.
         </p>
       </Section>
 
@@ -164,8 +165,8 @@ export default function PrivacyPage() {
           <li>Rate-limit counters are deleted after one day.</li>
           <li>Drafts stay in your browser until you publish or clear your browser data.</li>
           <li>
-            Accounts, profiles and guest accounts are kept until deleted on request. We do not yet
-            delete inactive accounts automatically.
+            Accounts, profiles and guest accounts are kept until you delete them or ask us to. We do
+            not yet delete inactive accounts automatically.
           </li>
         </ul>
       </Section>
@@ -176,8 +177,12 @@ export default function PrivacyPage() {
           <Link href="/snippets" className="text-foreground underline-offset-2 hover:underline">
             /snippets
           </Link>
-          . To delete a snippet, a comment or your account, or to ask what data we hold about you,
-          email <ContactLink /> from the address on your account. See{" "}
+          , and edit or delete them there. You can delete your account and all its data at{" "}
+          <Link href="/account" className="text-foreground underline-offset-2 hover:underline">
+            /account
+          </Link>
+          . To delete a comment, or to ask what data we hold about you, email <ContactLink /> from
+          the address on your account. See{" "}
           <Link href="/help/data" className="text-foreground underline-offset-2 hover:underline">
             Managing your data
           </Link>{" "}

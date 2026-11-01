@@ -7,9 +7,11 @@ import { SnippetList } from "./snippet-list";
 afterEach(cleanup);
 
 const snippet = {
+  id: "00000000-0000-4000-8000-000000000001",
   short_id: "abc123",
   slug: "hello-ts",
   filename: "hello.ts",
+  title: null,
   language: "typescript",
   created_at: "2026-07-14T12:00:00.000Z",
   view_count: 42,

@@ -7,6 +7,7 @@ import { bundledLanguages } from "@lumis-sh/lumis/bundles/full";
 import { createClient } from "@/lib/supabase/server";
 import { AppNav } from "@/components/app-nav";
 import { SiteFooter } from "@/components/site-footer";
+import { SnippetOwnerActions } from "@/components/snippet-owner-actions";
 import { SnippetAnnotationsView } from "./snippet-annotations-view";
 import {
   parseSnippetParam,
@@ -258,6 +259,14 @@ export default async function SnippetPage({ params }: Props) {
             <span>{snippet.line_count} lines</span>
             <span>{createdAt}</span>
           </div>
+          {author && currentUserId === author.id ? (
+            <SnippetOwnerActions
+              snippetId={snippet.id}
+              name={snippet.title ?? snippet.filename}
+              variant="buttons"
+              afterDelete="snippets"
+            />
+          ) : null}
         </header>
 
         {/* The collaborative code block keeps the snippet's own theme; only the

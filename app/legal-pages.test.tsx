@@ -60,13 +60,20 @@ describe("legal pages", () => {
     }
   });
 
-  it("data help points to the snippets list and to email for deletion that is not self-serve", () => {
+  it("data help describes the self-serve edit, delete and account deletion controls", () => {
     render(<DataHelpPage />);
-    expect(screen.getByRole("link", { name: "Your snippets" }).getAttribute("href")).toBe(
-      "/snippets",
-    );
-    expect(screen.getByText(/no self-serve account deletion yet/)).toBeTruthy();
-    expect(screen.getByText(/There is no delete button yet/)).toBeTruthy();
+    for (const link of screen.getAllByRole("link", { name: "Your snippets" }))
+      expect(link.getAttribute("href")).toBe("/snippets");
+    expect(screen.getByRole("link", { name: "Account" }).getAttribute("href")).toBe("/account");
+    expect(screen.getByText(/choose Delete account and confirm/)).toBeTruthy();
+    expect(screen.getByText(/choose Delete from its menu/)).toBeTruthy();
+    expect(screen.queryByText(/no self-serve|no delete button|cannot be edited\./)).toBeNull();
     expect(contact()).toContain("mailto:supagist@leandro.io");
+  });
+
+  it("privacy points to self-serve deletion and no longer says the MCP tools cannot delete", () => {
+    render(<PrivacyPage />);
+    expect(screen.getByRole("link", { name: "/account" }).getAttribute("href")).toBe("/account");
+    expect(screen.queryByText(/do not read, change or delete/)).toBeNull();
   });
 });

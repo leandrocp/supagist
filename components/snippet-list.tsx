@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { SnippetOwnerActions } from "@/components/snippet-owner-actions";
 import type { SnippetSummary } from "@/app/actions/get-my-snippets";
 import { languageDisplayName } from "@/lib/snippet-utils";
 
@@ -16,7 +17,7 @@ export function SnippetList({ snippets }: { snippets: SnippetSummary[] }) {
   return (
     <ul className="grid gap-x-8 gap-y-9 sm:grid-cols-2 lg:grid-cols-3">
       {snippets.map((s) => (
-        <li key={s.short_id}>
+        <li key={s.short_id} className="relative">
           <Link
             href={`/${s.slug}-${s.short_id}`}
             className="group flex flex-col gap-3 rounded-[18px] focus-visible:focus-ring"
@@ -35,7 +36,7 @@ export function SnippetList({ snippets }: { snippets: SnippetSummary[] }) {
             </span>
             <span className="flex items-baseline justify-between gap-3 px-0.5">
               <span className="truncate font-mono text-[15px] font-medium text-foreground">
-                {s.filename}
+                {s.title ?? s.filename}
               </span>
               {s.language ? (
                 <span className="shrink-0 font-mono text-xs text-muted-foreground">
@@ -48,6 +49,15 @@ export function SnippetList({ snippets }: { snippets: SnippetSummary[] }) {
               {s.view_count > 0 ? ` · ${s.view_count.toLocaleString()} views` : null}
             </span>
           </Link>
+          {/* Outside the link so opening the menu never navigates. */}
+          <div className="absolute top-2 right-2">
+            <SnippetOwnerActions
+              snippetId={s.id}
+              name={s.title ?? s.filename}
+              variant="menu"
+              afterDelete="refresh"
+            />
+          </div>
         </li>
       ))}
     </ul>

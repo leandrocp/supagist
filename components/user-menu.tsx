@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
-import { Laptop, LogOut, Moon, Sun } from "lucide-react";
+import Link from "next/link";
+import { Laptop, LogOut, Moon, Sun, UserRound } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -77,6 +78,11 @@ export function UserMenu({ username, avatarUrl }: { username: string; avatarUrl?
           </DropdownMenuRadioItem>
         </DropdownMenuRadioGroup>
         <DropdownMenuSeparator />
+        <DropdownMenuItem asChild className="flex gap-2">
+          <Link href="/account">
+            <UserRound className="text-muted-foreground" /> <span>Account</span>
+          </Link>
+        </DropdownMenuItem>
         <DropdownMenuItem className="flex gap-2" onSelect={() => void logout()}>
           <LogOut className="text-muted-foreground" /> <span>Log out</span>
         </DropdownMenuItem>
