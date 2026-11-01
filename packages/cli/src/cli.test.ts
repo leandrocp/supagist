@@ -1,4 +1,5 @@
-import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { createHash } from "node:crypto";
+import { mkdir, mkdtemp, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -41,6 +42,15 @@ describe("parseArgs", () => {
     expect(parseArgs(["options", "--json"])).toEqual({ command: "options", flags: { json: true } });
     expect(parseArgs(["--help"]).command).toBe("help");
     expect(parseArgs(["--version"]).command).toBe("version");
+    expect(parseArgs(["auth", "status", "--json"])).toEqual({
+      command: "auth",
+      action: "status",
+      flags: { json: true },
+    });
+    expect(parseArgs(["a.ts", "--publish", "--title", "Hi"]).flags).toEqual({
+      publish: true,
+      title: "Hi",
+    });
   });
 
   it.each([
@@ -56,8 +66,13 @@ describe("parseArgs", () => {
     [["options", "extra"], "takes no arguments"],
     [[], "Give a file to render"],
     [["a.ts", "b.ts"], "one file at a time"],
-    [["auth", "login"], "not available yet"],
-    [["a.ts", "--publish"], "not available yet"],
+    [["auth"], "Use supagist auth login, logout or status"],
+    [["auth", "signup"], "Use supagist auth login, logout or status"],
+    [["auth", "login", "--brand", "x"], "Unknown option --brand"],
+    [["a.ts", "--publish", "--out", "a.png"], "--out can't be used with --publish"],
+    [["a.ts", "--publish", "--pixel-ratio", "2"], "--pixel-ratio can't be used with --publish"],
+    [["a.ts", "--publish", "--author", "me"], "--author can't be used with --publish"],
+    [["a.ts", "--title", "Hi"], "--title only applies with --publish"],
   ])("rejects %j as a usage error", (argv, message) => {
     expect(() => parseArgs(argv)).toThrow(UsageError);
     expect(() => parseArgs(argv)).toThrow(message);
@@ -75,6 +90,8 @@ describe("parseLineRange", () => {
   });
 });
 
+const NOW = 1_800_000_000_000;
+
 describe("run", () => {
   let dir: string;
   let fetchMock: ReturnType<typeof vi.fn<typeof fetch>>;
@@ -83,6 +100,7 @@ describe("run", () => {
   let stdin: string[];
   let env: Record<string, string | undefined>;
   let tty: boolean;
+  let openUrl: ((url: string) => unknown) | undefined;
 
   beforeEach(async () => {
     dir = await mkdtemp(join(tmpdir(), "supagist-cli-"));
@@ -91,8 +109,9 @@ describe("run", () => {
     stdout = [];
     stderr = [];
     stdin = [];
-    env = {};
+    env = { XDG_CONFIG_HOME: dir };
     tty = false;
+    openUrl = undefined;
   });
   afterEach(() => rm(dir, { recursive: true, force: true }));
 
@@ -110,6 +129,8 @@ describe("run", () => {
       stderr: { write: (chunk: string) => stderr.push(chunk) },
       env,
       fetch: fetchMock,
+      openUrl,
+      now: () => NOW,
     });
   const svgResponse = () =>
     new Response("<svg>card</svg>", {
@@ -303,5 +324,239 @@ describe("run", () => {
     expect(await cli("help")).toBe(0);
     expect(stdout.join("")).toContain("Exit codes: 0 ok, 1 failure, 2 usage.");
     expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  describe("auth and publish", () => {
+    const issuer = "https://auth.example/auth/v1";
+    const tokenEndpoint = `${issuer}/oauth/token`;
+    const credentialsFile = () => join(dir, "supagist", "supagist.app.json");
+    // An unsigned JWT is enough: the CLI only reads claims for display.
+    const jwt = (claims: object) =>
+      `e30.${Buffer.from(JSON.stringify(claims)).toString("base64url")}.sig`;
+    const saveCredentials = async (expiresAt: number) => {
+      await mkdir(join(dir, "supagist"), { recursive: true });
+      await writeFile(
+        credentialsFile(),
+        JSON.stringify({
+          host: DEFAULT_HOST,
+          issuer,
+          tokenEndpoint,
+          clientId: "client-1",
+          accessToken: jwt({ email: "old@example.com" }),
+          refreshToken: "refresh-1",
+          expiresAt,
+        }),
+      );
+    };
+    const published = {
+      url: "https://supagist.app/deploy-config-abc123",
+      image_url: "https://storage.example/canonical.svg",
+      visibility: "unlisted",
+      redactions: { redacted: 1, kinds: { aws_access_key: 1 } },
+    };
+    const sse = (message: object) =>
+      new Response(`event: message\ndata: ${JSON.stringify(message)}\n\n`, {
+        headers: { "content-type": "text/event-stream" },
+      });
+
+    it("logs in with dynamic registration, PKCE and a loopback redirect", async () => {
+      let authorizeUrl: URL | undefined;
+      fetchMock.mockImplementation(async (input, init) => {
+        const url = String(input);
+        if (url === `${DEFAULT_HOST}/mcp`) {
+          return new Response(null, {
+            status: 401,
+            headers: {
+              "www-authenticate": `Bearer resource_metadata="${DEFAULT_HOST}/mcp/oauth-protected-resource"`,
+            },
+          });
+        }
+        if (url === `${DEFAULT_HOST}/mcp/oauth-protected-resource`) {
+          return Response.json({ authorization_servers: [issuer] });
+        }
+        // RFC 8414 path-inserted metadata is missing here, like local Supabase.
+        if (url === "https://auth.example/.well-known/oauth-authorization-server/auth/v1") {
+          return new Response("not found", { status: 404 });
+        }
+        if (url === `${issuer}/.well-known/oauth-authorization-server`) {
+          return Response.json({
+            issuer,
+            authorization_endpoint: `${issuer}/oauth/authorize`,
+            token_endpoint: tokenEndpoint,
+            registration_endpoint: `${issuer}/oauth/clients/register`,
+          });
+        }
+        if (url === `${issuer}/oauth/clients/register`) {
+          return Response.json({ client_id: "client-1" }, { status: 201 });
+        }
+        if (url === tokenEndpoint) {
+          return Response.json({
+            access_token: jwt({ email: "dev@example.com" }),
+            refresh_token: "refresh-1",
+            expires_in: 3600,
+          });
+        }
+        throw new Error(`unexpected ${url} ${init?.method}`);
+      });
+      // Stands in for the browser: the user approves and the server redirects.
+      openUrl = (url) => {
+        authorizeUrl = new URL(url);
+        const redirect = new URL(authorizeUrl.searchParams.get("redirect_uri")!);
+        redirect.searchParams.set("code", "code-1");
+        redirect.searchParams.set("state", authorizeUrl.searchParams.get("state")!);
+        return globalThis.fetch(redirect);
+      };
+
+      expect(await cli("auth", "login", "--json")).toBe(0);
+      expect(json()).toEqual({
+        ok: true,
+        host: DEFAULT_HOST,
+        signedIn: true,
+        email: "dev@example.com",
+      });
+
+      const registration = fetchMock.mock.calls.find(([u]) => String(u).endsWith("/register"));
+      const client = JSON.parse(String(registration![1]!.body));
+      expect(client).toMatchObject({ token_endpoint_auth_method: "none" });
+      expect(client.redirect_uris[0]).toMatch(/^http:\/\/127\.0\.0\.1:\d+\/callback$/);
+      expect(authorizeUrl!.searchParams.get("redirect_uri")).toBe(client.redirect_uris[0]);
+      expect(authorizeUrl!.searchParams.get("code_challenge_method")).toBe("S256");
+
+      const exchange = fetchMock.mock.calls.find(([u]) => String(u) === tokenEndpoint);
+      const form = new URLSearchParams(String(exchange![1]!.body));
+      expect(form.get("grant_type")).toBe("authorization_code");
+      expect(form.get("code")).toBe("code-1");
+      // The challenge the browser saw must be the hash of the verifier sent here.
+      expect(createHash("sha256").update(form.get("code_verifier")!).digest("base64url")).toBe(
+        authorizeUrl!.searchParams.get("code_challenge"),
+      );
+
+      expect((await stat(credentialsFile())).mode & 0o777).toBe(0o600);
+      expect(JSON.parse(await readFile(credentialsFile(), "utf8"))).toMatchObject({
+        clientId: "client-1",
+        refreshToken: "refresh-1",
+        tokenEndpoint,
+        expiresAt: NOW + 3_600_000,
+      });
+    });
+
+    it("publishes through publish_snippet, refreshing an expired session first", async () => {
+      await saveCredentials(NOW - 1);
+      fetchMock.mockImplementation(async (input) => {
+        if (String(input) === tokenEndpoint) {
+          return Response.json({
+            access_token: "fresh",
+            refresh_token: "refresh-2",
+            expires_in: 60,
+          });
+        }
+        return sse({
+          jsonrpc: "2.0",
+          id: 1,
+          result: { content: [{ type: "text", text: JSON.stringify(published) }] },
+        });
+      });
+
+      expect(
+        await cli(
+          join(dir, "auth.ts"),
+          "--publish",
+          "--title",
+          "Deploy config",
+          "--brand",
+          "supabase",
+        ),
+      ).toBe(0);
+      expect(stdout.join("")).toBe(`${published.url}\n`);
+      expect(stderr.join("")).toContain("Published as unlisted");
+      expect(stderr.join("")).toContain(
+        "Replaced 1 secret with [REDACTED:kind] (1 aws_access_key)",
+      );
+
+      const refresh = new URLSearchParams(String(fetchMock.mock.calls[0][1]!.body));
+      expect(Object.fromEntries(refresh)).toEqual({
+        grant_type: "refresh_token",
+        refresh_token: "refresh-1",
+        client_id: "client-1",
+      });
+      const call = sent(1);
+      expect(call.url).toBe(`${DEFAULT_HOST}/mcp`);
+      expect(new Headers(call.init.headers).get("authorization")).toBe("Bearer fresh");
+      expect(call.body).toMatchObject({
+        method: "tools/call",
+        params: { name: "publish_snippet" },
+      });
+      expect(call.body.params.arguments).toEqual({
+        code: "line 1\nline 2\nline 3\nline 4",
+        language: null,
+        filename: "auth.ts",
+        brand: "supabase",
+        title: "Deploy config",
+      });
+      // The rotated refresh token replaces the used one.
+      expect(JSON.parse(await readFile(credentialsFile(), "utf8"))).toMatchObject({
+        accessToken: "fresh",
+        refreshToken: "refresh-2",
+        expiresAt: NOW + 60_000,
+      });
+    });
+
+    it("reports a publish as JSON and tool errors as failures", async () => {
+      await saveCredentials(NOW + 3_600_000);
+      fetchMock.mockResolvedValueOnce(
+        Response.json({
+          jsonrpc: "2.0",
+          id: 1,
+          result: { content: [{ type: "text", text: JSON.stringify(published) }] },
+        }),
+      );
+      expect(await cli(join(dir, "auth.ts"), "--publish", "--json")).toBe(0);
+      expect(json()).toEqual({
+        ok: true,
+        url: published.url,
+        image: published.image_url,
+        visibility: "unlisted",
+        redactions: published.redactions,
+      });
+
+      stdout = [];
+      fetchMock.mockResolvedValueOnce(
+        Response.json({
+          jsonrpc: "2.0",
+          id: 1,
+          result: { isError: true, content: [{ type: "text", text: "Publish limit reached." }] },
+        }),
+      );
+      expect(await cli(join(dir, "auth.ts"), "--publish", "--json")).toBe(1);
+      expect(json().error).toEqual({ code: "PUBLISH_FAILED", message: "Publish limit reached." });
+    });
+
+    it("asks to log in when there is no session or the server ends it", async () => {
+      expect(await cli(join(dir, "auth.ts"), "--publish")).toBe(1);
+      expect(stderr.join("")).toBe(
+        `supagist: Not signed in to ${DEFAULT_HOST}. Run supagist auth login.\n`,
+      );
+      expect(fetchMock).not.toHaveBeenCalled();
+      expect(await cli("auth", "status")).toBe(1);
+
+      await saveCredentials(NOW + 3_600_000);
+      fetchMock.mockResolvedValueOnce(Response.json({ error: "invalid token" }, { status: 401 }));
+      stdout = [];
+      expect(await cli(join(dir, "auth.ts"), "--publish", "--json")).toBe(1);
+      expect(json().error.code).toBe("AUTH_REQUIRED");
+    });
+
+    it("shows status and logs out, revoking the CLI's own session", async () => {
+      await saveCredentials(NOW + 3_600_000);
+      expect(await cli("auth", "status")).toBe(0);
+      expect(stdout.join("")).toBe(`Signed in to ${DEFAULT_HOST} as old@example.com.\n`);
+
+      fetchMock.mockResolvedValueOnce(new Response(null, { status: 204 }));
+      stdout = [];
+      expect(await cli("auth", "logout", "--json")).toBe(0);
+      expect(json()).toEqual({ ok: true, host: DEFAULT_HOST, signedIn: false, revoked: true });
+      expect(sent().url).toBe(`${issuer}/logout?scope=local`);
+      await expect(stat(credentialsFile())).rejects.toThrow();
+    });
   });
 });

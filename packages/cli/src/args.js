@@ -52,22 +52,29 @@ const RENDER_FLAGS = {
   out: { type: "string" },
   format: { type: "string" },
   lines: { type: "string" },
+  publish: { type: "boolean" },
+  title: { type: "string" },
 };
 const ALIASES = { o: "out", h: "help", v: "version" };
-// Reserved until publishing is safe (unlisted by default, secrets redacted).
-const NOT_YET = new Set(["auth", "publish"]);
+const AUTH_ACTIONS = ["login", "logout", "status"];
+// Render-only flags: a published snippet is stored as SVG, owned and credited
+// to the signed-in account, and written to no local file.
+const NOT_PUBLISHED = ["out", "format", "pixel-ratio", "author"];
 
 /**
  * @param {string[]} argv arguments after the executable and script
- * @returns {{ command: "help" | "version" | "options" | "render", file?: string, flags: Record<string, string | number | boolean | null> }}
+ * @returns {{ command: "help" | "version" | "options" | "auth" | "render", file?: string, action?: string, flags: Record<string, string | number | boolean | null> }}
  */
 export function parseArgs(argv) {
   /** @type {string[]} */
   const positionals = [];
   /** @type {Record<string, string | number | boolean | null>} */
   const flags = {};
-  const command = argv[0] === "options" || argv[0] === "render" ? argv[0] : undefined;
-  const flagSet = command === "options" ? GLOBAL_FLAGS : { ...GLOBAL_FLAGS, ...RENDER_FLAGS };
+  const command = ["options", "auth", "render"].includes(argv[0]) ? argv[0] : undefined;
+  const flagSet =
+    command === "options" || command === "auth"
+      ? GLOBAL_FLAGS
+      : { ...GLOBAL_FLAGS, ...RENDER_FLAGS };
   /** @param {string} name */
   const lookup = (name) => (Object.hasOwn(flagSet, name) ? flagSet[name] : undefined);
 
@@ -84,7 +91,6 @@ export function parseArgs(argv) {
     const [rawName, inline] = arg.startsWith("--")
       ? splitOnce(arg.slice(2))
       : [ALIASES[/** @type {keyof typeof ALIASES} */ (arg.slice(1))] ?? arg.slice(1), undefined];
-    if (NOT_YET.has(rawName)) throw notYet();
     const negated = rawName.startsWith("no-") && lookup(rawName.slice(3))?.type === "boolean";
     const name = negated ? rawName.slice(3) : rawName;
     const flag = lookup(name);
@@ -111,7 +117,12 @@ export function parseArgs(argv) {
 
   if (flags.version) return { command: "version", flags };
   if (flags.help || positionals[0] === "help") return { command: "help", flags };
-  if (NOT_YET.has(positionals[0]) && !command) throw notYet();
+  if (command === "auth") {
+    if (positionals.length !== 1 || !AUTH_ACTIONS.includes(positionals[0])) {
+      throw new UsageError("Use supagist auth login, logout or status.");
+    }
+    return { command, action: positionals[0], flags };
+  }
   if (command === "options") {
     if (positionals.length) throw new UsageError("supagist options takes no arguments.");
     return { command, flags };
@@ -120,6 +131,12 @@ export function parseArgs(argv) {
     throw new UsageError("Give a file to render, or - for stdin. Run supagist --help.");
   }
   if (positionals.length > 1) throw new UsageError("Render one file at a time.");
+  if (flags.publish) {
+    const conflict = NOT_PUBLISHED.find((name) => name in flags);
+    if (conflict) throw new UsageError(`--${conflict} can't be used with --publish.`);
+  } else if ("title" in flags) {
+    throw new UsageError("--title only applies with --publish.");
+  }
   return { command: "render", file: positionals[0], flags };
 }
 
@@ -127,12 +144,6 @@ export function parseArgs(argv) {
 function splitOnce(text) {
   const at = text.indexOf("=");
   return at === -1 ? [text, undefined] : [text.slice(0, at), text.slice(at + 1)];
-}
-
-function notYet() {
-  return new UsageError(
-    "Publishing and auth are not available yet. Render to a file with --out instead.",
-  );
 }
 
 /**

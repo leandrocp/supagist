@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { readFile, writeFile } from "node:fs/promises";
 import { basename, extname } from "node:path";
 import { UsageError, parseArgs, parseLineRange, renderFields } from "./args.js";
+import { AuthError, accessToken, loadCredentials, login, logout, tokenClaims } from "./auth.js";
 
 export const VERSION = JSON.parse(
   readFileSync(new URL("../package.json", import.meta.url), "utf8"),
@@ -14,13 +15,17 @@ export const HELP = `supagist ${VERSION}: turn code into a Supagist image
 
 Usage
   supagist <file|-> [options]       Render a file, or stdin with -
+  supagist <file|-> --publish       Publish an unlisted snippet and print its link
   supagist options [--json]         List brands, themes, fonts, languages and more
+  supagist auth login|logout|status Sign the CLI in to publish (opens a browser)
 
 Output
   -o, --out <file>        Write to a .svg or .png file (default: stdout)
       --format svg|png    Output format (default: from --out, else svg)
       --lines <a-b>       Render only lines a to b of the file
       --json              Machine-readable output and errors on stdout
+      --publish           Save an unlisted snippet to your account instead
+      --title <text>      Page title of the published snippet
       --host <url>        Server (default: $SUPAGIST_HOST or ${DEFAULT_HOST})
 
 Appearance (values come from \`supagist options\`; flags override the brand)
@@ -34,7 +39,9 @@ Appearance (values come from \`supagist options\`; flags override the brand)
   --[no-]footer  --[no-]footer-language  --[no-]footer-theme  --[no-]footer-lines
   --[no-]footer-chars  --[no-]footer-author  --footer-align <left|center|right>
 
-Rendering creates nothing on the server. Exit codes: 0 ok, 1 failure, 2 usage.
+Rendering creates nothing on the server. --publish creates an unlisted snippet
+(anyone with the link can view it) after replacing common secrets with
+[REDACTED:kind]. Exit codes: 0 ok, 1 failure, 2 usage.
 `;
 
 /**
@@ -44,6 +51,8 @@ Rendering creates nothing on the server. Exit codes: 0 ok, 1 failure, 2 usage.
  *   stderr: { write(chunk: string): unknown },
  *   env: Record<string, string | undefined>,
  *   fetch: typeof fetch,
+ *   openUrl?: (url: string) => unknown,
+ *   now?: () => number,
  * }} Io
  */
 
@@ -68,16 +77,23 @@ export async function run(argv, io) {
     if (args.command === "help") return print(io, HELP);
     const host = resolveHost(/** @type {string | undefined} */ (args.flags.host), io.env);
     if (args.command === "options") return await options(host, args.flags, io);
+    if (args.command === "auth")
+      return await auth(host, /** @type {string} */ (args.action), args.flags, io);
     return await render(host, /** @type {string} */ (args.file), args.flags, io);
   } catch (error) {
     const usage = error instanceof UsageError;
     const details =
       error instanceof ApiError
         ? error.details
-        : { code: usage ? "USAGE" : "FAILED", message: String(error?.message ?? error) };
+        : {
+            code: usage ? "USAGE" : error instanceof AuthError ? error.code : "FAILED",
+            message: String(error?.message ?? error),
+          };
     if (json) io.stdout.write(`${JSON.stringify({ ok: false, error: details })}\n`);
     else io.stderr.write(`supagist: ${details.message}\n`);
-    const invalidInput = error instanceof ApiError && [400, 413].includes(details.status ?? 0);
+    const invalidInput =
+      error instanceof ApiError &&
+      ([400, 413].includes(details.status ?? 0) || details.code === "INVALID_INPUT");
     return usage || invalidInput ? EXIT.usage : EXIT.failure;
   }
 }
@@ -127,7 +143,13 @@ async function request(host, path, io, init = {}) {
   const body = await response.json().catch(() => null);
   const retryAfter = Number(response.headers.get("retry-after")) || undefined;
   throw new ApiError({
-    code: body?.error?.code ?? `HTTP_${response.status}`,
+    // MCP errors are JSON-RPC objects with numeric codes.
+    code:
+      typeof body?.error?.code === "string"
+        ? body.error.code
+        : response.status === 429
+          ? "RATE_LIMITED"
+          : `HTTP_${response.status}`,
     message: body?.error?.message ?? `${host} answered ${response.status}.`,
     status: response.status,
     ...(retryAfter ? { retryAfter } : {}),
@@ -185,14 +207,15 @@ async function render(host, file, flags, io) {
   // A final newline is not a line of the image.
   code = code.replace(/\r?\n$/, "");
 
-  const body = {
+  const fields = {
     code,
     // null asks the server to detect the language from the filename and code.
     language: null,
     ...(file === "-" ? {} : { filename: basename(file) }),
     ...renderFields(flags),
-    ...(format === "png" ? { format } : {}),
   };
+  if (flags.publish) return await publish(host, fields, flags, io);
+  const body = { ...fields, ...(format === "png" ? { format } : {}) };
   const response = await request(host, "/api/render", io, {
     method: "POST",
     headers: { "content-type": "application/json" },
@@ -265,4 +288,128 @@ function cropLines(code, [start, end]) {
     throw new UsageError(`--lines ${start}-${end} starts after the last line (${lines.length}).`);
   }
   return lines.slice(start - 1, end).join("\n");
+}
+
+/**
+ * Publishes through the MCP publish_snippet tool as the signed-in CLI user:
+ * the server redacts secrets, stores the snippet as unlisted and applies the
+ * same storage policies, RLS and rate limits as any publish.
+ * @param {string} host
+ * @param {Record<string, unknown>} fields
+ * @param {Record<string, string | number | boolean | null>} flags
+ * @param {Io} io
+ */
+async function publish(host, fields, flags, io) {
+  const token = await accessToken(host, io);
+  const args = { ...fields, ...(typeof flags.title === "string" ? { title: flags.title } : {}) };
+  let response;
+  try {
+    response = await request(host, "/mcp", io, {
+      method: "POST",
+      headers: {
+        authorization: `Bearer ${token}`,
+        "content-type": "application/json",
+        accept: "application/json, text/event-stream",
+        "mcp-protocol-version": "2025-06-18",
+      },
+      body: JSON.stringify({
+        jsonrpc: "2.0",
+        id: 1,
+        method: "tools/call",
+        params: { name: "publish_snippet", arguments: args },
+      }),
+    });
+  } catch (error) {
+    if (error instanceof ApiError && error.details.status === 401) {
+      throw new AuthError(`Your CLI session for ${host} has ended. Run supagist auth login.`);
+    }
+    throw error;
+  }
+  const message = parseRpc(await response.text());
+  if (message?.error) {
+    throw new ApiError({
+      // -32602: arguments failed the tool's input schema.
+      code: message.error.code === -32602 ? "INVALID_INPUT" : "PUBLISH_FAILED",
+      message: String(message.error.message),
+    });
+  }
+  const text = message?.result?.content?.find((/** @type {any} */ c) => c.type === "text")?.text;
+  if (message?.result?.isError || typeof text !== "string") {
+    throw new ApiError({ code: "PUBLISH_FAILED", message: text ?? "Publishing failed." });
+  }
+  const result = JSON.parse(text);
+  const output = {
+    ok: true,
+    url: result.url,
+    image: result.image_url,
+    visibility: result.visibility,
+    redactions: result.redactions,
+  };
+  if (flags.json) return print(io, `${JSON.stringify(output)}\n`);
+  const redacted = result.redactions?.redacted ?? 0;
+  const kinds = Object.entries(result.redactions?.kinds ?? {})
+    .map(([kind, count]) => `${count} ${kind}`)
+    .join(", ");
+  io.stderr.write(
+    `Published as ${result.visibility}: anyone with the link can view it.\n` +
+      (redacted
+        ? `Replaced ${redacted} secret${redacted === 1 ? "" : "s"} with [REDACTED:kind] (${kinds}).\n`
+        : ""),
+  );
+  return print(io, `${result.url}\n`);
+}
+
+/** A JSON-RPC message from a JSON or single-event SSE body. @param {string} body */
+function parseRpc(body) {
+  const data =
+    body.startsWith("event:") || body.startsWith("data:")
+      ? body
+          .split("\n")
+          .find((line) => line.startsWith("data:"))
+          ?.slice(5)
+      : body;
+  try {
+    return JSON.parse(data ?? "");
+  } catch {
+    throw new ApiError({ code: "PUBLISH_FAILED", message: "The server sent an unreadable reply." });
+  }
+}
+
+/**
+ * @param {string} host
+ * @param {string} action
+ * @param {Record<string, unknown>} flags
+ * @param {Io} io
+ */
+async function auth(host, action, flags, io) {
+  /** @param {Record<string, unknown>} result @param {string} text */
+  const report = (result, text) =>
+    flags.json ? print(io, `${JSON.stringify({ ok: true, host, ...result })}\n`) : print(io, text);
+  if (action === "login") {
+    const credentials = await login(host, io);
+    const email = tokenClaims(credentials.accessToken).email;
+    return report(
+      { signedIn: true, email },
+      `Signed in to ${host}${email ? ` as ${email}` : ""}.\n`,
+    );
+  }
+  if (action === "logout") {
+    const { signedOut, revoked } = await logout(host, io);
+    return report(
+      { signedIn: false, revoked },
+      !signedOut
+        ? `Not signed in to ${host}.\n`
+        : revoked
+          ? `Signed out of ${host}.\n`
+          : `Removed the saved sign-in for ${host}. The server did not confirm the session ended.\n`,
+    );
+  }
+  const credentials = await loadCredentials(host, io);
+  if (!credentials) {
+    if (flags.json) io.stdout.write(`${JSON.stringify({ ok: true, host, signedIn: false })}\n`);
+    else io.stderr.write(`Not signed in to ${host}. Run supagist auth login.\n`);
+    return EXIT.failure;
+  }
+  const email = tokenClaims(credentials.accessToken).email;
+  return report({ signedIn: true, email }, `Signed in to ${host}${email ? ` as ${email}` : ""}.\n`);
 }

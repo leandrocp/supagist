@@ -12,8 +12,13 @@ npx supagist options --json
 
 Requires Node.js 22 or later. No runtime dependencies.
 
+```sh
+npm install -g supagist   # or run it without installing: npx supagist
+```
+
 Rendering creates nothing on the server: no snippet, no URL, no stored code.
 Your code is sent to the Supagist render API to be drawn, so don't render secrets.
+`--publish` is the only command that saves anything.
 
 ## Render
 
@@ -124,11 +129,57 @@ The CLI is a thin client for two endpoints, which you can also call directly:
   and `X-Supagist-Height` headers. Errors are JSON:
   `{"error":{"code":"…","message":"…"}}`.
 
-## Not yet
+## Publish
 
-`--publish` and `supagist auth login|logout|status` will create shareable
-snippets once publishing from the CLI is safe (unlisted by default, with
-secrets redacted). Until then they exit with a usage error.
+```sh
+supagist auth login                                    # once per machine
+supagist src/lib/auth.ts --lines 12-40 --brand supabase --publish --title "Auth flow"
+supagist src/app.ts --publish --json
+```
+
+`--publish` saves a snippet to your Supagist account and prints its link on
+stdout. It takes the same appearance flags as a render, plus `--title` for the
+page heading and link slug. `--out`, `--format`, `--pixel-ratio` and `--author`
+don't apply: the snippet is stored as SVG and credited to your account.
+
+- **Unlisted.** Anyone with the link can view the snippet. It is never listed
+  or indexed.
+- **Secrets are redacted.** Before anything is stored, the server replaces
+  common secrets (API keys, tokens, private keys) in the code and title with
+  `[REDACTED:kind]`. The output says how many were replaced, never their values.
+  It is a safety net, not a guarantee: don't publish code you wouldn't share.
+- Each call creates a new snippet. Don't retry a success.
+- Errors have the code `PUBLISH_FAILED` (exit 1), including options the
+  server rejects, or `AUTH_REQUIRED` when you need to run `supagist auth login`.
+
+```json
+{
+  "ok": true,
+  "url": "https://supagist.app/auth-flow-x7k2q9",
+  "image": "https://….supabase.co/storage/v1/object/public/snippet-images/…/canonical.svg",
+  "visibility": "unlisted",
+  "redactions": { "redacted": 1, "kinds": { "aws_access_key": 1 } }
+}
+```
+
+Publishing is limited per account: 3 a minute, 10 an hour and 20 a day,
+shared with publishing from the web.
+
+## Sign in
+
+```sh
+supagist auth login    # opens the browser to approve the CLI
+supagist auth status   # exit 0 when signed in, 1 when not
+supagist auth logout
+```
+
+`auth login` prints a link and opens it in the browser. Sign in to Supagist
+and approve **Supagist CLI**. The CLI is its own OAuth client with its own
+session: it registers itself, uses PKCE and receives the code on a
+`127.0.0.1` loopback port. It never reads or reuses your browser session.
+Credentials live in `~/.config/supagist/<host>.json` (or under
+`$XDG_CONFIG_HOME`) with mode 0600, and refresh themselves. `--host` picks the
+server, so local and preview deployments keep separate sign-ins.
 
 ## Develop
 
@@ -136,9 +187,16 @@ From the repository root:
 
 ```sh
 supabase start
-supabase functions serve render
+supabase functions serve   # render, plus mcp for --publish
 npm run dev
 node packages/cli src/app.ts --host http://localhost:3000 --out app.svg
 npx vitest run packages/cli       # unit tests
 npx playwright test e2e/cli.test.ts --project=chromium   # against the local server
 ```
+
+## Release
+
+Bump `version` in `packages/cli/package.json`, merge to `main`, then push a
+matching tag such as `cli-v0.1.0`. The Release CLI workflow tests the package
+and publishes it to npm with provenance, using the `NPM_TOKEN` repository
+secret.
