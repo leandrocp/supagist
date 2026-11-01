@@ -64,7 +64,6 @@ describe("parseArgs", () => {
     [["a.ts", "--brand", "a", "--brand", "b"], "--brand was given more than once"],
     [["options", "--brand", "x"], "Unknown option --brand"],
     [["options", "extra"], "takes no arguments"],
-    [[], "Give a file to render"],
     [["a.ts", "b.ts"], "one file at a time"],
     [["auth"], "Use supagist auth login, logout or status"],
     [["auth", "signup"], "Use supagist auth login, logout or status"],
@@ -100,6 +99,7 @@ describe("run", () => {
   let stdin: string[];
   let env: Record<string, string | undefined>;
   let tty: boolean;
+  let stdinTty: boolean;
   let openUrl: ((url: string) => unknown) | undefined;
 
   beforeEach(async () => {
@@ -111,15 +111,19 @@ describe("run", () => {
     stdin = [];
     env = { XDG_CONFIG_HOME: dir };
     tty = false;
+    stdinTty = false;
     openUrl = undefined;
   });
   afterEach(() => rm(dir, { recursive: true, force: true }));
 
   const cli = (...argv: string[]) =>
     run(argv, {
-      stdin: (async function* () {
-        yield* stdin;
-      })(),
+      stdin: Object.assign(
+        (async function* () {
+          yield* stdin;
+        })(),
+        { isTTY: stdinTty },
+      ),
       stdout: {
         write: (chunk: string | Uint8Array) => stdout.push(Buffer.from(chunk).toString()),
         get isTTY() {
@@ -169,6 +173,33 @@ describe("run", () => {
       filename: "auth.ts",
       brand: "supabase",
     });
+  });
+
+  it("takes lines from file:a-b, unless a file has that whole name", async () => {
+    fetchMock.mockImplementation(async () => svgResponse());
+    expect(await cli(`${join(dir, "auth.ts")}:2-3`)).toBe(0);
+    expect(sent().body).toMatchObject({ code: "line 2\nline 3", filename: "auth.ts" });
+    expect(await cli(`${join(dir, "auth.ts")}:4`)).toBe(0);
+    expect(sent(1).body.code).toBe("line 4");
+
+    await writeFile(join(dir, "odd:2"), "whole name");
+    expect(await cli(join(dir, "odd:2"))).toBe(0);
+    expect(sent(2).body).toMatchObject({ code: "whole name", filename: "odd:2" });
+
+    expect(await cli(`${join(dir, "auth.ts")}:2-3`, "--lines", "1-2")).toBe(2);
+    expect(stderr.join("")).toContain("Give the lines once");
+  });
+
+  it("reads piped code without -, and explains itself when nothing is piped", async () => {
+    fetchMock.mockResolvedValue(svgResponse());
+    stdin = ["const a = 1;\n"];
+    expect(await cli("--filename", "a.ts")).toBe(0);
+    expect(sent().body).toMatchObject({ code: "const a = 1;", filename: "a.ts" });
+
+    stdinTty = true;
+    expect(await cli()).toBe(2);
+    expect(stderr.join("")).toContain("Nothing to render.");
+    expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
   it("clamps a range that runs past the end of the file", async () => {

@@ -1,5 +1,5 @@
 import { readFileSync } from "node:fs";
-import { readFile, writeFile } from "node:fs/promises";
+import { access, readFile, writeFile } from "node:fs/promises";
 import { basename, extname, join } from "node:path";
 import { UsageError, parseArgs, parseLineRange, renderFields } from "./args.js";
 import { AuthError, accessToken, loadCredentials, login, logout, tokenClaims } from "./auth.js";
@@ -11,10 +11,20 @@ export const DEFAULT_HOST = "https://supagist.app";
 export const EXIT = { ok: 0, failure: 1, usage: 2 };
 const FORMATS = ["svg", "png"];
 
+// Shown when there is nothing to render: what it does and the common cases.
+const SHORT_HELP = `Nothing to render. Give a file, a range or pipe code in:
+
+  supagist src/app.ts                     app.png here
+  supagist src/app.ts:12-40 --brand supabase
+  pbpaste | supagist --filename app.ts
+
+Run supagist --help for every option.`;
+
 export const HELP = `supagist ${VERSION}: turn code into a Supagist image
 
 Usage
-  supagist <file|-> [options]       Render a file, or stdin with -
+  supagist <file[:a-b]> [options]   Render a file, or lines a to b of it
+  supagist [options] < file         Render piped code (or name stdin with -)
   supagist <file|-> --publish       Publish an unlisted snippet and print its link
   supagist options [--json]         List brands, themes, fonts, languages and more
   supagist auth login|logout|status Sign the CLI in to publish (opens a browser)
@@ -48,7 +58,7 @@ Rendering creates nothing on the server. --publish creates an unlisted snippet
 
 /**
  * @typedef {{
- *   stdin: AsyncIterable<Buffer | string>,
+ *   stdin: AsyncIterable<Buffer | string> & { isTTY?: boolean },
  *   stdout: { write(chunk: string | Uint8Array): unknown, isTTY?: boolean },
  *   stderr: { write(chunk: string): unknown },
  *   env: Record<string, string | undefined>,
@@ -82,7 +92,8 @@ export async function run(argv, io) {
     if (args.command === "options") return await options(host, args.flags, io);
     if (args.command === "auth")
       return await auth(host, /** @type {string} */ (args.action), args.flags, io);
-    return await render(host, /** @type {string} */ (args.file), args.flags, io);
+    if (args.file === undefined && io.stdin.isTTY) throw new UsageError(SHORT_HELP);
+    return await render(host, args.file ?? "-", args.flags, io);
   } catch (error) {
     const usage = error instanceof UsageError;
     const details =
@@ -207,7 +218,13 @@ async function render(host, file, flags, io) {
     out,
   );
 
-  const range = typeof flags.lines === "string" ? parseLineRange(flags.lines) : undefined;
+  const source = file === "-" ? { file } : await locate(file);
+  if (source.lines && flags.lines !== undefined) {
+    throw new UsageError(`Give the lines once: ${file} already has :${source.lines}.`);
+  }
+  file = source.file;
+  const lines = source.lines ?? flags.lines;
+  const range = typeof lines === "string" ? parseLineRange(lines) : undefined;
   let code = file === "-" ? await readStdin(io.stdin) : await readSource(file);
   if (range) code = cropLines(code, range);
   // A final newline is not a line of the image.
@@ -298,6 +315,32 @@ function outputFormat(format, out) {
   return extension;
 }
 
+/**
+ * Splits "path:12-40" (the form editors and stack traces print) into the
+ * file and its lines, unless a file with that whole name exists.
+ * @param {string} spec
+ * @returns {Promise<{ file: string, lines?: string }>}
+ */
+async function locate(spec) {
+  const colon = spec.lastIndexOf(":");
+  if (colon <= 0 || (await exists(spec))) return { file: spec };
+  const lines = spec.slice(colon + 1);
+  try {
+    parseLineRange(lines);
+  } catch {
+    return { file: spec };
+  }
+  return { file: spec.slice(0, colon), lines };
+}
+
+/** @param {string} path */
+async function exists(path) {
+  return access(path).then(
+    () => true,
+    () => false,
+  );
+}
+
 /** @param {string} file */
 async function readSource(file) {
   try {
@@ -319,7 +362,7 @@ async function readStdin(stdin) {
 function cropLines(code, [start, end]) {
   const lines = code.replace(/\r?\n$/, "").split(/\r?\n/);
   if (start > lines.length) {
-    throw new UsageError(`--lines ${start}-${end} starts after the last line (${lines.length}).`);
+    throw new UsageError(`Lines ${start}-${end} start after the last line (${lines.length}).`);
   }
   return lines.slice(start - 1, end).join("\n");
 }

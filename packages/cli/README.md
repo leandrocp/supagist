@@ -36,7 +36,7 @@ supagist <file|-> [options]
 | `-h, --help`        | Show help.                                                                                                                                                                                                         |
 | `-v, --version`     | Show the version.                                                                                                                                                                                                  |
 
-Use `-` to read the code from stdin. The language is detected from the file
+Pipe code in (`pbpaste | supagist --filename app.ts`), or use `-` to name stdin explicitly. `supagist src/app.ts:12-40` is the same as `--lines 12-40`, so paths copied from an editor or a stack trace work as is. The language is detected from the file
 name (or `--filename`) and the code, unless you pass `--language`.
 
 An image holds at most 30 visual rows (lines wrap at 110 columns), and the

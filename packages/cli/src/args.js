@@ -127,9 +127,7 @@ export function parseArgs(argv) {
     if (positionals.length) throw new UsageError("supagist options takes no arguments.");
     return { command, flags };
   }
-  if (positionals.length === 0) {
-    throw new UsageError("Give a file to render, or - for stdin. Run supagist --help.");
-  }
+  // No file means stdin; run() shows a short help instead when stdin is a terminal.
   if (positionals.length > 1) throw new UsageError("Render one file at a time.");
   if (flags.publish) {
     const conflict = NOT_PUBLISHED.find((name) => name in flags);
