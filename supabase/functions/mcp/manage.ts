@@ -1,6 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { z } from "zod";
-import { renderInput } from "./input.ts";
 import { redactSecrets, type RedactionSummary } from "./redact.ts";
 
 const APP_ORIGIN = "https://supagist.app";
@@ -27,29 +26,24 @@ export function shortIdFromRef(ref: string): string | null {
   return /^[a-z0-9]{6}$/.test(short) ? short : null;
 }
 
-// Same code limits as a publish (30 source lines, 8,000 code points).
-const { code } = renderInput.shape;
-
+// A published snippet is sealed: only its title and visibility can change.
 export const updateInput = z
   .strictObject({
     snippet: snippetRef,
-    code: code.optional(),
     title: z
       .string()
       .trim()
       .max(120)
       .optional()
       .describe("New page title. An empty string clears it, so the page shows the filename."),
-    language: z.string().min(1).max(64).optional().describe("Exact language ID."),
-    theme: z.string().min(1).max(64).optional().describe("Syntax theme name."),
     visibility: z
       .enum(["public", "unlisted"])
       .optional()
       .describe("public snippets can appear in listings; unlisted ones only open by link."),
   })
   .refine(
-    (input) => Object.keys(input).some((key) => key !== "snippet"),
-    "Change at least one of code, title, language, theme or visibility",
+    (input) => input.title !== undefined || input.visibility !== undefined,
+    "Change at least one of title or visibility",
   );
 
 export const deleteInput = z.strictObject({ snippet: snippetRef });
@@ -84,25 +78,13 @@ export async function updateSnippet(
   supabase: SupabaseClient,
 ): Promise<UpdateResult> {
   const input = updateInput.parse(rawInput);
-  const { supportedLanguages, supportedThemes } = await import("./render.ts");
-  if (input.language !== undefined && !supportedLanguages.includes(input.language))
-    throw new Error(`Unknown language "${input.language}".`);
-  if (input.theme !== undefined && !supportedThemes.includes(input.theme))
-    throw new Error(`Unknown theme "${input.theme}".`);
 
   // Redact before anything is stored, exactly like a publish.
-  const redactedCode = input.code === undefined ? undefined : redactSecrets(input.code);
   const redactedTitle = input.title ? redactSecrets(input.title) : undefined;
-  const kinds = { ...redactedCode?.summary.kinds };
-  for (const [kind, count] of Object.entries(redactedTitle?.summary.kinds ?? {}))
-    kinds[kind] = (kinds[kind] ?? 0) + count;
 
   const snippet = await ownSnippet(input.snippet, userId, supabase);
   const changes = {
-    ...(redactedCode ? { code: redactedCode.code } : {}),
     ...(input.title !== undefined ? { title: redactedTitle?.code ?? null } : {}),
-    ...(input.language !== undefined ? { language: input.language } : {}),
-    ...(input.theme !== undefined ? { theme: input.theme } : {}),
     ...(input.visibility !== undefined ? { visibility: input.visibility } : {}),
   };
   const { data, error } = await supabase
@@ -118,10 +100,7 @@ export async function updateSnippet(
   return {
     url: `${APP_ORIGIN}/${snippet.slug}-${snippet.short_id}`,
     visibility: data.visibility,
-    redactions: {
-      redacted: (redactedCode?.summary.redacted ?? 0) + (redactedTitle?.summary.redacted ?? 0),
-      kinds,
-    },
+    redactions: redactedTitle?.summary ?? { redacted: 0, kinds: {} },
   };
 }
 

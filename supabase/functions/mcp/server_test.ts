@@ -190,11 +190,9 @@ Deno.test("update_snippet and delete_snippet are owner-only, destructive and tak
     assert.ok(tool.inputSchema.required.includes("snippet"), name);
     assert.ok(tool.description.includes("owns"), name);
   }
+  // Published snippets are sealed: only the title and visibility can change.
   assert.deepEqual(Object.keys(byName.update_snippet.inputSchema.properties).sort(), [
-    "code",
-    "language",
     "snippet",
-    "theme",
     "title",
     "visibility",
   ]);

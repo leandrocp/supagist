@@ -35,9 +35,9 @@ export default function DataHelpPage() {
           <Link href="/snippets" className={link}>
             Your snippets
           </Link>
-          . You can change the code, title, language, theme and visibility (public or unlisted); the
-          link stays the same. Changing the code, language or theme removes the images stored for
-          the old version.
+          . You can change the title and visibility (public or unlisted); the link stays the same.
+          Once published, a snippet&apos;s code, language and theme are sealed. To change them,
+          delete the snippet and publish it again.
         </p>
       </Section>
 

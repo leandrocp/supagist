@@ -15,17 +15,18 @@ Deno.test("snippet links, paths and short ids resolve to the short id", () => {
     assert.equal(shortIdFromRef(ref), null, ref);
 });
 
-Deno.test("an update needs at least one change and keeps publish's code limits", () => {
+Deno.test("an update needs at least one change and cannot touch sealed fields", () => {
   const snippet = "https://supagist.app/x-a1b2c3";
   assert.equal(updateInput.safeParse({ snippet }).success, false);
   assert.equal(updateInput.safeParse({ snippet, title: "" }).success, true);
+  assert.equal(updateInput.safeParse({ snippet, visibility: "public" }).success, true);
   assert.equal(updateInput.safeParse({ snippet, visibility: "private" }).success, false);
-  assert.equal(updateInput.safeParse({ snippet, code: "x\n".repeat(31) }).success, false);
-  // A trailing newline is not a line: 30 lines plus one is still 30.
-  assert.equal(
-    updateInput.safeParse({ snippet, code: "x\n".repeat(30) }).data?.code,
-    Array(30).fill("x").join("\n"),
-  );
-  assert.equal(updateInput.safeParse({ snippet, code: "a\r\nb" }).data?.code, "a\nb");
+  // A published snippet is sealed: code, language and theme are refused.
+  for (const sealed of [{ code: "x" }, { language: "rust" }, { theme: "dracula" }])
+    assert.equal(
+      updateInput.safeParse({ snippet, title: "t", ...sealed }).success,
+      false,
+      JSON.stringify(sealed),
+    );
   assert.equal(updateInput.safeParse({ snippet, author_id: "x", title: "t" }).success, false);
 });

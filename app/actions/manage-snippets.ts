@@ -1,16 +1,10 @@
 "use server";
 
-import { availableLanguages, availableThemes } from "@lumis-sh/lumis/client";
-import { isBrandThemeId } from "@/lib/brand-themes";
 import { createClient } from "@/lib/supabase/server";
-import { codePointLength, getRawFileExtension, normalizeSnippetCode } from "@/lib/snippet-utils";
-import { cardPathFor } from "@/lib/og-image";
 
+/** What an owner can still change once a snippet is published (sealed). */
 export type SnippetEdit = {
-  code: string;
   title: string;
-  language: string;
-  theme: string;
   visibility: "public" | "unlisted";
 };
 
@@ -20,8 +14,8 @@ const BUCKET = "snippet-images";
 
 /**
  * Removes a snippet's stored files right away: the recorded paths plus
- * everything in the owner's folder for it (such as card.png, or files a
- * previous edit replaced). The queued cleanup retries anything this misses.
+ * everything in the owner's folder for it (such as card.png, or files an
+ * earlier version of editing replaced). The queued cleanup retries anything this misses.
  */
 async function removeSnippetFiles(
   supabase: Awaited<ReturnType<typeof createClient>>,
@@ -45,85 +39,14 @@ async function persistentUser() {
   return { supabase, user: user && !user.is_anonymous ? user : null };
 }
 
-type StoredImages = {
-  canonical_image_path: string;
-  og_image_path: string;
-  svg_path: string;
-  raw_path: string;
-};
-
 /**
- * Stores the images the editor re-rendered for an edit, under new names in
- * the snippet's folder: Storage has no overwrite policy, and a new URL is
- * never served stale from the CDN. The share image's card goes beside the
- * canonical PNG under the same version (`cardPathFor`), before the row points
- * at it, so a new share URL never finds an old card. Returns the columns to
- * set and every file uploaded, or null when there are none to store.
+ * Owner-only edit of a published snippet's title and visibility. The code,
+ * language, theme and images are sealed at publish; RLS and a database
+ * trigger enforce ownership and the editable fields.
  */
-async function uploadEditImages(
-  supabase: Awaited<ReturnType<typeof createClient>>,
-  folder: string,
-  filename: string,
-  code: string,
-  images: FormData | undefined,
-): Promise<{ columns: StoredImages; files: string[] } | null> {
-  const canonical = images?.get("canonical_image");
-  const og = images?.get("og_image");
-  const svg = images?.get("svg");
-  if (!(canonical instanceof Blob) || !(og instanceof Blob) || !(svg instanceof Blob)) return null;
-
-  const version = crypto.randomUUID().slice(0, 8);
-  const paths: StoredImages = {
-    canonical_image_path: `${folder}/canonical-${version}.png`,
-    og_image_path: `${folder}/og-${version}.png`,
-    svg_path: `${folder}/canonical-${version}.svg`,
-    raw_path: `${folder}/raw-${version}.${getRawFileExtension(filename)}`,
-  };
-  const card = images?.get("card_image");
-  const cardPath = card instanceof Blob ? cardPathFor(paths.canonical_image_path) : null;
-  const files = [...Object.values(paths), ...(cardPath ? [cardPath] : [])];
-  const bucket = supabase.storage.from(BUCKET);
-  const results = await Promise.all([
-    bucket.upload(paths.canonical_image_path, canonical, { contentType: "image/png" }),
-    bucket.upload(paths.og_image_path, og, { contentType: "image/png" }),
-    bucket.upload(paths.svg_path, svg, { contentType: "image/svg+xml" }),
-    bucket.upload(paths.raw_path, Buffer.from(code, "utf-8"), { contentType: "text/plain" }),
-    // Optional: without it the share image falls back to the canonical PNG.
-    cardPath && card instanceof Blob
-      ? bucket.upload(cardPath, card, { contentType: "image/png" })
-      : { error: null },
-  ]);
-  if (results.slice(0, 4).some((result) => result.error)) {
-    await bucket.remove(files);
-    return null;
-  }
-  return { columns: paths, files };
-}
-
-/**
- * Owner-only edit. RLS and a database trigger enforce ownership and editable
- * fields. `images` holds the editor's re-render (as a publish sends it); with
- * them the snippet keeps its stored images, without them the edit clears the
- * ones that no longer match.
- */
-export async function updateSnippet(
-  snippetId: string,
-  edit: SnippetEdit,
-  images?: FormData,
-): Promise<Result> {
-  const code = normalizeSnippetCode(edit.code);
-  const length = codePointLength(code);
-  if (length === 0 || length > 8000) {
-    return { error: `Code must be 1–8,000 characters (got ${length.toLocaleString()}).` };
-  }
+export async function updateSnippet(snippetId: string, edit: SnippetEdit): Promise<Result> {
   const title = edit.title.trim();
   if (title.length > 120) return { error: "Title must be at most 120 characters." };
-  if (!isBrandThemeId(edit.theme) && !availableThemes().some((t) => t.name === edit.theme)) {
-    return { error: "Unknown theme." };
-  }
-  if (!availableLanguages().some((language) => language.id === edit.language)) {
-    return { error: "Unknown language." };
-  }
   if (edit.visibility !== "public" && edit.visibility !== "unlisted") {
     return { error: "Unknown visibility." };
   }
@@ -131,33 +54,12 @@ export async function updateSnippet(
   const { supabase, user } = await persistentUser();
   if (!user) return { error: "Sign in to edit your snippets." };
 
-  const { data: snippet } = await supabase
-    .from("snippets")
-    .select("filename")
-    .eq("id", snippetId)
-    .eq("author_id", user.id)
-    .maybeSingle();
-  if (!snippet) return { error: "Snippet not found, or it isn't yours." };
-
-  const folder = `${user.id}/snippets/${snippetId}`;
-  const stored = await uploadEditImages(supabase, folder, snippet.filename, code, images);
-
   const { data, error } = await supabase
     .from("snippets")
-    .update({
-      code,
-      title: title || null,
-      language: edit.language,
-      theme: edit.theme,
-      visibility: edit.visibility,
-      ...stored?.columns,
-    })
+    .update({ title: title || null, visibility: edit.visibility })
     .eq("id", snippetId)
     .eq("author_id", user.id)
     .select("id");
-  if (error || !data?.length) {
-    if (stored) await supabase.storage.from(BUCKET).remove(stored.files);
-  }
   if (error?.message.includes("edit_hour_rate_limit")) {
     return { error: "Too many edits in the last hour. Try again later." };
   }

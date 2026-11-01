@@ -1,6 +1,6 @@
 // update_snippet and delete_snippet end to end against the disposable local
-// stack: owner-only edits with redaction, refusal for another account, and
-// deletion of the row, its annotations and its stored files.
+// stack: owner-only title and visibility edits with redaction, sealed code,
+// refusal for another account, and deletion of the row, its annotations and its stored files.
 import assert from "node:assert/strict";
 import { createClient } from "@supabase/supabase-js";
 import { localSession, rpc } from "./local.mjs";
@@ -23,40 +23,6 @@ const { url, image_url } = JSON.parse(published.content[0].text);
 const imagePath = new URL(image_url).pathname;
 assert.equal((await fetch(`${config.API_URL}${imagePath}`)).status, 200);
 
-// The web app's share image (the job serves it on :3000), decoded by resvg:
-// how much of the card's place in the envelope is the theme's editor colour.
-const WEB = "http://127.0.0.1:3000";
-async function shareImage() {
-  const page = await (await fetch(`${WEB}${new URL(url).pathname}`)).text();
-  const src = /<meta property="og:image" content="([^"]+)"/.exec(page)?.[1];
-  assert.ok(src, "the page links its share image");
-  const res = await fetch(new URL(new URL(src).pathname + new URL(src).search, WEB));
-  assert.equal(res.status, 200);
-  const png = Buffer.from(await res.arrayBuffer());
-  const { Resvg } = await import("@resvg/resvg-js");
-  const href = `data:image/png;base64,${png.toString("base64")}`;
-  const image = new Resvg(
-    `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630"><image href="${href}" width="1200" height="630"/></svg>`,
-  ).render();
-  // A getter that copies the buffer: read it once.
-  const p = image.pixels;
-  const share = (hex) => {
-    const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
-    let hits = 0;
-    let total = 0;
-    for (let y = 128; y < 412; y += 2) {
-      for (let x = 555; x < 1145; x += 2) {
-        const at = (y * image.width + x) * 4;
-        total += 1;
-        if (p[at] === r && p[at + 1] === g && p[at + 2] === b) hits += 1;
-      }
-    }
-    return hits / total;
-  };
-  return { src, share };
-}
-const sharedBefore = await shareImage();
-
 // Another account cannot touch it.
 for (const [name, args] of [
   ["update_snippet", { snippet: url, title: "Hijacked" }],
@@ -67,15 +33,13 @@ for (const [name, args] of [
   assert.match(denied.content[0].text, /No snippet of yours/);
 }
 
-// Owner edit: redacted code, new title and visibility; same link.
+// Owner edit: redacted title and new visibility; same link.
 const githubToken = "ghp_" + "x8Kq2Lm9Pz4Rt7Vw1Yb3Nc6Hd5Jf0Gs2Ae8U";
 const updated = result(
   await call("update_snippet", {
     snippet: url,
-    code: `const token = "${githubToken}";`,
-    title: "Edited",
+    title: `Edited ${githubToken}`,
     visibility: "public",
-    theme: "dracula",
   }),
 );
 assert.ok(!updated.isError, JSON.stringify(updated));
@@ -87,25 +51,18 @@ assert.deepEqual(JSON.parse(updated.content[0].text), {
 const shortId = url.slice(-6);
 const { data: row } = await owner.client
   .from("snippets")
-  .select("id, code, title, visibility, theme, line_count, svg_path")
+  .select("code, title, visibility, svg_path")
   .eq("short_id", shortId)
   .single();
-assert.equal(row.title, "Edited");
+assert.ok(row.title.startsWith("Edited [REDACTED:github_token]"), row.title);
 assert.equal(row.visibility, "public");
-assert.equal(row.theme, "dracula");
-assert.equal(row.line_count, 1);
-assert.equal(row.svg_path, null);
-assert.ok(row.code.includes("[REDACTED:github_token]") && !row.code.includes(githubToken));
+// The published snippet is sealed: its code and stored image are unchanged.
+assert.equal(row.code, "one\ntwo\nthree");
+assert.ok(row.svg_path);
+assert.equal((await fetch(`${config.API_URL}${imagePath}`)).status, 200);
 
-// The edit dropped the stored SVG; the share image still shows the card, in
-// the edited theme, under a new URL.
-const sharedAfter = await shareImage();
-assert.notEqual(sharedAfter.src, sharedBefore.src, "the share image URL changes with the edit");
-// Dracula's editor background; the envelope alone has none of it.
-assert.ok(sharedAfter.share("#282a36") > 0.1, "the dracula card is in the envelope");
-
-const unknown = result(await call("update_snippet", { snippet: url, theme: "no-such-theme" }));
-assert.equal(unknown.isError, true);
+const sealed = result(await call("update_snippet", { snippet: url, code: "changed" }));
+assert.equal(sealed.isError, true, "code can no longer be edited");
 
 // Owner delete: the row is gone and the link no longer resolves. (That is the
 // fifth owner tool call: the per-account 5/minute quota allows no more.)
@@ -126,5 +83,5 @@ const image = await fetch(`${config.API_URL}${new URL(second.image_url).pathname
 assert.equal(image.status, 400, "the stored image is removed with the snippet");
 
 console.log(
-  "PASS: update_snippet and delete_snippet ownership, redaction, share image and Storage removal",
+  "PASS: update_snippet and delete_snippet ownership, redaction, sealed code and Storage removal",
 );

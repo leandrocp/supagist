@@ -123,14 +123,11 @@ describe.skipIf(skip)("owner edit/delete RLS and account deletion", () => {
     expect(deleted).toEqual([{ id: reaction!.id }]);
   });
 
-  it("only the owner can edit; an edit recomputes metadata, drops stale images and trims annotations", async () => {
+  it("only the owner can edit, and only the title and visibility; annotations and images stay", async () => {
     const { id, prefix } = await insertSnippet(alice);
     await bob.client
       .from("snippet_comments")
       .insert({ snippet_id: id, author_id: bob.id, line_number: 3, body: "on line 3" });
-    await bob.client
-      .from("snippet_line_reactions")
-      .insert({ snippet_id: id, author_id: bob.id, line_number: 1, emoji: "🔥" });
 
     for (const client of [bob.client, anon]) {
       const { data } = await client
@@ -143,108 +140,48 @@ describe.skipIf(skip)("owner edit/delete RLS and account deletion", () => {
 
     const { data, error } = await alice.client
       .from("snippets")
-      .update({ code: "only\nlines 🎉", title: "Edited", visibility: "unlisted" })
+      .update({ title: "Edited", visibility: "unlisted" })
       .eq("id", id)
-      .select(
-        "title, visibility, line_count, code_char_count, canonical_image_path, og_image_path, svg_path, raw_path",
-      )
+      .select("title, visibility, code, line_count, svg_path, raw_path")
       .single();
     expect(error).toBeNull();
     expect(data).toEqual({
       title: "Edited",
       visibility: "unlisted",
-      line_count: 2,
-      code_char_count: 12,
-      canonical_image_path: null,
-      og_image_path: null,
-      svg_path: null,
-      raw_path: null,
+      code: "one\ntwo\nthree",
+      line_count: 3,
+      svg_path: `${prefix}/canonical.svg`,
+      raw_path: `${prefix}/raw.ts`,
     });
-    expect(await queuedPaths(id)).toEqual(
-      ["canonical.png", "canonical.svg", "card.png", "og.png", "raw.ts"].map(
-        (file) => `${prefix}/${file}`,
-      ),
-    );
-
-    // Line 3 no longer exists; line 1 still does.
+    expect(await queuedPaths(id)).toEqual([]);
     const { data: comments } = await admin
       .from("snippet_comments")
-      .select("id")
-      .eq("snippet_id", id);
-    const { data: reactions } = await admin
-      .from("snippet_line_reactions")
       .select("line_number")
       .eq("snippet_id", id);
-    expect(comments).toEqual([]);
-    expect(reactions).toEqual([{ line_number: 1 }]);
+    expect(comments).toEqual([{ line_number: 3 }]);
   });
 
-  it("a title-only edit keeps the stored images", async () => {
-    const { id, prefix } = await insertSnippet(alice);
-    const { data } = await alice.client
-      .from("snippets")
-      .update({ title: "Renamed" })
-      .eq("id", id)
-      .select("svg_path")
-      .single();
-    expect(data?.svg_path).toBe(`${prefix}/canonical.svg`);
-    expect(await queuedPaths(id)).toEqual([]);
-  });
-
-  it("an edit that brings re-rendered images keeps them and queues only what it replaced", async () => {
-    const { id, prefix } = await insertSnippet(alice);
-    const { data, error } = await alice.client
-      .from("snippets")
-      .update({
-        code: "re-rendered",
-        canonical_image_path: `${prefix}/canonical-v2.png`,
-        og_image_path: `${prefix}/og-v2.png`,
-        raw_path: `${prefix}/raw-v2.ts`,
-      })
-      .eq("id", id)
-      .select("canonical_image_path, og_image_path, svg_path, raw_path")
-      .single();
-    expect(error).toBeNull();
-    // The SVG was not replaced, so it is stale and cleared.
-    expect(data).toEqual({
-      canonical_image_path: `${prefix}/canonical-v2.png`,
-      og_image_path: `${prefix}/og-v2.png`,
-      svg_path: null,
-      raw_path: `${prefix}/raw-v2.ts`,
-    });
-    // The replaced version's card goes with its canonical PNG; the new one
-    // (card-v2.png) sits beside canonical-v2.png.
-    expect(await queuedPaths(id)).toEqual(
-      ["canonical.png", "canonical.svg", "card.png", "og.png", "raw.ts"].map(
-        (file) => `${prefix}/${file}`,
-      ),
-    );
-
-    // A later edit retires card-v2.png with canonical-v2.png.
-    await alice.client.from("snippets").update({ code: "cleared" }).eq("id", id);
-    expect(await queuedPaths(id)).toEqual(
-      expect.arrayContaining([`${prefix}/canonical-v2.png`, `${prefix}/card-v2.png`]),
-    );
-  });
-
-  it("the owner cannot change identity, counters or point assets outside the snippet's folder", async () => {
+  it("a published snippet is sealed: the owner cannot change its content, images or identity", async () => {
     const { id, prefix } = await insertSnippet(alice);
     for (const change of [
+      { code: "one" },
+      { title: "Renamed", language: "rust" },
+      { theme: "dracula" },
+      { font_id: "jetbrains" },
+      { appearance: { background: "Lumis" } },
+      { line_count: 1 },
+      { svg_path: `${prefix}/canonical-v2.svg` },
       { author_id: bob.id },
       { short_id: "hijack" },
       { view_count: 1_000_000 },
-      { svg_path: `${alice.id}/snippets/${randomUUID()}/canonical.svg` },
-      { svg_path: `${bob.id}/snippets/${id}/canonical.svg` },
-      { canonical_image_path: `${prefix}/nested/canonical.png` },
-      { canonical_image_path: `${prefix}/` },
-      // Fixed at publish: an edit re-renders the images with it.
-      { appearance: { background: "Lumis" } },
     ]) {
       const { error } = await alice.client.from("snippets").update(change).eq("id", id);
       expect(error?.message, JSON.stringify(change)).toMatch(
         /snippet_field_not_editable|row-level security/,
       );
     }
+    const { data } = await admin.from("snippets").select("title, code").eq("id", id).single();
+    expect(data).toEqual({ title: null, code: "one\ntwo\nthree" });
   });
 
   it("a snippet keeps the appearance it was published with, as a bounded object", async () => {
