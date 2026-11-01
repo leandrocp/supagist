@@ -100,5 +100,5 @@ jobs:
           VERSION: ${{ needs.tag.outputs.version }}
         run: |
           set -euo pipefail
-          npm publish tarball/supagist-"$VERSION".tgz --access public --provenance
+          npm publish ./tarball/supagist-"$VERSION".tgz --access public --provenance
           echo "Published supagist@$VERSION" >> "$GITHUB_STEP_SUMMARY"

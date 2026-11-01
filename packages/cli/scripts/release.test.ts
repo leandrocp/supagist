@@ -116,3 +116,13 @@ describe("release.mjs in a repository", () => {
     expect(JSON.parse(release("plan"))).toEqual({ status: "pending", version: pkg.version });
   });
 });
+
+describe("release.yml", () => {
+  // npm 12 reads a bare `tarball/x.tgz` as the GitHub repo `tarball/x.tgz`
+  // and refuses to fetch it (EALLOWGIT), which failed the 0.1.1 publish.
+  it("publishes the staged tarball by an explicit relative path", () => {
+    const workflow = readFileSync(".github/workflows/release.yml", "utf8");
+    const publish = workflow.match(/npm publish (\S+)/)?.[1];
+    expect(publish).toMatch(/^\.\//);
+  });
+});
