@@ -22,6 +22,16 @@ const SHORT_HELP = `Nothing to render. Give a file, a range or pipe code in:
 Run supagist --help for every option.`;
 
 export const HELP = `supagist ${VERSION}: turn code into a Supagist image
+https://supagist.app
+
+Examples
+  supagist src/app.ts                           app.png in this folder
+  supagist src/app.ts:12-40 --brand supabase    lines 12-40, Supabase style
+  supagist https://github.com/o/r/blob/main/a.ts#L5-L20
+  supagist src/app.ts --aspect-ratio 16:9 --copy
+                                                16:9 image, ready to paste
+  pbpaste | supagist --filename app.ts --out app.svg
+  supagist src/app.ts --publish                 unlisted link, copied
 
 Usage
   supagist <file[:a-b]> [options]   Render a file, or lines a to b of it

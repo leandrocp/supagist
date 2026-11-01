@@ -438,6 +438,7 @@ describe("run", () => {
     expect(stdout.join("")).toBe(`${VERSION}\n`);
     expect(await cli("help")).toBe(0);
     expect(stdout.join("")).toContain("Exit codes: 0 ok, 1 failure, 2 usage.");
+    expect(stdout.join("")).toContain("https://supagist.app\n\nExamples\n");
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
