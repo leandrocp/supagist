@@ -326,17 +326,22 @@ describe("Lumis and MDEx presets", () => {
 });
 
 describe("Inertia preset", () => {
-  it("matches the reference card: flat blue canvas, chrome-less GitHub Dark card, 16:9", () => {
+  it("matches the reference card: flat blue canvas, chrome-less card with a drop shadow, 16:9", () => {
     const inertia = getBrandPreset("inertia")!;
     expect(inertia.background).toMatchObject({
       label: "Inertia",
       from: "#195DFC",
       to: "#195DFC",
       decoration: { layers: [{ kind: "ascii-shapes" }] },
-      frame: { showDots: false, cardFill: "#0D1117" },
+      frame: {
+        showDots: false,
+        cardFill: "#0D1117",
+        lineHeight: expect.closeTo(2.17, 2),
+        cardShadow: { color: "#000000" },
+      },
     });
     expect(inertia.settings).toMatchObject({
-      theme: "github_dark",
+      theme: "inertia",
       fontId: "jetbrains",
       ligatures: true,
       windowDecoration: "none",
@@ -347,6 +352,24 @@ describe("Inertia preset", () => {
     });
     // Layered canvases replace the ambient scene, so none may sneak back in.
     expect("scene" in inertia).toBe(false);
+  });
+
+  it("colours PHP the way the reference card does", () => {
+    const { highlights } = buildLumisThemeFromBrand(getBrandTheme("inertia")!) as unknown as {
+      highlights: Record<string, { fg?: string }>;
+    };
+    // return/new and `::`/`=>` coral; classes, constructors and strings light
+    // blue; methods purple; named arguments orange; variables plain.
+    expect(highlights["keyword.return"]?.fg).toBe("#ff7b72");
+    expect(highlights.keyword?.fg).toBe("#ff7b72");
+    expect(highlights.operator?.fg).toBe("#ff7b72");
+    expect(highlights.type?.fg).toBe("#79c0ff");
+    expect(highlights.constructor?.fg).toBe("#79c0ff");
+    expect(highlights.string?.fg).toBe("#a5d6ff");
+    expect(highlights["function.call"]?.fg).toBe("#d2a8ff");
+    expect(highlights["variable.parameter"]?.fg).toBe("#ffa657");
+    expect(highlights.variable?.fg).toBe("#e6edf3");
+    expect(highlights["punctuation.bracket"]?.fg).toBe("#e6edf3");
   });
 
   it("ships the CC0 Simple Icons mark it points to", () => {

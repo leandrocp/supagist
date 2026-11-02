@@ -2736,7 +2736,15 @@ describe("Lumis and MDEx brand presets", () => {
     expect(
       layers[0]!.compareDocumentPosition(card) & Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy();
-    expect(svg.querySelector("[data-scene-layer], [filter]")).toBeNull();
+    expect(svg.querySelector("[data-scene-layer]")).toBeNull();
+    // A soft drop shadow under the card, and the reference's loose rows.
+    expect(card.getAttribute("filter")).toBe("url(#brand-card-drop)");
+    expect(svg.querySelector("#brand-card-drop feDropShadow")).not.toBeNull();
+    const codeRows = [...svg.querySelectorAll("text")]
+      .filter((t) => !t.closest("[data-brand-layer]") && t.textContent?.trim())
+      .map((t) => Number(t.getAttribute("y")));
+    // CODE has four source lines: three rows of 30px (2.17em at 14px) apart.
+    expect(codeRows.at(-1)! - codeRows[0]!).toBe(90);
     // No window chrome: no dots and no header text above the code.
     expect(svg.querySelector("circle")).toBeNull();
     expect(svg.textContent).not.toContain("OrderController.php");
@@ -2754,7 +2762,7 @@ describe("Lumis and MDEx brand presets", () => {
         y: (Number(row.getAttribute("y")) - top!) / height!,
       }));
     });
-    expect([...new Set(layers[0]!.textContent)].sort().join("")).toBe("#'+-.`");
+    expect([...new Set(layers[0]!.textContent)].sort().join("")).toBe("#'+-");
     // Scattered into every corner of the visible canvas, as in the reference.
     for (const [right, bottom] of [
       [false, false],

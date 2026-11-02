@@ -117,8 +117,12 @@ export function normalizeExportFontSize(fontSize: number) {
 
 // Line height and character advance are both measured at the 14px default, so
 // a resized code font keeps the same optical rhythm by scaling them with it.
-export function exportLineHeightForFontSize(fontSize: number) {
-  return Math.round(normalizeExportFontSize(fontSize) * (EXPORT_LINE_HEIGHT / EXPORT_FONT_SIZE));
+// A brand frame may set its own `lineHeight`, as a multiple of the font size.
+export function exportLineHeightForFontSize(
+  fontSize: number,
+  lineHeight = EXPORT_LINE_HEIGHT / EXPORT_FONT_SIZE,
+) {
+  return Math.round(normalizeExportFontSize(fontSize) * lineHeight);
 }
 
 export function exportCharWidthForFontSize(fontSize: number) {
@@ -315,116 +319,112 @@ function codeFieldRow(line: string) {
   return out;
 }
 
-// Supagist's own ASCII solids (ray-marched, then frozen as text) for the
-// `ascii-shapes` layer. Placements are design px on the 1600×900 canvas: the
-// top-left of each shape's first cell.
-const ASCII_CELL = { width: 7.8, height: 12.4, fontSize: 13 } as const;
-const ASCII_SHAPES = {
-  torus: [
-    "           #############+++++++---'",
-    "         ##########+++++++++++-----''",
-    "       ########+++++---------------'''`",
-    "      ######+++----'''''''''''''''''''``",
-    "     ####+++---''````...`````'''''''''``.",
-    "    +##+++--''``.............````''''```..",
-    "    ++++--''``....          ...`````````..",
-    "   ++++--''`....              .`````````...",
-    "   -+---''`....                `````````...",
-    "   ----''``....                '''''```....",
-    "   ---'''``....                --'''```....",
-    "   ''''''``.....              ++--'''``....",
-    "    ''''````...``'          ###++--''`....",
-    "    `'''````````''--++++#######++--'``....",
-    "     `````````'''--+++########++--''`....",
-    "      ```````''''--+++#######++--''`....",
-    "       .``````'''----++++++++--''``....",
-    "         ..````''''----------''``....",
-    "           ....````''''''''```.....",
-  ],
-  sphere: [
-    "     +#############++++---''`",
-    "    ###############++++---'''`",
-    "   ################++++---'''`.",
-    "  +###############+++++---'''``.",
-    "  +##############+++++----''```.",
-    " ++############++++++----'''``...",
-    " +++########++++++++----'''```...",
-    " -++++++++++++++++-----'''```....",
-    " --++++++++++++------''''```.....",
-    " '---+++++++-------'''''```......",
-    "  '--------------'''''````......",
-    "  '''--------'''''''````........",
-    "   `'''''''''''''`````.........",
-    "    ````''''````````..........",
-    "     ..`````````.............",
-  ],
-  cube: [
-    "            ##################-.",
-    "          ##################+`...",
-    "        ###################'......",
-    "       ##################-........",
-    "     ##################+`..........",
-    "   ###################'............",
-    "  ##################-...............",
-    "###################`.................",
-    " ''''''''''''''''''`.................",
-    " '''''''''''''''''''`.................",
-    "  '''''''''''''''''''..................",
-    "   ''''''''''''''''''`.................",
-    "   '''''''''''''''''''..................",
-    "    ''''''''''''''''''`...............",
-    "     ''''''''''''''''''`.............",
-    "     '''''''''''''''''''...........",
-    "      ''''''''''''''''''`........",
-    "      '''''''''''''''''''`......",
-    "       '''''''''''''''''''....",
-    "        ''''''''''''''''''`.",
-  ],
-  capsule: [
-    "     ####++-",
-    "   +#####+++-'",
-    "   ########+++-'",
-    "  -+##+######+++-'",
-    "   -+++++######+++-'",
-    "   ''--++++######+++-'",
-    "    .`'--++++######+++-'",
-    "      .`'--++++######+++-'",
-    "        .`'--++++######+++-'",
-    "          .''--++++#####++-'`",
-    "            .''--++++##++--'`",
-    "              .''--++++--''`..",
-    "                `''----''``..",
-    "                  `'''```....",
-    "                    .......",
-  ],
-  ring: [
-    "      #########++++++-'",
-    "     ####++-------++++--`",
-    "   +##++-''``..``''-----'`",
-    "   #++-'`...     ..`'----'`",
-    "  +++-'...          `'---'`.",
-    "  ++-'`..            ''-''`.",
-    "  +--'`.              ---'`.",
-    "  ---'`.              ---'`.",
-    "  ---''`.            ++--'`.",
-    "  '---''''          +#+-'`..",
-    "   ''-------'     ###++-'`.",
-    "    `''---+++#######++-'`..",
-    "     .`''--+++####++-'`..",
-    "       .``''------''`...",
-  ],
+// The Inertia announcement card's ASCII art, read cell by cell from the
+// reference image. Cells sit on a fixed grid in design px on the 1600×900
+// canvas: column c starts at x0 + c·width, row r is centred on y0 + r·height,
+// with its baseline `baseline` below that centre.
+const INERTIA_ASCII_GRID = {
+  x0: -1.453,
+  y0: 6.492,
+  width: 5.8354,
+  height: 10.6846,
+  baseline: 3,
 } as const;
-const ASCII_SHAPE_PLACEMENTS: readonly {
-  shape: keyof typeof ASCII_SHAPES;
-  x: number;
-  y: number;
-}[] = [
-  { shape: "torus", x: 60, y: -50 },
-  { shape: "ring", x: 10, y: 330 },
-  { shape: "sphere", x: 110, y: 690 },
-  { shape: "cube", x: 1300, y: 80 },
-  { shape: "capsule", x: 1270, y: 640 },
-  { shape: "sphere", x: 1530, y: 790 },
+const INERTIA_ASCII: readonly (readonly [row: number, column: number, text: string])[] = [
+  [0, 18, "####+-''''''''''''''''''++++++#"],
+  [1, 15, "##+-''''''''''''''''''-+#+-'+#+++#"],
+  [2, 15, "#-'''''''''''''''-+#+-'      '#++##"],
+  [3, 15, "#-''''''''''-+#+-''"],
+  [3, 45, "'-###"],
+  [4, 15, "#+''''''+##-'"],
+  [4, 44, "''+###"],
+  [5, 15, "##-+#+-'"],
+  [5, 39, "''+####"],
+  [6, 16, "#-'"],
+  [6, 34, "''+####"],
+  [7, 17, "##"],
+  [7, 29, "''-####"],
+  [8, 19, "#+'  ''++###"],
+  [9, 20, "#####"],
+  [11, 240, "#"],
+  [12, 238, "#####"],
+  [12, 267, "###"],
+  [13, 236, "##' +--##"],
+  [13, 265, "#+'#-##"],
+  [14, 234, "##-   -+''+##"],
+  [14, 263, "#+'  -+'-##"],
+  [15, 232, "##-'    '# '''##"],
+  [15, 261, "##     -+'''+"],
+  [16, 232, "#+     '-#-'''''##"],
+  [16, 259, "##       '# '''"],
+  [17, 232, "##   '-#+++#-''''-##     ##'      '+#+#+''"],
+  [18, 233, "#  -#+++++++# ''''+#  ##"],
+  [18, 265, "+#+++++#-"],
+  [19, 233, "#-#++++++++++#+'''''+#-'     '+#+++++++++"],
+  [20, 233, "##+++++++++++++#-'''-#     '+#+++++++++++"],
+  [21, 234, "###+++++++++++++#-''#   '-#+++++++++++++"],
+  [22, 236, "##++++++++++++++# #' -#++++++++++++++#"],
+  [23, 238, "##+++++++++++++##+#++++++++++++++##"],
+  [24, 240, "##+++++++++++++++++++++++++++##"],
+  [25, 29, "#############"],
+  [25, 242, "##+++++++++++++++++++++++##"],
+  [26, 23, "#####+++++###++++##"],
+  [26, 243, "##++++++++++++++++++++###"],
+  [27, 22, "## ''''' '#++++++++#"],
+  [27, 245, "##++++++++++++++++###"],
+  [28, 23, "''"],
+  [28, 36, "'    '"],
+  [28, 247, "''"],
+  [28, 261, "'-"],
+  [37, 8, "####"],
+  [38, 7, "## ''"],
+  [39, 7, "##"],
+  [40, 8, "#"],
+  [41, 8, "#"],
+  [42, 8, "#-"],
+  [43, 8, "##++"],
+  [58, 229, "##+"],
+  [58, 240, "-++---------+-+"],
+  [59, 232, "##+''''''''-+#++++#-'-#"],
+  [60, 235, "##+''''''''-##+' '##"],
+  [61, 35, "##"],
+  [61, 238, "##+'''''''#  '##"],
+  [62, 32, "### '+##"],
+  [62, 241, "##-'''-+'+#"],
+  [63, 28, "##+-'     ''+##"],
+  [63, 243, "###-###"],
+  [64, 27, "#++#+'"],
+  [64, 41, "'+##"],
+  [64, 246, "###"],
+  [65, 27, "#-'''+#+'''-##++##"],
+  [66, 26, "##'''''''+#++++++#"],
+  [67, 26, "#+'''''''+++++++##"],
+  [68, 26, "#-'''''''#++++++##"],
+  [68, 273, "#"],
+  [69, 25, "## ''''''-#++++++#"],
+  [69, 272, "##"],
+  [70, 25, "#+'''''''+++++++##"],
+  [70, 271, "#++"],
+  [71, 25, "#-'''''''#++++++##"],
+  [71, 269, "##+++"],
+  [72, 24, "## ''''''+#++++++#"],
+  [72, 268, "###+++"],
+  [73, 24, "#-'''''''+++++++##"],
+  [73, 270, "#+'"],
+  [74, 24, "#-'''''''#++##+' '-##"],
+  [74, 271, "##"],
+  [75, 23, "## ''''''+#+''       '-###"],
+  [75, 272, "##"],
+  [76, 23, "#-'''''''''-##"],
+  [76, 47, "''###"],
+  [77, 22, "##'''''''''''''-+#-'"],
+  [77, 50, "''+##"],
+  [78, 23, "###-'''''''''''''-+#-'       '-##"],
+  [79, 26, "###-''''''''''''''+#-''-##+++#"],
+  [80, 29, "###+''''''''''''''#++++++##"],
+  [81, 33, "##+''''''''''-#++++++#"],
+  [82, 36, "##+-''''''+#++++++#"],
+  [83, 39, "##+''''#+++++###"],
 ];
 
 export type ExportViewport = { left: number; top: number; width: number; height: number };
@@ -499,21 +499,20 @@ export function renderBrandLayers(
         // Every glyph gets its own x so the art holds its grid in any font,
         // and no renderer can fuse runs like `--` or `++` into a ligature.
         const u = (n: number) => +n.toFixed(2);
-        const rows = ASCII_SHAPE_PLACEMENTS.flatMap(({ shape, x, y }) =>
-          ASCII_SHAPES[shape].map((line, row) => {
-            const xs: number[] = [];
-            let glyphs = "";
-            [...line].forEach((char, column) => {
-              if (char === " ") return;
-              xs.push(u(left + (x + column * ASCII_CELL.width) * s));
-              glyphs += char;
-            });
-            const baseline = u(top + (y + (row + 0.8) * ASCII_CELL.height) * s);
-            return `<text x="${xs.join(" ")}" y="${baseline}">${escapeXml(glyphs)}</text>`;
-          }),
-        ).join("");
+        const g = INERTIA_ASCII_GRID;
+        const rows = INERTIA_ASCII.map(([row, column, text]) => {
+          const xs: number[] = [];
+          let glyphs = "";
+          [...text].forEach((char, i) => {
+            if (char === " ") return;
+            xs.push(u(left + (g.x0 + (column + i) * g.width) * s));
+            glyphs += char;
+          });
+          const baseline = u(top + (g.y0 + row * g.height + g.baseline) * s);
+          return `<text x="${xs.join(" ")}" y="${baseline}">${escapeXml(glyphs)}</text>`;
+        }).join("");
         return (
-          `<g data-brand-layer="ascii-shapes" font-family="${escapeXml(fontFamily)}" font-size="${u(ASCII_CELL.fontSize * s)}" fill="${escapeXml(layer.color)}" fill-opacity="${layer.opacity}">` +
+          `<g data-brand-layer="ascii-shapes" font-family="${escapeXml(fontFamily)}" font-size="${u((g.width / 0.6) * s)}" fill="${escapeXml(layer.color)}" fill-opacity="${layer.opacity}">` +
           rows +
           `</g>`
         );
@@ -976,7 +975,7 @@ export function estimateExportDimensions({
   code = normalizeSnippetCode(code);
   const rawLines = code.split(/\r?\n/);
   const innerPaddingPx = normalizeExportInnerPadding(innerPadding);
-  const codeLineHeight = exportLineHeightForFontSize(fontSize);
+  const codeLineHeight = exportLineHeightForFontSize(fontSize, background?.frame?.lineHeight);
   const codeCharWidth = exportCharWidthForFontSize(fontSize);
   const resolvedHeader = normalizeHeaderSettings(header);
   const resolvedFooter = normalizeFooterSettings(footer, showFooter);
@@ -1246,7 +1245,7 @@ export async function createHighlightedSvg(
 
   const innerPaddingPx = normalizeExportInnerPadding(innerPadding);
   const codeFontSize = normalizeExportFontSize(fontSize);
-  const codeLineHeight = exportLineHeightForFontSize(codeFontSize);
+  const codeLineHeight = exportLineHeightForFontSize(codeFontSize, background?.frame?.lineHeight);
   const codeCharWidth = exportCharWidthForFontSize(codeFontSize);
   const resolvedHeader = normalizeHeaderSettings(headerSettings, showFilename ?? true);
   const resolvedFooter = normalizeFooterSettings(footerSettings, showFooter ?? false);
@@ -1714,11 +1713,22 @@ export async function createHighlightedSvg(
       : frame.cardBorder === null
         ? ""
         : ` stroke="${escapeXml(frame.cardBorder.color)}" stroke-width="${frame.cardBorder.width}"`;
-  const cardShadowAttr = scene ? ` filter="url(#brand-card-shadow)"` : "";
+  const dropShadow = scene ? null : frame?.cardShadow;
+  const cardShadowAttr = scene
+    ? ` filter="url(#brand-card-shadow)"`
+    : dropShadow
+      ? ` filter="url(#brand-card-drop)"`
+      : "";
   const cardRect =
     `<rect x="${outerPaddingPx}" y="${outerPaddingPx}" width="${actualWidth}" height="${actualHeight}" ` +
     `rx="${cardRadius}" ry="${cardRadius}" fill="${escapeXml(cardFill)}"${cardStrokeAttrs}${cardShadowAttr}/>`;
-  const sceneDefs = scene ? renderBrandSceneDefs(scene) : "";
+  const sceneDefs = scene
+    ? renderBrandSceneDefs(scene)
+    : dropShadow
+      ? `<filter id="brand-card-drop" x="-20%" y="-50%" width="140%" height="200%">` +
+        `<feDropShadow dx="0" dy="${dropShadow.y}" stdDeviation="${dropShadow.blur / 2}" flood-color="${escapeXml(dropShadow.color)}" flood-opacity="${dropShadow.opacity}"/>` +
+        `</filter>`
+      : "";
   const sceneCanvasLayers = scene
     ? renderBrandCanvasLayers(scene, totalWidth, totalHeight, viewport)
     : "";

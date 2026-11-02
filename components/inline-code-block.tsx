@@ -292,7 +292,7 @@ export function InlineCodeBlock({
   // fixed-height line. Both the height and the type size are derived from the
   // same font size the export uses so the preview matches the rendered image.
   const codeFontSize = normalizeExportFontSize(fontSize);
-  const codeLineHeight = exportLineHeightForFontSize(codeFontSize);
+  const codeLineHeight = exportLineHeightForFontSize(codeFontSize, brandFrame?.lineHeight);
   const compactPreviewGutter = compactGutter;
   const gutterWidth = showLineNumbers
     ? compactPreviewGutter

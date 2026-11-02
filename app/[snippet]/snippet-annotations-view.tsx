@@ -853,7 +853,7 @@ export function SnippetAnnotationsView({
   // ── Render ─────────────────────────────────────────────────────────────────
   const fontFamily = (EXPORT_FONTS.find((font) => font.id === fontId) ?? EXPORT_FONTS[0]!).family;
   const { header, windowDecoration } = appearance;
-  const lineHeight = exportLineHeightForFontSize(appearance.fontSize);
+  const lineHeight = exportLineHeightForFontSize(appearance.fontSize, brandFrame?.lineHeight);
   // Without line numbers the gutter only hosts the reaction and comment
   // controls, so it drops its rule as the composer preview does.
   const gutterRule = appearance.lineNumbers ? c.border : "transparent";

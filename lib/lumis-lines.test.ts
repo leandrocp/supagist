@@ -26,6 +26,7 @@ beforeAll(async () => {
   await highlighter.loadLanguage("typescript");
   await highlighter.loadLanguage("python");
   await highlighter.loadLanguage("diff");
+  await highlighter.loadLanguage("php");
 });
 
 const lineText = (tokens: HighlightedToken[]) => tokens.map((token) => token.text).join("");
@@ -49,6 +50,28 @@ describe("loadLanguageOrPlaintext", () => {
 });
 
 describe("highlightTokenLines", () => {
+  it("highlights PHP that has no opening tag, keeping one row per source line", () => {
+    const code = "return Inertia::render('Orders/Show', [\n    'order' => $order,\n]);";
+    const lines = highlightTokenLines(highlighter, code, "php", everforestDark);
+
+    // Without the hidden tag, Lumis's grammar reads all of it as inline HTML.
+    expect(lines.map(lineText)).toEqual(code.split("\n"));
+    expect(lines[0]![0]).toMatchObject({ text: "return", scope: "keyword.return" });
+    expect(lines[1]!.find((token) => token.text === "=>")?.scope).toBe("operator");
+
+    const html = highlightHtmlLines(highlighter, code, "php", everforestDark);
+    expect(html).toHaveLength(3);
+    expect(html[0]).toMatch(/^<span[^>]*color:[^>]*>return<\/span>/);
+    expect(html.join("\n")).not.toContain("php");
+  });
+
+  it("leaves PHP with its own opening tag as written", () => {
+    const code = "<?php\n\necho 42;";
+    const lines = highlightTokenLines(highlighter, code, "php", everforestDark);
+    expect(lines.map(lineText)).toEqual(["<?php", "", "echo 42;"]);
+    expect(highlightHtmlLines(highlighter, code, "php", everforestDark)).toHaveLength(3);
+  });
+
   it("marks only the changed words of paired -/+ lines when wordDiff is on", () => {
     const code = [
       "@@ -12,4 +12,4 @@",

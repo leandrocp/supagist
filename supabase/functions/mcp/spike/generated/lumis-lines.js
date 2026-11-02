@@ -17,6 +17,18 @@ export async function loadLanguageOrPlaintext(highlighter, language) {
 }
 
 /**
+ * Lumis's PHP grammar treats everything before `<?php` as inline HTML, so a
+ * snippet without an opening tag (most shared PHP) would come out uncolored.
+ * Such code is highlighted behind a hidden `<?php` line, whose row the callers
+ * drop again.
+ */
+const PHP_OPEN_TAG = "<?php\n";
+
+function hiddenPrefix(code, language) {
+  return language === "php" && !code.includes("<?") ? PHP_OPEN_TAG : "";
+}
+
+/**
  * Per-line token runs for the editors and the SVG export. There is one entry
  * per `code.split("\n")` row, the row model every editor surface uses, and no
  * token carries a line terminator: the CR of a CRLF is dropped even when Lumis
@@ -30,7 +42,9 @@ export async function loadLanguageOrPlaintext(highlighter, language) {
  * `diff` document with the `diff.minus.word` / `diff.plus.word` scopes.
  */
 export function highlightTokenLines(highlighter, code, language, theme, options) {
-  const lines = code.split("\n").map(() => []);
+  const prefix = hiddenPrefix(code, language);
+  const source = prefix + code;
+  const lines = source.split("\n").map(() => []);
   let lineIndex = 0;
 
   const endLine = () => {
@@ -44,7 +58,7 @@ export function highlightTokenLines(highlighter, code, language, theme, options)
   };
 
   highlighter.highlightIter(
-    code,
+    source,
     language,
     theme,
     (text, _language, _range, scope, style) => {
@@ -57,7 +71,7 @@ export function highlightTokenLines(highlighter, code, language, theme, options)
     options,
   );
 
-  return lines;
+  return prefix ? lines.slice(1) : lines;
 }
 
 /**
@@ -82,11 +96,12 @@ export function tokenStyle(style) {
  * crosses a newline, so every row is balanced HTML on its own.
  */
 export function highlightHtmlLines(highlighter, code, language, theme) {
+  const prefix = hiddenPrefix(code, language);
   const html = highlighter.highlight(
-    code,
+    prefix + code,
     htmlInline({ language, theme, structure: "inline", italic: true }),
   );
-  const lines = html.split("\n");
+  const lines = html.split("\n").slice(prefix ? 1 : 0);
   // A final newline ends the last line rather than opening an empty one, but
   // the grid still renders that empty row.
   const rowCount = code.split("\n").length;

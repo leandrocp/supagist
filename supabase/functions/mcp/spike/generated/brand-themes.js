@@ -293,6 +293,36 @@ export const BRAND_THEMES = [
     },
     logoUrl: "/brands/mdex-tile.svg",
   },
+  // Inertia: the live-props announcement card. GitHub Dark's colours, mapped
+  // the way the card paints them: coral keywords and `::`/`=>`, light-blue
+  // classes and strings, purple methods, orange named arguments.
+  {
+    id: "inertia",
+    brand: "inertia",
+    name: "Inertia",
+    appearance: "dark",
+    gradient: { from: "#195DFC", to: "#195DFC" },
+    palette: {
+      foreground: "#e6edf3",
+      editorBg: "#0d1117",
+      comment: "#8b949e",
+      string: "#a5d6ff",
+      number: "#79c0ff",
+      constant: "#79c0ff",
+      keyword: "#ff7b72",
+      function: "#d2a8ff",
+      parameter: "#ffa657",
+      punctuation: "#e6edf3",
+      property: "#79c0ff",
+    },
+    overrides: {
+      operator: { fg: "#ff7b72" },
+      constructor: { fg: "#79c0ff" },
+      "type.builtin": { fg: "#ff7b72" },
+      "variable.builtin": { fg: "#e6edf3" },
+    },
+    logoUrl: "/brands/inertia.svg",
+  },
 ];
 
 // ── Lookups ──────────────────────────────────────────────────────────────────
@@ -428,6 +458,7 @@ export function buildLumisThemeFromBrand(brand) {
       "markup.quote": fg(p.comment),
       "markup.raw": { fg: p.string, italic: true },
       "markup.raw.block": { fg: p.string, italic: true },
+      ...brand.overrides,
     },
   };
 }

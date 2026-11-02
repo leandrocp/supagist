@@ -482,7 +482,10 @@ export function HomeComposer({ full = false }: HomeComposerProps) {
   const busy = isPublishing || isExporting;
 
   const previewLineCount = getPreviewLineCount(draft.code);
-  const previewLineHeight = exportLineHeightForFontSize(draft.fontSize);
+  const previewLineHeight = exportLineHeightForFontSize(
+    draft.fontSize,
+    selectedBackground?.frame?.lineHeight,
+  );
   const previewHeight = Math.max(previewLineCount, 1) * previewLineHeight + draft.innerPadding * 2;
   const showPreviewGutter = shouldShowPreviewGutter(draft.lineNumbers, true, true);
   const previewCanvasPadding = getPreviewOuterPadding(

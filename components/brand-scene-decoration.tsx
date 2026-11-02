@@ -38,11 +38,15 @@ export function backgroundFrameShadow(background: ExportBackground | null): stri
   if (!background?.frame) return undefined;
   const border = background.frame.cardBorder;
   if (!border) return "0 25px 50px -12px rgba(0,0,0,0.42)";
-  return (
-    `0 0 0 ${border.width}px ${border.color}` +
-    // Layered brand canvases draw a flat card, as the export does.
-    (background.decoration ? "" : ", 0 25px 50px -12px rgba(0,0,0,0.42)")
-  );
+  // Layered brand canvases draw a flat card unless the frame asks for a drop
+  // shadow, as the export does. CSS blur is twice the SVG stdDeviation.
+  const drop = background.frame.cardShadow;
+  const shadow = background.decoration
+    ? drop
+      ? `, 0 ${drop.y}px ${drop.blur}px color-mix(in srgb, ${drop.color} ${Math.round(drop.opacity * 100)}%, transparent)`
+      : ""
+    : ", 0 25px 50px -12px rgba(0,0,0,0.42)";
+  return `0 0 0 ${border.width}px ${border.color}${shadow}`;
 }
 
 /** A background's scene guides or brand layers, over a `width`×`height` canvas. */

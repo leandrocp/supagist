@@ -10,13 +10,14 @@ import {
 const RAYSO_BRANDS = new Set(["supabase", "vercel", "tailwind", "resend", "stripe"]);
 
 describe("BRAND_THEMES registry", () => {
-  it("includes the 5 ray.so brands plus the Lumis and MDEx preset themes", () => {
+  it("includes the 5 ray.so brands plus the Lumis, MDEx and Inertia preset themes", () => {
     const brands = new Set(BRAND_THEMES.map((t) => t.brand));
-    expect(brands).toEqual(new Set([...RAYSO_BRANDS, "lumis", "mdex"]));
+    expect(brands).toEqual(new Set([...RAYSO_BRANDS, "lumis", "mdex", "inertia"]));
     expect(BRAND_THEMES.filter((t) => !RAYSO_BRANDS.has(t.brand)).map((t) => t.id)).toEqual([
       "lumis-paper",
       "lumis-dusk",
       "mdex-paper",
+      "inertia",
     ]);
   });
 

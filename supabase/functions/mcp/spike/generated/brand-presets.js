@@ -966,9 +966,11 @@ export const BRAND_PRESETS = [
   lumisLook(true),
   mdexLook(false),
   mdexLook(true),
-  // The Inertia announcement card: flat bright blue with faint ASCII solids,
-  // a chrome-less near-black card, GitHub Dark tokens and JetBrains Mono with
-  // its `=>` ligature. Colours were sampled from the reference card.
+  // The Inertia live-props announcement card, replicated from the reference:
+  // its flat blue canvas and ASCII art, a chrome-less near-black card with a
+  // soft drop shadow, JetBrains Mono with its `=>` ligature, the card's syntax
+  // colours and loose line spacing. Colours and sizes were measured from it;
+  // at 14px these paddings put the card where the reference has it.
   {
     id: "inertia",
     name: "Inertia",
@@ -981,22 +983,24 @@ export const BRAND_PRESETS = [
       to: "#195DFC",
       brandId: "inertia",
       decoration: {
-        layers: [{ kind: "ascii-shapes", color: "#B4CCFF", opacity: 0.7 }],
+        layers: [{ kind: "ascii-shapes", color: "#A5C6FF", opacity: 1 }],
       },
       frame: {
         showDots: false,
         showCenteredFilename: false,
-        cardBorder: { color: "#4B4F58", width: 1 },
-        cardRadius: 16,
+        cardBorder: { color: "#4D5057", width: 1 },
+        cardRadius: 12,
         cardFill: "#0D1117",
+        lineHeight: 2.1667,
+        cardShadow: { color: "#000000", opacity: 0.22, y: 4, blur: 9 },
       },
     },
-    settings: defaults("github_dark", {
+    settings: defaults("inertia", {
       windowDecoration: "none",
       aspectRatio: "16:9",
-      outerPadding: 64,
-      innerPadding: 32,
-      cornerRadius: 16,
+      outerPadding: 32,
+      innerPadding: 16,
+      cornerRadius: 12,
       fontId: "jetbrains",
       ligatures: true,
       header: { ...DEFAULT_HEADER_SETTINGS, enabled: false },
