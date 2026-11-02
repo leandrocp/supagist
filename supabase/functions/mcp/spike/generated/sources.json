@@ -1,9 +1,9 @@
 {
-  "lib/export-utils.ts": "dddfb69d67356675985037fff7d75c0467892c132ef6e5f21299b802908cd730",
+  "lib/export-utils.ts": "92f48c0e1b66b8d4f003cfc34056cb0f171648e9e93a87b1781ac91eab0e208d",
   "lib/snippet-utils.ts": "242d69de49286b29ac4822a053acf24d364013ccee12f47f027ae7c6d2da2d1d",
   "lib/lumis-lines.ts": "4b9f1c9cdd9cd80046a81b8d0d37f339f097bf4f1e22a79b7dd7ed831ae54708",
   "lib/presence-utils.ts": "e49fd5060ea596fcdcad0e9a4a75886facd936a722cb58372800d1f71efd5973",
-  "lib/brand-presets.ts": "f02c63f308504f98663bdb31e143634078603ccdd43a1c13bf958a6c4d0c02cf",
+  "lib/brand-presets.ts": "92a25b519801eb6259e1a25ead1b86c8e42e464e1b55336a66e2dc3f03236536",
   "lib/brand-scenes.ts": "843aab6741476bb69358340f3cb3a8fffde245f2f0faf3df1a6d1bc28e8b5f63",
   "lib/export-metadata.ts": "cd8d84eb20ed899fe6dd840e4447d968cf52f7c962350b0a2c9d053860dd79f0",
   "lib/brand-themes.ts": "df44787fc94cc7d1f4f183e619ee96c51baff9f8c326e163fd59f93ea11c0b4a"

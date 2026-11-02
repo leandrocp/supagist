@@ -30,7 +30,7 @@ const BASE_APPEARANCE = {
 
 describe("BRAND_PRESETS", () => {
   it("ships the complete social-developer launch catalog", () => {
-    expect(BRAND_PRESETS).toHaveLength(33);
+    expect(BRAND_PRESETS).toHaveLength(34);
     expect(BRAND_PRESETS.map((preset) => preset.name)).toEqual(
       expect.arrayContaining([
         "Supabase",
@@ -52,6 +52,7 @@ describe("BRAND_PRESETS", () => {
         "Lumis Dark",
         "MDEx Purple",
         "MDEx Purple Dark",
+        "Inertia",
       ]),
     );
   });
@@ -90,10 +91,19 @@ describe("BRAND_PRESETS", () => {
   });
 
   it("leaves the 29 launch presets exactly as they were before Lumis and MDEx", () => {
-    const launch = BRAND_PRESETS.filter((preset) => !NEW_PRESET_IDS.includes(preset.id));
+    const launch = BRAND_PRESETS.filter(
+      (preset) => !NEW_PRESET_IDS.includes(preset.id) && preset.id !== "inertia",
+    );
     // Digest of the 29 presets on main before the Lumis/MDEx presets landed.
     expect(createHash("sha256").update(JSON.stringify(launch)).digest("hex")).toBe(
       "f1931dca2bfb10a204ac17774a7e9617cf729e094b8720838c72d57686111358",
+    );
+  });
+
+  it("leaves the Lumis and MDEx presets exactly as they were before Inertia", () => {
+    const layered = BRAND_PRESETS.filter((preset) => NEW_PRESET_IDS.includes(preset.id));
+    expect(createHash("sha256").update(JSON.stringify(layered)).digest("hex")).toBe(
+      "0a4014470609f860b8e676968a70ee6abf4eca0841356f7840a073d384ce52c7",
     );
   });
 
@@ -312,6 +322,37 @@ describe("Lumis and MDEx presets", () => {
     }
     expect(getBrandPreset("lumis")?.settings.outerPadding).toBe(128);
     expect(getBrandPreset("mdex-purple")?.settings.outerPadding).toBe(96);
+  });
+});
+
+describe("Inertia preset", () => {
+  it("matches the reference card: flat blue canvas, chrome-less GitHub Dark card, 16:9", () => {
+    const inertia = getBrandPreset("inertia")!;
+    expect(inertia.background).toMatchObject({
+      label: "Inertia",
+      from: "#195DFC",
+      to: "#195DFC",
+      decoration: { layers: [{ kind: "ascii-shapes" }] },
+      frame: { showDots: false, cardFill: "#0D1117" },
+    });
+    expect(inertia.settings).toMatchObject({
+      theme: "github_dark",
+      fontId: "jetbrains",
+      ligatures: true,
+      windowDecoration: "none",
+      aspectRatio: "16:9",
+      lineNumbers: false,
+      header: { enabled: false },
+      footer: { enabled: false },
+    });
+    // Layered canvases replace the ambient scene, so none may sneak back in.
+    expect("scene" in inertia).toBe(false);
+  });
+
+  it("ships the CC0 Simple Icons mark it points to", () => {
+    const inertia = getBrandPreset("inertia")!;
+    expect(inertia.logoUrl).toBe("/brands/inertia.svg");
+    expect(existsSync(join(process.cwd(), "public", inertia.logoUrl))).toBe(true);
   });
 });
 

@@ -2612,7 +2612,7 @@ describe("Lumis and MDEx brand presets", () => {
     return { markup, svg, card, frame };
   }
 
-  it.each(["lumis", "lumis-dark", "mdex-purple", "mdex-purple-dark"])(
+  it.each(["lumis", "lumis-dark", "mdex-purple", "mdex-purple-dark", "inertia"])(
     "renders %s on a 16:9 canvas with the card centred",
     async (id) => {
       const { svg, card } = await renderPreset(id);
@@ -2727,6 +2727,48 @@ describe("Lumis and MDEx brand presets", () => {
         el.getAttribute("data-brand-layer"),
       ),
     ).toEqual(["dot-grid"]);
+  });
+
+  it("paints Inertia's ASCII shapes around the card, one positioned glyph per character", async () => {
+    const { svg, card } = await renderPreset("inertia", "OrderController.php");
+    const layers = [...svg.querySelectorAll("[data-brand-layer]")];
+    expect(layers.map((el) => el.getAttribute("data-brand-layer"))).toEqual(["ascii-shapes"]);
+    expect(
+      layers[0]!.compareDocumentPosition(card) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+    expect(svg.querySelector("[data-scene-layer], [filter]")).toBeNull();
+    // No window chrome: no dots and no header text above the code.
+    expect(svg.querySelector("circle")).toBeNull();
+    expect(svg.textContent).not.toContain("OrderController.php");
+
+    const [left, top, width, height] = svg.getAttribute("viewBox")!.split(" ").map(Number);
+    const glyphs = [...layers[0]!.querySelectorAll("text")].flatMap((row) => {
+      const xs = row.getAttribute("x")!.split(" ").map(Number);
+      const text = row.textContent!;
+      // Each glyph is placed on its own, so no font or renderer can shift the
+      // grid or fuse `--`/`++` into a ligature; spaces are skipped, not drawn.
+      expect(xs).toHaveLength([...text].length);
+      expect(text).not.toContain(" ");
+      return xs.map((x) => ({
+        x: (x - left!) / width!,
+        y: (Number(row.getAttribute("y")) - top!) / height!,
+      }));
+    });
+    expect([...new Set(layers[0]!.textContent)].sort().join("")).toBe("#'+-.`");
+    // Scattered into every corner of the visible canvas, as in the reference.
+    for (const [right, bottom] of [
+      [false, false],
+      [true, false],
+      [false, true],
+      [true, true],
+    ]) {
+      expect(
+        glyphs.some(
+          ({ x, y }) => x < 1 && y < 1 && x > 0 && y > 0 && x > 0.5 === right && y > 0.5 === bottom,
+        ),
+        `${right ? "right" : "left"} ${bottom ? "bottom" : "top"}`,
+      ).toBe(true);
+    }
   });
 
   it("draws the Lumis bar: icon + filename left, < Language /> and exactly 3 sun dashes right", async () => {

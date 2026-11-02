@@ -12,8 +12,8 @@ file mentions it. Never invent an id.
 ## Pick a brand from the project
 
 Look up the project's dependencies (`package.json`, `pyproject.toml`,
-`requirements.txt`, `Gemfile`, `mix.exs`, `go.mod`, `Cargo.toml`) in this
-table, exact package names only. Don't guess from partial names or file
+`requirements.txt`, `Gemfile`, `mix.exs`, `composer.json`, `go.mod`,
+`Cargo.toml`) in this table, exact package names only. Don't guess from partial names or file
 contents.
 
 - Exactly one brand matches: use it.
@@ -59,6 +59,7 @@ contents.
 | `lumis-dark`       | Lumis Dark       | dark  | Same packages as `lumis`, for dark pages                                          |
 | `mdex-purple`      | MDEx Purple      | light | `mdex` (Elixir); light pages                                                      |
 | `mdex-purple-dark` | MDEx Purple Dark | dark  | Same as `mdex-purple`, for dark pages                                             |
+| `inertia`          | Inertia          | dark  | `inertiajs/inertia-laravel` (Composer), any package in the `@inertiajs` scope     |
 
 "Look" is the preset's appearance. When the image goes on a light page (many
 READMEs and blogs) and a brand has a light and a dark variant, pick the one

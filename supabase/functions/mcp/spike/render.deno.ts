@@ -136,14 +136,15 @@ Deno.test("every advertised brand embeds its font and required pattern; layout l
   for (const brand of appearanceOptions.brands) {
     const result = await renderSnippet({ code: "const answer = 42;", brand: brand.id });
     assert.match(result.svg, /data:font\/ttf;base64,/);
-    // Lumis and MDEx paint brand layers on a flat card instead of the ambient scene.
-    if (["lumis", "lumis-dark", "mdex-purple", "mdex-purple-dark"].includes(brand.id)) {
+    // Lumis, MDEx and Inertia paint brand layers on a flat card instead of the ambient scene.
+    if (["lumis", "lumis-dark", "mdex-purple", "mdex-purple-dark", "inertia"].includes(brand.id)) {
       assert.match(result.svg, /data-brand-layer=/);
       assert.equal(result.width, 1600);
       assert.equal(result.height, 900);
     } else assert.match(result.svg, /brand-card-shadow/);
     if (["tailwind", "resend"].includes(brand.id))
       assert.match(result.svg, /data:image\/png;base64,/);
+    if (brand.id === "inertia") assert.match(result.svg, /data-brand-layer="ascii-shapes"/);
     if (["lumis", "lumis-dark"].includes(brand.id))
       assert.match(result.svg, /data-brand-header="mark" href="data:image\/svg\+xml;base64,/);
   }

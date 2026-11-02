@@ -33,7 +33,9 @@ test("CLI lists the server's options", async () => {
   const { code, stdout } = await supagist("options", "--json");
   expect(code).toBe(0);
   const options = JSON.parse(stdout);
-  expect(options.brands.map((brand: { id: string }) => brand.id)).toContain("supabase");
+  const brands = options.brands.map((brand: { id: string }) => brand.id);
+  expect(brands).toContain("supabase");
+  expect(brands).toContain("inertia");
   expect(options.themes).toContain("dracula");
   expect(options.languages).toContain("typescript");
   expect(options.formats).toEqual(["svg", "png"]);

@@ -966,6 +966,42 @@ export const BRAND_PRESETS = [
   lumisLook(true),
   mdexLook(false),
   mdexLook(true),
+  // The Inertia announcement card: flat bright blue with faint ASCII solids,
+  // a chrome-less near-black card, GitHub Dark tokens and JetBrains Mono with
+  // its `=>` ligature. Colours were sampled from the reference card.
+  {
+    id: "inertia",
+    name: "Inertia",
+    logoUrl: "/brands/inertia.svg",
+    accent: "#9553E9",
+    appearance: "dark",
+    background: {
+      label: "Inertia",
+      from: "#195DFC",
+      to: "#195DFC",
+      brandId: "inertia",
+      decoration: {
+        layers: [{ kind: "ascii-shapes", color: "#B4CCFF", opacity: 0.7 }],
+      },
+      frame: {
+        showDots: false,
+        showCenteredFilename: false,
+        cardBorder: { color: "#4B4F58", width: 1 },
+        cardRadius: 16,
+        cardFill: "#0D1117",
+      },
+    },
+    settings: defaults("github_dark", {
+      windowDecoration: "none",
+      aspectRatio: "16:9",
+      outerPadding: 64,
+      innerPadding: 32,
+      cornerRadius: 16,
+      fontId: "jetbrains",
+      ligatures: true,
+      header: { ...DEFAULT_HEADER_SETTINGS, enabled: false },
+    }),
+  },
 ];
 
 export function resolveBrandScene(preset) {

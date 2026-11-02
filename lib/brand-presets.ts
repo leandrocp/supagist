@@ -73,7 +73,9 @@ export type BrandDecorationLayer =
    *  units to design px. */
   | { kind: "silhouette"; x: number; y: number; scale: number; color: string }
   | { kind: "code-field"; color: string; opacity: number }
-  | { kind: "dot-grid"; color: string; opacity: number; size: number };
+  | { kind: "dot-grid"; color: string; opacity: number; size: number }
+  /** Supagist's own shaded ASCII-art solids, scattered around the edges. */
+  | { kind: "ascii-shapes"; color: string; opacity: number };
 
 export type BrandPresetShape = {
   id: string;
@@ -1071,6 +1073,42 @@ export const BRAND_PRESETS = [
   lumisLook(true),
   mdexLook(false),
   mdexLook(true),
+  // The Inertia announcement card: flat bright blue with faint ASCII solids,
+  // a chrome-less near-black card, GitHub Dark tokens and JetBrains Mono with
+  // its `=>` ligature. Colours were sampled from the reference card.
+  {
+    id: "inertia",
+    name: "Inertia",
+    logoUrl: "/brands/inertia.svg",
+    accent: "#9553E9",
+    appearance: "dark",
+    background: {
+      label: "Inertia",
+      from: "#195DFC",
+      to: "#195DFC",
+      brandId: "inertia",
+      decoration: {
+        layers: [{ kind: "ascii-shapes", color: "#B4CCFF", opacity: 0.7 }],
+      },
+      frame: {
+        showDots: false,
+        showCenteredFilename: false,
+        cardBorder: { color: "#4B4F58", width: 1 },
+        cardRadius: 16,
+        cardFill: "#0D1117",
+      },
+    },
+    settings: defaults("github_dark", {
+      windowDecoration: "none",
+      aspectRatio: "16:9",
+      outerPadding: 64,
+      innerPadding: 32,
+      cornerRadius: 16,
+      fontId: "jetbrains",
+      ligatures: true,
+      header: { ...DEFAULT_HEADER_SETTINGS, enabled: false },
+    }),
+  },
 ] as const satisfies readonly BrandPresetShape[];
 
 export type BrandPreset = (typeof BRAND_PRESETS)[number];
