@@ -50,11 +50,13 @@ import {
   backgroundCanvasStyle,
   backgroundFrameShadow,
 } from "@/components/brand-scene-decoration";
+import { findMatchingBrandPreset, normalizeLegacyBrandTheme } from "@/lib/brand-presets";
 import {
-  applyBrandPreset,
-  findMatchingBrandPreset,
-  normalizeLegacyBrandTheme,
-} from "@/lib/brand-presets";
+  backgroundSource,
+  draftBrand,
+  pickBrandPreset,
+  withDefaultBackground,
+} from "@/lib/brand-background";
 import {
   DEFAULT_FOOTER_SETTINGS,
   DEFAULT_HEADER_SETTINGS,
@@ -176,6 +178,9 @@ type Draft = {
   fontSize: number;
   languageOverride: string | null;
   background: string | null;
+  /** See BrandDraft: the Brand picked last and whether Background was picked by hand. */
+  brandId: string | null;
+  backgroundOverride: boolean;
   outerPadding: number;
   innerPadding: number;
   cornerRadius: number;
@@ -211,6 +216,8 @@ export function HomeComposer({ full = false }: HomeComposerProps) {
     fontSize: EXPORT_FONT_SIZE,
     languageOverride: null,
     background: null,
+    brandId: null,
+    backgroundOverride: false,
     outerPadding: 64,
     innerPadding: EXPORT_INNER_PADDING,
     cornerRadius: 12,
@@ -249,7 +256,7 @@ export function HomeComposer({ full = false }: HomeComposerProps) {
           showFooter?: boolean;
           windowDecorationSchema?: number;
         };
-        setDraft({
+        const restored = {
           filename: p.filename || DEFAULT_FILENAME,
           code: p.code || DEFAULT_CODE,
           theme: normalizeLegacyBrandTheme(p.theme || defaultTheme),
@@ -269,8 +276,19 @@ export function HomeComposer({ full = false }: HomeComposerProps) {
             p.windowDecoration,
             p.windowDecorationSchema,
           ),
-          aspectRatio: p.aspectRatio === "16:9" ? "16:9" : null,
+          aspectRatio: p.aspectRatio === "16:9" ? ("16:9" as const) : null,
           ligatures: p.ligatures ?? true,
+        };
+        // Drafts saved before Background followed Brand: a background that
+        // is not its Brand's own was picked by hand, so it stays put.
+        const brand = findMatchingBrandPreset(restored);
+        setDraft({
+          ...restored,
+          brandId: typeof p.brandId === "string" ? p.brandId : (brand?.id ?? null),
+          backgroundOverride:
+            typeof p.backgroundOverride === "boolean"
+              ? p.backgroundOverride
+              : restored.background !== null && !brand,
         });
       } catch {
         window.localStorage.removeItem(DRAFT_KEY);
@@ -362,7 +380,8 @@ export function HomeComposer({ full = false }: HomeComposerProps) {
     b.label.toLowerCase().includes(backgroundQuery.trim().toLowerCase()),
   );
   const selectedBackground = backgroundOptions.find((b) => b.label === draft.background) ?? null;
-  const selectedBrand = findMatchingBrandPreset(draft);
+  const selectedBrand = draftBrand(draft);
+  const selectedBackgroundSource = backgroundSource(draft);
 
   // Theme, brand and background changes fade the preview in instead of
   // snapping (opacity only; none with reduced motion).
@@ -833,7 +852,7 @@ export function HomeComposer({ full = false }: HomeComposerProps) {
                   <span className={panelLabelClass}>Brand</span>
                   <BrandPicker
                     value={selectedBrand?.id ?? null}
-                    onChange={(preset) => setDraft((current) => applyBrandPreset(current, preset))}
+                    onChange={(preset) => setDraft((current) => pickBrandPreset(current, preset))}
                   />
                 </div>
 
@@ -842,7 +861,9 @@ export function HomeComposer({ full = false }: HomeComposerProps) {
                   <div className="flex h-11 items-center gap-2 text-foreground">
                     <ThemePicker
                       value={draft.theme}
-                      onChange={(next) => setDraft((d) => ({ ...d, theme: next }))}
+                      onChange={(next) =>
+                        setDraft((d) => withDefaultBackground({ ...d, theme: next }))
+                      }
                       themes={themes.map((t) => ({ id: t.name, label: t.name }))}
                       triggerClassName="h-11 min-w-0 flex-1 rounded-xl bg-surf2 px-3.5 text-foreground hover:bg-surf3"
                       iconColor="hsl(var(--foreground-muted))"
@@ -855,7 +876,8 @@ export function HomeComposer({ full = false }: HomeComposerProps) {
                       onClick={() => {
                         const others = themes.filter((t) => t.name !== draft.theme);
                         const pick = others[Math.floor(Math.random() * others.length)];
-                        if (pick) setDraft((d) => ({ ...d, theme: pick.name }));
+                        if (pick)
+                          setDraft((d) => withDefaultBackground({ ...d, theme: pick.name }));
                       }}
                     >
                       <Shuffle data-icon="inline-start" />
@@ -874,83 +896,123 @@ export function HomeComposer({ full = false }: HomeComposerProps) {
                   />
                 </label>
 
-                <div className="flex min-w-0 flex-col gap-1">
-                  <span className={panelLabelClass}>Background</span>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <button
-                        type="button"
-                        className="flex h-11 min-w-0 items-center gap-2 rounded-xl bg-surf2 px-3.5 text-[15px] text-foreground transition-colors hover:bg-surf3 focus-visible:focus-ring"
-                      >
-                        <span
-                          className={cn(
-                            "size-4 shrink-0 rounded-full border border-border-strong",
-                            !selectedBackground ? "bg-transparent" : "",
-                          )}
-                          style={selectedBackgroundStyle}
-                        />
-                        <span className="truncate">{selectedBackground?.label ?? "None"}</span>
-                      </button>
-                    </PopoverTrigger>
-                    <PopoverContent side="top" align="start" className="w-[min(92vw,360px)]">
-                      <div className="flex flex-col gap-3">
-                        <div>
-                          <p className="text-sm font-medium">Background</p>
-                          <p className="text-xs text-foreground-lighter">
-                            Search or choose the outer canvas.
-                          </p>
-                        </div>
-                        <Input
-                          value={backgroundQuery}
-                          onChange={(e) => setBackgroundQuery(e.target.value)}
-                          placeholder="Search backgrounds"
-                        />
-                        <div className="grid max-h-72 grid-cols-2 gap-2 overflow-y-auto pr-1">
+                {/* Background follows Brand (or Theme), so the home row leaves it
+                    to All options, where a hand-picked one can be reset. */}
+                {full ? (
+                  <div className="col-span-full flex min-w-0 flex-col gap-1">
+                    <div className="flex min-w-0 flex-wrap items-center justify-between gap-x-3">
+                      <span className={panelLabelClass}>Background</span>
+                      {selectedBackgroundSource === "override" ? (
+                        <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                          Custom ·
                           <button
                             type="button"
-                            onClick={() => setDraft((d) => ({ ...d, background: null }))}
-                            className={cn(
-                              "flex h-11 items-center gap-2 rounded-lg px-3 text-sm transition-colors focus-visible:focus-ring",
-                              !draft.background
-                                ? "bg-ink text-paper"
-                                : "bg-surf2 text-muted-foreground hover:bg-surf3",
-                            )}
+                            onClick={() =>
+                              setDraft((d) =>
+                                withDefaultBackground({ ...d, backgroundOverride: false }),
+                              )
+                            }
+                            className="rounded-sm font-semibold text-postal hover:underline focus-visible:focus-ring"
                           >
-                            <span className="size-4 rounded-full border border-current" />
-                            None
+                            Reset to {selectedBrand ? "brand" : "theme"} default
                           </button>
-                          {filteredBackgroundOptions.map((b) => (
+                        </span>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">
+                          Follows {selectedBackgroundSource === "brand" ? "Brand" : "Theme"}
+                        </span>
+                      )}
+                    </div>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <button
+                          type="button"
+                          className="flex h-11 min-w-0 items-center gap-2 rounded-xl bg-surf2 px-3.5 text-[15px] text-foreground transition-colors hover:bg-surf3 focus-visible:focus-ring"
+                        >
+                          <span
+                            className={cn(
+                              "size-4 shrink-0 rounded-full border border-border-strong",
+                              !selectedBackground ? "bg-transparent" : "",
+                            )}
+                            style={selectedBackgroundStyle}
+                          />
+                          <span className="truncate">{selectedBackground?.label ?? "None"}</span>
+                        </button>
+                      </PopoverTrigger>
+                      <PopoverContent side="top" align="start" className="w-[min(92vw,360px)]">
+                        <div className="flex flex-col gap-3">
+                          <div>
+                            <p className="text-sm font-medium">Background</p>
+                            <p className="text-xs text-foreground-lighter">
+                              Search or choose the outer canvas.
+                            </p>
+                          </div>
+                          <Input
+                            value={backgroundQuery}
+                            onChange={(e) => setBackgroundQuery(e.target.value)}
+                            placeholder="Search backgrounds"
+                          />
+                          <div className="grid max-h-72 grid-cols-2 gap-2 overflow-y-auto pr-1">
                             <button
-                              key={b.label}
                               type="button"
-                              onClick={() => setDraft((d) => ({ ...d, background: b.label }))}
+                              onClick={() =>
+                                setDraft((d) => ({
+                                  ...d,
+                                  background: null,
+                                  backgroundOverride: true,
+                                }))
+                              }
                               className={cn(
-                                "flex h-11 min-w-0 items-center gap-2 rounded-lg px-3 text-left text-sm transition-colors focus-visible:focus-ring",
-                                draft.background === b.label
+                                "flex h-11 items-center gap-2 rounded-lg px-3 text-sm transition-colors focus-visible:focus-ring",
+                                !draft.background
                                   ? "bg-ink text-paper"
                                   : "bg-surf2 text-muted-foreground hover:bg-surf3",
                               )}
                             >
-                              <span
-                                className="size-4 shrink-0 rounded-full border border-border-strong"
-                                style={
-                                  b.patternUrl
-                                    ? {
-                                        backgroundImage: `url(${b.patternUrl}), linear-gradient(135deg, ${b.from}, ${b.to})`,
-                                        backgroundSize: "cover, cover",
-                                        backgroundPosition: "center, center",
-                                      }
-                                    : { background: `linear-gradient(135deg, ${b.from}, ${b.to})` }
-                                }
-                              />
-                              <span className="truncate">{b.label}</span>
+                              <span className="size-4 rounded-full border border-current" />
+                              None
                             </button>
-                          ))}
+                            {filteredBackgroundOptions.map((b) => (
+                              <button
+                                key={b.label}
+                                type="button"
+                                onClick={() =>
+                                  setDraft((d) => ({
+                                    ...d,
+                                    background: b.label,
+                                    backgroundOverride: true,
+                                  }))
+                                }
+                                className={cn(
+                                  "flex h-11 min-w-0 items-center gap-2 rounded-lg px-3 text-left text-sm transition-colors focus-visible:focus-ring",
+                                  draft.background === b.label
+                                    ? "bg-ink text-paper"
+                                    : "bg-surf2 text-muted-foreground hover:bg-surf3",
+                                )}
+                              >
+                                <span
+                                  className="size-4 shrink-0 rounded-full border border-border-strong"
+                                  style={
+                                    b.patternUrl
+                                      ? {
+                                          backgroundImage: `url(${b.patternUrl}), linear-gradient(135deg, ${b.from}, ${b.to})`,
+                                          backgroundSize: "cover, cover",
+                                          backgroundPosition: "center, center",
+                                        }
+                                      : {
+                                          background: `linear-gradient(135deg, ${b.from}, ${b.to})`,
+                                        }
+                                  }
+                                />
+                                <span className="truncate">{b.label}</span>
+                              </button>
+                            ))}
+                          </div>
                         </div>
-                      </div>
-                    </PopoverContent>
-                  </Popover>
-                </div>
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                ) : null}
 
                 {!full ? (
                   <Button

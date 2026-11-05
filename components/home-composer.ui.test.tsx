@@ -164,9 +164,11 @@ describe("HomeComposer controls", () => {
   it("shows only the basic options on the home teaser and links to the full editor", () => {
     render(<HomeComposer />);
 
-    for (const name of ["Brand", "Theme", "Background"]) {
+    for (const name of ["Brand", "Theme"]) {
       expect(screen.getByText(name, { selector: "span" })).toBeTruthy();
     }
+    // Background follows Brand or Theme; picking one by hand is in All options.
+    expect(screen.queryByText("Background", { selector: "span" })).toBeNull();
     expect(screen.getByLabelText("Filename")).toBeTruthy();
     expect(screen.queryByRole("combobox", { name: "Font" })).toBeNull();
     expect(screen.queryByRole("heading", { name: "Header" })).toBeNull();
@@ -219,10 +221,48 @@ describe("HomeComposer controls", () => {
 
     expect(screen.getByRole("button", { name: "Theme" }).textContent).toContain("github_dark");
     expect(screen.getByRole("button", { name: "Brand" }).textContent).toContain("Custom");
-    expect(screen.getByRole("button", { name: "Tailwind" })).toBeTruthy();
+    // With the Brand gone Custom the background follows the Theme: no canvas.
+    expect(screen.queryByTestId("snippet-canvas")).toBeNull();
     expect(screen.getByTestId("code-preview").getAttribute("data-window-decoration")).toBe(
       "macos-subtle",
     );
+
+    fireEvent.click(screen.getByRole("button", { name: "Theme" }));
+    expect(screen.getByRole("button", { name: "Brand" }).textContent).toContain("Tailwind");
+    expect(screen.getByTestId("snippet-canvas").getAttribute("data-background")).toBe("Tailwind");
+  });
+
+  it("puts Background in All options, following Brand until one is picked by hand", () => {
+    render(<HomeComposer full />);
+    expect(screen.getByText("Follows Theme")).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("button", { name: "Brand" }));
+    fireEvent.click(screen.getByText("Supabase"));
+    expect(screen.getByText("Follows Brand")).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("button", { name: "Supabase" }));
+    fireEvent.click(screen.getByRole("button", { name: "Sunset" }));
+    expect(screen.getByTestId("snippet-canvas").getAttribute("data-background")).toBe("Sunset");
+    // A hand-picked background stays through a Brand change.
+    fireEvent.click(screen.getByRole("button", { name: "Brand" }));
+    fireEvent.click(screen.getByText("Vercel"));
+    expect(screen.getByRole("button", { name: "Brand" }).textContent).toContain("Vercel");
+    expect(screen.getByTestId("snippet-canvas").getAttribute("data-background")).toBe("Sunset");
+
+    fireEvent.click(screen.getByRole("button", { name: "Reset to brand default" }));
+    expect(screen.getByTestId("snippet-canvas").getAttribute("data-background")).toBe("Vercel");
+    expect(screen.getByText("Follows Brand")).toBeTruthy();
+  });
+
+  it("treats a restored draft's background that is not its Brand's own as hand-picked", () => {
+    window.localStorage.setItem(
+      "supagist:draft:v1",
+      JSON.stringify({ theme: "github_dark", background: "Sunset" }),
+    );
+    render(<HomeComposer full />);
+    fireEvent.click(screen.getByRole("button", { name: "Theme" }));
+    expect(screen.getByTestId("snippet-canvas").getAttribute("data-background")).toBe("Sunset");
+    expect(screen.getByRole("button", { name: "Reset to theme default" })).toBeTruthy();
   });
 
   it("passes Brand frame fill and header-strip chrome into the live editor", () => {
