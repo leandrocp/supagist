@@ -125,7 +125,7 @@ Published snippets are unlisted (anyone with the link can view them, nothing lis
 npx skills add leandrocp/supagist --skill supagist
 ```
 
-The [skill](./.agents/skills/supagist/SKILL.md) teaches your coding agent to make good code images: pick the right lines, match a brand preset to your project, render with the CLI or the MCP server, check the result, and publish a link only when you ask.
+The [skill](./skills/supagist/SKILL.md) teaches your coding agent to make good code images: pick the right lines, match a brand preset to your project, render with the CLI or the MCP server, check the result, and publish a link only when you ask.
 
 ## Contributing
 

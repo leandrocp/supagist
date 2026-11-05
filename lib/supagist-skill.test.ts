@@ -6,7 +6,7 @@ import { APPEARANCE_FLAGS, UsageError, parseArgs } from "@/packages/cli/src/args
 
 // The agent skill teaches brand ids and CLI flags; these checks keep it from
 // drifting away from lib/brand-presets.ts and the CLI's argument parser.
-const SKILL_DIR = join(__dirname, "..", ".agents", "skills", "supagist");
+const SKILL_DIR = join(__dirname, "..", "skills", "supagist");
 const docs = [
   "SKILL.md",
   ...readdirSync(join(SKILL_DIR, "reference")).map((file) => `reference/${file}`),

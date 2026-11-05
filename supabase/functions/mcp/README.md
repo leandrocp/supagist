@@ -57,7 +57,7 @@ override the selected preset; partial header/footer settings merge with it.
 `ligatures: false` splits operator ligatures such as `|>` into absolutely
 positioned characters (resvg ignores `font-variant-ligatures`). Both default off
 unless the brand sets them (the Lumis and MDEx presets use 16:9, no ligatures).
-See the skill's [complete parameter guide](../../../.agents/skills/supagist/reference/features.md).
+See the skill's [complete parameter guide](../../../skills/supagist/reference/features.md).
 
 Named fonts and brand pattern images are embedded. `system` uses JetBrains Mono
 for portability. Comments embed Hack as a missing-glyph fallback where needed.

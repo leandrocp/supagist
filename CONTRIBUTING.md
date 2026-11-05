@@ -204,7 +204,7 @@ For the production endpoint, rate limits and the OAuth setup, see [`supabase/fun
 
 ## Agent skill development
 
-The Supagist skill lives in [`.agents/skills/supagist`](./.agents/skills/supagist/SKILL.md). It teaches coding agents to connect to the MCP server over OAuth, save SVG exports as real `.svg` files, and offer optional PNG conversion on the client machine. The skill and MCP use SVG exclusively. PNG conversion runs locally (not in an Edge Function or a hosted renderer), needs Node.js 22+, and needs explicit approval to install its isolated resvg dependency. It never adds dependencies to the user's application and never uploads SVGs for conversion.
+The Supagist skill lives in [`skills/supagist`](./skills/supagist/SKILL.md). It teaches coding agents to connect to the MCP server over OAuth, save SVG exports as real `.svg` files, and offer optional PNG conversion on the client machine. The skill and MCP use SVG exclusively. PNG conversion runs locally (not in an Edge Function or a hosted renderer), needs Node.js 22+, and needs explicit approval to install its isolated resvg dependency. It never adds dependencies to the user's application and never uploads SVGs for conversion.
 
 Installing the skill and connecting the MCP server are separate steps. The skill includes the connection instructions.
 
@@ -217,7 +217,7 @@ DISABLE_TELEMETRY=1 npx skills add . --list --skill supagist
 Run the converter tests:
 
 ```sh
-node --test .agents/skills/supagist/scripts/
+node --test skills/supagist/scripts/
 ```
 
 The skill follows the [skills.sh GitHub distribution format](https://github.com/vercel-labs/skills/blob/main/docs/creating-skills.md). Preparing these files does not publish a directory listing or install the skill for anyone. After a release, verify the remote command from the README (`npx skills add leandrocp/supagist --skill supagist`). Don't claim a skills.sh listing until it is visible there.
@@ -233,7 +233,8 @@ The skill follows the [skills.sh GitHub distribution format](https://github.com/
 | `packages/cli/`   | The `supagist` command-line tool                                                                        |
 | `supabase/`       | `config.toml`, `migrations/`, and Edge Functions (`mcp`, `render`, `cleanup`)                           |
 | `e2e/`            | Playwright tests                                                                                        |
-| `.agents/skills/` | The Supagist agent skill (and other skills used when working on this repo)                              |
+| `skills/`         | Published skills: `supagist` (usage) and `supagist-add-brand` (contributors)                            |
+| `.agents/skills/` | Third-party skills used when working on this repo (see `skills-lock.json`)                              |
 | `assets/brand/`   | Brand kit: logos, banner, favicons, social images. See [`brand.md`](./assets/brand/brand.md)            |
 | `public/`         | Static files served by the app                                                                          |
 

@@ -36,7 +36,7 @@ assert.equal(catalog.brands.find((brand) => brand.id === "supabase").fontId, "ge
 assert.ok(catalog.fontSizes.includes(18));
 assert.ok(catalog.backgrounds.includes("Supabase"));
 
-const skill = new URL("../../../../.agents/skills/supagist/", import.meta.url);
+const skill = new URL("../../../../skills/supagist/", import.meta.url);
 const examples = [];
 for (const file of ["SKILL.md", "reference/mcp.md", "reference/features.md"]) {
   const markdown = await readFile(new URL(file, skill), "utf8");
