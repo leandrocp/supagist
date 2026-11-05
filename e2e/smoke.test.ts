@@ -227,6 +227,32 @@ test("composer remains usable at 375px with a stable overlay selector", async ({
   expect(hasHorizontalOverflow).toBe(false);
 });
 
+test("compose customization scrollbar does not cover the controls", async ({ page }) => {
+  // Radix draws the scrollbar over the viewport; the content must leave room
+  // for it or slider thumbs, switches and value labels end up underneath.
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.goto("/compose");
+  const scroll = page.getByTestId("customization-scroll");
+  await expect(scroll.getByRole("slider").first()).toBeVisible();
+  const scrollbar = scroll.locator("[data-slot=scroll-area-scrollbar]");
+  await expect(async () => {
+    await page.mouse.move(0, 0);
+    await scroll.hover();
+    await expect(scrollbar).toBeVisible({ timeout: 1000 });
+  }).toPass();
+  const barLeft = (await scrollbar.boundingBox())!.x;
+  const rightmost = await scroll
+    .locator("[data-slot=scroll-area-viewport]")
+    .evaluate((viewport) =>
+      Math.max(
+        ...[...viewport.querySelectorAll("button, input, [role=slider], [role=switch]")].map(
+          (element) => element.getBoundingClientRect().right,
+        ),
+      ),
+    );
+  expect(rightmost).toBeLessThanOrEqual(barLeft);
+});
+
 test("font-mono text renders in the monospace font, not the inherited sans", async ({ page }) => {
   // next/font defines the mono family variable on <body>; resolving --font-mono
   // on :root made every font-mono element (the saved view's code included)

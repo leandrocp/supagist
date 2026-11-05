@@ -816,7 +816,7 @@ export function HomeComposer({ full = false }: HomeComposerProps) {
           )}
         >
           <ScrollArea data-testid="customization-scroll" type="hover" className="min-h-0 flex-1">
-            <div className={cn("min-w-0", full && "pb-4 lg:pr-1")}>
+            <div className={cn("min-w-0", full && "pb-4 lg:pr-4")}>
               {full ? (
                 <h2 className="mb-5 font-display text-[28px] leading-tight text-foreground">
                   Customize
