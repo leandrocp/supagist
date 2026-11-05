@@ -23,7 +23,7 @@
     "@fontsource/fira-code": "^5.3.0",
     "@fontsource/geist-mono": "^5.3.0",
     "@fontsource/jetbrains-mono": "^5.3.0",
-    "@lumis-sh/lumis": "^0.10.1",
+    "@lumis-sh/lumis": "^0.10.2",
     "@lumis-sh/react": "^0.4.2",
     "@lumis-sh/themes": "^0.4.3",
     "@lumis-sh/wasm-bundle-full": "^0.1.6",
