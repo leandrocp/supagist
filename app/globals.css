@@ -409,12 +409,10 @@
   animation: rise 520ms cubic-bezier(0.2, 0.7, 0.3, 1) both;
 }
 
-/* The home hero (HeroEnvelope). One unit, --u, is 1/660 of the envelope's
-   width, the artwork's own coordinate space. React steps data-phase; every
-   movement below is a transition or keyframe keyed on it. */
+/* The publish envelope (SendEnvelope). One unit, --u, is 1/660 of the
+   envelope's width, the artwork's own coordinate space. React steps
+   data-phase; every movement below is a transition or keyframe keyed on it. */
 .hero-scene {
-  --px: 0;
-  --py: 0;
   --env-back: #eaddca;
   --env-flap: #f7f2e9;
   --env-inside: #ddcdb5;
@@ -422,7 +420,6 @@
   --env-bottom: #f0e7d8;
   --env-shadow:
     0 40px 70px -30px hsl(var(--shadow-tint) / 0.32), 0 6px 16px -6px hsl(var(--shadow-tint) / 0.18);
-  --ink: #b3261e;
   container-type: inline-size;
   aspect-ratio: 660 / 600;
   perspective: 1400px;
@@ -434,16 +431,12 @@
   --env-side: #171717;
   --env-bottom: #1c1c1c;
   --env-shadow: 0 40px 70px -30px rgb(0 0 0 / 0.8), 0 6px 16px -6px rgb(0 0 0 / 0.6);
-  --ink: #e5534b;
 }
 .hero-tilt {
   --u: calc(100cqw / 660);
-  transform: rotateX(calc(var(--py) * -5deg)) rotateY(calc(var(--px) * 7deg));
-  transition: transform 500ms cubic-bezier(0.2, 0.7, 0.3, 1);
 }
 
-/* The envelope and everything in it. It is sent off to the top right and the
-   next one is slid in from the right, overshooting a little as it lands. */
+/* The envelope and everything in it. It is sent off to the top right. */
 .hero-rig {
   position: absolute;
   top: calc(var(--u) * 200);
@@ -456,10 +449,6 @@
 .hero-scene[data-phase="send"] .hero-rig {
   transform: translate(150%, -55%) rotate(24deg) scale(0.5);
   transition: transform 700ms cubic-bezier(0.55, 0, 0.8, 0.2);
-}
-.hero-scene[data-phase="away"] .hero-rig {
-  transform: translate(140%, 12%) rotate(16deg);
-  transition: none;
 }
 .hero-body {
   position: absolute;
@@ -497,13 +486,7 @@
     transform 560ms cubic-bezier(0.5, 0, 0.3, 1),
     z-index 0s linear 280ms;
 }
-.hero-scene:is(
-    [data-phase="reading"],
-    [data-phase="insert"],
-    [data-phase="open"],
-    [data-phase="rise"]
-  )
-  .hero-flap {
+.hero-scene:is([data-phase="reading"], [data-phase="insert"]) .hero-flap {
   transform: perspective(calc(var(--u) * 1600)) rotateX(180deg);
   z-index: 2;
 }
@@ -515,50 +498,6 @@
 }
 .hero-flap-inside {
   transform: rotateX(180deg);
-}
-
-/* The postmark is inked on the flap after the seal, and stays until the
-   letter is opened and the flap turns away. */
-.hero-postmark {
-  position: absolute;
-  top: calc(var(--u) * 20);
-  left: calc(var(--u) * 400);
-  width: calc(var(--u) * 210);
-  color: var(--ink);
-  opacity: 0;
-  transform: rotate(-9deg);
-  mix-blend-mode: multiply;
-}
-.dark .hero-postmark {
-  mix-blend-mode: screen;
-}
-.hero-scene:is(
-    [data-phase="post"],
-    [data-phase="send"],
-    [data-phase="away"],
-    [data-phase="arrive"],
-    [data-phase="crack"],
-    [data-phase="open"]
-  )
-  .hero-postmark {
-  opacity: 0.72;
-}
-@keyframes hero-postmark {
-  0% {
-    opacity: 0;
-    transform: rotate(-9deg) scale(1.7);
-  }
-  55% {
-    opacity: 0.9;
-    transform: rotate(-9deg) scale(0.94);
-  }
-  100% {
-    opacity: 0.72;
-    transform: rotate(-9deg);
-  }
-}
-.hero-scene[data-phase="post"] .hero-postmark {
-  animation: hero-postmark 320ms cubic-bezier(0.5, 0, 0.6, 1) both;
 }
 
 /* The code card: out of the envelope while it is read, inside it otherwise.
@@ -584,17 +523,15 @@
     opacity 0s linear 300ms,
     background-color 0s;
 }
-.hero-scene:is([data-phase="reading"], [data-phase="rise"]) .hero-card {
+.hero-scene[data-phase="reading"] .hero-card {
   transform: rotate(-2.5deg);
   opacity: 1;
   transition:
     transform 750ms cubic-bezier(0.25, 1.35, 0.45, 1),
     opacity 0s;
 }
-.hero-scene:is([data-phase="insert"], [data-phase="open"]) .hero-card {
-  opacity: 1;
-}
 .hero-scene[data-phase="insert"] .hero-card {
+  opacity: 1;
   transition:
     transform 850ms cubic-bezier(0.6, 0, 0.3, 1),
     opacity 0s;
@@ -629,23 +566,7 @@
   line-height: 1.75;
   white-space: pre;
 }
-@keyframes hero-caret {
-  50% {
-    opacity: 0;
-  }
-}
-.hero-caret {
-  display: inline-block;
-  width: 0.55ch;
-  height: 1.15em;
-  margin-left: 1px;
-  vertical-align: text-bottom;
-  background: currentColor;
-  animation: hero-caret 1s steps(1) infinite;
-}
-
-/* The seal on the flap tip: stamped down from above, then cracked in two
-   when the next letter is opened. */
+/* The seal on the flap tip, stamped down from above. */
 .hero-seal {
   position: absolute;
   z-index: 6;
@@ -663,14 +584,7 @@
   opacity: 0;
   filter: drop-shadow(0 calc(var(--u) * 3) calc(var(--u) * 3) rgb(0 0 0 / 0.35));
 }
-.hero-scene:is(
-    [data-phase="seal"],
-    [data-phase="post"],
-    [data-phase="send"],
-    [data-phase="away"],
-    [data-phase="arrive"]
-  )
-  .hero-seal-whole {
+.hero-scene:is([data-phase="seal"], [data-phase="send"]) .hero-seal-whole {
   opacity: 1;
   transform: rotate(-10deg);
 }
@@ -727,47 +641,6 @@
 .hero-scene[data-phase="seal"] .hero-body {
   animation: hero-thump 380ms ease-out 220ms;
 }
-.hero-seal-left {
-  clip-path: polygon(0 0, 54% 0, 46% 28%, 57% 50%, 44% 72%, 52% 100%, 0 100%);
-}
-.hero-seal-right {
-  clip-path: polygon(54% 0, 100% 0, 100% 100%, 52% 100%, 44% 72%, 57% 50%, 46% 28%);
-}
-@keyframes hero-crack-left {
-  0% {
-    opacity: 1;
-    transform: rotate(-10deg);
-  }
-  25% {
-    opacity: 1;
-    transform: translate(-3%, 1%) rotate(-14deg);
-  }
-  100% {
-    opacity: 0;
-    transform: translate(-70%, 90%) rotate(-70deg);
-  }
-}
-@keyframes hero-crack-right {
-  0% {
-    opacity: 1;
-    transform: rotate(-10deg);
-  }
-  25% {
-    opacity: 1;
-    transform: translate(3%, 1%) rotate(-6deg);
-  }
-  100% {
-    opacity: 0;
-    transform: translate(70%, 80%) rotate(50deg);
-  }
-}
-.hero-scene[data-phase="crack"] .hero-seal-left {
-  animation: hero-crack-left 560ms cubic-bezier(0.4, 0, 0.8, 0.6) both;
-}
-.hero-scene[data-phase="crack"] .hero-seal-right {
-  animation: hero-crack-right 560ms cubic-bezier(0.4, 0, 0.8, 0.6) both;
-}
-
 /* The home intro's small envelope (IntroEnvelope): Envelope B with the R3
    seal. Once per session it arrives and the seal stamps in, reusing the
    hero's seal, ripple and thump; the first edit presses the seal again. No
@@ -1000,9 +873,11 @@
   .intro-env[data-pressed] .intro-seal-ripple {
     animation: none;
   }
-  /* The hero keeps its first frame: no loop runs, and no pointer tilt. */
-  .hero-tilt {
-    transform: none;
+  /* The publish envelope shows sealed and still. */
+  .hero-scene[data-phase] .hero-seal-whole,
+  .hero-scene[data-phase] .hero-seal::after,
+  .hero-scene[data-phase] .hero-body {
+    animation: none;
   }
   .press:active:not(:disabled) {
     scale: none;

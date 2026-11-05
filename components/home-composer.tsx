@@ -45,6 +45,7 @@ import {
 import { languageDisplayName, codePointLength, normalizeSnippetCode } from "@/lib/snippet-utils";
 import { ThemePicker } from "@/components/theme-picker";
 import { BrandPicker } from "@/components/brand-picker";
+import { SendEnvelope } from "@/components/brand/hero-envelope";
 import {
   BackgroundDecoration,
   backgroundCanvasStyle,
@@ -236,6 +237,8 @@ export function HomeComposer({ full = false }: HomeComposerProps) {
   const [viewerLabel, setViewerLabel] = useState<string | null>(null);
   const [viewerAvatar, setViewerAvatar] = useState<string | null>(null);
   const [isPublishing, setIsPublishing] = useState(false);
+  /** The snippet just published, while the envelope carries it off. */
+  const [sentPath, setSentPath] = useState<string | null>(null);
   const [visibility, setVisibility] = useState<SnippetVisibility>("public");
   const [isExporting, setIsExporting] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -535,10 +538,11 @@ export function HomeComposer({ full = false }: HomeComposerProps) {
         // best-effort clipboard
       }
 
-      // The snippet page stamps the seal on arrival, so publish itself never
-      // waits on an animation.
+      // The big envelope seals and sends the snippet (about 1.8 s; at once
+      // with reduced motion), then its page stamps the seal and shows the link.
       markJustPublished(result.path!, copied);
-      router.push(result.path!);
+      router.prefetch(result.path!);
+      setSentPath(result.path!);
     } catch (error: unknown) {
       toast.error(error instanceof Error ? error.message : "Publish failed. Please try again.");
     } finally {
@@ -546,7 +550,7 @@ export function HomeComposer({ full = false }: HomeComposerProps) {
     }
   };
 
-  const busy = isPublishing || isExporting;
+  const busy = isPublishing || isExporting || sentPath !== null;
 
   const previewLineCount = getPreviewLineCount(draft.code);
   const previewLineHeight = exportLineHeightForFontSize(
@@ -1701,6 +1705,21 @@ export function HomeComposer({ full = false }: HomeComposerProps) {
           </div>
         ) : null}
       </div>
+
+      {sentPath ? (
+        <div className="rise-in pointer-events-none fixed inset-0 z-50 flex items-center justify-center overflow-hidden bg-background/80">
+          <SendEnvelope
+            file={draft.filename}
+            lang={languageDisplayName(language)}
+            code={publishedCode}
+            onSent={() => router.push(sentPath)}
+            className="w-[min(86vw,400px)]"
+          />
+          <p role="status" className="sr-only">
+            Published. Opening your snippet.
+          </p>
+        </div>
+      ) : null}
     </section>
   );
 }

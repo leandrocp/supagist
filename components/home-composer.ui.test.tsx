@@ -64,8 +64,9 @@ vi.mock("next/dynamic", () => ({
     },
 }));
 
+const router = vi.hoisted(() => ({ push: vi.fn(), prefetch: vi.fn() }));
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ push: vi.fn() }),
+  useRouter: () => router,
 }));
 
 vi.mock("@lumis-sh/lumis/client", async (importOriginal) => ({
@@ -137,6 +138,22 @@ describe("HomeComposer controls", () => {
     fireEvent.click(screen.getByRole("button", { name: "Publish private" }));
     await vi.waitFor(() => expect(publishSnippet).toHaveBeenCalledTimes(2));
     expect(publishSnippet.mock.calls[1]![0].get("visibility")).toBe("private");
+  });
+
+  it("seals and sends the published snippet in the big envelope, then opens its page", async () => {
+    publishSnippet.mockResolvedValueOnce({ path: "/hello-tsx-abc123" } as never);
+    render(<HomeComposer />);
+    fireEvent.click(screen.getByRole("button", { name: "Publish" }));
+
+    const envelope = await screen.findByTestId("send-envelope");
+    expect(envelope.querySelector(".hero-card-file")?.textContent).toBe("snippet.tsx");
+    expect(router.prefetch).toHaveBeenCalledWith("/hello-tsx-abc123");
+    expect(router.push).not.toHaveBeenCalled();
+    // Publish stays busy while the letter is on its way.
+    expect(screen.getByRole("button", { name: "Publish" }).hasAttribute("disabled")).toBe(true);
+    await vi.waitFor(() => expect(router.push).toHaveBeenCalledWith("/hello-tsx-abc123"), {
+      timeout: 4000,
+    });
   });
 
   it("uses the wax primary for Publish and keeps the preview gutter", () => {
