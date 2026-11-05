@@ -25,8 +25,7 @@ import { UserAvatar } from "@/components/user-avatar";
 import { Badge } from "@/components/ui/badge";
 import { recordVisit } from "@/app/actions/record-visit";
 import { buildAppUrl, getRequestOrigin } from "@/lib/utils";
-import { cardSource, ogVersion } from "@/lib/og-image";
-import { fetchOgFacts } from "@/lib/og-render";
+import { ogVersion } from "@/lib/og-image";
 import { parseSnippetAppearance } from "@/lib/snippet-appearance";
 
 // Module-level singleton — safe because this is server-only code. The Node
@@ -74,6 +73,7 @@ const getSnippet = cache(async (slug: string, shortId: string) => {
   const code = normalizeSnippetCode(data.code);
   return {
     ...data,
+    raw_code: data.code,
     code,
     line_count: code.split("\n").length,
     code_char_count: codePointLength(code),
@@ -88,40 +88,15 @@ export async function generateMetadata({ params }: Props) {
   const snippet = await getSnippet(parsed.slug, parsed.shortId);
   if (!snippet) return {};
 
-  // The live share image (app/[snippet]/og.png). `?v=` changes exactly when
-  // the picture would, which also busts X, Slack and Discord preview caches.
-  // If the facts can't be read, fall back to the publish-time og.png, then to
-  // the site default.
-  const supabase = await createClient();
-  let ogImage: string | null = null;
-  try {
-    const facts = await fetchOgFacts(supabase, snippet.id);
-    const v = ogVersion({
-      viewCount: snippet.view_count,
-      reactionEmojis: facts.reactionEmojis,
-      commentCount: facts.commentCount,
-      theme: snippet.theme,
-      unlisted: snippet.visibility === "unlisted",
-      lineCount: snippet.line_count,
-      language: snippet.language,
-      author: snippet.author
-        ? { username: snippet.author.username, avatarUrl: snippet.author.avatar_url }
-        : null,
-      card: cardSource(snippet),
-      edit: {
-        code: snippet.code,
-        title: snippet.title,
-        fontId: snippet.font_id,
-        appearance: snippet.appearance,
-      },
-    });
-    ogImage = `/${param}/og.png?v=${v}`;
-  } catch (error) {
-    console.error(`Share image facts failed for snippet ${snippet.id}`, error);
-    ogImage = snippet.og_image_path
-      ? supabase.storage.from("snippet-images").getPublicUrl(snippet.og_image_path).data.publicUrl
-      : null;
-  }
+  // The share image (app/[snippet]/og.png) is the snippet's own export
+  // render. `?v=` changes exactly when the picture would (the snippet is
+  // sealed, so only on a visibility change), which busts X, Slack, WhatsApp
+  // and Discord preview caches; a title change keeps it.
+  const ogImage = `/${param}/og.png?v=${ogVersion({
+    ...snippet,
+    // The image is drawn from the stored code, not the trimmed copy.
+    code: snippet.raw_code,
+  })}`;
 
   // Short, screen-reader-friendly description used as the og:image alt and
   // the social-card description — see buildSnippetSocialAlt for the shape.
@@ -136,9 +111,7 @@ export async function generateMetadata({ params }: Props) {
   });
 
   // A page's openGraph replaces the layout's, so name the default share image.
-  const images = ogImage
-    ? [{ url: ogImage, width: 1200, height: 630, alt }]
-    : [{ url: "/og-image.png", width: 1200, height: 630 }];
+  const images = [{ url: ogImage, width: 1200, height: 630, alt }];
   const title = `${snippet.title ?? snippet.filename} — Supagist`;
   return {
     title,

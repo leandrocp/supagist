@@ -68,10 +68,9 @@ const nextConfig: NextConfig = {
   // deployed saved view would fall back to plain text for every snippet.
   outputFileTracingIncludes: {
     "/\\[snippet\\]": ["./node_modules/@lumis-sh/wasm-*/**/*"],
-    // The share image reads its fonts, envelope layers and Noto emoji at
-    // request time (lib/og-render.tsx). It and the live thumbnail also render
-    // snippets with no stored image using the TTF faces and brand images
-    // (lib/snippet-render.ts).
+    // The share image reads its band font and seal at request time
+    // (lib/og-render.ts). It and the live thumbnail render snippets with the
+    // TTF faces and brand images (lib/snippet-render.ts).
     "/\\[snippet\\]/og.png": ["./assets/og/**/*", ...SNIPPET_RENDER_FILES],
     "/\\[snippet\\]/image.png": SNIPPET_RENDER_FILES,
     // Read at request time; see lib/google-connected-apps.ts.

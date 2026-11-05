@@ -8,9 +8,9 @@ import parsers from "@/supabase/functions/mcp/spike/generated/parser-packages.js
 
 /**
  * Renders a saved snippet from its live row on the server, with the same
- * export renderer and stored appearance the composer used at publish. An edit
- * drops the publish-time images, and an MCP publish stores no PNG, so the
- * share card and the list thumbnail of those snippets come from here.
+ * export renderer and stored appearance the composer used at publish. The
+ * share image (lib/og-render.ts) and, for snippets with no stored PNG (MCP
+ * publishes), the list thumbnail come from here.
  */
 export type RenderableSnippet = {
   code: string;
@@ -97,15 +97,15 @@ const runtime: ExportRuntime = {
 };
 
 /**
- * At 2×. `card`: the card alone, as publish stores card.png for the share
- * image. Otherwise the full canonical render with its canvas.
+ * The full canonical render with its canvas, as Save as PNG draws it, at
+ * `pixelRatio` (2× by default).
  */
 export async function renderSnippetPng(
   snippet: RenderableSnippet,
-  { card }: { card: boolean },
+  { pixelRatio = 2 }: { pixelRatio?: number } = {},
 ): Promise<Uint8Array> {
   const appearance = parseSnippetAppearance(snippet.appearance);
-  const background = card ? null : findExportBackground(appearance.background);
+  const background = findExportBackground(appearance.background);
   const svg = await createHighlightedSvg(
     snippet.code,
     snippet.filename,
@@ -135,7 +135,7 @@ export async function renderSnippetPng(
     appearance.footer,
     appearance.fontSize,
     false,
-    card ? null : appearance.aspectRatio,
+    appearance.aspectRatio,
     appearance.ligatures,
     runtime,
   );
@@ -147,6 +147,6 @@ export async function renderSnippetPng(
     .replace("data:font/woff2;base64,", "data:font/ttf;base64,")
     .replace("format('woff2')", "format('truetype')")
     .replace("</style>", `${await emojiFace}</style>`);
-  const { png } = await rasterizeSvg(ttf, 2);
+  const { png } = await rasterizeSvg(ttf, pixelRatio);
   return new Uint8Array(png);
 }

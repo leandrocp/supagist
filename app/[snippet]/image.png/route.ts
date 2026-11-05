@@ -29,7 +29,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ sni
     .maybeSingle<RenderableSnippet & { visibility: "public" | "unlisted" }>();
   if (!snippet) return new Response("Not found", { status: 404 });
 
-  const png = await renderSnippetPng(snippet, { card: false });
+  const png = await renderSnippetPng(snippet);
   return new Response(png as BodyInit, {
     headers: {
       "Content-Type": "image/png",

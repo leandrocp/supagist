@@ -1,223 +1,170 @@
-import { readFileSync } from "node:fs";
+import sharp from "sharp";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { pngSize } from "@/lib/og-render";
+import { OG_BAND, OG_SIZE, ogVersion } from "@/lib/og-image";
+import { OG_MAX_BYTES } from "@/lib/og-render";
+import { renderSnippetPng } from "@/lib/snippet-render";
+import { loadTheme } from "@/lib/theme-loader";
 
-// Supabase is external I/O here; the route, the model and the real next/og
-// render run unmocked.
-const db = vi.hoisted(() => ({
-  snippet: null as Record<string, unknown> | null,
-  reactions: [] as { emoji: string }[],
-  reactionsError: null as Error | null,
-  comments: 0,
-  files: {} as Record<string, Uint8Array>,
-  downloads: [] as string[],
-}));
+// Supabase is external I/O here; the route, the export renderer and sharp run
+// unmocked.
+const db = vi.hoisted(() => ({ snippet: null as Record<string, unknown> | null }));
 
 vi.mock("@supabase/supabase-js", () => ({
   createClient: () => ({
-    rpc: () => ({
-      select: () => ({ maybeSingle: async () => ({ data: db.snippet }) }),
-    }),
-    from: (table: string) => ({
-      select: () => ({
-        eq: async () =>
-          table === "snippet_line_reactions"
-            ? { data: db.reactions, error: db.reactionsError }
-            : { count: db.comments, error: null },
-      }),
-    }),
+    rpc: () => ({ select: () => ({ maybeSingle: async () => ({ data: db.snippet }) }) }),
     storage: {
       from: () => ({
-        download: async (path: string) => {
-          db.downloads.push(path);
-          const bytes = db.files[path];
-          return bytes ? { data: new Blob([bytes as BlobPart]) } : { data: null };
-        },
-        getPublicUrl: (path: string) => ({
-          data: { publicUrl: `https://storage.test/${path}` },
-        }),
+        getPublicUrl: (path: string) => ({ data: { publicUrl: `https://storage.test/${path}` } }),
       }),
     },
   }),
 }));
 
 const { GET } = await import("./route");
-const { loadTheme } = await import("@/lib/theme-loader");
 
-/** RGB of one pixel of a 1200×630 PNG, decoded by resvg. */
-async function pixelAt(png: Uint8Array, x: number, y: number) {
-  const { Resvg } = await import("@resvg/resvg-js");
-  const href = `data:image/png;base64,${Buffer.from(png).toString("base64")}`;
-  const image = new Resvg(
-    `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630"><image href="${href}" width="1200" height="630"/></svg>`,
-  ).render();
-  const at = (y * image.width + x) * 4;
-  return [...image.pixels.subarray(at, at + 3)];
-}
-
-const CARD = new Uint8Array(
-  readFileSync(new URL("../../../public/brand/hero-card.png", import.meta.url)),
-);
+const author = { username: "leandrocp", avatar_url: "https://avatars.githubusercontent.com/u/1" };
 
 const row = (overrides: Record<string, unknown> = {}) => ({
   id: "s1",
-  author_id: "u1",
-  filename: "seal-button.tsx",
+  code: "export function Render() {\n  return <h1>Hello, Supagist!</h1>;\n}\n\n",
+  filename: "snippet.tsx",
   language: "tsx",
-  theme: "github_light",
-  // A row stored before trimming, with trailing blank lines.
-  code: "const a = 1;\nconst b = 2;\n\n",
-  line_count: 4,
-  view_count: 137,
-  created_at: "2026-10-31T12:00:00Z",
+  theme: "lumis-dusk",
+  font_id: "jetbrains",
+  appearance: { background: "Lumis Dark", aspectRatio: "16:9", outerPadding: 64 },
   visibility: "public",
-  canonical_image_path: "u1/snippets/s1/canonical.png",
   og_image_path: "u1/snippets/s1/og.png",
-  svg_path: "u1/snippets/s1/canonical.svg",
-  author: { username: "leandrocp", avatar_url: null },
+  author,
   ...overrides,
 });
 
-const get = (param = "seal-button-tsx-6ophdd") =>
-  GET(new Request(`https://supagist.app/${param}/og.png`), {
-    params: Promise.resolve({ snippet: param }),
+const get = (query = "") =>
+  GET(new Request(`https://supagist.app/snippet-tsx-zocdc9/og.png${query}`), {
+    params: Promise.resolve({ snippet: "snippet-tsx-zocdc9" }),
   });
 
-// next/og loads its layout engine from a data: URL; anything else would be a
-// runtime CDN dependency (fonts, emoji or avatars) that the image must not have.
-const realFetch = globalThis.fetch;
+/** Mean RGB of a region of an image. */
+async function meanAt(
+  image: Uint8Array,
+  region: { left: number; top: number; width: number; height: number },
+) {
+  const cut = await sharp(image).extract(region).toBuffer();
+  const { channels } = await sharp(cut).stats();
+  return channels.slice(0, 3).map((c) => c.mean);
+}
+
+// Offline: the avatar and the parser fetch fail, and the code draws as plain
+// text. The image must still render.
 const networkCalls: string[] = [];
-const fetchSpy = vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
-  const url = String(input instanceof Request ? input.url : input);
-  if (url.startsWith("data:")) return realFetch(input, init);
-  networkCalls.push(url);
-  return Promise.reject(new Error(`the share image must not fetch ${url}`));
-});
-
 beforeEach(() => {
-  Object.assign(db, {
-    snippet: row(),
-    reactions: [{ emoji: "🔥" }, { emoji: "🔥" }, { emoji: "❤️" }],
-    reactionsError: null,
-    comments: 2,
-    files: { "u1/snippets/s1/card.png": CARD },
-    downloads: [],
-  });
-  vi.stubGlobal("fetch", fetchSpy);
+  db.snippet = row();
+  vi.spyOn(console, "warn").mockImplementation(() => {});
+  vi.stubGlobal(
+    "fetch",
+    vi.fn((input: RequestInfo | URL) => {
+      networkCalls.push(String(input instanceof Request ? input.url : input));
+      return Promise.reject(new Error("offline"));
+    }),
+  );
 });
 
 afterEach(() => {
   vi.unstubAllGlobals();
+  vi.restoreAllMocks();
   networkCalls.length = 0;
 });
 
 describe("GET /[snippet]/og.png", () => {
-  it("renders a cacheable 1200×630 PNG without any network fetch", async () => {
+  it("is the 16:9 export filling the frame, with the band, under the size limit", async () => {
     const res = await get();
     expect(res.status).toBe(200);
     expect(res.headers.get("content-type")).toBe("image/png");
-    expect(res.headers.get("cache-control")).toBe(
+    const og = new Uint8Array(await res.arrayBuffer());
+    expect(og.byteLength).toBeLessThanOrEqual(OG_MAX_BYTES);
+    expect(await sharp(og).metadata()).toMatchObject(OG_SIZE);
+
+    // The middle of the frame is the export's middle: 3200×1800 scaled to
+    // 1120×630 at x=40, so their centres line up.
+    const exported = await renderSnippetPng({ ...row(), code: row().code.trimEnd() } as never);
+    const exportCentre = await meanAt(await sharp(exported).resize(1120, 630).png().toBuffer(), {
+      left: 460,
+      top: 215,
+      width: 200,
+      height: 200,
+    });
+    const ogCentre = await meanAt(og, { left: 500, top: 215, width: 200, height: 200 });
+    ogCentre.forEach((c, i) => expect(Math.abs(c - exportCentre[i])).toBeLessThan(4));
+
+    // The flat C seal in the band is wax red: a good part of its box is.
+    const box = await sharp(og)
+      .extract({
+        left: 40 + OG_BAND.inset,
+        top: OG_SIZE.height - (OG_BAND.height + OG_BAND.seal) / 2,
+        width: OG_BAND.seal,
+        height: OG_BAND.seal,
+      })
+      .removeAlpha()
+      .raw()
+      .toBuffer();
+    let wax = 0;
+    for (let i = 0; i < box.length; i += 3) {
+      if (box[i] > 150 && box[i + 1] < 90 && box[i + 2] < 90) wax += 1;
+    }
+    expect(wax).toBeGreaterThan(OG_BAND.seal ** 2 / 4);
+  }, 60_000);
+
+  it("fits an auto-sized card with no background whole, on its editor colour", async () => {
+    db.snippet = row({ appearance: { background: null, aspectRatio: null } });
+    const og = new Uint8Array(await (await get()).arrayBuffer());
+    expect(await sharp(og).metadata()).toMatchObject(OG_SIZE);
+    const { data } = await loadTheme("lumis-dusk");
+    const bg = (data.highlights.normal as { bg: string }).bg;
+    const want = [1, 3, 5].map((i) => parseInt(bg.slice(i, i + 2), 16));
+    // Far left of the frame is the fill, not the card.
+    const fill = await meanAt(og, { left: 2, top: 200, width: 8, height: 100 });
+    fill.forEach((c, i) => expect(Math.abs(c - want[i])).toBeLessThan(2));
+  }, 60_000);
+
+  it("caches the current version for a year and anything else for an hour", async () => {
+    const current = ogVersion(row() as never);
+    expect((await get(`?v=${current}`)).headers.get("cache-control")).toBe(
+      "public, max-age=31536000, s-maxage=31536000, immutable",
+    );
+    expect((await get("?v=stale")).headers.get("cache-control")).toBe(
       "public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800",
     );
-    expect(res.headers.get("x-robots-tag")).toBeNull();
-    expect(pngSize(new Uint8Array(await res.arrayBuffer()))).toEqual({ width: 1200, height: 630 });
-    expect(db.downloads).toEqual(["u1/snippets/s1/card.png"]);
-    expect(networkCalls).toEqual([]);
-  }, 30_000);
+  }, 60_000);
 
-  it("falls back to canonical.png for snippets published before card.png", async () => {
-    db.files = { "u1/snippets/s1/canonical.png": CARD };
-    const res = await get();
-    expect(res.status).toBe(200);
-    expect(db.downloads).toEqual(["u1/snippets/s1/card.png", "u1/snippets/s1/canonical.png"]);
-  }, 30_000);
-
-  // The reported bug: an owner edit nulls the stored image paths, and the
-  // share image lost its card (envelope and seal only).
-  it("draws the edited code from the live row once an edit dropped the stored renders", async () => {
-    const edited = (code: string) =>
-      row({
-        code,
-        theme: "lumis-dusk",
-        // The composer's default, which names no font file.
-        font_id: "system",
-        appearance: null,
-        canonical_image_path: null,
-        og_image_path: null,
-        svg_path: null,
-      });
-    // Offline here, the parser fetch fails and the code draws as plain text.
-    vi.spyOn(console, "warn").mockImplementation(() => {});
-    // card.png from before the edit is still in Storage, but stale.
-    db.snippet = edited("const before = 1;\nconst after = 2;");
-    const first = new Uint8Array(await (await get()).arrayBuffer());
-    db.snippet = edited("const edited = 3;\nconst again = 4;");
-    const res = await get();
-    expect(res.status).toBe(200);
-    const second = new Uint8Array(await res.arrayBuffer());
-
-    expect(db.downloads).toEqual([]);
-    // Only the pinned parser, as the browser and the MCP renderer load it.
-    expect(networkCalls.length).toBeGreaterThan(0);
-    for (const url of networkCalls) {
-      expect(url).toMatch(
-        /^https:\/\/cdn\.jsdelivr\.net\/npm\/@lumis-sh\/wasm-tsx@[\d.]+\/tree-sitter-tsx\.wasm$/,
-      );
-    }
-    // The card sits in the envelope: right of the short lines, its body is the
-    // theme's editor colour (the envelope alone is grey there).
-    const { data: theme } = await loadTheme("lumis-dusk");
-    const bg = (theme.highlights.normal as { bg: string }).bg;
-    const pixel = await pixelAt(second, 1100, 330);
-    expect(pixel.map((c) => c.toString(16).padStart(2, "0")).join("")).toBe(bg.slice(1));
-    // Same filename, lines, theme and date: only the code differs, so the
-    // pictures differ only if the card shows the live code.
-    expect(Buffer.from(first).equals(Buffer.from(second))).toBe(false);
-  }, 30_000);
-
-  // The reported edit added 😀: resvg has no color emoji, and without a
-  // fallback face the glyph went missing from the card.
-  it("draws emoji in a live card", async () => {
-    vi.spyOn(console, "warn").mockImplementation(() => {});
-    const edited = (code: string) =>
-      row({
-        code,
-        theme: "lumis-dusk",
-        font_id: "system",
-        appearance: null,
-        canonical_image_path: null,
-        og_image_path: null,
-        svg_path: null,
-      });
-    db.snippet = edited("const greeting = 1; // 😀");
-    const grin = Buffer.from(await (await get()).arrayBuffer());
-    db.snippet = edited("const greeting = 1; // 🚀");
-    const rocket = Buffer.from(await (await get()).arrayBuffer());
-    expect(grin.equals(rocket)).toBe(false);
-  }, 30_000);
-
-  it("marks unlisted images noindex and skips the avatar", async () => {
+  it("unlisted shows less: noindex, no author anywhere in the picture", async () => {
     db.snippet = row({
-      visibility: "unlisted",
-      author: { username: "leandrocp", avatar_url: "https://avatars.githubusercontent.com/u/1" },
+      appearance: { background: "Lumis Dark", footer: { enabled: true, showAuthor: true } },
     });
+    const pub = Buffer.from(await (await get()).arrayBuffer());
+    networkCalls.length = 0;
+    db.snippet = { ...db.snippet, visibility: "unlisted" };
     const res = await get();
-    expect(res.status).toBe(200);
     expect(res.headers.get("x-robots-tag")).toBe("noindex");
-    expect(networkCalls).toEqual([]);
-  }, 30_000);
+    const unlisted = Buffer.from(await res.arrayBuffer());
+    expect(unlisted.equals(pub)).toBe(false);
+    // Not even the avatar is fetched.
+    expect(networkCalls.filter((url) => url.includes("avatars"))).toEqual([]);
+  }, 60_000);
 
-  it("redirects to the publish-time og.png when the render fails", async () => {
-    db.reactionsError = new Error("db down");
+  it("redirects, uncached, to the publish-time og.png when the render fails", async () => {
+    db.snippet = row({ theme: "no-such-theme" });
     vi.spyOn(console, "error").mockImplementation(() => {});
     const res = await get();
     expect(res.status).toBe(307);
     expect(res.headers.get("location")).toBe("https://storage.test/u1/snippets/s1/og.png");
-  });
+    expect(res.headers.get("cache-control")).toBe("no-store");
+  }, 60_000);
 
   it("404s for an unknown or malformed snippet", async () => {
     db.snippet = null;
     expect((await get()).status).toBe(404);
-    expect((await get("x")).status).toBe(404);
+    const res = await GET(new Request("https://supagist.app/x/og.png"), {
+      params: Promise.resolve({ snippet: "x" }),
+    });
+    expect(res.status).toBe(404);
   });
 });

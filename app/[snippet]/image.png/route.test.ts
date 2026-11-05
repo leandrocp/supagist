@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { pngSize } from "@/lib/og-render";
+import sharp from "sharp";
 
 // Supabase is external I/O here; the route and the real renderer run unmocked.
 const db = vi.hoisted(() => ({ snippet: null as Record<string, unknown> | null }));
@@ -40,7 +40,7 @@ describe("GET /[snippet]/image.png", () => {
     expect(res.headers.get("cache-control")).toBe(
       "public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800",
     );
-    expect(pngSize(new Uint8Array(await res.arrayBuffer())).width).toBeGreaterThan(0);
+    expect((await sharp(Buffer.from(await res.arrayBuffer())).metadata()).width).toBeGreaterThan(0);
   }, 30_000);
 
   it("marks unlisted renders noindex and 404s for unknown links", async () => {
