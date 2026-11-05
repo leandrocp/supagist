@@ -163,6 +163,23 @@ describe("supagist-add-brand skill", () => {
     }
   });
 
+  it("points at the pull request template, which carries the brand checklist", () => {
+    const template = readFileSync(
+      join(__dirname, "..", ".github", "pull_request_template.md"),
+      "utf8",
+    );
+    expect(skill).toContain("](../../.github/pull_request_template.md)");
+    for (const item of [
+      "## Brand preset",
+      "Preset appended last in `BRAND_PRESETS`",
+      "`public/brands/README.md`",
+      "`skills/supagist/reference/brands.md`",
+      "`prepare-render.mjs`",
+      "Sample card rendered and checked",
+    ])
+      expect(template, item).toContain(item);
+  });
+
   it("names the digest test that pins the shipped presets", () => {
     const tests = readFileSync(join(__dirname, "brand-presets.test.ts"), "utf8");
     const name = "leaves the shipped presets exactly as they were";

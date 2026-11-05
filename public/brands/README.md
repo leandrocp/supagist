@@ -6,8 +6,8 @@ These marks identify third-party Brand presets and do not imply endorsement.
   Cloudflare, ElevenLabs, Firecrawl, Gemini, Mintlify, Nuxt, OpenAI, Prisma,
   and Trigger.dev SVGs were sourced from the MIT-licensed
   [`raycast/ray-so`](https://github.com/raycast/ray-so) project.
-- Anthropic, Cursor, Docker, GitHub, Hugging Face, Linear, and Perplexity SVGs
-  were sourced from the CC0-licensed
+- Anthropic, Cursor, Docker, GitHub, Hugging Face, Inertia, Linear, and
+  Perplexity SVGs were sourced from the CC0-licensed
   [`simple-icons/simple-icons`](https://github.com/simple-icons/simple-icons)
   project.
 

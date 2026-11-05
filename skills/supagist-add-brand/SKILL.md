@@ -240,20 +240,12 @@ gh pr create --repo leandrocp/supagist --base main \
   --title "Add the <Project> brand preset" --body-file pr.md
 ```
 
-Write `pr.md` (outside the repo, or delete it after) with:
-
-- the sample PNGs (drag them into the pull request on GitHub after it opens);
-- the logo's source and licence, and where each colour came from;
-- the theme you chose and why;
-- this checklist, ticked:
-  - [ ] Preset appended last in `BRAND_PRESETS`; no other preset changed
-        (digest test passes)
-  - [ ] Logo in `public/brands/` with its source in `public/brands/README.md`
-  - [ ] Row added to `skills/supagist/reference/brands.md`
-  - [ ] MCP Edge copy regenerated (`prepare-render.mjs`)
-  - [ ] Sample card rendered and checked
-  - [ ] `npm run lint`, `npm run fmt:check`, `npm run typecheck`, `npm test`
-        and the Deno render tests pass
+Fill in `pr.md` (outside the repo, or delete it after) from the repository's
+pull request template,
+[`.github/pull_request_template.md`](../../.github/pull_request_template.md):
+copy it, fill in "What and why" and the "Brand preset" section (logo source
+and licence, where each colour came from, the theme and why), and tick every
+box that holds. After the pull request opens, drag the sample PNGs into it.
 
 CI runs the full suite, including the end-to-end and Deno tests. A
 maintainer merges; pushes to `main` deploy.
