@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 
-import { cleanup, render, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it } from "vitest";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { readFileSync } from "node:fs";
 import AgentsPage from "./agents/page";
 import DataHelpPage from "./help/data/page";
@@ -99,5 +99,24 @@ describe("agents quickstart", () => {
       ).toBe(true);
     }
     expect(screen.getByRole("heading", { name: "Try it" })).toBeTruthy();
+  });
+
+  it("gives every code block a copy button that copies that block's exact text", async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, "clipboard", { value: { writeText }, configurable: true });
+    const { container } = render(<AgentsPage />);
+    const blocks = Array.from(container.querySelectorAll("pre"));
+    const buttons = screen.getAllByRole("button", { name: "Copy" });
+    expect(buttons).toHaveLength(blocks.length);
+
+    // The Codex block spans two lines; copying must keep both.
+    const index = blocks.findIndex((pre) => pre.textContent!.startsWith("codex mcp add"));
+    fireEvent.click(buttons[index]);
+    await waitFor(() =>
+      expect(writeText).toHaveBeenCalledWith(
+        "codex mcp add supagist --url https://supagist.app/mcp\ncodex mcp login supagist",
+      ),
+    );
+    expect(await screen.findByRole("button", { name: "Copied" })).toBeTruthy();
   });
 });

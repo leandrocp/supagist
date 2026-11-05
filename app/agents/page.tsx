@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { CopyCodeBlock } from "@/components/copy-code-block";
 import { LegalPage, Section } from "@/components/legal-page";
 
 export const metadata: Metadata = {
@@ -11,20 +12,12 @@ export const metadata: Metadata = {
 
 const MCP_URL = "https://supagist.app/mcp";
 
-function Code({ children }: { children: string }) {
-  return (
-    <pre className="overflow-x-auto rounded-lg bg-surf2 px-4 py-3 font-mono text-[13px] leading-relaxed text-foreground md:text-sm">
-      <code>{children}</code>
-    </pre>
-  );
-}
-
 function Client({ name, note, children }: { name: string; note?: ReactNode; children: string }) {
   return (
     <div className="space-y-2">
       <h3 className="font-semibold text-foreground">{name}</h3>
       {note ? <p>{note}</p> : null}
-      <Code>{children}</Code>
+      <CopyCodeBlock>{children}</CopyCodeBlock>
     </div>
   );
 }
@@ -51,7 +44,7 @@ export default function AgentsPage() {
           preset to your project, render with the CLI or the MCP server, check the result, and
           publish a link only when you ask.
         </p>
-        <Code>npx skills add leandrocp/supagist --skill supagist</Code>
+        <CopyCodeBlock>npx skills add leandrocp/supagist --skill supagist</CopyCodeBlock>
         <p>
           Read the{" "}
           <a
@@ -72,7 +65,7 @@ export default function AgentsPage() {
           delete snippets on your account. It speaks Streamable HTTP and signs you in with OAuth, so
           there is no API key to copy.
         </p>
-        <Code>{MCP_URL}</Code>
+        <CopyCodeBlock>{MCP_URL}</CopyCodeBlock>
         <Client
           name="Claude Code"
           note={
@@ -121,9 +114,9 @@ export default function AgentsPage() {
           ))}
         </ul>
         <p>Or run the CLI yourself:</p>
-        <Code>
+        <CopyCodeBlock>
           {`npx supagist src/lib/auth.ts --lines 12-40 --brand supabase --out auth.png\nnpx supagist options`}
-        </Code>
+        </CopyCodeBlock>
       </Section>
 
       <Section title="What gets stored">
