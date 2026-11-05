@@ -1,6 +1,6 @@
 {
   "name": "supagist",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Turn code into polished Supagist images from the terminal",
   "keywords": [
     "cli",

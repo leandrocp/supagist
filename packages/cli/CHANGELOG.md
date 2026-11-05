@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.2 (2026-11-05)
+
+- Make snippets public or private everywhere, like GitHub gists ([4982595](https://github.com/leandrocp/supagist/commit/4982595564d57e9f23b58c3361237d141c657111))
+
 ## 0.1.1 (2026-11-01)
 
 - Point the README and skill at npx supagist ([e6a2912](https://github.com/leandrocp/supagist/commit/e6a2912b2f0179aeec6dbb114a10d74b1f78e97a))
