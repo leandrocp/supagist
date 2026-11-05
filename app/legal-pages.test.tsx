@@ -93,7 +93,10 @@ describe("agents quickstart", () => {
       "amp mcp add supagist https://supagist.app/mcp",
     ]) {
       expect(readme, command).toContain(command);
-      expect(blocks.some((block) => block.includes(command)), command).toBe(true);
+      expect(
+        blocks.some((block) => block.includes(command)),
+        command,
+      ).toBe(true);
     }
     expect(screen.getByRole("heading", { name: "Try it" })).toBeTruthy();
   });
