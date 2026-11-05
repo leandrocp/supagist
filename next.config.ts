@@ -73,6 +73,15 @@ const nextConfig: NextConfig = {
     // TTF faces and brand images (lib/snippet-render.ts).
     "/\\[snippet\\]/og.png": ["./assets/og/**/*", ...SNIPPET_RENDER_FILES],
     "/\\[snippet\\]/image.png": SNIPPET_RENDER_FILES,
+    // The public share image (lib/og-compose-render.ts) reads the brand seal
+    // and wordmark SVGs and Plex Mono at request time.
+    "/og/\\[file\\]": [
+      "./assets/brand/logo/mark/seal-flat-c*.svg",
+      "./assets/brand/logo/mono/seal-c-*.svg",
+      "./assets/brand/logo/wordmark/*.svg",
+      "./assets/og/fonts/IBMPlexMono-Medium-latin.ttf",
+      ...SNIPPET_RENDER_FILES,
+    ],
     // Read at request time; see lib/google-connected-apps.ts.
     "/.well-known/google-connected-apps": ["./google-connected-apps.json"],
   },

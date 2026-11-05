@@ -26,6 +26,7 @@ import { Badge } from "@/components/ui/badge";
 import { recordVisit } from "@/app/actions/record-visit";
 import { buildAppUrl, getRequestOrigin } from "@/lib/utils";
 import { ogVersion } from "@/lib/og-image";
+import { ogImageHash, ogImagePath } from "@/lib/og-compose";
 import { parseSnippetAppearance } from "@/lib/snippet-appearance";
 
 // Module-level singleton — safe because this is server-only code. The Node
@@ -88,18 +89,11 @@ export async function generateMetadata({ params }: Props) {
   const snippet = await getSnippet(parsed.slug, parsed.shortId);
   if (!snippet) return {};
 
-  // The share image (app/[snippet]/og.png) is the snippet's own export
-  // render. `?v=` changes exactly when the picture would (the snippet is
-  // sealed, so only on a visibility change), which busts X, Slack, WhatsApp
-  // and Discord preview caches; a title change keeps it.
-  const ogImage = `/${param}/og.png?v=${ogVersion({
-    ...snippet,
-    // The image is drawn from the stored code, not the trimmed copy.
-    code: snippet.raw_code,
-  })}`;
+  // The images are drawn from the stored code, not the trimmed copy.
+  const drawn = { ...snippet, code: snippet.raw_code };
 
-  // Short, screen-reader-friendly description used as the og:image alt and
-  // the social-card description — see buildSnippetSocialAlt for the shape.
+  // Short, screen-reader-friendly description used as the social-card
+  // description (and the unlisted image's alt) — see buildSnippetSocialAlt.
   const author = snippet.author as { username: string } | null;
   const alt = buildSnippetSocialAlt({
     filename: snippet.filename,
@@ -110,8 +104,22 @@ export async function generateMetadata({ params }: Props) {
     charCount: snippet.code_char_count,
   });
 
-  // A page's openGraph replaces the layout's, so name the default share image.
-  const images = [{ url: ogImage, width: 1200, height: 630, alt }];
+  // Public: the OG spec v2.1 JPEG at a URL versioned by everything drawn
+  // (app/og/[file]), stored at publish. Unlisted keeps its own share image
+  // (app/[snippet]/og.png), whose `?v=` also busts caches on a visibility
+  // change. A page's openGraph replaces the layout's, so name the image.
+  const images =
+    snippet.visibility === "public"
+      ? [
+          {
+            url: ogImagePath(param, ogImageHash(drawn)),
+            width: 1200,
+            height: 630,
+            type: "image/jpeg",
+            alt: `${snippet.filename} code snippet on Supagist`,
+          },
+        ]
+      : [{ url: `/${param}/og.png?v=${ogVersion(drawn)}`, width: 1200, height: 630, alt }];
   const title = `${snippet.title ?? snippet.filename} — Supagist`;
   return {
     title,

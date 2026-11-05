@@ -39,24 +39,36 @@ beforeEach(() => {
 });
 
 describe("snippet page share metadata", () => {
-  it("points og:image and twitter:image at the versioned share image, with og:url", async () => {
+  it("points a public snippet's og:image and twitter:image at its versioned JPEG", async () => {
     const meta = await metadata();
-    const url = `/snippet-tsx-zocdc9/og.png?v=${ogVersion(row() as never)}`;
+    const [image] = meta.openGraph.images;
     expect(meta.openGraph.url).toBe("/snippet-tsx-zocdc9");
-    expect(meta.openGraph.images).toEqual([
-      expect.objectContaining({ url, width: 1200, height: 630 }),
-    ]);
+    expect(image).toEqual({
+      url: expect.stringMatching(/^\/og\/snippet-tsx-zocdc9\.[0-9a-f]{16}\.jpg$/),
+      width: 1200,
+      height: 630,
+      type: "image/jpeg",
+      alt: "snippet.tsx code snippet on Supagist",
+    });
     expect(meta.twitter.card).toBe("summary_large_image");
-    expect(meta.twitter.images[0].url).toBe(url);
+    expect(meta.twitter.images[0].url).toBe(image.url);
   });
 
-  it("keeps the image URL on a retitle and changes it on a visibility change", async () => {
+  it("keeps the image URL on a retitle and changes it when the drawn snippet changes", async () => {
     const before = (await metadata()).openGraph.images[0].url;
     db.snippet = row({ title: "Renamed" });
     const renamed = await metadata();
     expect(renamed.title).toBe("Renamed — Supagist");
     expect(renamed.openGraph.images[0].url).toBe(before);
-    db.snippet = row({ visibility: "unlisted" });
+    db.snippet = row({ appearance: { background: "Lumis Dark", outerPadding: 0 } });
     expect((await metadata()).openGraph.images[0].url).not.toBe(before);
+  });
+
+  it("keeps the existing show-less share image for unlisted snippets", async () => {
+    db.snippet = row({ visibility: "unlisted" });
+    const url = `/snippet-tsx-zocdc9/og.png?v=${ogVersion(row({ visibility: "unlisted" }) as never)}`;
+    expect((await metadata()).openGraph.images).toEqual([
+      expect.objectContaining({ url, width: 1200, height: 630 }),
+    ]);
   });
 });
