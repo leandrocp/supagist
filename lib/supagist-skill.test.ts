@@ -129,12 +129,53 @@ describe("supagist skill", () => {
   });
 
   it("links only to files that exist", () => {
-    const broken = docs.flatMap((file) =>
-      [...read(file).matchAll(/\]\(([^)#:]+)(#[^)]*)?\)/g)]
-        .map(([, target]) => target)
-        .filter((target) => !existsSync(join(SKILL_DIR, dirname(file), target)))
-        .map((target) => `${file} -> ${target}`),
-    );
-    expect(broken).toEqual([]);
+    expect(brokenLinks(SKILL_DIR, docs)).toEqual([]);
   });
 });
+
+describe("supagist-add-brand skill", () => {
+  const dir = join(__dirname, "..", "skills", "supagist-add-brand");
+  const skill = readFileSync(join(dir, "SKILL.md"), "utf8");
+
+  it("has valid frontmatter whose name matches its directory", () => {
+    const meta = frontmatter(skill);
+    expect(meta.name).toBe("supagist-add-brand");
+    expect(meta.description.length).toBeGreaterThan(0);
+    expect(meta.description.length).toBeLessThanOrEqual(1024);
+    expect(meta.compatibility.length).toBeLessThanOrEqual(500);
+    expect(meta.license).toBe("MIT");
+  });
+
+  it("links only to files that exist, and its scripts and commands are real", () => {
+    expect(brokenLinks(dir, ["SKILL.md"])).toEqual([]);
+    for (const path of [
+      "lib/brand-presets.ts",
+      "lib/brand-presets.test.ts",
+      "public/brands/README.md",
+      "skills/supagist/scripts/convert-png.mjs",
+      "skills/supagist-add-brand/scripts/render-sample.mjs",
+      "supabase/functions/mcp/spike/prepare-render.mjs",
+      "supabase/functions/mcp/spike/render.deno.ts",
+      "supabase/functions/mcp/deno.json",
+    ]) {
+      expect(skill, path).toContain(path);
+      expect(existsSync(join(__dirname, "..", path)), path).toBe(true);
+    }
+  });
+
+  it("names the digest test that pins the shipped presets", () => {
+    const tests = readFileSync(join(__dirname, "brand-presets.test.ts"), "utf8");
+    const name = "leaves the shipped presets exactly as they were";
+    expect(skill).toContain(name);
+    expect(tests).toContain(`it("${name}"`);
+  });
+});
+
+function brokenLinks(dir: string, files: string[]) {
+  return files.flatMap((file) =>
+    [...readFileSync(join(dir, file), "utf8").matchAll(/\]\(([^)#:]+)(#[^)]*)?\)/g)]
+      .map(([, target]) => target)
+      .filter((target) => !existsSync(join(dir, dirname(file), target)))
+      .map((target) => `${file} -> ${target}`),
+  );
+}

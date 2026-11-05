@@ -90,21 +90,15 @@ describe("BRAND_PRESETS", () => {
     }
   });
 
-  it("leaves the 29 launch presets exactly as they were before Lumis and MDEx", () => {
-    const launch = BRAND_PRESETS.filter(
-      (preset) => !NEW_PRESET_IDS.includes(preset.id) && preset.id !== "inertia",
-    );
-    // Digest of the 29 presets on main before the Lumis/MDEx presets landed.
-    expect(createHash("sha256").update(JSON.stringify(launch)).digest("hex")).toBe(
-      "f1931dca2bfb10a204ac17774a7e9617cf729e094b8720838c72d57686111358",
-    );
-  });
-
-  it("leaves the Lumis and MDEx presets exactly as they were before Inertia", () => {
-    const layered = BRAND_PRESETS.filter((preset) => NEW_PRESET_IDS.includes(preset.id));
-    expect(createHash("sha256").update(JSON.stringify(layered)).digest("hex")).toBe(
-      "0a4014470609f860b8e676968a70ee6abf4eca0841356f7840a073d384ce52c7",
-    );
+  it("leaves the shipped presets exactly as they were", () => {
+    // New presets are appended (skills/supagist-add-brand), so the first 34
+    // (the 29 launch presets, Lumis, MDEx and Inertia) must never change.
+    // Changing one on purpose means updating this digest in the same commit.
+    expect(
+      createHash("sha256")
+        .update(JSON.stringify(BRAND_PRESETS.slice(0, 34)))
+        .digest("hex"),
+    ).toBe("ae71fd5514480e7d423ec02a3adca6ff740ce08ece03b12546fa8ee43b4d55f7");
   });
 
   it("migrates legacy synthetic brand themes to official Lumis ids", () => {
