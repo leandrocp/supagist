@@ -45,7 +45,7 @@ file_size_limit = "50MiB"
 [storage.buckets."snippet-images"]
 public = true
 file_size_limit = "5MiB"
-allowed_mime_types = ["image/png", "image/svg+xml", "text/plain"]
+allowed_mime_types = ["image/png", "image/svg+xml", "text/plain", "image/jpeg"]
 
 [storage.image_transformation]
 enabled = true

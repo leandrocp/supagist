@@ -76,6 +76,8 @@ export async function updateSnippet(
   rawInput: z.input<typeof updateInput>,
   userId: string,
   supabase: SupabaseClient,
+  /** The caller's Authorization header, to store a newly public snippet's share image. */
+  authorization?: string,
 ): Promise<UpdateResult> {
   const input = updateInput.parse(rawInput);
 
@@ -96,6 +98,17 @@ export async function updateSnippet(
   if (error?.message.includes("edit_hour_rate_limit"))
     throw new Error("Edit limit reached. Try again later.");
   if (error || !data) throw new Error("Could not update the snippet.");
+
+  // A snippet made public gets its public share image stored now, so the
+  // first paste of its link already has it (the site skips one already
+  // stored). A miss is rendered on the first request instead.
+  if (data.visibility === "public" && authorization) {
+    await fetch(`${APP_ORIGIN}/og/${snippet.slug}-${snippet.short_id}.jpg`, {
+      method: "POST",
+      headers: { Authorization: authorization },
+      signal: AbortSignal.timeout(25_000),
+    }).catch(() => null);
+  }
 
   return {
     url: `${APP_ORIGIN}/${snippet.slug}-${snippet.short_id}`,

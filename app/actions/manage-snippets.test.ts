@@ -1,7 +1,14 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+
+// The share image request after a publish is network I/O.
+beforeEach(() => vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response("{}"))));
+afterEach(() => vi.unstubAllGlobals());
 
 const { mockCreateClient } = vi.hoisted(() => ({ mockCreateClient: vi.fn() }));
 vi.mock("@/lib/supabase/server", () => ({ createClient: mockCreateClient }));
+vi.mock("next/headers", () => ({
+  headers: async () => new Headers({ host: "supagist.app", "x-forwarded-proto": "https" }),
+}));
 
 import { deleteAccount, deleteSnippet, updateSnippet } from "./manage-snippets";
 
@@ -37,6 +44,7 @@ function makeSupabase({
       },
       auth: {
         getUser: vi.fn().mockResolvedValue({ data: { user } }),
+        getSession: vi.fn().mockResolvedValue({ data: { session: { access_token: "tok" } } }),
         signOut: vi.fn().mockResolvedValue({ error: null }),
       },
       rpc: vi.fn().mockResolvedValue({ error: rpcError }),
@@ -67,6 +75,21 @@ describe("updateSnippet", () => {
     expect(await updateSnippet(ID, smuggled)).toEqual({ ok: true });
     expect(supabase.calls).toContainEqual(["update", { title: "Hello", visibility: "unlisted" }]);
     expect(supabase.calls).toContainEqual(["eq", "author_id", "user-1"]);
+  });
+
+  it("has the public share image stored when a snippet is made public, not when unlisted", async () => {
+    const supabase = makeSupabase({
+      result: { data: [{ id: ID, slug: "posts-ts", short_id: "ab12cd" }], error: null },
+    });
+    mockCreateClient.mockResolvedValue(supabase.client);
+    await updateSnippet(ID, edit);
+    expect(fetch).not.toHaveBeenCalled();
+    expect(await updateSnippet(ID, { ...edit, visibility: "public" })).toEqual({ ok: true });
+    expect(fetch).toHaveBeenCalledWith("https://supagist.app/og/posts-ts-ab12cd.jpg", {
+      method: "POST",
+      headers: { Authorization: "Bearer tok" },
+      signal: expect.any(AbortSignal),
+    });
   });
 
   it("clears an empty title", async () => {

@@ -110,7 +110,12 @@ export function createServer(caller?: Caller) {
     async (input) => {
       if (!caller) throw new Error("Sign in to edit snippets.");
       const { updateSnippet } = await import("./manage.ts");
-      const result = await updateSnippet(input, caller.userId, caller.supabase);
+      const result = await updateSnippet(
+        input,
+        caller.userId,
+        caller.supabase,
+        caller.authorization,
+      );
       return { content: [{ type: "text" as const, text: JSON.stringify(result) }] };
     },
   );

@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { storeShareImage } from "@/lib/og-publish";
 
 /** What an owner can still change once a snippet is published (sealed). */
 export type SnippetEdit = {
@@ -59,13 +60,18 @@ export async function updateSnippet(snippetId: string, edit: SnippetEdit): Promi
     .update({ title: title || null, visibility: edit.visibility })
     .eq("id", snippetId)
     .eq("author_id", user.id)
-    .select("id");
+    .select("id, slug, short_id");
   if (error?.message.includes("edit_hour_rate_limit")) {
     return { error: "Too many edits in the last hour. Try again later." };
   }
   if (error) return { error: "Could not save your changes. Please try again." };
   if (!data?.length) return { error: "Snippet not found, or it isn't yours." };
 
+  // A snippet made public gets its public share image now (the route skips
+  // one that is already stored).
+  if (edit.visibility === "public") {
+    await storeShareImage(supabase, `${data[0]!.slug}-${data[0]!.short_id}`);
+  }
   return { ok: true };
 }
 

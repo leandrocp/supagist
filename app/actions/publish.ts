@@ -12,6 +12,7 @@ import {
   normalizeSnippetCode,
 } from "@/lib/snippet-utils";
 import { cardPathFor } from "@/lib/og-image";
+import { storeShareImage } from "@/lib/og-publish";
 import { parseSnippetAppearance } from "@/lib/snippet-appearance";
 
 type PublishResult = { path: string; error?: never } | { error: string; path?: never };
@@ -215,6 +216,8 @@ export async function publishSnippet(formData: FormData): Promise<PublishResult>
   if (commentRows.length > 0) {
     await supabase.from("snippet_comments").insert(commentRows);
   }
+
+  await storeShareImage(supabase, `${slug}-${shortId}`);
 
   return { path: `/${slug}-${shortId}` };
 }

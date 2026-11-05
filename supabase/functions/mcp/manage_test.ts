@@ -1,5 +1,6 @@
 import { strict as assert } from "node:assert";
-import { shortIdFromRef, updateInput } from "./manage.ts";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import { shortIdFromRef, updateInput, updateSnippet } from "./manage.ts";
 
 Deno.test("snippet links, paths and short ids resolve to the short id", () => {
   for (const ref of [
@@ -29,4 +30,39 @@ Deno.test("an update needs at least one change and cannot touch sealed fields", 
       JSON.stringify(sealed),
     );
   assert.equal(updateInput.safeParse({ snippet, author_id: "x", title: "t" }).success, false);
+});
+
+Deno.test("making a snippet public has its share image stored, as the caller", async () => {
+  const query = (result: unknown) => {
+    const chain: Record<string, unknown> = {};
+    for (const method of ["select", "eq", "update"]) chain[method] = () => chain;
+    chain.maybeSingle = async () => result;
+    return chain;
+  };
+  const rows = [
+    { data: { id: "s1", slug: "posts-ts", short_id: "ab12cd", visibility: "unlisted" } },
+    { data: { visibility: "public" } },
+  ];
+  const supabase = { from: () => query(rows.shift()) } as unknown as SupabaseClient;
+  const calls: [string, RequestInit | undefined][] = [];
+  const realFetch = globalThis.fetch;
+  globalThis.fetch = (async (url: string, init?: RequestInit) => {
+    calls.push([url, init]);
+    return new Response("{}");
+  }) as typeof fetch;
+  try {
+    const result = await updateSnippet(
+      { snippet: "https://supagist.app/posts-ts-ab12cd", visibility: "public" },
+      "u1",
+      supabase,
+      "Bearer caller-token",
+    );
+    assert.equal(result.visibility, "public");
+    assert.equal(calls.length, 1);
+    assert.equal(calls[0]![0], "https://supagist.app/og/posts-ts-ab12cd.jpg");
+    assert.equal(calls[0]![1]?.method, "POST");
+    assert.deepEqual(calls[0]![1]?.headers, { Authorization: "Bearer caller-token" });
+  } finally {
+    globalThis.fetch = realFetch;
+  }
 });

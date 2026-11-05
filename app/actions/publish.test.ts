@@ -1,9 +1,17 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+
+// The share image request after a publish is network I/O.
+beforeEach(() => vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response("{}"))));
+afterEach(() => vi.unstubAllGlobals());
 
 const { mockCreateClient } = vi.hoisted(() => ({ mockCreateClient: vi.fn() }));
 
 vi.mock("@/lib/supabase/server", () => ({
   createClient: mockCreateClient,
+}));
+
+vi.mock("next/headers", () => ({
+  headers: async () => new Headers({ host: "supagist.app", "x-forwarded-proto": "https" }),
 }));
 
 import { publishSnippet } from "./publish";
@@ -41,6 +49,9 @@ function makeMockSupabase({
   return {
     auth: {
       getUser: vi.fn().mockResolvedValue({ data: { user }, error: authError }),
+      getSession: vi
+        .fn()
+        .mockResolvedValue({ data: { session: user ? { access_token: "owner-token" } : null } }),
     },
     from: mockFrom,
     storage: { from: mockStorageFrom },
@@ -380,6 +391,27 @@ describe("publishSnippet — happy path", () => {
 });
 
 // ── Error handling ────────────────────────────────────────────────────────────
+
+describe("publishSnippet — share image", () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it("has the share image stored, as the owner, before it returns the link", async () => {
+    mockCreateClient.mockResolvedValue(makeMockSupabase());
+    const { path } = await publishSnippet(makeFormData());
+    expect(fetch).toHaveBeenCalledWith(`https://supagist.app/og${path}.jpg`, {
+      method: "POST",
+      headers: { Authorization: "Bearer owner-token" },
+      signal: expect.any(AbortSignal),
+    });
+  });
+
+  it("still publishes when the share image can't be stored", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("offline")));
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    mockCreateClient.mockResolvedValue(makeMockSupabase());
+    expect((await publishSnippet(makeFormData())).path).toMatch(/^\/foo-ts-[a-z0-9]{6}$/);
+  });
+});
 
 describe("publishSnippet — error handling", () => {
   beforeEach(() => vi.clearAllMocks());
