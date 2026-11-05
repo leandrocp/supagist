@@ -1,6 +1,7 @@
 /* eslint-disable -- Generated third-party code; see vendor-licenses.txt and vendor-manifest.json. */
 // themes/rosepine_dark.ts
 var theme = {
+  $schema: "https://lumis.sh/schemas/themes/v1.0.0.json",
   name: "rosepine_dark",
   appearance: "dark",
   revision: "ff483051a47e27d84bdef47703538df1ed9f4a47",

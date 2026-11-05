@@ -30,7 +30,7 @@ npm test
 
 Preparation uses Node's built-in TypeScript erasure, installed Rolldown **1.2.16**,
 and the repository formatter. It refuses any installed Lumis version other than
-**0.10.1** or themes version other than **0.4.3**. It generates copies of eight existing app modules,
+**0.10.4** or themes version other than **0.4.4**. It generates copies of eight existing app modules,
 with source SHA-256 records and a Vitest source-drift guard. No app source changes,
 extraction, new root dependency, hand-written approximation of the card, or native
 Lumis entrypoint is involved. The generated code retains unused browser export

@@ -1,6 +1,7 @@
 /* eslint-disable -- Generated third-party code; see vendor-licenses.txt and vendor-manifest.json. */
 // themes/vscode_light.ts
 var theme = {
+  $schema: "https://lumis.sh/schemas/themes/v1.0.0.json",
   name: "vscode_light",
   appearance: "light",
   revision: "6439ed89d0e10193f07e92268a321d7c6f6e93ee",

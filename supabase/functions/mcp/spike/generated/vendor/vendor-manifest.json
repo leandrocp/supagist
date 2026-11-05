@@ -1,8 +1,8 @@
 {
   "bundler": "rolldown@1.2.16",
   "versions": {
-    "@lumis-sh/lumis": "0.10.1",
-    "@lumis-sh/themes": "0.4.3",
+    "@lumis-sh/lumis": "0.10.4",
+    "@lumis-sh/themes": "0.4.4",
     "@noble/hashes": "2.4.0",
     "pathe": "2.0.3",
     "semver": "7.8.5",
@@ -14,13 +14,15 @@
     "node_modules/@lumis-sh/lumis/dist/asm-4ZY3U2C5.js": "601e9350891e3d09231ed4f38b108bdac1408636fba4e5c8951cd3d76e603d04",
     "node_modules/@lumis-sh/lumis/dist/astro-TZRKYVCN.js": "494bf1045323c0ed0156d8955623eaf60edf6c58dd45de218df34dff1b25ae53",
     "node_modules/@lumis-sh/lumis/dist/bash-MXJTSKDX.js": "ab650f36e0fa25c96c4ea4a219ff691dc8dab373a56b7f03ee58af4b6bdcb15b",
+    "node_modules/@lumis-sh/lumis/dist/bend-NQZQDA72.js": "b10c818553b8e374846ae89a7613733c0e723b2a72fcedf25e7f4bd1c92aa043",
     "node_modules/@lumis-sh/lumis/dist/bicep-XDY2JSS5.js": "ab0cd1c9c9c8d4e3543d1fbbc91fa511230ce60132361024f2c9f1af10a95203",
     "node_modules/@lumis-sh/lumis/dist/c-OQGCVSAJ.js": "e8a36f0cd2dbef6632d609c2c27fe126b0b1f666e3668daf6e4b44ba0ba19be8",
     "node_modules/@lumis-sh/lumis/dist/caddy-NVMIUV2O.js": "bb8af70f6ac8d4a9f7c5c6189a3f9e53b8aba41c4f9a55a4abd38aa27db8d002",
-    "node_modules/@lumis-sh/lumis/dist/chunk-CDF44WOX.js": "1f172048fdb444ba94c62fe4c57a020a6446509038ec655e25813e6a81ab75eb",
-    "node_modules/@lumis-sh/lumis/dist/chunk-MBM7PUQ4.js": "41da512636f25b64e8c20a5f6b910a3cca44e21e6b4e96bbaef39a1e6fb06610",
-    "node_modules/@lumis-sh/lumis/dist/chunk-NB3WMMKI.js": "0740de8a0918baac7839fcc4e15765420b38061111c455f50e6d2971e908ccd2",
-    "node_modules/@lumis-sh/lumis/dist/chunk-RTY2WNY5.js": "34353b42974f658d6fe15ee2feb0001a5f8512535e8afb8e2677f3f19a743531",
+    "node_modules/@lumis-sh/lumis/dist/chunk-4NGIACIZ.js": "0efecc78e51165273d8c5e08383b47143e408254a7755f8d5aa9784c3915abd8",
+    "node_modules/@lumis-sh/lumis/dist/chunk-CWKUQBUX.js": "0e63f0dd83209bba5f7811e7fed3b2b4139caf98360f8cdadad3138e2c26e4d5",
+    "node_modules/@lumis-sh/lumis/dist/chunk-MPVSEWBQ.js": "3d5d0cf71518bdd61d459984a8fabfe36620abdd3d556a606d53b4619787ccae",
+    "node_modules/@lumis-sh/lumis/dist/chunk-TENHFFGF.js": "752617c1fa0c68f67452a97544e6c39f82a9f6322b2c39de189be288e784f9ab",
+    "node_modules/@lumis-sh/lumis/dist/chunk-UGIWNA6I.js": "09afcd0c60c58af9c6f67ce87af345e53e991ff5388e160d01965bdf1043344e",
     "node_modules/@lumis-sh/lumis/dist/clojure-AHIHD7HX.js": "40b02206baeb16bcf20119e68732785c83c355600d5fa72652e46fb3edd00c12",
     "node_modules/@lumis-sh/lumis/dist/cmake-XANSKN54.js": "20e1e06f676f65dab3f5c9f9364c434c930fbbcb5b7b7c0a8cd0cc34af9197db",
     "node_modules/@lumis-sh/lumis/dist/comment-ZAH33WUA.js": "6d8e9ee64dc5f5eb07ddf6538d8e90d0c369e36eb2e4a5e6842bcf28faca7650",
@@ -42,7 +44,7 @@
     "node_modules/@lumis-sh/lumis/dist/erb-4HKISYXT.js": "a963d5aa32a3a903dd3fbe0de896a572710c303b27496270d981837b8ee28674",
     "node_modules/@lumis-sh/lumis/dist/erlang-WWPB5VBS.js": "9ac4762fabfd9e7556bb579338bff0961553677d818d1ba6d984e87e3acf74a4",
     "node_modules/@lumis-sh/lumis/dist/fish-HP6FILVH.js": "012bea2bd31c4d40c70788112e0f64156bb553b505a12b5d453ff951bc35285d",
-    "node_modules/@lumis-sh/lumis/dist/formatters.js": "2814911fa066b1582467b28cc6f81f34d321819ce9f4f998a6f671d4bc2b5444",
+    "node_modules/@lumis-sh/lumis/dist/formatters.js": "8fba63d70020fdbb5225a8063d0435c6f200fde0d708244c337e4b7ebed29377",
     "node_modules/@lumis-sh/lumis/dist/fortran-CXP5RCIK.js": "5083bb9cbf7e86477f048a65d0c4ba63443bb56e6a3fc49457f310087362b384",
     "node_modules/@lumis-sh/lumis/dist/fsharp-Y3YQYASJ.js": "ce3ef28738d7b9b5ae001dc284d78a33c500373c3a5d8683bfe412b8f6f6403e",
     "node_modules/@lumis-sh/lumis/dist/gitattributes-G2IIBENZ.js": "f99252e66b08ca1bcd6b3034add1778c9a5d4735b539004becd442296a34b07f",
@@ -61,7 +63,6 @@
     "node_modules/@lumis-sh/lumis/dist/http-TUVR5P54.js": "f3cc53ac6e2ab076d5dfae22cf7b33c1a9a162acff570fa07999a53565438ab0",
     "node_modules/@lumis-sh/lumis/dist/hurl-ARERYAQ7.js": "204285f23e6ae5d32f168603ec9fe43588eb958569dedb7b05678a4e4c97c319",
     "node_modules/@lumis-sh/lumis/dist/iex-SQ4XU64O.js": "46cb622478c41f37a49d87a891be2e87e12d6c942318ec1d64c7915ce581c24b",
-    "node_modules/@lumis-sh/lumis/dist/index.browser.js": "38bdfd85ae00956871e478c4019c0fd53873d9a6d99a549f40f35f05d2e054c9",
     "node_modules/@lumis-sh/lumis/dist/ini-QFCEG3BL.js": "c330daf2215c7b6fd0ff51deb40331600c074547aa3c52f7d256470282bc5cfb",
     "node_modules/@lumis-sh/lumis/dist/java-M2DGZYBP.js": "faf8b2dcede4f14b3afcc44b30ff8427dfb388e4ad4fe3c36a935efa8d469129",
     "node_modules/@lumis-sh/lumis/dist/javadoc-7NZOVAXF.js": "bd3ca5cbcf7e6863a389ee3419e79c9e5363a66bda4413556a48886c95ff607c",
@@ -76,6 +77,7 @@
     "node_modules/@lumis-sh/lumis/dist/kdl-TVPD2Y2H.js": "14c9502a0ed441853f858b52a22144a8fdc4ad61a6183b4b7ec92d6f9a363f4e",
     "node_modules/@lumis-sh/lumis/dist/kotlin-SZ5EHAN7.js": "cef248c4aff3bc43d489b926a7e83c751f7b96392d716c3e53231abc3d6890cb",
     "node_modules/@lumis-sh/lumis/dist/latex-UXHP4TRP.js": "199797646386ce2c6b65c6c50f9c61e44c1880f2c57298c97c3c5aac89c42fde",
+    "node_modules/@lumis-sh/lumis/dist/lean-B2AVNWI2.js": "e8d95b5cc866876c302ffb260857bebcbe8f97ed30b0bcab4a625824387ec003",
     "node_modules/@lumis-sh/lumis/dist/liquid-TJLPRR6J.js": "998cccf1c7e09b302b9387e8fd5343bafc806a9ce9df6c201681616d511aacf1",
     "node_modules/@lumis-sh/lumis/dist/llvm-AJUTXFFB.js": "fe33ebf8dbbf436f1ebcaed25c061de50e0bead2da706519a790d36a6d158520",
     "node_modules/@lumis-sh/lumis/dist/lua-4WSYPPG7.js": "d89e9681b095d4adb753c522905197dfba0aa4d07e0552acd7e6f2c50fed2239",
@@ -131,243 +133,243 @@
     "node_modules/@lumis-sh/lumis/dist/vim-BUV5GTKR.js": "62485d907e1b2a40ce7c2b8d56516d30dfd7421ae119d0731a17a6a4c3dd4875",
     "node_modules/@lumis-sh/lumis/dist/vue-3MP5VBJJ.js": "d9e46eaecde9a7a5f18952c56d74f2523833b0b1d4ed585e58ff4e638b232d2a",
     "node_modules/@lumis-sh/lumis/dist/wat-OFKFALAW.js": "fcd2fc6b441e9888b1943235919e388bc8c54cd7233abf9e35ff4be4885be8c6",
-    "node_modules/@lumis-sh/lumis/dist/web-tree-sitter-PL55ZHCW.js": "4b7d66ea8d1bfd2f8ca1330f62d5f9b671f4c5ee75633580c943c159ae14eb69",
+    "node_modules/@lumis-sh/lumis/dist/web-tree-sitter-PL55ZHCW.js": "ea76738eb9c6a9fa1d17dc5793232144cf6f648a1929aba452e428f57dba3502",
     "node_modules/@lumis-sh/lumis/dist/wgsl-TIK6KIBL.js": "ae9e9d329206caeb704ec0e29dead06dcd7972c67c4238b497b3ca50295807d2",
     "node_modules/@lumis-sh/lumis/dist/xml-6P2JJ7PD.js": "de7df5f3361f2ab67dfcf94be170d63fd56c38e683294d2a0b9800dc860029b6",
     "node_modules/@lumis-sh/lumis/dist/yaml-CY2IEJKR.js": "9e00c1b390e51dcf8bafcba6e4f0f53a5f576374377fca2f56c518c5c0f41e20",
     "node_modules/@lumis-sh/lumis/dist/zig-4QSSGHFQ.js": "2293e4fdc0178d362bb255e46f14a0f25e7d3dd255104425f87891a94bfc943a",
     "node_modules/@lumis-sh/lumis/dist/zsh-6ENJLMAV.js": "bd548c8c29b617ce25cb10dab73ebb8eacd66ca6e66e8ff37c3e3ecf4350fb2b",
-    "node_modules/@lumis-sh/themes/dist/themes/adwaita_dark.js": "25d8be661645d14a12c89c822cdddf9ddf3da96c63707637a23b2d026eee643b",
-    "node_modules/@lumis-sh/themes/dist/themes/adwaita_light.js": "feeedf77602ed43b811c299b289ca05bca872fec8deb55bc933bcd7780208352",
-    "node_modules/@lumis-sh/themes/dist/themes/arctic.js": "2c2f7bee85ab2454be72f2871d5aad68b76a039a94ef756fe6351356c6f917ce",
-    "node_modules/@lumis-sh/themes/dist/themes/aura_dark_soft_text.js": "1ed808cf9eb659d3007d8a3e766901eb079d6a1fc52e97e81fa221e7ebd1428e",
-    "node_modules/@lumis-sh/themes/dist/themes/aura_dark.js": "20120047ee9e26bd2d33b56ebee8786d3c66f7a2d3feb889d457650ddc8da290",
-    "node_modules/@lumis-sh/themes/dist/themes/aura_soft_dark_soft_text.js": "3af849bb4e262783f8118efd4edd684fa0e1fcebb6cae7ed1e353443263d1a53",
-    "node_modules/@lumis-sh/themes/dist/themes/aura_soft_dark.js": "eb01e729f0fbb16498864cd7b78c4b77e712aab33779a7286926e3a097742efc",
-    "node_modules/@lumis-sh/themes/dist/themes/aurora.js": "7a5bc4587fb7742661247547d49d69d8da5c62f38d165fdd9470bce1f06c4e5c",
-    "node_modules/@lumis-sh/themes/dist/themes/bamboo_light.js": "159cb5b802030c03610d9f2a3b456037e04a3ae0d30c6b7d977ed13ae5f167ae",
-    "node_modules/@lumis-sh/themes/dist/themes/bamboo_multiplex.js": "a2c06df0a6c011d98eab6ba8fe1b800607e83ffe45ef610cf421eb5994cd38bf",
-    "node_modules/@lumis-sh/themes/dist/themes/bamboo_vulgaris.js": "5574df4fee80fb2e990a05658bc59dd13f56777f851a14ed0c7668f660e1b169",
-    "node_modules/@lumis-sh/themes/dist/themes/carbonfox.js": "94d79516057e1f22e8db9c5858282d2595ae8f198533a911458908664e2acdbd",
-    "node_modules/@lumis-sh/themes/dist/themes/catppuccin_frappe.js": "dc997e5ceb6bb5f32584539c246eb113cf14ead0741883405b38681c982c8ee3",
-    "node_modules/@lumis-sh/themes/dist/themes/catppuccin_latte.js": "396980ea9c20187c366c027819aecb8086392562312aa552cbf9064b25046509",
-    "node_modules/@lumis-sh/themes/dist/themes/catppuccin_macchiato.js": "4cfbdba1d878bc99630e8960fdafd739445b1562df66e9dcffb143e160d68288",
-    "node_modules/@lumis-sh/themes/dist/themes/catppuccin_mocha.js": "c299b0b0efdd9fef89c5151db68035360799a4b2ce3f29617ca20176539af9dc",
-    "node_modules/@lumis-sh/themes/dist/themes/citruszest.js": "c0825dff67dfe20b893770d7aaa80a1a68ee3ab67b96be1af0d782796424ce73",
-    "node_modules/@lumis-sh/themes/dist/themes/cobalt2.js": "7c41802d033a44b94c3117c349908513c89d8d0ed9f172d949c2c72e1da310b3",
-    "node_modules/@lumis-sh/themes/dist/themes/cyberdream_dark.js": "a2bbef55210b0b770b67949345add15c7dd5d812c0598f58b5d1fb275fa5a012",
-    "node_modules/@lumis-sh/themes/dist/themes/cyberdream_light.js": "515194385b885feb22818790f1c946cec67d44d462662bba8cf07004e7903080",
-    "node_modules/@lumis-sh/themes/dist/themes/darkvoid.js": "2d1858f052393a51c90ed304c1eaef0f818fca8aef0441c78fbc20389073e649",
-    "node_modules/@lumis-sh/themes/dist/themes/dawnfox.js": "17f3358010d5646fc2bc22f1e9e443fcb27b6515d3642f10325284b5608eb728",
-    "node_modules/@lumis-sh/themes/dist/themes/dayfox.js": "a6169d00bd9e76089b04548642c43852e29467bf6489e16bb28658fd55d96625",
-    "node_modules/@lumis-sh/themes/dist/themes/deepwhite.js": "099227736c05adfa244e284843146655066be92cf1d0f10b260275d823df4d11",
-    "node_modules/@lumis-sh/themes/dist/themes/doom_one_dark.js": "63158e22ea356f2b3437be254551b9165cc8a03c9dad102d27932b1b1987de98",
-    "node_modules/@lumis-sh/themes/dist/themes/doom_one_light.js": "0f3525daf1a53c5176ef5281d82326adf731199fe090755cdabb7e13f5f23609",
-    "node_modules/@lumis-sh/themes/dist/themes/dracula_soft.js": "d4e348978c388a7dc3f194497855c613cb216b90c8d21c9c0102aaa8da434bdd",
-    "node_modules/@lumis-sh/themes/dist/themes/dracula.js": "e9ea9702635e447d58b2baace0af81c066112ab7c5cadcdf546cf15ed26fbb92",
-    "node_modules/@lumis-sh/themes/dist/themes/duckbones.js": "6393e3ba0414cb223836e420247b1e526a0aac9114a1617569d1017e87010d7e",
-    "node_modules/@lumis-sh/themes/dist/themes/duskfox.js": "ee4e471fa72544d9334a7ab1b4dbaa937b4d6a0ef954a685a6212cce1589d06c",
-    "node_modules/@lumis-sh/themes/dist/themes/edge_aura.js": "66922cde2342a09fb9e4faed6c49f40245d4f6e44d416788cbc03f8def03e850",
-    "node_modules/@lumis-sh/themes/dist/themes/edge_dark.js": "f7484c31cf723f28910bf12d05a3347a1f2d731912fd746be9a2b8c6d9e571eb",
-    "node_modules/@lumis-sh/themes/dist/themes/edge_light.js": "23acdf481caeef996442fe5155c28c254fbc4cea0a98a7d7c09a14104dc6d085",
-    "node_modules/@lumis-sh/themes/dist/themes/edge_neon.js": "80beb045716ec97dd6fb52c0ffecbe78db1498456d39f387a99c4f7018fc1be5",
-    "node_modules/@lumis-sh/themes/dist/themes/eldritch.js": "4cb244dee5de8ed1fda8f7a039e1a188569972c25462052d34fbdeb67f318c37",
-    "node_modules/@lumis-sh/themes/dist/themes/embark.js": "b0e380997c7a06155f245039fd8f5cce8c2ee57abfa6e0076180ee690a1a1642",
-    "node_modules/@lumis-sh/themes/dist/themes/everblush.js": "7799a66ac28ea06e47b39a76ba8cd1941f31904eb22bc804afa98c801b8e580e",
-    "node_modules/@lumis-sh/themes/dist/themes/everforest_dark.js": "1b6c3c4108d8897c6860a4e307d0009019aedf8c79691c6476fbcaaa414995ca",
-    "node_modules/@lumis-sh/themes/dist/themes/everforest_light.js": "07a7f1abce9a2a78b33ec87bbe7646ed1ff333e0d035ffa49258976c058c58f5",
-    "node_modules/@lumis-sh/themes/dist/themes/flexoki_dark.js": "1cc6d4167915adff83087178bd7ba16065b6d49eaa4b6cded3aba08f1104fc41",
-    "node_modules/@lumis-sh/themes/dist/themes/flexoki_light.js": "85113ff953f7ef438eebec26686d0e6e815d7cfead7a85501442416aad6794cb",
-    "node_modules/@lumis-sh/themes/dist/themes/flow_dark.js": "694776543356fb44c7ede661a00e4e2138eac6544137300fce34527708786385",
-    "node_modules/@lumis-sh/themes/dist/themes/flow_light.js": "f3c7bd2321526abf66d6bad34fd4217c8aa4381c669a4903754d8934de78668e",
-    "node_modules/@lumis-sh/themes/dist/themes/fluoromachine_delta.js": "2e518ce5f32f03dadedb6fb8cd57b3130f5268e814a0247027304a84c787b0ad",
-    "node_modules/@lumis-sh/themes/dist/themes/fluoromachine_fluoromachine.js": "41bb4d25d602daac1b6afc8912b80f07769ef9ac53243ae587565277e4cce1f9",
-    "node_modules/@lumis-sh/themes/dist/themes/fluoromachine_retrowave.js": "f429497ac8110e4fd1135ba2c230efe4d2fd93b8b34b1762cd11503a0daeb824",
-    "node_modules/@lumis-sh/themes/dist/themes/forestbones_dark.js": "58e760c22fbee5bec90cba7440230b3e201ed0e53b0c1373e5179167550159dc",
-    "node_modules/@lumis-sh/themes/dist/themes/forestbones_light.js": "e134d4766d0f378ac0722194a2ce177eec4c8bbc352f6648e48252f161cdf6aa",
-    "node_modules/@lumis-sh/themes/dist/themes/github_dark_colorblind.js": "a41d96daf43be2e955b36cdcee8c0acebb5e745fa8a182ab475aae6e58f5e438",
-    "node_modules/@lumis-sh/themes/dist/themes/github_dark_dimmed.js": "90e360316305d1b981a6c79beeff5fbf3f2e824bdcba64f6d199ad20f39cbc5a",
-    "node_modules/@lumis-sh/themes/dist/themes/github_dark_high_contrast.js": "75e506f127dd2c436f0feaeec1e6135e7e0e2fea5d26de1a894a469845680f87",
-    "node_modules/@lumis-sh/themes/dist/themes/github_dark_tritanopia.js": "7c3d4c10dda55e954e4abf3c04b1247c9c54f4dedb4b7f158931160292453671",
-    "node_modules/@lumis-sh/themes/dist/themes/github_dark.js": "f9bd3ece366673b6215c81717230275974134b402752ca20820b5bf0345cfacb",
-    "node_modules/@lumis-sh/themes/dist/themes/github_light_colorblind.js": "f7a04ae41b8efd9e0782075df2dba568d450d6944760d4695c00e5db8bea442f",
-    "node_modules/@lumis-sh/themes/dist/themes/github_light_high_contrast.js": "858f9220db64947be10f48a60d87906d9ddf3ac7628063722bb120e100cd67b3",
-    "node_modules/@lumis-sh/themes/dist/themes/github_light_tritanopia.js": "32c8ecf7c327df3f6e97335f3226fce46125a66fc21818049890cd2259458716",
-    "node_modules/@lumis-sh/themes/dist/themes/github_light.js": "5e21f8067cd7b486ce5fdd0cceaea903b2d8cd7a2b401e43ee3a3ab1ddda0a2a",
-    "node_modules/@lumis-sh/themes/dist/themes/gruber_darker.js": "79c50c58652095140865ab7c7e940707ad384d44ee1a43ad90261f7f23f0004f",
-    "node_modules/@lumis-sh/themes/dist/themes/gruvbox_baby.js": "987dc369a5a3928504698c8726b4658f1b0a7b5f4773fcd40bd956295595f0ab",
-    "node_modules/@lumis-sh/themes/dist/themes/gruvbox_dark_hard.js": "9b9215ee0d7646ea88bc2f8c8a46bc51e98c813815af330b74e8b08e76f3028e",
-    "node_modules/@lumis-sh/themes/dist/themes/gruvbox_dark_soft.js": "67ac9ce0bddfd91506c65b839b35165c0038edec0f22c4106984eb0b50ce6873",
-    "node_modules/@lumis-sh/themes/dist/themes/gruvbox_dark.js": "7bc3774d4bc69986f1e1e3d76a1de3ba71ae188b6631e463d83a939defbe2a7c",
-    "node_modules/@lumis-sh/themes/dist/themes/gruvbox_light_hard.js": "d688f4471d39430c7d905118768c491a1f78cb1d63ff433260784f7dcd921955",
-    "node_modules/@lumis-sh/themes/dist/themes/gruvbox_light_soft.js": "fd8fbc601f3061d3329923d19bd62c4e2896d3d127a9394b808cedb5e2d4c45b",
-    "node_modules/@lumis-sh/themes/dist/themes/gruvbox_light.js": "fe9a891e87d3244c09da91f37a60cff374179a2d537f91223bc50098925d8648",
-    "node_modules/@lumis-sh/themes/dist/themes/gruvbox_material_dark.js": "1b00ec7d35edbaa7d56419f5b4332d72a521cb2c5be38397f03e05cb904afc6e",
-    "node_modules/@lumis-sh/themes/dist/themes/gruvbox_material_light.js": "f9da43ac7df42e3c72c0938db031ae6b695d93a81d6675a6efdf61071269a2c3",
-    "node_modules/@lumis-sh/themes/dist/themes/horizon_dark.js": "62661c595413cf5faae0ad952bf5aa86ee30a0b2d31a6a34ffd79cea70ae565f",
-    "node_modules/@lumis-sh/themes/dist/themes/horizon_light.js": "4ecbab62c55585c0efde09391b2c309e6badc60a5ce0317dae838b87aabe4a66",
-    "node_modules/@lumis-sh/themes/dist/themes/hybrid.js": "ea098fd8f9d2410a0cef0ea00031c228f2e021c48f360f08f3e18ce333935f67",
-    "node_modules/@lumis-sh/themes/dist/themes/iceberg.js": "723c20efa2aa5193f9241cfb90ed94240610deade5f490ab2733e29955a4332e",
-    "node_modules/@lumis-sh/themes/dist/themes/jellybeans.js": "a17d758f80d1330cef40b91788099b75ce51011c635b47a5b39e787c42c39a72",
-    "node_modules/@lumis-sh/themes/dist/themes/kanagawa_dragon.js": "93af7b274f274b20d57fb18261aff9f9587d717f0f27496d0a1c8d22047fc5bf",
-    "node_modules/@lumis-sh/themes/dist/themes/kanagawa_lotus.js": "43f358a60d91ddedcd00c716bb7eaf2d5d4ccc92000a44a9ba44cbff6b75b54d",
-    "node_modules/@lumis-sh/themes/dist/themes/kanagawa_paper_dark.js": "45ffef0fc5fdd22540bd3e6eb4c6a2e10ba8228110a00ba0e920d8c5c2a857d0",
-    "node_modules/@lumis-sh/themes/dist/themes/kanagawa_paper_light.js": "48b04aeb0ebf86fa91fb564c31c4fdcd895c0dc9cc667301657a4fc8b93e9596",
-    "node_modules/@lumis-sh/themes/dist/themes/kanagawa_wave.js": "af6d3f41232644f77c1b43acf9b841ebd98a732ee5a9b644cfe08ded87b1ffd7",
-    "node_modules/@lumis-sh/themes/dist/themes/kanagawabones.js": "03deae7e7f976cb1f4e8829d9f00ce40ec386d1aab6fd0399521299eca3efa44",
-    "node_modules/@lumis-sh/themes/dist/themes/lackluster_hack.js": "f3272a53426b5d491f93aca85cd2bc71454ca444ff6c6c230246d74a807f211c",
-    "node_modules/@lumis-sh/themes/dist/themes/lackluster_mint.js": "14cfb73a2dee5c6d611346826a273117859dbfd95a6f7375447a7ca0d1c4dd9f",
-    "node_modules/@lumis-sh/themes/dist/themes/lackluster.js": "3a78afc1a8ae53a3ed93345f6c63aaf7861a438c64cc2a373fdce5d40701321b",
-    "node_modules/@lumis-sh/themes/dist/themes/matte_black.js": "fde7f9f1c1a5ac27fe8fff0a788c4d83c0e8b9459001c5e7e72f09c46baf385b",
-    "node_modules/@lumis-sh/themes/dist/themes/melange_dark.js": "d0b5271b93a1cc750b4fbb1cf059c7afa19743531daa28b3124589af97c27c14",
-    "node_modules/@lumis-sh/themes/dist/themes/melange_light.js": "0f44f873283481c9265fb6d8d464603f9e524d8c879ca409ac5c72a9405340b1",
-    "node_modules/@lumis-sh/themes/dist/themes/mellifluous_alduin.js": "154cf83fd48125fc27c69c79aea22060334e6732bb1b6794506c9c3ccf305f7e",
-    "node_modules/@lumis-sh/themes/dist/themes/mellifluous_dark.js": "179ec8b09d90c5f10016a89c9497e869875e23b4f0040dcb0d4d20a580e7e0c5",
-    "node_modules/@lumis-sh/themes/dist/themes/mellifluous_kanagawa_dragon.js": "dc7bf921bbfe6f2e70793167bff9c2af9ac724f67876a9ef087f5b6e4d4b2a3e",
-    "node_modules/@lumis-sh/themes/dist/themes/mellifluous_light.js": "1e638abbb446d21862adea5384ef1a35a50fcdcaed74441b98a0c24e33c1aa9d",
-    "node_modules/@lumis-sh/themes/dist/themes/mellifluous_mountain.js": "c80509a3bd90c7357c7ac6f891f8017425a343bec0f3043ec91dcdbe7fe17930",
-    "node_modules/@lumis-sh/themes/dist/themes/mellifluous_tender.js": "7a4511dea80867fb5a22a8a213803d7b09bbf74d6db86e5c3d915cbfc2f54473",
-    "node_modules/@lumis-sh/themes/dist/themes/mellow.js": "f86d45a712affe98a7f2c80f0be1feeb5d91da8742e39fcdfad7b12e4861e60e",
-    "node_modules/@lumis-sh/themes/dist/themes/mfd_amber.js": "8ee2c8c221c3fdf6183eff5ecebcac52faad5e29bc3b9628d770a70ef26299e2",
-    "node_modules/@lumis-sh/themes/dist/themes/mfd_blackout.js": "0a9e110b8130faceb7529821d7b16e43174828baa8637ac3f219b0a18ba8d23d",
-    "node_modules/@lumis-sh/themes/dist/themes/mfd_dark.js": "6027d17aa7f3b3e6affd24f2b4237e8468e98c814e67cc41ca33824a7608f313",
-    "node_modules/@lumis-sh/themes/dist/themes/mfd_default.js": "0772e87409ad0ca253fc2e9965eb805dd5f091054c33a6bb216b53d228cf53bd",
-    "node_modules/@lumis-sh/themes/dist/themes/mfd_flir_bh.js": "3f16931e1651eb0838d752883957f784cd774c8ef8d1af61db93b2f64c3cd86e",
-    "node_modules/@lumis-sh/themes/dist/themes/mfd_flir_fusion.js": "5a50be9b56ba3717d6ef11554b449b6f8d6996049731fa95bee1c7cfaec8f2fe",
-    "node_modules/@lumis-sh/themes/dist/themes/mfd_flir_rh.js": "8b437764623e85b2042cebf1d8df5e16de052653badb993b2f0a0b77ff9c6e71",
-    "node_modules/@lumis-sh/themes/dist/themes/mfd_flir.js": "e250da0879fbdf9648b4d56862297d7ea89702b382768a48fe03e08e337cd5e0",
-    "node_modules/@lumis-sh/themes/dist/themes/mfd_gbl_dark.js": "c6c4746725515e65e6802dd44a64cd37f9e5c604947b4bc0f44b01c14a716526",
-    "node_modules/@lumis-sh/themes/dist/themes/mfd_gbl_light.js": "84f6ed942c802add72f7a95fbb9dac5d10a482b274f03ec088907be2c105e2e4",
-    "node_modules/@lumis-sh/themes/dist/themes/mfd_hud.js": "08e04a00c023cd5e9253059530fddcc047dfc2555fcdee7a706dd2fb7ce1a47b",
-    "node_modules/@lumis-sh/themes/dist/themes/mfd_lumon.js": "de64b4f1395a26be8244ccc60b3d3dc2bbdb0804b4749e6b24da53b2ab627c66",
-    "node_modules/@lumis-sh/themes/dist/themes/mfd_mono.js": "bbcd5dec1927103134e2ef521aa74fa16b7d308c1e252a97daa8fa3aec0d9ac2",
-    "node_modules/@lumis-sh/themes/dist/themes/mfd_nvg.js": "6b4121dd698dfe3ed6a8fb88c7b4213876c2560a31326fca48900b8f24d49e9c",
-    "node_modules/@lumis-sh/themes/dist/themes/mfd_paper.js": "b142937caf0ac13c84cf956be378b39f7b36920ced791b79f47a0f630f448a7e",
-    "node_modules/@lumis-sh/themes/dist/themes/mfd_scarlet.js": "e2ad3f92d2d057d6ed00ab1820e186fea11f4f1c08ec29955a795d1312bd37da",
-    "node_modules/@lumis-sh/themes/dist/themes/mfd_stealth.js": "0d909b412fa88d79fb52208eed88319c4385bd51c9092e5d034cd0a94c024c37",
-    "node_modules/@lumis-sh/themes/dist/themes/miasma.js": "4e78ab4b5d438f51f97b68a34376c35d669d040902fd3f04d4867415cd720fd8",
-    "node_modules/@lumis-sh/themes/dist/themes/midnight.js": "6ebc57eda4d5a2584b1afedbf4a144057be8e93fb7b7103a871d7c8cb236c22a",
-    "node_modules/@lumis-sh/themes/dist/themes/molokai.js": "56d013104ae8434b88da9761b9edc1d3f71544ce624042a290f90bd01ac7cd8d",
-    "node_modules/@lumis-sh/themes/dist/themes/monokai_nightasty_dark.js": "33765502e3269ed8e28bed6e295e80876a071ccbc412e6ea62362816f24123e2",
-    "node_modules/@lumis-sh/themes/dist/themes/monokai_nightasty_light.js": "4420221e0aed8bd1cc944f0f160252594fab5fffece77bd7e73e071a0c7b0aee",
-    "node_modules/@lumis-sh/themes/dist/themes/monokai_pro_dark.js": "d378a55098f50304019d76bc0c10f876fdf78fa82f0643e9bc22b032e43da612",
-    "node_modules/@lumis-sh/themes/dist/themes/monokai_pro_machine.js": "4eab33b6d13001f6e69923d82af1697da3407c86b621abb5ae3fbecd1c41febd",
-    "node_modules/@lumis-sh/themes/dist/themes/monokai_pro_ristretto.js": "958db9dc0139418fc8c9c23d24eaf401c1fd2d30fd3c9bb1fd44cd89f2cf480e",
-    "node_modules/@lumis-sh/themes/dist/themes/monokai_pro_spectrum.js": "fe709f66638e910ca9e5024add90b7ae9d74e7639d556349f32d03070dd06b09",
-    "node_modules/@lumis-sh/themes/dist/themes/monokai_pro.js": "a92dec5c1e288c3e293d858aeb79ff12b34aa2875f59b3b8b024b2f6653fad17",
-    "node_modules/@lumis-sh/themes/dist/themes/monokai_soda.js": "923e5a49220cc63a45cd574b55172051210b11aeb1da75cdb43a2f586f3e995b",
-    "node_modules/@lumis-sh/themes/dist/themes/monokai.js": "789fedf6e0a780400dc03fdd12bb3dcd611e7c434c2fe9c75e9817257e0e93b2",
-    "node_modules/@lumis-sh/themes/dist/themes/moonfly.js": "2155ade2b60517fb9df95f000b1521595efcef8c0bc544503ab78c81202ad9c5",
-    "node_modules/@lumis-sh/themes/dist/themes/neobones_dark.js": "a5feb3535e4df0f09c8ec1e8fb078d4ca18bc0521b6b9d7d03f373cfafc345d1",
-    "node_modules/@lumis-sh/themes/dist/themes/neobones_light.js": "73b105b2128e957347ba8008e2ea91ff0c64d6e5cd0fbdb73801bd0b6c0b0aa1",
-    "node_modules/@lumis-sh/themes/dist/themes/neofusion.js": "d1a384feba33c79fd725ff5c18259d893399d45bce68ba49ab523f25674e106e",
-    "node_modules/@lumis-sh/themes/dist/themes/neomodern_gyokuro_dark.js": "a72b9c6a576f644645eb8c6958299fd5cb4337bedd6b838ea63b1bc4a8de8ffd",
-    "node_modules/@lumis-sh/themes/dist/themes/neomodern_gyokuro_light.js": "5adaffbe7964a4cd0b82b2e693d44a8ca6b430a8524022e0f9ce07335d1fc486",
-    "node_modules/@lumis-sh/themes/dist/themes/neomodern_hojicha_dark.js": "82671c67b6568b12e2bf8be02b041e0b8ffaf312988317d4c288d6f4086b66a3",
-    "node_modules/@lumis-sh/themes/dist/themes/neomodern_hojicha_light.js": "2141a3cf7443ed0d2ecd33aee348a0ef954f300051231732cd011e5f07f3beb9",
-    "node_modules/@lumis-sh/themes/dist/themes/neomodern_iceclimber_dark.js": "e82013f77a2fe7c9975a4ef531c6e00b05f93c5556d4ddb60784e043a3733472",
-    "node_modules/@lumis-sh/themes/dist/themes/neomodern_iceclimber_light.js": "164b665aa63dc8a1c8059e196ebdd56360adeee8b6f794d12baead6b696085c7",
-    "node_modules/@lumis-sh/themes/dist/themes/neomodern_moon_dark.js": "e5bec17c32618f5583aca0bb793505306e1e2757bbe5833fa41734e161ab3cf1",
-    "node_modules/@lumis-sh/themes/dist/themes/neomodern_moon_light.js": "434d258613508d2a15a93d55f15734d34554d0644ae6445d4c9b335743ec7505",
-    "node_modules/@lumis-sh/themes/dist/themes/neomodern_roseprime_dark.js": "76bd78d980e5ac469eedd38aa0ba48c9dc653e16b4627b5b630f954e4f1a3e96",
-    "node_modules/@lumis-sh/themes/dist/themes/neomodern_roseprime_light.js": "5f5d7a2ee0c874e6c6636b82725ec5f6e7f8cc3b1267a8b7c47f5d9ee351caa4",
-    "node_modules/@lumis-sh/themes/dist/themes/neosolarized.js": "7d6ed6733d744088dd7fb68de9631653c4babd777ff21341274807aed4ee8a73",
-    "node_modules/@lumis-sh/themes/dist/themes/neosolarized2_dark.js": "fee6b76566eb2bcc0e452b39ec2ca8769273fc0b12179cd7d334545cb3813dbf",
-    "node_modules/@lumis-sh/themes/dist/themes/neosolarized2_light.js": "ec1a53837ec632e3a37c5d6eec81dba635c4ee25716e1d3567ddcbb52b24acae",
-    "node_modules/@lumis-sh/themes/dist/themes/neovim_dark.js": "6f703c8e82e25c3c02a55a626b720dd455748b56702cd6dd4658a4c929d7a25f",
-    "node_modules/@lumis-sh/themes/dist/themes/neovim_light.js": "598279da2e1fe2c28ab71093e2f8c1d667670ee852eb4a6cacf762ee15a3f266",
-    "node_modules/@lumis-sh/themes/dist/themes/night_owl.js": "0a82c9ae038f252b4a9f8c32cdba14996ff17849ecde60c1e75f8805914d5f3c",
-    "node_modules/@lumis-sh/themes/dist/themes/nightfly.js": "41a03ac2ee4a8fcabe8c7ea450f509b146e9eb39ff6242414e6e329b4405bf9b",
-    "node_modules/@lumis-sh/themes/dist/themes/nightfox.js": "9f2ce0291b447cfb869f97dc93ed2b0765f522d91e57526f8a53dac4ed5a0932",
-    "node_modules/@lumis-sh/themes/dist/themes/nord.js": "59329b9eff0c2e1daaa2fd8b0d100d0bc08f321ce43e4d436ac1d061719f57a9",
-    "node_modules/@lumis-sh/themes/dist/themes/nordbones.js": "360b1e386ba9c9a0f7d36bffc2c8ff94b19c4e258e86196502afebe3bc82b2ec",
-    "node_modules/@lumis-sh/themes/dist/themes/nordern.js": "061036af76e6831eb99fad7771696620034e1a8139bbcb4a776790e87b16b93b",
-    "node_modules/@lumis-sh/themes/dist/themes/nordfox.js": "f05335894b489190808a1944d819792c1bff3988d8d7f1412962decf622787fa",
-    "node_modules/@lumis-sh/themes/dist/themes/nordic.js": "c349b25764a7a809866bc1574180f508f3539a23410845e2db871dae8df38230",
-    "node_modules/@lumis-sh/themes/dist/themes/obscure.js": "7d14571c3cfa5d125ce0cd75f60a942062b3fb1e984418fc83f3d14c9910c1fc",
-    "node_modules/@lumis-sh/themes/dist/themes/oceanic_next.js": "dda874ab0cdca72417d5c1c6330f1ad891d68e7cdaaca0113e903aaab5cf3301",
-    "node_modules/@lumis-sh/themes/dist/themes/ofirkai.js": "50506e32db2ee29935827db76df045d4446eb05b897b0cfcd3820ac6e785534d",
-    "node_modules/@lumis-sh/themes/dist/themes/oldworld_cooler.js": "f3176f7328f0719833f6b6c4af67bf4ff5266286cc59df3dca9eab9cac9f4711",
-    "node_modules/@lumis-sh/themes/dist/themes/oldworld_oled.js": "fb6d733dc5464a1c4953e55edfbd668a851d1408fd3da5d7f0f43790742e9ce3",
-    "node_modules/@lumis-sh/themes/dist/themes/oldworld.js": "8d9a8bbd45ceca28809c587cb82b4bd050cfd4d55eef19561055022d5443f21a",
-    "node_modules/@lumis-sh/themes/dist/themes/one_monokai.js": "a82461adacd1507642bfb8b1f6e88d12ca9bcc7c4ddfeda849c37312e5ce4489",
-    "node_modules/@lumis-sh/themes/dist/themes/onedark_cool.js": "6094e2fb1b9d79d41fc426eb3da7c38e4415d38719ede38fefe711d181bad443",
-    "node_modules/@lumis-sh/themes/dist/themes/onedark_darker.js": "d37aa6d905b11103992e9498cde129ae27aef5093102043a4512716ddbdebe80",
-    "node_modules/@lumis-sh/themes/dist/themes/onedark_deep.js": "e6f638188e0b99f4d1e7d88e4faac17ec352171b67041bcd86b19d532e17bfd6",
-    "node_modules/@lumis-sh/themes/dist/themes/onedark_light.js": "234be199e821433b50410b695cce68f6cf8445ad48e2bc758b33245a0061a5b3",
-    "node_modules/@lumis-sh/themes/dist/themes/onedark_warm.js": "1860d220fa283d84e9a51f1a1eae058f57aec8842c4d955c11ca1452089a2cc7",
-    "node_modules/@lumis-sh/themes/dist/themes/onedark_warmer.js": "b72ff878ed61342b1c22099be8aba19dd3bd640c9de97f635f916bba8112cb38",
-    "node_modules/@lumis-sh/themes/dist/themes/onedark.js": "2100d15c50ad1a3e8f4e219c0ba3a2cf2e57e2dea019970edb992c8222889ec0",
-    "node_modules/@lumis-sh/themes/dist/themes/onedarkpro_dark.js": "6a2bcd42977cab19f60d096e5996902a15525d714e6577a5e61b7fe083a3fd3d",
-    "node_modules/@lumis-sh/themes/dist/themes/onedarkpro_vivid.js": "ae8ef84bbcf42e105df7223f04c89f47bdec3432b1754de304e8260a8f1deda8",
-    "node_modules/@lumis-sh/themes/dist/themes/onelight.js": "e5e322088e3448bbc1b1d8977018a413904ac9ad917d9fe1ef3dfc6604640d4b",
-    "node_modules/@lumis-sh/themes/dist/themes/onenord_dark.js": "c61bb5a2cc11b8c30588434254814b6a6dbb7d0d3c2165b8ba3f734c3352ad46",
-    "node_modules/@lumis-sh/themes/dist/themes/onenord_light.js": "8ccab2497806892037ef9115f0ae83a30a423b55aea761a6db61e2a6b7639f14",
-    "node_modules/@lumis-sh/themes/dist/themes/oxocarbon_dark.js": "0ab68f7dd1da14dce3be024b82c7fc781870406ef022015868ae0717b18f653b",
-    "node_modules/@lumis-sh/themes/dist/themes/oxocarbon_light.js": "74e78535fce5ad5be0b959af5319b41f030f58f17cc62433706ddd64d7e18ae0",
-    "node_modules/@lumis-sh/themes/dist/themes/palenightfall.js": "9efe321acafea563cd4a9efae2de7c2e3e93029ee8c9162e37873451fcc226b9",
-    "node_modules/@lumis-sh/themes/dist/themes/papercolor_dark.js": "ae2b1faadb8fd69234f6d516552b500398e27d43881cfec77fd49d684c65c5c0",
-    "node_modules/@lumis-sh/themes/dist/themes/papercolor_light.js": "8cf36c5277c56ee987fd6edf4268bd831f3a28b639fee46e0cb7f8ad6e282638",
-    "node_modules/@lumis-sh/themes/dist/themes/rosebones_dark.js": "8e41d7ebbf4319ee4645ce452c5a66873a1304605be1da68e963a7bec01884ea",
-    "node_modules/@lumis-sh/themes/dist/themes/rosebones_light.js": "e79140d207d492282be31c401591a7b5a75579fd252b1edcd20cffff5afbb0c4",
-    "node_modules/@lumis-sh/themes/dist/themes/rosepine_dark.js": "77b132dadf88dfab60870d2cd87e983e367930e88a5b66779bbf86abc134c97b",
-    "node_modules/@lumis-sh/themes/dist/themes/rosepine_dawn.js": "b237255389c3eb2c1512fe760f602ecac631519565b574eee148ea6b1065d091",
-    "node_modules/@lumis-sh/themes/dist/themes/rosepine_moon.js": "9b8d4de857d55bde163602df6a90f0dc7bbcb5aa719acdb9b8951cad0239e3ac",
-    "node_modules/@lumis-sh/themes/dist/themes/seoulbones_dark.js": "e4f64d894da43778c33e57e436043c213d722e00a33e3aee6ab3d3d653bb9558",
-    "node_modules/@lumis-sh/themes/dist/themes/seoulbones_light.js": "bb0dbf0b0ad26a9f48e1eb410e7cc090efc87dddf23cd1c59fe036b18cf9c191",
-    "node_modules/@lumis-sh/themes/dist/themes/solarized_autumn_dark.js": "616590a91d7823fae83be05b724c81c8d19b0f2e55ac2ca489c4decfc80364da",
-    "node_modules/@lumis-sh/themes/dist/themes/solarized_autumn_light.js": "6a4255c1c864125336494e4ee5ab99523e5d23f7b727941ec9405200c0d20b8d",
-    "node_modules/@lumis-sh/themes/dist/themes/solarized_osaka_dark.js": "577d75e049fb4587b6437bd3a881b5bb6461ace242f017056db09fefd2424b3d",
-    "node_modules/@lumis-sh/themes/dist/themes/solarized_osaka_light.js": "20d37fefa45e53d092af0334459d06c4ed2ffb9061d1860fae4fd1a5e9d7df62",
-    "node_modules/@lumis-sh/themes/dist/themes/solarized_spring_dark.js": "d1536f48fa390699c61cb924025c1198355985f155d419f6ed17a2a9e38dbd4d",
-    "node_modules/@lumis-sh/themes/dist/themes/solarized_spring_light.js": "9e74aeaff06a12544e231974c807c0fddd61fd0eaf1c9f2be8b09184099117f2",
-    "node_modules/@lumis-sh/themes/dist/themes/solarized_summer_dark.js": "4b7ab61a987ad413e4486b5e9b7c15d1ceedeaf7708dd1ce91aec7917ea5ca89",
-    "node_modules/@lumis-sh/themes/dist/themes/solarized_summer_light.js": "ef4bcd37d0061e78db13dc95f9877e9c1a3899806a3c8688fb50f135cc1d7f96",
-    "node_modules/@lumis-sh/themes/dist/themes/solarized_winter_dark.js": "8170ce53387bb15862ec42d257edba09710b477525ae2a9f0b3cba9a3e55fe27",
-    "node_modules/@lumis-sh/themes/dist/themes/solarized_winter_light.js": "5d28ecdce1d984f7c2213dbb19fd105e2b6eb2b827a77f663c8ebd87808a2098",
-    "node_modules/@lumis-sh/themes/dist/themes/sonokai_andromeda.js": "f2c32d84ca59602c7610251fe8b034ce967ac73968087e62266922ff3cd7d4ad",
-    "node_modules/@lumis-sh/themes/dist/themes/sonokai_atlantis.js": "b850c6da867802a7898f58a59148ff97061a6583b257dfec784649c3884ec994",
-    "node_modules/@lumis-sh/themes/dist/themes/sonokai_default.js": "a9e137757fcc87b1f11082c10983633479671d7150cbaec0c3d3882134618d19",
-    "node_modules/@lumis-sh/themes/dist/themes/sonokai_espresso.js": "32a799a358a198b4d24ee96175ff68960d691a7867f4ae77906b0799182d8a82",
-    "node_modules/@lumis-sh/themes/dist/themes/sonokai_maia.js": "8e3cf5dea24c4d06ff5f1f6c686a1b1ed2c7986a2d61170287700e8647563178",
-    "node_modules/@lumis-sh/themes/dist/themes/sonokai_shusia.js": "2a1e8129b14034b2879a44e288599ba68576f3591b9e7c32f9a77b8943c436b8",
-    "node_modules/@lumis-sh/themes/dist/themes/srcery.js": "752b90b950236290859da3c881ea9291f2f1f75cfbcc8fb65ae20bc68586be28",
-    "node_modules/@lumis-sh/themes/dist/themes/synthweave_aqua.js": "bb32ccaa815b0b2f163aace07604f1d20eefe6f6460d49bfd01d38960f922a1c",
-    "node_modules/@lumis-sh/themes/dist/themes/synthweave.js": "93d50541425c1a3a12aa8834b024b9ec108a4579f65a0127b562ad881c89e110",
-    "node_modules/@lumis-sh/themes/dist/themes/terafox.js": "166a72b8053e7d1fb3a81675102de005f4cda17faf95060f3c9e4605b57d0f25",
-    "node_modules/@lumis-sh/themes/dist/themes/token_dark.js": "427a33cacd6ca50e54d2f6c689017d2aa08337687caaf6d0db37ab00a223fe64",
-    "node_modules/@lumis-sh/themes/dist/themes/token_flint_dark.js": "48d36ce9400e7487787142c981a8024feaa4757b918bce16db5f57d0641077f1",
-    "node_modules/@lumis-sh/themes/dist/themes/token_flint_light.js": "bca0056ab88e0361a2cb0bb33933ed2935324545889320286dffa50b8c5f3a28",
-    "node_modules/@lumis-sh/themes/dist/themes/token_light.js": "03305aff0701aef56bd70547d96d12ea4a94be66b75aa858a75a13683e50db94",
-    "node_modules/@lumis-sh/themes/dist/themes/token_meridian_dark.js": "3139a6007030ea724e4983909565b1181a20e62f756b9c1ae741194ae4c9b7c9",
-    "node_modules/@lumis-sh/themes/dist/themes/token_meridian_light.js": "0d3d4a55598457f4d8e4765137cd06b69a949e310db22bcac913e7e3b875f4d9",
-    "node_modules/@lumis-sh/themes/dist/themes/token_temper_dark.js": "4f1f76ffdc3fbfc49d849491d9b77205046fb982baf27888e35414448b38a941",
-    "node_modules/@lumis-sh/themes/dist/themes/token_temper_light.js": "8263f48bf2509a350abbbf920e2114989e86f6d50092655958e9e63df0efd2b0",
-    "node_modules/@lumis-sh/themes/dist/themes/token_ultra_dark.js": "943b9542876891e37e2cd7edc5547245b5c86cbeb665b9b552e7808934caa47d",
-    "node_modules/@lumis-sh/themes/dist/themes/token_ultra_light.js": "561b90d63e228f89fc51656988097c70a1dd5015194a0d9e6eaf879d84413418",
-    "node_modules/@lumis-sh/themes/dist/themes/tokyobones_dark.js": "35e28b2c0209cece9654e917c023196ca59de3c99965beac3758b2c5e3f62aaf",
-    "node_modules/@lumis-sh/themes/dist/themes/tokyobones_light.js": "7606fc902a79bd514c6655d99ba795109c8d9298b2ddb91ce098bb01d733b29d",
-    "node_modules/@lumis-sh/themes/dist/themes/tokyonight_day.js": "bb5c9da90f17d13d3b632b297a01b5ad1c4dde7b99131b896264bba3b096cc2f",
-    "node_modules/@lumis-sh/themes/dist/themes/tokyonight_moon.js": "dbd81bae70ca5951cce87da3dbd47a2fb502edcf52676706f5d0a48e2b151119",
-    "node_modules/@lumis-sh/themes/dist/themes/tokyonight_night.js": "c4f65f931bc86640d22810a721fdab1ca71f3d5ba11fb4012e01f57a1e97b71f",
-    "node_modules/@lumis-sh/themes/dist/themes/tokyonight_storm.js": "afa66b2c244a56a96765415465518183e7c3c5e415ad4db0205246689c4abee9",
-    "node_modules/@lumis-sh/themes/dist/themes/vague.js": "fb8658deab20a4a7480a76929d052f0d5b70d31fa243b2df8ac2f1afb63f25c5",
-    "node_modules/@lumis-sh/themes/dist/themes/vesper.js": "37f0ad3f778dcd4f1888a4dfbf2e624d5223598c62240bdd57e50c75c7f2a1bb",
-    "node_modules/@lumis-sh/themes/dist/themes/vimbones.js": "415f0d6813a291c16430fef3fb6c72b90a18acf1c74129e871efd6aa203098e1",
-    "node_modules/@lumis-sh/themes/dist/themes/vscode_dark.js": "57f1fd2864025d35f9fd76d548fe083156ec512a0ff9c128d4ca3d01e29a1306",
-    "node_modules/@lumis-sh/themes/dist/themes/vscode_light.js": "705045866d5eb9b447eda92cc43be15d08e8c6657f56701fe61c3ffecd00a660",
-    "node_modules/@lumis-sh/themes/dist/themes/xcode_dark_hc.js": "880a44349e5bebf2fa9f59aed72a010825c9b5090a389229a06dd0ca5762ab85",
-    "node_modules/@lumis-sh/themes/dist/themes/xcode_dark.js": "2f30c0a17729d7290a530046d8c1944131ceb2cf6755062a507d48ff88fa6924",
-    "node_modules/@lumis-sh/themes/dist/themes/xcode_light_hc.js": "b27e6348a5ae22565d180c01ce8ad5aa77937aa4a365c0324b74b16da8bb1580",
-    "node_modules/@lumis-sh/themes/dist/themes/xcode_light.js": "285ea8007197f1d0a8f38b4edea28a6e59da68f9cbf68d7dda1ed92a56aec71a",
-    "node_modules/@lumis-sh/themes/dist/themes/xcode_wwdc.js": "b373a08ef640a066f3a09f11b0a0a08aae07c59985738f23b995e7cb9cea5ced",
-    "node_modules/@lumis-sh/themes/dist/themes/zenbones_dark.js": "dabdac0bcf2f4d8ac3caa1d5d9a8acd740444d8aaa5d7c794bff0284c82a0294",
-    "node_modules/@lumis-sh/themes/dist/themes/zenbones_light.js": "1c246ef1f07932fa4d4dfe1e8bb26106e72dadbbec8fcaeade0d0713e0f97152",
-    "node_modules/@lumis-sh/themes/dist/themes/zenburn.js": "a343ee078110eea6046579efe47f928985c66f9c7a5683107b08687a7de9d1dc",
-    "node_modules/@lumis-sh/themes/dist/themes/zenburned.js": "d3f4bed248cb661789503bba8c123edb0ea442d1c08789b0338b857b9185de7c",
-    "node_modules/@lumis-sh/themes/dist/themes/zenwritten_dark.js": "2cabe57acca3cdc433bb38afba9f46ba6007840505743dc6101d142044500333",
-    "node_modules/@lumis-sh/themes/dist/themes/zenwritten_light.js": "10ca364dd4063b8036ed3f034b8d379ae31401f07d2a80a5af4d17056e05cf4f",
-    "node_modules/@lumis-sh/themes/dist/themes/zephyr_dark.js": "f9c0eb719b78f999930f4ed235987367d28b48dcb07834b3f94c93a80afdb665",
+    "node_modules/@lumis-sh/themes/dist/themes/adwaita_dark.js": "8bb59fc8b664beee71f7c272f880b6dac50d874af0d2cd6253552f3b82b6b5b7",
+    "node_modules/@lumis-sh/themes/dist/themes/adwaita_light.js": "751038d7344fd4bb659a7478974e5d95ff876155086ec011a839476b7676564b",
+    "node_modules/@lumis-sh/themes/dist/themes/arctic.js": "3785a5298c8f1ad136f440583d6c80f1da637343011dc48ce0374887266ce1ca",
+    "node_modules/@lumis-sh/themes/dist/themes/aura_dark_soft_text.js": "81c3348047adc0b9e0caf4f54b35bce3334ceb3f5971b12cf919403fd2d2691a",
+    "node_modules/@lumis-sh/themes/dist/themes/aura_dark.js": "8d4c7530a8281d36037507d2711700fd6c7d4fdb39fd5326ddcb10d65963679f",
+    "node_modules/@lumis-sh/themes/dist/themes/aura_soft_dark_soft_text.js": "61695ee7b7bb72c3e260ea9b6c3fb408a3841865f2e4d3f5cdac3d792a4644d7",
+    "node_modules/@lumis-sh/themes/dist/themes/aura_soft_dark.js": "ccab3c8896c67524b2ef2c77f2c514fce751ba82ee95553cbed11e4775bd9308",
+    "node_modules/@lumis-sh/themes/dist/themes/aurora.js": "e8d4640ffd6d5e060c84e4648d7a6307111218c0b0ad1a06c96141c45396e8fe",
+    "node_modules/@lumis-sh/themes/dist/themes/bamboo_light.js": "03dce7178cdec3369a640d0449ed05870854968b64de205224748a163e1a2b33",
+    "node_modules/@lumis-sh/themes/dist/themes/bamboo_multiplex.js": "c55fc754fd48c9ac5239c824a572e768d00c34bf6223f08acd9256766afd801b",
+    "node_modules/@lumis-sh/themes/dist/themes/bamboo_vulgaris.js": "2b8a9fb1b41a23120ea21db96515e756ae7e6ff34322e333599312403938b05e",
+    "node_modules/@lumis-sh/themes/dist/themes/carbonfox.js": "fbcf64526455dc297025f5850eecf77f2e81d0038f515a8964ac4fc870ad5623",
+    "node_modules/@lumis-sh/themes/dist/themes/catppuccin_frappe.js": "f04825243a0a278cb63ef083cbfa04cf3b87e7d595c22137524289759a65cc67",
+    "node_modules/@lumis-sh/themes/dist/themes/catppuccin_latte.js": "2f41a09698543dec4fead22c121560e697e3508cd95c705c666e2366fa6d6c4f",
+    "node_modules/@lumis-sh/themes/dist/themes/catppuccin_macchiato.js": "9b0d965693e7c4f1ba4a5d577799e148143ca955d5bfff7c747ec24949cdab45",
+    "node_modules/@lumis-sh/themes/dist/themes/catppuccin_mocha.js": "5201453f9d9fb0fc5f8eafb2d9d7add21f0b382b708cbcfbf014cd743357ed4d",
+    "node_modules/@lumis-sh/themes/dist/themes/citruszest.js": "01505c9835cc5a22de086f0f31c2a0730803ca158be2fc677f2cee718fcef188",
+    "node_modules/@lumis-sh/themes/dist/themes/cobalt2.js": "d298c5f591c9adc9b417993cb6259ef67fafb0c62a2698e379df2873b3c36676",
+    "node_modules/@lumis-sh/themes/dist/themes/cyberdream_dark.js": "b60b282423d7a1f42dfe2406f28734778e39973947aad24c7b9a8fc8d8201515",
+    "node_modules/@lumis-sh/themes/dist/themes/cyberdream_light.js": "c72af0c2148acadadd34b1e5a060a3712c6d04740c283c8acc7194c3b75059b8",
+    "node_modules/@lumis-sh/themes/dist/themes/darkvoid.js": "ca0e7cea75ce6feaebe21aa4e98d49a955f4cbd692ac441a2598813700e8c631",
+    "node_modules/@lumis-sh/themes/dist/themes/dawnfox.js": "38651bce709e82c7a71e01ca3f1ef6c1b92d05ad04293fcd434d6bca349c402c",
+    "node_modules/@lumis-sh/themes/dist/themes/dayfox.js": "767bcad92f810dff5f2871def8301a5eb3c23c34c65d508d4563d1c706f31c79",
+    "node_modules/@lumis-sh/themes/dist/themes/deepwhite.js": "63525cd44fb1a51a89298608992fd8299b9596243ba15f434427145d38c22450",
+    "node_modules/@lumis-sh/themes/dist/themes/doom_one_dark.js": "02b94ee223a80f8a27d05c71df127a95b24d12bc2c0ec09002b4d12d3febcbac",
+    "node_modules/@lumis-sh/themes/dist/themes/doom_one_light.js": "411dc62da52f25a0887150b00fee05d73cbc0f9e919582f1f647da5a54616c01",
+    "node_modules/@lumis-sh/themes/dist/themes/dracula_soft.js": "959526ad16ababcfa20cc98676d38e089219d30d1459a8419c6abb2715c548c0",
+    "node_modules/@lumis-sh/themes/dist/themes/dracula.js": "0816de2f42c103449209ed6bd1921ff9f60319f1a271678d1e5d2b3d95255adb",
+    "node_modules/@lumis-sh/themes/dist/themes/duckbones.js": "bfcd0e27a03cbc547b7d85346fbe18285078bc047687b9fef09271442610938e",
+    "node_modules/@lumis-sh/themes/dist/themes/duskfox.js": "0d6c238fc5bea11a9c198df94b2656f363d1e4e63718d1d421ef468a50e5e27a",
+    "node_modules/@lumis-sh/themes/dist/themes/edge_aura.js": "738b36754156360df4ce56f9074453da866c0d5a89f78a694882f259152568cb",
+    "node_modules/@lumis-sh/themes/dist/themes/edge_dark.js": "467603e9fa39cf7c9b443a05049e5aa815e515e3d23bd4a093a107b19936b01c",
+    "node_modules/@lumis-sh/themes/dist/themes/edge_light.js": "710f26e0c126c615de1a49cf14bebc9553cd670dfe08f96609e31fed3bc97be5",
+    "node_modules/@lumis-sh/themes/dist/themes/edge_neon.js": "cc49d3e472d0d6920cd4e8d029324ce23139707ea1629ac40449e00268f685cc",
+    "node_modules/@lumis-sh/themes/dist/themes/eldritch.js": "1fb897e4636a7605c98cb903c123fe0fdfccb7a745dab6bbb379193695f71502",
+    "node_modules/@lumis-sh/themes/dist/themes/embark.js": "1d6fb7cbfee3eade869dadb25dd5b956036b30ed959357a8b9d10aa1497e438e",
+    "node_modules/@lumis-sh/themes/dist/themes/everblush.js": "eedbb2d620d10138d109fa8973f4d5a51487911fa5cf998081b3fc9916931a30",
+    "node_modules/@lumis-sh/themes/dist/themes/everforest_dark.js": "43cff26080bce2bca244c50a22077b6ad89ec2d9639ea0f6217a0a07e0472baa",
+    "node_modules/@lumis-sh/themes/dist/themes/everforest_light.js": "64070d48131424ae0c62349ab24b2474351ca01d1f9c26b71fe746fe8d1e4309",
+    "node_modules/@lumis-sh/themes/dist/themes/flexoki_dark.js": "bfb614db29297a19ddaeadc5f89f15e4d32ede50676ec63d684e1df595b3dc37",
+    "node_modules/@lumis-sh/themes/dist/themes/flexoki_light.js": "3b3bb84c27450ec79ec4a71bad4a86e8d5da3875bd6889c1d097689c3df8501d",
+    "node_modules/@lumis-sh/themes/dist/themes/flow_dark.js": "d55367287e55dbe28ef16cd1acd1534e55d98bc0bd7215ff90096503c9ee436b",
+    "node_modules/@lumis-sh/themes/dist/themes/flow_light.js": "b355b5f6a61d7972d201adafc6950ca361088bae83dea94b52f411a52b0ab99d",
+    "node_modules/@lumis-sh/themes/dist/themes/fluoromachine_delta.js": "3c52d2390edde9ed39eea661382a9754b74a823b07efe6f6ebb41fa1e489859a",
+    "node_modules/@lumis-sh/themes/dist/themes/fluoromachine_fluoromachine.js": "45566407fff185aa34c723bba3f2fc2457b175d71d1a13cb68e745324ad080e4",
+    "node_modules/@lumis-sh/themes/dist/themes/fluoromachine_retrowave.js": "7a25e3cd1be2cc39c40eb96af7488548831c31bc6aada23a1e653ed0638fc048",
+    "node_modules/@lumis-sh/themes/dist/themes/forestbones_dark.js": "40c976b63030240d9525aa63c646dc8fd65435f766fc046b47be6d7590207849",
+    "node_modules/@lumis-sh/themes/dist/themes/forestbones_light.js": "a48eb689029b366daf475c134529103db6e5551356cdf13cf9296aacfb55f83b",
+    "node_modules/@lumis-sh/themes/dist/themes/github_dark_colorblind.js": "f03b22f5afb1056afd0f36e2dc3dfaa0f689afb825647cac58a30a868f61b27e",
+    "node_modules/@lumis-sh/themes/dist/themes/github_dark_dimmed.js": "64532330fd670bd0e141913f3674228b3732993aa2bcba630ec82f393d502a4a",
+    "node_modules/@lumis-sh/themes/dist/themes/github_dark_high_contrast.js": "2617fce74f2d1f899a1f782e39c2c7cd41e9c06d0d4c7c65287b29591db01587",
+    "node_modules/@lumis-sh/themes/dist/themes/github_dark_tritanopia.js": "f538592e65215f9f75a52c844445766827cc328ba9d6cecdb634f8600b2de914",
+    "node_modules/@lumis-sh/themes/dist/themes/github_dark.js": "0f1fd6cca6925277a835f2cd0cf01e1c354ed4171bd3acfcdff47246829fd179",
+    "node_modules/@lumis-sh/themes/dist/themes/github_light_colorblind.js": "3333f8558a2f825ecd88fa90d4568c617b052486cbf0bf4dec053918ebe4e10a",
+    "node_modules/@lumis-sh/themes/dist/themes/github_light_high_contrast.js": "fec68ba3c47576ec0d7279366f9ce9bb64ec84841773b848dc11b0f6aa038ef3",
+    "node_modules/@lumis-sh/themes/dist/themes/github_light_tritanopia.js": "ef0b70f9b59f2fb3ad1ae64b2cc2592f6c32c8428e57fbff9b5b04972554156e",
+    "node_modules/@lumis-sh/themes/dist/themes/github_light.js": "7f6f3b67226ba9aeef2c9499febfda5115fb29846e9abd76547c4763d053e46f",
+    "node_modules/@lumis-sh/themes/dist/themes/gruber_darker.js": "29201450ece1892bf5d57f33dfdeaddbc606c741428f232f495601f4570606b5",
+    "node_modules/@lumis-sh/themes/dist/themes/gruvbox_baby.js": "4853aab6446492c93687f1a15bb926daf82fc70fd0bd0316e6a542fd15d76e99",
+    "node_modules/@lumis-sh/themes/dist/themes/gruvbox_dark_hard.js": "03e13cd4b8f5d886e585fa1d288fefe06e5322db96d633c9d41183a96c0201a9",
+    "node_modules/@lumis-sh/themes/dist/themes/gruvbox_dark_soft.js": "d5fe53ab1e8b78cbecb4c54bdf76b193720ff54d3992b825e9435c2d5ed90190",
+    "node_modules/@lumis-sh/themes/dist/themes/gruvbox_dark.js": "a8bc9622c6d41d9e36ab486fc143cfa8a507c9147b1a4feed01de105b4024c5b",
+    "node_modules/@lumis-sh/themes/dist/themes/gruvbox_light_hard.js": "df2e9873400b1bc33a8230fc1629fc54e77a49bd3c14bc2af35b5faf00e0e7d9",
+    "node_modules/@lumis-sh/themes/dist/themes/gruvbox_light_soft.js": "9aa196acd6694c5ccfd2d65fb9f8ef5b549d980c366970e41e2c2b49439a5c2d",
+    "node_modules/@lumis-sh/themes/dist/themes/gruvbox_light.js": "db13e4a6b2c607b43c5d5a782f68a45ed2b97125fae98828ba8fa50e0ada9cec",
+    "node_modules/@lumis-sh/themes/dist/themes/gruvbox_material_dark.js": "58479701d2390d06f0443b0763717901dc36812acb00e6781256d2b416ba29d9",
+    "node_modules/@lumis-sh/themes/dist/themes/gruvbox_material_light.js": "aeed0b628330a5337ad071f583fa23c1e7ee06c0342a1ee9330575d618d220d9",
+    "node_modules/@lumis-sh/themes/dist/themes/horizon_dark.js": "c846c58560b87a32435044d9e23c622a2cb2c36cc57ac6863e2f894766f4e712",
+    "node_modules/@lumis-sh/themes/dist/themes/horizon_light.js": "83d62014a06d9fc03ba16a92eaf7c443f888573f25efd45730691d6d91ba461f",
+    "node_modules/@lumis-sh/themes/dist/themes/hybrid.js": "ec9dc391ca4837356ba659ecfc1288dfa1ce6677bf964ed522727a2a517d1bd0",
+    "node_modules/@lumis-sh/themes/dist/themes/iceberg.js": "feb8f58950f4a07d376df2ecb31bb0ec968b57b1cda854d3793b22bf01b9df90",
+    "node_modules/@lumis-sh/themes/dist/themes/jellybeans.js": "e692c9a726da1158997e490e06beef2f5ece3f5e3ab7f9f26a291db72c18173d",
+    "node_modules/@lumis-sh/themes/dist/themes/kanagawa_dragon.js": "e6916c1bb08753ea5556d840525086bc1dcbb0408819d8e75cf476a7317e9fad",
+    "node_modules/@lumis-sh/themes/dist/themes/kanagawa_lotus.js": "fdf4370e7ebed810539b34d02d114d55d7572fd80d912e03ade2cd003a4258b0",
+    "node_modules/@lumis-sh/themes/dist/themes/kanagawa_paper_dark.js": "7102161b194ed1da5a31ba61034611546df9c23e37c7ada9c2c4a1ce637b8faa",
+    "node_modules/@lumis-sh/themes/dist/themes/kanagawa_paper_light.js": "6402759194fc9eafcb8c241dd433d064b06912ab54555048ef09e535c9f3be7a",
+    "node_modules/@lumis-sh/themes/dist/themes/kanagawa_wave.js": "b35e164ad889473520a61deddc77d180b84ad4637eca4ebc3f07fbf347c5e828",
+    "node_modules/@lumis-sh/themes/dist/themes/kanagawabones.js": "f36c2be87f4957d7be4c06116f6c19a852eddd093081d4c3b1c28adbccddce0b",
+    "node_modules/@lumis-sh/themes/dist/themes/lackluster_hack.js": "1a76facce3ed5a6f5d5b473a730b6da07a61f860e34156367260c283951a10e5",
+    "node_modules/@lumis-sh/themes/dist/themes/lackluster_mint.js": "7df66f31bba36266dd6f779395bd3ae100b4e46c92eac84c6a15322837e8271d",
+    "node_modules/@lumis-sh/themes/dist/themes/lackluster.js": "c9a2698cd25bc5c339c368c295c3515f5d43a1c2fc6bb36e4987d53f7ccdcdf7",
+    "node_modules/@lumis-sh/themes/dist/themes/matte_black.js": "733dbc22505a0bc03ba2294940f2a97d2ef32dc54ab9aaadc13fdf8e5bdf3213",
+    "node_modules/@lumis-sh/themes/dist/themes/melange_dark.js": "5866cb7e80e5f9efe2830d50574722565456affa82ce0a72bfb66c8581946086",
+    "node_modules/@lumis-sh/themes/dist/themes/melange_light.js": "cf6cbc052844f00effaf280be144648117f19f431290212ed00fca70e4bc133f",
+    "node_modules/@lumis-sh/themes/dist/themes/mellifluous_alduin.js": "824815a20a54447a61980d9cc2fe6be55d9aef57daea50ce1cc2e1f9b7c0576b",
+    "node_modules/@lumis-sh/themes/dist/themes/mellifluous_dark.js": "85c5a157a6569cdccaae071554a67be5381501549a68ec4355eec9bce49c25ff",
+    "node_modules/@lumis-sh/themes/dist/themes/mellifluous_kanagawa_dragon.js": "9053c9a04f75d9561d7de01105056cb5557f78f637ac7d3783c0a46134d4e1f3",
+    "node_modules/@lumis-sh/themes/dist/themes/mellifluous_light.js": "23588931cdfb1d1e9dc5318fc23feebc47084ecbd31efcef312e1f20dc8b5ab1",
+    "node_modules/@lumis-sh/themes/dist/themes/mellifluous_mountain.js": "6f3b2dd100ccbe8b12124b0263c0151f25a0b1fd5a7591bff094a207e3acaea4",
+    "node_modules/@lumis-sh/themes/dist/themes/mellifluous_tender.js": "8047f670f1c13fac5aad1c9b7a9526c22913af66f62c00fa50ae8394fa3a9f2f",
+    "node_modules/@lumis-sh/themes/dist/themes/mellow.js": "923d24b23f167092a9eab018b51935a3bb9f262f32f5b2bbdfed2f52e9096874",
+    "node_modules/@lumis-sh/themes/dist/themes/mfd_amber.js": "aaaeb4bfb10e37e65a35dfbb9081f04ab8ed5a7911fc01750edc19eed5db5514",
+    "node_modules/@lumis-sh/themes/dist/themes/mfd_blackout.js": "d3af5a4030217bb320db185b370e7536e642f682b1f0e5b5fb6d60d91da327d2",
+    "node_modules/@lumis-sh/themes/dist/themes/mfd_dark.js": "68fe0025d3be3eeee567f0c10a0ef967a111e79ab15c6039fc4d453c6360618e",
+    "node_modules/@lumis-sh/themes/dist/themes/mfd_default.js": "8c042a9be819eee8197a60edcf4bc4af58b9bf4c2e2bb42ab7fc93969c0a5af1",
+    "node_modules/@lumis-sh/themes/dist/themes/mfd_flir_bh.js": "51922c54d8638d3edbd7d5f6ff340adcc75c425382a89f361073c803179d5c50",
+    "node_modules/@lumis-sh/themes/dist/themes/mfd_flir_fusion.js": "276afe25e85b16eb16e7bad8b5ca7a510bbc848e3099da2d72f8400d8872297d",
+    "node_modules/@lumis-sh/themes/dist/themes/mfd_flir_rh.js": "4f9cce5ef3474dee383813f128297c17241acfc009d9f673ad495367f223c800",
+    "node_modules/@lumis-sh/themes/dist/themes/mfd_flir.js": "d110dd61dcda3196e9c97d24d5d248c112bfd73662a630b893f8a2a6fdc1eb9c",
+    "node_modules/@lumis-sh/themes/dist/themes/mfd_gbl_dark.js": "be7c308332733e0fd602900c7f01439ceeae4b983937a348bd84ee5d856910ef",
+    "node_modules/@lumis-sh/themes/dist/themes/mfd_gbl_light.js": "27a7ca6ca52afac5aae57d4a9958d8f562664a6a05416870d1e5b3b9ddea5021",
+    "node_modules/@lumis-sh/themes/dist/themes/mfd_hud.js": "4c3a8c17948e7169e9644d578fb4067c5a4693179b479c9dd2f131cf7a90fbd1",
+    "node_modules/@lumis-sh/themes/dist/themes/mfd_lumon.js": "9e38f329f1643ad7b568ac348ff1f12c87725ace46989cef6f29cccd4e03254f",
+    "node_modules/@lumis-sh/themes/dist/themes/mfd_mono.js": "f230edc330cd4ea43f2afbf561528550335f55661c47348ddda1824b1c854d83",
+    "node_modules/@lumis-sh/themes/dist/themes/mfd_nvg.js": "2a4dd32287b2cc487b9461c77452df9e6282ca2cd6bd9635cac9a91d8e0c8082",
+    "node_modules/@lumis-sh/themes/dist/themes/mfd_paper.js": "7f4aeb86aa265997e585fb3dcf4f58cbe3dbf4998e529e1ab5f285b051199452",
+    "node_modules/@lumis-sh/themes/dist/themes/mfd_scarlet.js": "febd7cd14c5e08e47d8684f8aaa712e8a347beef1b22472caf9e05b5cc80d396",
+    "node_modules/@lumis-sh/themes/dist/themes/mfd_stealth.js": "bbcf1b0ab38a329583a279b9dd9881b97f4012105b314f946720ea5e57d0c8b6",
+    "node_modules/@lumis-sh/themes/dist/themes/miasma.js": "a9553091ba97ff3bce9bce68d8fc79591303f974be07238ef2f79e4d051ac546",
+    "node_modules/@lumis-sh/themes/dist/themes/midnight.js": "e2893884e61c3832e5ee75cc2321fec06575e49a20eac56039ad09726232233c",
+    "node_modules/@lumis-sh/themes/dist/themes/molokai.js": "a81699afc6203c37475b851f532a67a4a793109415c4a6149cfd6a208ab45084",
+    "node_modules/@lumis-sh/themes/dist/themes/monokai_nightasty_dark.js": "c8e414b1724fce63010176976653448dc84ab83dc4790a58048d1ba53185d34d",
+    "node_modules/@lumis-sh/themes/dist/themes/monokai_nightasty_light.js": "671de45a88889351c421b90475e836fbb46eb90a27620980a5a25bc97a212afa",
+    "node_modules/@lumis-sh/themes/dist/themes/monokai_pro_dark.js": "87b7bb5deaa87f83138abadd01374ff7a20474fc402b5b04154c6bbe6d404ed9",
+    "node_modules/@lumis-sh/themes/dist/themes/monokai_pro_machine.js": "6ad1a805d1b1e2791984be4c484b4ec2d2433b412ec6f800895010224c675481",
+    "node_modules/@lumis-sh/themes/dist/themes/monokai_pro_ristretto.js": "636a52c953db4236e4030094b5bbdad2ae44b793c50e51ea708db0c10495f9d9",
+    "node_modules/@lumis-sh/themes/dist/themes/monokai_pro_spectrum.js": "86ca7e217b43b1a8367e617ad9ac69be96e1179b4bea440ca4e91d3b6789abb0",
+    "node_modules/@lumis-sh/themes/dist/themes/monokai_pro.js": "b7f04abc24d4324096207a09c16c90760efc535a5db8093216a37cd61ed16f23",
+    "node_modules/@lumis-sh/themes/dist/themes/monokai_soda.js": "38b97a3524610e4965ddb436035b1a84e557e3757c9f38b719c934b5487982ff",
+    "node_modules/@lumis-sh/themes/dist/themes/monokai.js": "84383b2822babe53b1aa66b795b6ac8cda76f462df7f7ffbf3bc28a9b3efc0ad",
+    "node_modules/@lumis-sh/themes/dist/themes/moonfly.js": "307e6a09f76f2fb26b26c14af3d02829e9b93855ffdcfa7d95aa295f0cc5d8b6",
+    "node_modules/@lumis-sh/themes/dist/themes/neobones_dark.js": "46700aeebd3ec7938a1e60a2529e3ed53a78502faa93224bd4407c21b957f7b0",
+    "node_modules/@lumis-sh/themes/dist/themes/neobones_light.js": "bb0fb394fb9062706edf767dc5fc5ca366d3098a33acda324c660869e564c138",
+    "node_modules/@lumis-sh/themes/dist/themes/neofusion.js": "aaa9a51cb6dcf5a8b0311a1cc1a6de3f2508e630f8c145f35a11f11099239a44",
+    "node_modules/@lumis-sh/themes/dist/themes/neomodern_gyokuro_dark.js": "0fa485f6a3dfb3e6495919de6997bb45ededdc09def017507c919a6b00cc1e1f",
+    "node_modules/@lumis-sh/themes/dist/themes/neomodern_gyokuro_light.js": "9759c5a083f5f6ad280f40773f4b9848bf17adb61e1f99135276976ebcfb3d49",
+    "node_modules/@lumis-sh/themes/dist/themes/neomodern_hojicha_dark.js": "bc6d2e8df19e87eb97f07e5bf6ec679fe9d36250410e9a1ed2af028375833a1b",
+    "node_modules/@lumis-sh/themes/dist/themes/neomodern_hojicha_light.js": "a78b5e83e56989f2774cdfd02818c21c8704ece910479bb6ea1ea0aced8d29bf",
+    "node_modules/@lumis-sh/themes/dist/themes/neomodern_iceclimber_dark.js": "e44fbfda66fcad835d4f2b1c536a5cb302fdaabb63f83c938fe649c8239b3df8",
+    "node_modules/@lumis-sh/themes/dist/themes/neomodern_iceclimber_light.js": "866273c2d9ba03c984cbdef86fc84f76c7614cd6bbb40f147eb31728fcb03148",
+    "node_modules/@lumis-sh/themes/dist/themes/neomodern_moon_dark.js": "eff9dd256bbcc5117deffb3ac718ad6ae3c148c63f20374e3c1d7a5c93121e17",
+    "node_modules/@lumis-sh/themes/dist/themes/neomodern_moon_light.js": "12b301bfb6f83389fbdb10568e34089379d90cf5e711cbf0d8503e4afb7472a2",
+    "node_modules/@lumis-sh/themes/dist/themes/neomodern_roseprime_dark.js": "3c959433d772b58b43457e408f4ae9a2cf9d916785005dc769bd5ca8c8bafada",
+    "node_modules/@lumis-sh/themes/dist/themes/neomodern_roseprime_light.js": "e5b3cca247fa884e9a606b366df9c56e5615c0ca5b408d49462072a3197c9112",
+    "node_modules/@lumis-sh/themes/dist/themes/neosolarized.js": "e2e1f95f6a8ee6dcc37f52bd37f9f5967e788ddec15e5408f17f69f6e05ee532",
+    "node_modules/@lumis-sh/themes/dist/themes/neosolarized2_dark.js": "f2ef92af138c128ef012634c786909acb84d75ee8681605149fbbe6870318400",
+    "node_modules/@lumis-sh/themes/dist/themes/neosolarized2_light.js": "ba8593dc92a575b3c11ecb336199f0c1a0775273fa0a1803add1fa360291879d",
+    "node_modules/@lumis-sh/themes/dist/themes/neovim_dark.js": "b5f651acbc4bdaa46dc4e2564886b2cec6d1c3169c6cceb698496e440efb1787",
+    "node_modules/@lumis-sh/themes/dist/themes/neovim_light.js": "0f8bc3a732126c75361706ac2c6107a4d39c400e37cf98cac425b05ede91786f",
+    "node_modules/@lumis-sh/themes/dist/themes/night_owl.js": "3c40762c96cbb24fad3e0e49cfed5dde9abc22c8f0155279b3f0e9540de188f1",
+    "node_modules/@lumis-sh/themes/dist/themes/nightfly.js": "4b346f7424a367625334fb22d1d21f71d38f7e5de13c00430394c2ca39fe00ad",
+    "node_modules/@lumis-sh/themes/dist/themes/nightfox.js": "7e7f28b500a1d833bd6c43c00b61810ec1489c4db463769e40a7a9883ab51e38",
+    "node_modules/@lumis-sh/themes/dist/themes/nord.js": "05076edc098aedf9732497d3ef27a2a94e9795f4cab721733fba38f1fa1e243d",
+    "node_modules/@lumis-sh/themes/dist/themes/nordbones.js": "163eef8f44d5b789396dbe4e6ccb27be62190c68f45afb87c8f0b9f5db92a681",
+    "node_modules/@lumis-sh/themes/dist/themes/nordern.js": "cc562bb93dcefa42eae92a20afd607e9f25b0466ed5a714388125aecf8b1e9eb",
+    "node_modules/@lumis-sh/themes/dist/themes/nordfox.js": "61de8bb3920e525f9ea007b119637c1ba25aafbec801d99ca7238ee170871ce5",
+    "node_modules/@lumis-sh/themes/dist/themes/nordic.js": "42fcc4db79990d332abf51560b15fbda6dd26f4adbb7ce0ac6185c53f2107eb7",
+    "node_modules/@lumis-sh/themes/dist/themes/obscure.js": "5bbb8d113dc50e4809e534047dba3296fb1a2f0752d29b3271f459c7042ebbf9",
+    "node_modules/@lumis-sh/themes/dist/themes/oceanic_next.js": "e30afee28ee634ecfa1676f557be2cda2ebef6c5d90ffe34ef4f10c6c6f9ccaa",
+    "node_modules/@lumis-sh/themes/dist/themes/ofirkai.js": "fda820a8673b60a04db6a82a5c72c6a64a2e611e87c963d72b3126f020fa9a03",
+    "node_modules/@lumis-sh/themes/dist/themes/oldworld_cooler.js": "c29d4fe81485ee03cb40e7465d8faabc295bcddd036a2b2e0d67086d66aad0d7",
+    "node_modules/@lumis-sh/themes/dist/themes/oldworld_oled.js": "13044f62799969a950ece2d0c4d4fde087f57986d5d978ef479fa2c567054c0b",
+    "node_modules/@lumis-sh/themes/dist/themes/oldworld.js": "df4563007439ddafeff3f4c241a4a27b90a9a3cef0ec4322b20ba220ac6cb25a",
+    "node_modules/@lumis-sh/themes/dist/themes/one_monokai.js": "9c11af7378319db67a49e6259cfcb0669e87bc6fa40a46443370e089d5140819",
+    "node_modules/@lumis-sh/themes/dist/themes/onedark_cool.js": "97dedbe022e7c514e9922e089ed6e1ca6ca5296b14a29893ef0320fe1e7a0a4f",
+    "node_modules/@lumis-sh/themes/dist/themes/onedark_darker.js": "0849527202db217cd486009239fdba19653e8fa321ddcf3fc5093e24d23eeeb1",
+    "node_modules/@lumis-sh/themes/dist/themes/onedark_deep.js": "973f6b30a6be9cef20046bc024c4f56836575e324a557a225ed9a26c708edcd2",
+    "node_modules/@lumis-sh/themes/dist/themes/onedark_light.js": "31e0a8ff9bd5a5ab9486264771714ff3ed01a0c55ff49eb37e6cce7769a4bb67",
+    "node_modules/@lumis-sh/themes/dist/themes/onedark_warm.js": "e0f0f678ee89b8d00f4801eee46fa2de9682132b0d8963ab6c9856b6b9fb442f",
+    "node_modules/@lumis-sh/themes/dist/themes/onedark_warmer.js": "62494c920bd27287a364aaeb25e4ea73ad1fa985704aa9541839c54314bc5971",
+    "node_modules/@lumis-sh/themes/dist/themes/onedark.js": "fc3dad5c2ad1a86bf2f1e7c520976a767433213ea3c7c3f0df24dfee8d79a3b7",
+    "node_modules/@lumis-sh/themes/dist/themes/onedarkpro_dark.js": "ebd34f97ee88d45c3289e28fbc4ba15dd4c84cf6202fd30b391e4783ecb89575",
+    "node_modules/@lumis-sh/themes/dist/themes/onedarkpro_vivid.js": "c55a44dc39e8a3e0b34fa91306fc6b058434b66de310aa0f8d73029d2ad3a7fc",
+    "node_modules/@lumis-sh/themes/dist/themes/onelight.js": "849c60e6f598660b99b796efc6279786455bcb5056182f539d75aa250d80ce51",
+    "node_modules/@lumis-sh/themes/dist/themes/onenord_dark.js": "6b2d699ed22905dfa3a07bf187865391258946d1e059b024eb61e76557817bbe",
+    "node_modules/@lumis-sh/themes/dist/themes/onenord_light.js": "7994d82507a07740974350fe6df69cef5fedf38520deb196a6e16ea1016d268f",
+    "node_modules/@lumis-sh/themes/dist/themes/oxocarbon_dark.js": "d320ea2df46f446af840e25aeb6297aa27410459ecc9f4320e6effd1c06ae29d",
+    "node_modules/@lumis-sh/themes/dist/themes/oxocarbon_light.js": "416ae80eb5036813a54ae66220e870b42fc5a6fa2e4d80a9f017419e5b7a1aae",
+    "node_modules/@lumis-sh/themes/dist/themes/palenightfall.js": "c3acc2376fd709ca1f9d158801dd816b77a902cf951cc3d394366c8e41b645a8",
+    "node_modules/@lumis-sh/themes/dist/themes/papercolor_dark.js": "39e586e0e9ca11aa73036f539e66185ed1e4190c2b13b8b92765acb34be7ab46",
+    "node_modules/@lumis-sh/themes/dist/themes/papercolor_light.js": "f408163f05687efb416342e02257b022cf1a0eb10d10ba8cb63512ca434ab678",
+    "node_modules/@lumis-sh/themes/dist/themes/rosebones_dark.js": "c0e5b4db40a650bfbebd0187b9f6a0dee0a359e2b85dc62c89e32d0d163ab81c",
+    "node_modules/@lumis-sh/themes/dist/themes/rosebones_light.js": "a5c1b324b39e4f4ef6d9f84da63ecdf4234dcea83b3d11c3a636bdf617b11ce1",
+    "node_modules/@lumis-sh/themes/dist/themes/rosepine_dark.js": "45c59e2b056f481c99a140d4d6fb307efe06552520afc81adf1cfc6b27b632bb",
+    "node_modules/@lumis-sh/themes/dist/themes/rosepine_dawn.js": "6b8558b882d3b9d63fe162756751bbf221da87cb15f118f3c4e678d9ea5564cd",
+    "node_modules/@lumis-sh/themes/dist/themes/rosepine_moon.js": "33c84a08b6ff4648b1fa8c199a03e6fa9ba1fd456e11312bb30f497e9037898b",
+    "node_modules/@lumis-sh/themes/dist/themes/seoulbones_dark.js": "5350b3abc45cb989a25e0324af87024d86b05dba03a6da8d3457e9609b3b33d9",
+    "node_modules/@lumis-sh/themes/dist/themes/seoulbones_light.js": "07dd3e919af415e52ef454dc3c520f1c9dfa4fc29928981a198c350ff6a9df19",
+    "node_modules/@lumis-sh/themes/dist/themes/solarized_autumn_dark.js": "1b8225314326c4724ac35bf5aa9a5fc7c9e2a0332d49a1cb198ca3285b8e5c79",
+    "node_modules/@lumis-sh/themes/dist/themes/solarized_autumn_light.js": "d1bda5ca9d39572164eb86430ae6a27626e75d2c58c23015bacc8236e7f3c08e",
+    "node_modules/@lumis-sh/themes/dist/themes/solarized_osaka_dark.js": "d02681be6d62d6d0fb4a4227c9fd447fc2ca76ec3cb89248a2699f07d6fc2f27",
+    "node_modules/@lumis-sh/themes/dist/themes/solarized_osaka_light.js": "7d0aa0b8b6686c282d47c5d5087e27fe83c75033d94dbf4eb2109bec69d9e06d",
+    "node_modules/@lumis-sh/themes/dist/themes/solarized_spring_dark.js": "38086224d5a4ff035770b2f2b781cd4ad866dde5ed3c822fa060689933263105",
+    "node_modules/@lumis-sh/themes/dist/themes/solarized_spring_light.js": "064f9ff7a8e60874ad6c862e624147fdb090c223cd927db2767a068be81612c2",
+    "node_modules/@lumis-sh/themes/dist/themes/solarized_summer_dark.js": "ea32a5a8f4cccf874f4418d0c4a54bb49ddf3aeb6f763db479fc0e89d62fb1df",
+    "node_modules/@lumis-sh/themes/dist/themes/solarized_summer_light.js": "0b8f87c1f8ab4219c93908479532f74dedf9edf15b750451e4a51b6762700861",
+    "node_modules/@lumis-sh/themes/dist/themes/solarized_winter_dark.js": "dedf1b6cec01d56b57109cfe0ad858c3017242a6d7d7f9406edfc520a6c2d407",
+    "node_modules/@lumis-sh/themes/dist/themes/solarized_winter_light.js": "bf720a6183350ef054e49f884a9ca5555f26cee5af66c8ec5208d1b47e5be126",
+    "node_modules/@lumis-sh/themes/dist/themes/sonokai_andromeda.js": "a8c396fc66f7b21d311bd0e6b09d2f20ebdcadfdf2d7e99cc8580c37fd5a45b2",
+    "node_modules/@lumis-sh/themes/dist/themes/sonokai_atlantis.js": "a6ab2d1379c473da70586ad28909d701d54e24e61ba6cd9c17e2680f175195ab",
+    "node_modules/@lumis-sh/themes/dist/themes/sonokai_default.js": "50fb078bb53c0d0a055f0b173a443fd43e948847f50b62537d6d99388d4460b5",
+    "node_modules/@lumis-sh/themes/dist/themes/sonokai_espresso.js": "20736f3f979a1b876f5c1c5269fa872b964098d0fbec401633d89fc61f5f8030",
+    "node_modules/@lumis-sh/themes/dist/themes/sonokai_maia.js": "b50c7b103b5d3e8aea7b5640abf3ef7064fa1978df03540c3740cd2c0b6d61a2",
+    "node_modules/@lumis-sh/themes/dist/themes/sonokai_shusia.js": "4bb6282bf1b80d82a851a9007c8d90251f5e3e58a6702470b8d9e0c3ecbcef48",
+    "node_modules/@lumis-sh/themes/dist/themes/srcery.js": "2f7373d96e92062ac1cb8a053a6ea2fada60d81994ec8202355d91f08cd404a0",
+    "node_modules/@lumis-sh/themes/dist/themes/synthweave_aqua.js": "75cffd7502d0c9741d36455cfc09696a20da1dd6108574b831890ac809ca8e81",
+    "node_modules/@lumis-sh/themes/dist/themes/synthweave.js": "594d98b6310ebdccee1568974e54cb85a656392a1b1ffee5fcea9e06894e1f32",
+    "node_modules/@lumis-sh/themes/dist/themes/terafox.js": "e636d72de5aca6f3a936153e4196aba4a5e569453163f1a1a21e107514109025",
+    "node_modules/@lumis-sh/themes/dist/themes/token_dark.js": "6f277ddf97dc3a58f22775a5e0f11ac41bae5c364dea8d8f4482f4edeb0cda48",
+    "node_modules/@lumis-sh/themes/dist/themes/token_flint_dark.js": "fc007e3a612a23d79e041a320e63eace4435d135646a5354f397c66207e7f2fd",
+    "node_modules/@lumis-sh/themes/dist/themes/token_flint_light.js": "bfc038b85425e81199de9450db20f85351e771a57943d81a3e475f08434a23b4",
+    "node_modules/@lumis-sh/themes/dist/themes/token_light.js": "d4828e8ba191560c1d2c686ddfaf0eefa6dc20137fcbf1868dcb6861722b9386",
+    "node_modules/@lumis-sh/themes/dist/themes/token_meridian_dark.js": "d96dbbbc57f3987e7df08445cd2d7b1559c9cea75517f23fc244840fd47e0abd",
+    "node_modules/@lumis-sh/themes/dist/themes/token_meridian_light.js": "9b0b61ede5e0bf15502de8ed2d4a62aed6de58a70a0c8d0b7dacec23dcd73223",
+    "node_modules/@lumis-sh/themes/dist/themes/token_temper_dark.js": "06094fa347c1576d2ab2fd37b0a89985f98a646f7415b99ffbf22e7200c7d89c",
+    "node_modules/@lumis-sh/themes/dist/themes/token_temper_light.js": "bef9c654e63a7d8a4773ab40998055a2e258cab531c7c8e2f57b9ed18960f386",
+    "node_modules/@lumis-sh/themes/dist/themes/token_ultra_dark.js": "10df626574a4675a12e2b9b2def11ab5f60a4af1188f9cbce91f0965196c8ebf",
+    "node_modules/@lumis-sh/themes/dist/themes/token_ultra_light.js": "0ea843951db2bace286dbbd84239bd155d42a582021427043c499238aa8d1097",
+    "node_modules/@lumis-sh/themes/dist/themes/tokyobones_dark.js": "740aa61024cdf110bab94ee86bb27e02a0ee698f0ca5f062e4b0c126d05ebf67",
+    "node_modules/@lumis-sh/themes/dist/themes/tokyobones_light.js": "142552d23b079d8ac68160927855d950b7f139c72c6caf8d838a57819e6db99a",
+    "node_modules/@lumis-sh/themes/dist/themes/tokyonight_day.js": "36776029b9183113b626347a298f78b34d17b88fa78c7790de2162d1ce1d4b05",
+    "node_modules/@lumis-sh/themes/dist/themes/tokyonight_moon.js": "707aca84f7fcbd019c6dcafe35925c7825c6a12c519b25c1bd3f0d83108462b1",
+    "node_modules/@lumis-sh/themes/dist/themes/tokyonight_night.js": "837be96e96327412f6118eec05c9fcce59cd75227c8f5ff22b4a3fdd200c87ac",
+    "node_modules/@lumis-sh/themes/dist/themes/tokyonight_storm.js": "de2856804a1c3e37d852372fbf36a3172efb436c40c871146cba2e5a73f6646d",
+    "node_modules/@lumis-sh/themes/dist/themes/vague.js": "04498e60af0b29c1beb2fe218d35286bd58efbb1ca83e903310c469c83866053",
+    "node_modules/@lumis-sh/themes/dist/themes/vesper.js": "7259b14cda073da2d18337908ec90015fb7e32968243682c9a797f819e59be7a",
+    "node_modules/@lumis-sh/themes/dist/themes/vimbones.js": "10f8b400b81ec987b06183d91aaa3375fc4c077d4f5aad78f5ec602fdd9f2dc4",
+    "node_modules/@lumis-sh/themes/dist/themes/vscode_dark.js": "b2075c879ba054e2bf1209a7d24bd14688a77613f93783ce964f960ea714da65",
+    "node_modules/@lumis-sh/themes/dist/themes/vscode_light.js": "795479d765e2e17dd379933221dce0260b423ef2ed07a29502425dd785e572a6",
+    "node_modules/@lumis-sh/themes/dist/themes/xcode_dark_hc.js": "53fc526329cfef6645cd7c42dc58929a706e39a0b125bd79733a10415627ae27",
+    "node_modules/@lumis-sh/themes/dist/themes/xcode_dark.js": "07834c87c8ad6d4a6594a5dde20098ae5561a9955487cda9a75c938294a3c1f1",
+    "node_modules/@lumis-sh/themes/dist/themes/xcode_light_hc.js": "effa1607e1c56c2b649058e3fe22bbd8b02f843a5d5979ad8843e947e0b95a14",
+    "node_modules/@lumis-sh/themes/dist/themes/xcode_light.js": "83bc489e8bca7ec89f98e38cf6e4e067474be189f849cbe320e968ff387bee1b",
+    "node_modules/@lumis-sh/themes/dist/themes/xcode_wwdc.js": "e238df82ee8492a64e70bfe69cf8191ccc773b2a08e429dab1006b6f594473a8",
+    "node_modules/@lumis-sh/themes/dist/themes/zenbones_dark.js": "29e6cbd9dc15ee835ee488de04c69b55c9ee5d7922f8d4d98ff3c4f016bfbe78",
+    "node_modules/@lumis-sh/themes/dist/themes/zenbones_light.js": "a429baf91cfeb3d038fefae442dbbbec3a76f7715ebc7df588d891b13c0270fe",
+    "node_modules/@lumis-sh/themes/dist/themes/zenburn.js": "61901ce922db8054623a885437dfcc37e3f379f5e133bc0b317ed6883d22d692",
+    "node_modules/@lumis-sh/themes/dist/themes/zenburned.js": "e9170a2c4ce2d8579c153305208dff9bf7ad008856b7158d468065942818f063",
+    "node_modules/@lumis-sh/themes/dist/themes/zenwritten_dark.js": "891b17ffb4d8d33465782e14dd12035bcdbd2314e9ef3aa2d465588d90c850de",
+    "node_modules/@lumis-sh/themes/dist/themes/zenwritten_light.js": "42f9ca08f64a792de5f0ffad0d6556b59286c14c4ef10696e2cde8c308f29a3c",
+    "node_modules/@lumis-sh/themes/dist/themes/zephyr_dark.js": "73f96f585e3ef8c132eff48055d15ac62ecaa13685084e90e8678d1f2c533c3e",
     "node_modules/@noble/hashes/_md.js": "60cf3010fda89e3e4d3f0e7ff1ce249e9c467f34b4fd41b6fd6101d9f69be763",
     "node_modules/@noble/hashes/_u64.js": "b09da8c07fe8187c07649494cdb7cd0bcf13df90b506a9473d19e4d5f8c2e102",
     "node_modules/@noble/hashes/sha2.js": "471746bba6ec4c6238ca41358d1d3b40b6ff31cf3363f0b4d550c649c1a8e83b",
@@ -413,6 +415,10 @@
     "bash-MXJTSKDX-CF0LShUG.js": {
       "bytes": 564,
       "sha256": "fedfd8c3098fe98b3a2c50adc7521046be48cf4c2769301ddd0c196dd18468cc"
+    },
+    "bend-NQZQDA72-1-xNMUyE.js": {
+      "bytes": 497,
+      "sha256": "99a3fae12231adbc26c40d69d602063209d394f17602bae36545573ada252709"
     },
     "bicep-XDY2JSS5-BSiBFaqB.js": {
       "bytes": 506,
@@ -638,6 +644,10 @@
       "bytes": 511,
       "sha256": "cfb171ab76330d3f225582d6acdb384764177775f469cd7954e80bfe3d82f510"
     },
+    "lean-B2AVNWI2-CoNDhGwT.js": {
+      "bytes": 504,
+      "sha256": "ba702ff77bdd0fdfb1bc95c1cea76498dd920d746425f6d7e3163aa011143d03"
+    },
     "liquid-TJLPRR6J-q9gKprdi.js": {
       "bytes": 515,
       "sha256": "c5e2d8958491cce288e733ac2a62d0d48bdbbdd54a2fe40f7400756306796d6f"
@@ -655,8 +665,8 @@
       "sha256": "3ffb05036a0e99ad76ff3e2c2866e5acb3e07e2953b1f34ebcceb85ca1a6fd47"
     },
     "lumis.js": {
-      "bytes": 573981,
-      "sha256": "82a987b1ef4ddeb7acb1d02b03db64568247991366520cfaaac497eb849aeff2"
+      "bytes": 576747,
+      "sha256": "29a7dd0b3f5429c62905a28ac74fb8678f82d010170d10a8f8cfea916d43d237"
     },
     "make-HCOPZBEJ-oMPteOVU.js": {
       "bytes": 497,
@@ -827,928 +837,928 @@
       "sha256": "7de2f64234e2526d0b55b8d1a80a2600dbe34b81bbe3d4de6ac805548892b0c6"
     },
     "themes/adwaita_dark.js": {
-      "bytes": 5137,
-      "sha256": "9806a394b01c4ae2e7618fddddd5d28cb88b338bc9f72f9eaa9cca5952349472"
+      "bytes": 5195,
+      "sha256": "43fc88512bdd47617e2e7dd9801f84454e628aeac4c108e0391d5995ce82d6cb"
     },
     "themes/adwaita_light.js": {
-      "bytes": 5115,
-      "sha256": "113dcc56dd71c2a69384cbf815cb1a06cd5c5059042f5a760b5b615f292f87ea"
+      "bytes": 5173,
+      "sha256": "68fc9222f80705180ce15e63fbb5d85ece98d54c6224083e83675b78e0a47a8a"
     },
     "themes/arctic.js": {
-      "bytes": 4703,
-      "sha256": "fe481906214a9bdbca1a4fe0b8faac03f3c864b6e68914b2b6348476c9013b5d"
+      "bytes": 4761,
+      "sha256": "1da3526b2f7d5ff45f81b27d22de036b471ec8fdabacb36feea0f02e32cd667c"
     },
     "themes/aura_dark.js": {
-      "bytes": 4690,
-      "sha256": "be264d44e0233a957306ff39ead350f61e922adc9b4982e9c8a7bb890e1809ae"
+      "bytes": 4748,
+      "sha256": "5815b155f4e16eb8e1ad48c34a218778cb61d3866542e619ddfa44a5355173a3"
     },
     "themes/aura_dark_soft_text.js": {
-      "bytes": 4730,
-      "sha256": "cfebda82d3d588f571f2bd13ff556d58e41d87b5b8c2eaeba4d064588b95b887"
+      "bytes": 4788,
+      "sha256": "3d491cb146ec4f324437e580e668c8eb9aba7f5f157ce5c986b3bf17d9b9257c"
     },
     "themes/aura_soft_dark.js": {
-      "bytes": 4710,
-      "sha256": "7c4f22c87efaeb627e8c4168322f1e50dd204982cbe3f22d2a792e1b3b986eb4"
+      "bytes": 4768,
+      "sha256": "2f03b1c40793031ba5683a83111dfc1d421a60a2d6daf1cdfb3c331e4d98450c"
     },
     "themes/aura_soft_dark_soft_text.js": {
-      "bytes": 4750,
-      "sha256": "e545a17459c9ea5c6484e7b5c5dd3f662faa6c178aa85d569d4e0845d089ab39"
+      "bytes": 4808,
+      "sha256": "87bebcbc70dcc3d3de2ebf450003bac5f66c8554e0131afa9a1c3c46c8a1dd07"
     },
     "themes/aurora.js": {
-      "bytes": 4992,
-      "sha256": "7d7e4c2444fb5ae988e09ec638cef3f3c0ce923ecaa49e03076e6719e4d027d4"
+      "bytes": 5050,
+      "sha256": "b4a578a597ebe49079598e80a50beae9334ada49d148057c00704dcb95cad560"
     },
     "themes/bamboo_light.js": {
-      "bytes": 5714,
-      "sha256": "2a5b979895c13e527a9fe53bcb32dfa8707f3477bc806abe8b11e6115ce764f6"
+      "bytes": 5772,
+      "sha256": "b5a4304eeabc08ec41e430181f8ed93a192f052a9540c7781570731eb9751533"
     },
     "themes/bamboo_multiplex.js": {
-      "bytes": 5729,
-      "sha256": "b3023c976a6a7ac43bf357d30d4db1a9779fa61919899264511d683c41ce65cf"
+      "bytes": 5787,
+      "sha256": "7071652ea7ccfcf5e5efcd9c73b8df6a068b59e6d5db0fe8cb70829ada9b337f"
     },
     "themes/bamboo_vulgaris.js": {
-      "bytes": 5725,
-      "sha256": "c02b2d5527874997a41ed4d9a697abd60bbd9799cf1bf04a65ccaa73541e1d4d"
+      "bytes": 5783,
+      "sha256": "f47dd917393535fc51bed8a1c1fc8ae7d88697f7f1eb084be902a143f4cbe237"
     },
     "themes/carbonfox.js": {
-      "bytes": 5160,
-      "sha256": "7087d9ff19dd23c0b58152984e070d8747300e9e4743b3c1a9eaac45e060e43f"
+      "bytes": 5218,
+      "sha256": "a14cd9cb3f0beaee9f292f64412429334f91431802a35109e39b86d22042ddb3"
     },
     "themes/catppuccin_frappe.js": {
-      "bytes": 6786,
-      "sha256": "857f107d5fdbec078367178c9c222499a3456f3e4e40ed7f1c0a9f1e952e7408"
+      "bytes": 6844,
+      "sha256": "3f09a48b74e628673fc9fecf9f991778deeeea8595081b6b33eb7e9cdd0127a5"
     },
     "themes/catppuccin_latte.js": {
-      "bytes": 6783,
-      "sha256": "a189949a337393dfa53ddfbf941a67798722d412e7f0b04be5541f7a7e92de52"
+      "bytes": 6841,
+      "sha256": "1c1a6d69b4e26f0d858f2691e728fa3794393a85357fa4a79a791280850e2b11"
     },
     "themes/catppuccin_macchiato.js": {
-      "bytes": 6798,
-      "sha256": "a4821f7b05d3453027942e7b4da7dbdee3614beb395383aa4f733e8d377aea09"
+      "bytes": 6856,
+      "sha256": "6be7b34ff4e2d7078d17fe91f0bdc98ade275d2d50ca0ae9f5c6d87215a4edbb"
     },
     "themes/catppuccin_mocha.js": {
-      "bytes": 6782,
-      "sha256": "3c7ee96b2b354d472b7ce05ee087328805751bb3c9d834260450256bc181d217"
+      "bytes": 6840,
+      "sha256": "604b4c400751aff62fbea3bbecd87e9bbb21ffa4b79aee1f3c31eaf5b7061728"
     },
     "themes/citruszest.js": {
-      "bytes": 5844,
-      "sha256": "60ed28f3f91b15c3010cf3054a02f4f96bed8be669e3bcaf45d93bdaca691b91"
+      "bytes": 5902,
+      "sha256": "9d443b1c8e5fbbf7d76bafcaaee70fd83d9d27b7120c6531f2e6c0909a756dbb"
     },
     "themes/cobalt2.js": {
-      "bytes": 5014,
-      "sha256": "0d74bfb664e8cdd5ef70bfa1258d17e0e24dd39e1b7784546bbfbffc1ec95580"
+      "bytes": 5072,
+      "sha256": "69e5c189e157b0a15ce9be999fbf7b51e01b7227ae6db63e7d5137ac30a51f01"
     },
     "themes/cyberdream_dark.js": {
-      "bytes": 5160,
-      "sha256": "58bf826cec1cf41575645c4f600cb13274c30e326232b46cd92241fc6dba8e34"
+      "bytes": 5218,
+      "sha256": "c03bb66f3954390d2f29690738bb1739c379b89ca17c3ee49909bf84d043d4aa"
     },
     "themes/cyberdream_light.js": {
-      "bytes": 5165,
-      "sha256": "94851a7ade88c77b7450f0476d495d15ae148ab76b2aa6c2c03c3782857a4cd5"
+      "bytes": 5223,
+      "sha256": "71e38e1b0413bf91bbbe309dce9cb92c7b019a51a0087c1f93de25866bbcdb9d"
     },
     "themes/darkvoid.js": {
-      "bytes": 4667,
-      "sha256": "cfa9168216baf4ae0fccd3fc32828a83eba1f0bee01b27a11cabbf3de6e21596"
+      "bytes": 4725,
+      "sha256": "98bd2d94482bc6243382d1a7d9759df72cc88c696ddcbb57074eb5cad9af75b5"
     },
     "themes/dawnfox.js": {
-      "bytes": 5153,
-      "sha256": "37fe2064a58b4a45e8464155e5bc1ef007501d1460195b013f92d35f373fac5f"
+      "bytes": 5211,
+      "sha256": "521e38d7cfce844ab8caf044228eb432c8d9be8a9dd97f44145926d1071d2dd6"
     },
     "themes/dayfox.js": {
-      "bytes": 5149,
-      "sha256": "ab8ea78ccbc10fdf4e86ab995975c2198186bc0550ffc766a0265b3292d6925c"
+      "bytes": 5207,
+      "sha256": "cfad6f0f88be66b98ef53c646287564d2ce55e16033b4fab2fc0a86e40ffef4b"
     },
     "themes/deepwhite.js": {
-      "bytes": 5358,
-      "sha256": "5b09f5911562c8a720e1afd5d39f930ea9eda9423a9d0a3a928496930a89d8b1"
+      "bytes": 5416,
+      "sha256": "c32c579144b9fb00b56a6afaf1c96c243f00308782fbd074f71816a496099bff"
     },
     "themes/doom_one_dark.js": {
-      "bytes": 4816,
-      "sha256": "9af5ae4d5df794903dcc05004c6eb1d6a81949602e5de8d83877b97d7cfcc2ae"
+      "bytes": 4874,
+      "sha256": "cccf26b4410a366705bbc2304b6ad5483121d1ffbdf8612bdf299b20066c9212"
     },
     "themes/doom_one_light.js": {
-      "bytes": 4821,
-      "sha256": "9af3068e7401d8c1c523f49a581eb671dc2d1d8cfed281e5bf0fe2190bbc9da3"
+      "bytes": 4879,
+      "sha256": "3b8f5b0beb3ac534a45bf894d01eb0989f39351d27e2053c2e55de2db9e4d893"
     },
     "themes/dracula.js": {
-      "bytes": 5504,
-      "sha256": "6c5ccf1fbe021656e73a220ffdc01a788986722cf5bd3f85af348dafa19483ea"
+      "bytes": 5562,
+      "sha256": "3bcf9c39873d8acd1486936221b74e0037e5a0850da79d51d8fd2f74771cdbcc"
     },
     "themes/dracula_soft.js": {
-      "bytes": 5524,
-      "sha256": "b601401430b5b0ff7a27b814226a4d8eb4f840055c710e0da49c9e21ca09bca8"
+      "bytes": 5582,
+      "sha256": "3e5949050e1585d9c77ef1f2530db5321c3559c7f3d524c374623499f36bebce"
     },
     "themes/duckbones.js": {
-      "bytes": 5325,
-      "sha256": "82e69be85a0239ada0218b3c03224ef981fad391176511c1a0e322034d224b5f"
+      "bytes": 5383,
+      "sha256": "67475447a6b2784d853fd7b1d34fa91d08c763d7c87e953636c25b077e0f8b8f"
     },
     "themes/duskfox.js": {
-      "bytes": 5152,
-      "sha256": "2f35d2406fb923769cd692f8ac71d19da221812dde13d411624a47b43d49eed2"
+      "bytes": 5210,
+      "sha256": "d3e1f2d0320a26f4b37c358bf1b0a946a4b26d34678f1b88d5a6a3e3a30ba6ba"
     },
     "themes/edge_aura.js": {
-      "bytes": 5572,
-      "sha256": "71e75348b0a80f778b2346d15e8162d9719d525601b6906364f8c5cee4cb8a93"
+      "bytes": 5630,
+      "sha256": "aa743f7d5eb05d014ded48e90ada048d4c5b65a7e184b9ec3ac07b8920a86721"
     },
     "themes/edge_dark.js": {
-      "bytes": 5572,
-      "sha256": "334c4704f649484298fe8617e7fddf6919cde8370695a2bfc28c7a4f193d6fa3"
+      "bytes": 5630,
+      "sha256": "5cfcc29159281c8106ab32b6763dbd60183bed5d250340fa249e465ad1dde572"
     },
     "themes/edge_light.js": {
-      "bytes": 5577,
-      "sha256": "229267b6754ca297942f7b66cc1b75415589fc505c67d7ab45b984e3debe7539"
+      "bytes": 5635,
+      "sha256": "1693ff4715ae19398b45fd4bbc87ff0e1935ece31aab56aeaca0fe57088b35a8"
     },
     "themes/edge_neon.js": {
-      "bytes": 5572,
-      "sha256": "f83e225170da85c78cd4d8e354503257edcbcf1376f0e686e9ae694a9eb3aa88"
+      "bytes": 5630,
+      "sha256": "37d5d508ab0b774a59ae78f2e9a3a63bf3d1cfef1e9aa319911bbc46a871095f"
     },
     "themes/eldritch.js": {
-      "bytes": 5529,
-      "sha256": "38c2019d85a424b1721f9c1b08a9ecffbf7e531105dcbd14a4a503c82202bff8"
+      "bytes": 5587,
+      "sha256": "cd28152d2426a8c256b057b789149a865f9726414005d7766249c6c31a60ca12"
     },
     "themes/embark.js": {
-      "bytes": 4589,
-      "sha256": "d64f7ee8545d1fdc404aa9c407cc996ca1d6089e67a4f406277f94ca0582f4f3"
+      "bytes": 4647,
+      "sha256": "c2a3e77401bdda2a7629cd64823d81eb013f6148f1f83c9ca0a9d20a85e52954"
     },
     "themes/everblush.js": {
-      "bytes": 4660,
-      "sha256": "abc484d8609a05d7907c78290d88db027b693163ea48127be54fb71c43fa38a1"
+      "bytes": 4718,
+      "sha256": "4ffdfa018379adc42ec768662a49957d2afbe908fe3b4a3490bd9c64f8e78537"
     },
     "themes/everforest_dark.js": {
-      "bytes": 6445,
-      "sha256": "d178840ba5b46549b5f31157d8e6ceead6f16b9b4dcf8e7075194fab101d8e73"
+      "bytes": 6503,
+      "sha256": "e41b6f644ec780a7bcd60ef700b7d1fb1511b5d4485ccbb1b5417ae21c2af18d"
     },
     "themes/everforest_light.js": {
-      "bytes": 6450,
-      "sha256": "87b006284ec3746febcfa3150699bca5bd6468467c2c16d3b2c3951e8d166acd"
+      "bytes": 6508,
+      "sha256": "380bb81c2645a93a22ec9deb83ce4dd1b994904dc2bdd10631a78eef4dfdeaa7"
     },
     "themes/flexoki_dark.js": {
-      "bytes": 4644,
-      "sha256": "fba4d1dd753c851e2b94a4fe0c8409487db01f04e9128254a595d62af172e15e"
+      "bytes": 4702,
+      "sha256": "2999fbebe6141c06cf6a4c39892674b8c0e407b6c8ed724924275d99598f495e"
     },
     "themes/flexoki_light.js": {
-      "bytes": 4649,
-      "sha256": "b836f082d25ed54286ca72e4471963ae71800c618fc336ba161a792e81315ea7"
+      "bytes": 4707,
+      "sha256": "59020967fa4e3149a642178991e68398d558eb69adbd4aa86becc07a4130867b"
     },
     "themes/flow_dark.js": {
-      "bytes": 5197,
-      "sha256": "bc5fb651f305e3f993e636c958996a47124186931343099854e3e796c71f1005"
+      "bytes": 5255,
+      "sha256": "d1bb3c79f89b3291001b5ec3fb44a573b46dbab5ea5a9218a02235aeebeda4e6"
     },
     "themes/flow_light.js": {
-      "bytes": 5202,
-      "sha256": "036234f3cb75fa1e7b4f104b8a7cd050457f49937a54fca71f27933233115a9f"
+      "bytes": 5260,
+      "sha256": "f0a30ee9f964e53bc8644c6c0ae7056259392f2e35fd681121945259ec1270c9"
     },
     "themes/fluoromachine_delta.js": {
-      "bytes": 6148,
-      "sha256": "a00c86d465402691328dc730479ced4b3b25c8c2cb642a7fdfd0544d740413e6"
+      "bytes": 6206,
+      "sha256": "d78209188efa91a5e1974c3b0d6d40c0e0b5951a4be9bd8ea3aa4c856cef944b"
     },
     "themes/fluoromachine_fluoromachine.js": {
-      "bytes": 5995,
-      "sha256": "c72b540bb60c4c2cd815fe57ea6ac053edd45625b603b13233249a56130acc0c"
+      "bytes": 6053,
+      "sha256": "cc504162aa516af47f67501dd691e0f30460693ddc30bd622022dcf9b85ae517"
     },
     "themes/fluoromachine_retrowave.js": {
-      "bytes": 5898,
-      "sha256": "c911d3afcc9f33fa2ca333092475d5967116c94d6681504130b531d2d57e3538"
+      "bytes": 5956,
+      "sha256": "5449aec17bdf92353fa7989af8d4d26c662f7b25611a68639a63fefa1f11b08d"
     },
     "themes/forestbones_dark.js": {
-      "bytes": 5581,
-      "sha256": "16223b8dc455c0ee85af22d472f4bc4b5c44243aa07ccf25a594e6dffa29da93"
+      "bytes": 5639,
+      "sha256": "366be801b6a621b344c23230b4bab2a9cde4372029450007149cac8d1c28f7d5"
     },
     "themes/forestbones_light.js": {
-      "bytes": 5586,
-      "sha256": "baffaa135b0712b4448472d3815de5d5ce3e3d1ea247d31529d6f5844cd149e2"
+      "bytes": 5644,
+      "sha256": "ec472902170f9e33ae9ea882c28e47aaf80af6ce3686bc1a1a90a6ce23fd4978"
     },
     "themes/github_dark.js": {
-      "bytes": 6186,
-      "sha256": "31fb2cebc9c03b8b08e87aca43b56a6b420cd5b67968958457382c92ca629b6f"
+      "bytes": 6244,
+      "sha256": "0c3644ca6ac286192fe632c6b128ea896905770d3852348b6b084e28f740e900"
     },
     "themes/github_dark_colorblind.js": {
-      "bytes": 6230,
-      "sha256": "bd8f9b3caece077270317fdd7de5aea4d6514a359b9e923f26ce326d586977a8"
+      "bytes": 6288,
+      "sha256": "6a80b9bde3cb5831974feb47250db679fd3b1428d47a11fb33197e4de99235ff"
     },
     "themes/github_dark_dimmed.js": {
-      "bytes": 6214,
-      "sha256": "7c2d930d61fa460ffaa2cfb8c7cdee211ef32956d9ac5ef0ec4cdaf8c2bf880e"
+      "bytes": 6272,
+      "sha256": "8de30bfda59ec7ea5c63f65dd999b0cabf0ca0bb9693d30fd1a9f3c6f1886293"
     },
     "themes/github_dark_high_contrast.js": {
-      "bytes": 6242,
-      "sha256": "9ff0cae4d510f1597c87a197a5811a52378b9231563fa8bf6de76693bf261ba9"
+      "bytes": 6300,
+      "sha256": "4220ac318667fb30fbda719f84aafcf9db2d6aa411cc505cf2fb1d2fdff199be"
     },
     "themes/github_dark_tritanopia.js": {
-      "bytes": 6230,
-      "sha256": "48e8c176d0981dbdc61a2e786c1252563acc96cc241c06d56b9fb6d622fd32d2"
+      "bytes": 6288,
+      "sha256": "1bb8543be51ec64e2b14fe62f7de0d51b9b6157b920102d09bcdaf7f341c066e"
     },
     "themes/github_light.js": {
-      "bytes": 6191,
-      "sha256": "320c75dcab6f4bb06f24512667bddbc6d7f369eefde552e6b0f2611bf6beadf1"
+      "bytes": 6249,
+      "sha256": "c9a325c8030229fe5f2c94ea0ad69c6990d1c8750c368047a22a4eed88955316"
     },
     "themes/github_light_colorblind.js": {
-      "bytes": 6078,
-      "sha256": "bf35e85773be0d6ccd97127785be323cc263e8a5e3f3b6f13886488cf324c357"
+      "bytes": 6136,
+      "sha256": "71cf5baf1521c5930196b86b77d88ba63e114ad7732b20742c34b8afe8b59b0e"
     },
     "themes/github_light_high_contrast.js": {
-      "bytes": 6247,
-      "sha256": "0265598166bbb2a806dfe378ec1d1e0cff4be2e89451991b3b80138184075ab9"
+      "bytes": 6305,
+      "sha256": "7e805c118d1f2274d66b6bf7e43ca63968d3b7c08755c54a36115f7f89b0b914"
     },
     "themes/github_light_tritanopia.js": {
-      "bytes": 6078,
-      "sha256": "933591f0a4e6a7ea3f5e5c04a34490ec8c47f3a314a2bbec1e6f5177190078ae"
+      "bytes": 6136,
+      "sha256": "b39c69fb96df431f733b775371bfa6b50dd74ace8e265883eb33309daf95d74f"
     },
     "themes/gruber_darker.js": {
-      "bytes": 5302,
-      "sha256": "1e63d61817ba919f07f1f8983eced15b4105b5d89ddf11e147dcd9cc6f77462c"
+      "bytes": 5360,
+      "sha256": "c472c565a6d1d9c65a144596a6077d6047cc824a65d8f1a00a6f2a6c7334da78"
     },
     "themes/gruvbox_baby.js": {
-      "bytes": 5120,
-      "sha256": "9a6ebf59e51f1a625fbfd0bc13fb6e98d59c454016b71d239e4ba0589ff379a4"
+      "bytes": 5178,
+      "sha256": "62982a5f32e893dffc81fa3ffd1c74410fdead0b8753335b1f99d08016691823"
     },
     "themes/gruvbox_dark.js": {
-      "bytes": 5271,
-      "sha256": "3e5e72e66a5515732d4507b869d73dc1c3d3f166023f541cb4c969721c0d7df8"
+      "bytes": 5329,
+      "sha256": "3400ec5928bad823de3fe29188f9c1af5f8993d71d9df3a876d1276c9666abb3"
     },
     "themes/gruvbox_dark_hard.js": {
-      "bytes": 5291,
-      "sha256": "94a63791875557ed9ac8b198d218eea83dec2ac38748931a1c48d5764d0900ca"
+      "bytes": 5349,
+      "sha256": "4e08346ae8bffbc1845a17ca915fb3d2dcb658006279e3c743432e991aab77c5"
     },
     "themes/gruvbox_dark_soft.js": {
-      "bytes": 5291,
-      "sha256": "edcb4dcad63e921fd422f9427feb178462b2db4dcda99359144c4ed49dda3cae"
+      "bytes": 5349,
+      "sha256": "7b8a52e0596f01446e2dd2ac9c732daf89a9841388e5daee4376254813a33032"
     },
     "themes/gruvbox_light.js": {
-      "bytes": 5276,
-      "sha256": "ee87bd185715f344791bccb0bc88486a17feabe7795eea287750af5786f3dc57"
+      "bytes": 5334,
+      "sha256": "933f40c37aad971d83ef37e2fc72ea162ae35d7dbc82048bfd210b0460ab4a13"
     },
     "themes/gruvbox_light_hard.js": {
-      "bytes": 5296,
-      "sha256": "8134c1e7d8c151481e333869d7f31a111f55d9c7c78f3587444d65a9a416bdb5"
+      "bytes": 5354,
+      "sha256": "92b08be5021f2b387617e0f157408a6d221f4919ea0249d54dd90254829d9bfd"
     },
     "themes/gruvbox_light_soft.js": {
-      "bytes": 5296,
-      "sha256": "ef558e44261dad12f0050afa7c662131c4b970b30315a999ea7757f0b2baca3f"
+      "bytes": 5354,
+      "sha256": "48d6b81a89501e25ef29a23bc14c2b5758f498f9a62ff21ffb99417c29cd2597"
     },
     "themes/gruvbox_material_dark.js": {
-      "bytes": 5848,
-      "sha256": "0ea1ff03c1ff3cb80af418907f1ee2e9288acaa1fef0d7fd19ae078e806d0224"
+      "bytes": 5906,
+      "sha256": "9e889706970a6a7fbe33be383b1faa0185562f0bd3b337732f0248355d5648bc"
     },
     "themes/gruvbox_material_light.js": {
-      "bytes": 5853,
-      "sha256": "e343526064aefce78a5bcb6dff701e8559b5986e00795cd1ea6652e67f651468"
+      "bytes": 5911,
+      "sha256": "233e98a7cb93a24740de8c2774f3c160eb96c798b1eaa68f0e2f6a69c7eb1ee8"
     },
     "themes/horizon_dark.js": {
-      "bytes": 5081,
-      "sha256": "31e0bb0b5043074c97b4ac5a95915b9fb8bf8ccdebb21aeadf32f903c503969f"
+      "bytes": 5139,
+      "sha256": "23cb0a7307672fa7016dc1bdff5ae1d7ac36d606dd4751630f0854c399a11fa9"
     },
     "themes/horizon_light.js": {
-      "bytes": 4471,
-      "sha256": "827fa2112d03439cfed1878170bc85196f32d75f2fa8202aadf1b35a7e6025a7"
+      "bytes": 4529,
+      "sha256": "aa3cc3facf2fbfc87a6dc6cd1b4757412ebe398d9c37259b2117797f1a3c4177"
     },
     "themes/hybrid.js": {
-      "bytes": 4603,
-      "sha256": "5e8961dd18495c4895812254b4cfd110ca39eadb81c3432fe96eda3187c6dcfd"
+      "bytes": 4661,
+      "sha256": "122b6f23f14020292b756585f6fa64cf2e2322e410ff7f382cfe1375eaa8c619"
     },
     "themes/iceberg.js": {
-      "bytes": 4622,
-      "sha256": "b7a6b60b4632c25ebb7452b82ed1d05a1bf1bd081cdf03305fc1e7c023cbd99c"
+      "bytes": 4680,
+      "sha256": "adfd0f70adb197c1e8472231c8df7e9b590a56b6134f6ef69584355b775fd837"
     },
     "themes/jellybeans.js": {
-      "bytes": 4601,
-      "sha256": "19f1f12422d70c750f5adb6e4cd792743ab717e5b6ce6565f0b9f2c1f8b85ec1"
+      "bytes": 4659,
+      "sha256": "651222aa3f448c1c6de71676272c337104921c33d1b7aaf403819312fb9b5035"
     },
     "themes/kanagawa_dragon.js": {
-      "bytes": 5100,
-      "sha256": "6105578b628d0606cb2befe9f32cf5eec1746367f9415fd2cbe23cdba318a700"
+      "bytes": 5158,
+      "sha256": "02362448c6306ef6f87d61fa840afdbd601997d9825b84db8b01c57ba8834aa9"
     },
     "themes/kanagawa_lotus.js": {
-      "bytes": 5097,
-      "sha256": "5d3a1d545d609ee446306b0b485f8947cd2720c04d3d8c1162f923a37e4d0dd7"
+      "bytes": 5155,
+      "sha256": "4f3363ed4070f21ce799376c346ac2a8c0d5146ca6640eaa552e23b18a98bd48"
     },
     "themes/kanagawa_paper_dark.js": {
-      "bytes": 5057,
-      "sha256": "336fc7185e689f7177c077bf8e8e436feac83c9ed65f3c7c4d8ed9473a16bc11"
+      "bytes": 5525,
+      "sha256": "cf640e6171b4afee9987a2b2538a03d98a5126cbf8a98a94bcd2b58da2652665"
     },
     "themes/kanagawa_paper_light.js": {
-      "bytes": 5062,
-      "sha256": "3d6233c937f8fbecd8a039d8d9ed1747519675be652f69b98baa64f1d3f86f46"
+      "bytes": 5530,
+      "sha256": "f58af797e952883f5609fee0011aae854c524d985682780688cf9e626b7bddad"
     },
     "themes/kanagawa_wave.js": {
-      "bytes": 5092,
-      "sha256": "59a472cf19caf0b828ecf867fb9639de17e2bdc2975675cecdd0786b9606bf87"
+      "bytes": 5150,
+      "sha256": "918b9d88f61c666b65c486a4844af9d351dbb60c12cb5e297bbbe1097f54f205"
     },
     "themes/kanagawabones.js": {
-      "bytes": 5653,
-      "sha256": "0123e2e10e44210b462bea6076a6891b10389444aac387596cc3e1f2a1f88539"
+      "bytes": 5711,
+      "sha256": "facb9e1fc8ef20c26beaf9b8bb712d55e1d84d16d214707fdc5f1df7c4899521"
     },
     "themes/lackluster.js": {
-      "bytes": 5151,
-      "sha256": "d7ff918fa2ad5b61b2acf586b98b1b58f8e7f66f4cb013eeeadf32f3deef6cd9"
+      "bytes": 5209,
+      "sha256": "8e971ff65e808bd3ea20b6991084a2fa24e34a6a4f87d3266d8ea25de667de70"
     },
     "themes/lackluster_hack.js": {
-      "bytes": 5171,
-      "sha256": "ee4a74020052d50cbffac99f5756032151f755b61f1a9fef61faf7a12a49e9fa"
+      "bytes": 5229,
+      "sha256": "3cb944268dc4837a19b02f7c0f52c84cb85066a6b6773c1a76fcd1ee12b09354"
     },
     "themes/lackluster_mint.js": {
-      "bytes": 5115,
-      "sha256": "f4bf97ebdbe02fd30fef8896ee81e8ae8c7ec7547863dff5b8a9e5bc38c927c9"
+      "bytes": 5173,
+      "sha256": "d25c1a7731e0b8632d3486eabea141d4ab0b27583127b9335082398cb2bfde7e"
     },
     "themes/matte_black.js": {
-      "bytes": 5109,
-      "sha256": "fe53bae60b6dc99f74a100fb590b12efdaae91ae3d966ddaed919f7198b382f3"
+      "bytes": 5167,
+      "sha256": "ff70ef7b95d2660bd191b59c94fd131f41a8bbada68cab2751c69521144f72be"
     },
     "themes/melange_dark.js": {
-      "bytes": 5059,
-      "sha256": "c224406b2ad014c4298077ccfe93e41d0c2fa5694508eeba848f838f1cd5d5a5"
+      "bytes": 5117,
+      "sha256": "4be744c61900bf70109b2a7e05b4853b3e8e1c2ece9eb87a6c0f19a8e778e22e"
     },
     "themes/melange_light.js": {
-      "bytes": 5064,
-      "sha256": "ecc172cb0762bfa2ca13ec7d6516fd1f3b1f5a7405e12e3e11e6ed90305e53b0"
+      "bytes": 5122,
+      "sha256": "d2075d0cddfa6f1a8c3e7fb21b52a70955d27cea54087b49f2a864083eb8fdca"
     },
     "themes/mellifluous_alduin.js": {
-      "bytes": 5103,
-      "sha256": "8e5ef6365c80285468221d113d95372ff00106e9e2c2b2077e9bf459a46c495c"
+      "bytes": 5161,
+      "sha256": "2f24fb0be742833787b16063b7a4c23ca3d0173d677527e818caf95e0cf898ae"
     },
     "themes/mellifluous_dark.js": {
-      "bytes": 5095,
-      "sha256": "f30af67acde3b73711866ca2e9a2272f6756cf718ea3f9f273a61e67fd56996b"
+      "bytes": 5153,
+      "sha256": "93814d63735a01497f6f45c24513ff7300d5ed2582b7b2eda52d87aa773671a0"
     },
     "themes/mellifluous_kanagawa_dragon.js": {
-      "bytes": 5139,
-      "sha256": "bc53b487dfa9def250b6340e53558ab0fe79fddc448a90266a5fc8a6ffea2e97"
+      "bytes": 5197,
+      "sha256": "83be1ab042e393a56d3f82bee49d10add7b76d9e5ed842b10a4807474466fef8"
     },
     "themes/mellifluous_light.js": {
-      "bytes": 5100,
-      "sha256": "351c712a7241c824ca255f6759bc3becda2473b268d4e2891d4b7ebc42fec4ad"
+      "bytes": 5158,
+      "sha256": "b3fe3c4a81064c66e5ac8fc0b62e9a966e88c4afd414b8f90b3e1deb9bdf697d"
     },
     "themes/mellifluous_mountain.js": {
-      "bytes": 5111,
-      "sha256": "1d2f8cc819a01f4d7cfcc396de08e0210d1d1e8ac75ced1da7869a84c387acbe"
+      "bytes": 5169,
+      "sha256": "46d8671f2fc41662382530fce2d6e57bc5a3783f9c3c08e30e81ba7938069a43"
     },
     "themes/mellifluous_tender.js": {
-      "bytes": 5103,
-      "sha256": "4177e3bc2c5b8242fb0e1815f9a8cc080fd6e065fc3d0bf633f57feeb160257b"
+      "bytes": 5161,
+      "sha256": "86bbac6cee406be2030f3e408fcbc69331cb31684db6e7cb821d1f4f8ac0f925"
     },
     "themes/mellow.js": {
-      "bytes": 4906,
-      "sha256": "192c9c0b79148ab3674cf4eceb5b5e0d6fab114d48830a2d800a431468270533"
+      "bytes": 4964,
+      "sha256": "2439102a80573a5daadeac7bc7a1d142d398f8085bf2a521fef063b702218ce9"
     },
     "themes/mfd_amber.js": {
-      "bytes": 5455,
-      "sha256": "74dcb13cc8804554cfb7b9bc6eedc67ef2c1f5f9c5c0654739d2f64d718be003"
+      "bytes": 5513,
+      "sha256": "350da334e2ff294653a22d35f73d53bb077f9af9a5e263d062611974aeafbca8"
     },
     "themes/mfd_blackout.js": {
-      "bytes": 5339,
-      "sha256": "fa09e686ee84d26ed38d412168e55df7c31c05a083a36fdc3e3c255933c7b7c1"
+      "bytes": 5397,
+      "sha256": "94ffb0f97d46e44d5ae28a82e28c5367d38e34b71fda96c628350468685943f0"
     },
     "themes/mfd_dark.js": {
-      "bytes": 5451,
-      "sha256": "a0aa7780d3dc823d94ebbca451aeb04c720f91cf4cebb12a400ee0831db3cb7b"
+      "bytes": 5509,
+      "sha256": "3a84dd5d1706f5a1412db850bf3dd6dde898f5e411f30483efda2ccd39db201f"
     },
     "themes/mfd_default.js": {
-      "bytes": 5464,
-      "sha256": "1eb53356c9817dc9df31580410903e456ab1bc020573e1df0113953271d828ef"
+      "bytes": 5522,
+      "sha256": "915384d4319789af07dba1c4d7f9845c55d2b898da44ba5c2a869e443dc2d588"
     },
     "themes/mfd_flir.js": {
-      "bytes": 5451,
-      "sha256": "8fb251fe6b2ab0353e81d549784c5fbac6bd5473933899c3bbb320a18d4be06d"
+      "bytes": 5509,
+      "sha256": "01c845d399c7403927011c3de8f35e384bcea61be197b41bc40d71f43060a237"
     },
     "themes/mfd_flir_bh.js": {
-      "bytes": 5464,
-      "sha256": "a874caf6b4ecafaea1e2fe4d95bf805e0c0b082b8e07c6c92ad06623252a5872"
+      "bytes": 5522,
+      "sha256": "af9314beb845847fe4e9de97551438c0bf22e53b2a992723b421984eff26b10f"
     },
     "themes/mfd_flir_fusion.js": {
-      "bytes": 5479,
-      "sha256": "29034361d687fc3a9300ef232e50321ddda145d83b19ce0c68fa95ae6f2ec736"
+      "bytes": 5537,
+      "sha256": "45260dfc9ccd78d8fface33eab43609de73803779c6235c95cca3df4429cde74"
     },
     "themes/mfd_flir_rh.js": {
-      "bytes": 5463,
-      "sha256": "408cbfc73fb3350428aad9f4cbf12f018f587454499a91d025c12d07080fa25d"
+      "bytes": 5521,
+      "sha256": "ca570139d64eeb4f2a59adb26c3ab3dbf9f1297edaa0cb30e123dbb83c1608e5"
     },
     "themes/mfd_gbl_dark.js": {
-      "bytes": 5467,
-      "sha256": "b427c7de7dcf4708cf6a8cba94efb9f9c3ec73b96c48c45f26421067df0815b5"
+      "bytes": 5525,
+      "sha256": "2ede18f7084ce7704bd3eceb0fea054c10d0fca3f0b9a741c97b12df5e6e6e08"
     },
     "themes/mfd_gbl_light.js": {
-      "bytes": 5472,
-      "sha256": "7f39c2342c9cb951f4ab1f5b0101d04bfeeb1d55245d407f827a8eff8716b097"
+      "bytes": 5530,
+      "sha256": "d9b2529f584de6daffe9d77090022009f93cd7a511c8ef5dc0d1c851febaca75"
     },
     "themes/mfd_hud.js": {
-      "bytes": 5492,
-      "sha256": "eab4f01cf801fce73cf5d59a76ac36285632355e00e75294c338a3a5021d862a"
+      "bytes": 5550,
+      "sha256": "58d0d52f34106b921c6863dde4d6ca4cb72dbd413890dfb77dd7ee64594bd1ed"
     },
     "themes/mfd_lumon.js": {
-      "bytes": 5455,
-      "sha256": "0e14bba647565951adfebdc01a3aec75ce63d448ce3968cfdde3e3dd6f53edf9"
+      "bytes": 5513,
+      "sha256": "aa43ceba34ba48e22322cf6bd836577af2bf8792f878e16494ef53084782d6e3"
     },
     "themes/mfd_mono.js": {
-      "bytes": 5451,
-      "sha256": "4688cc8a38646e0a257642d702557ac98d2074b387f4144880afe28bfc7dc0bd"
+      "bytes": 5509,
+      "sha256": "d9d17ba5e503142005f4e55e42606b70330669e442e12fcc6e561edb5dbf8227"
     },
     "themes/mfd_nvg.js": {
-      "bytes": 5447,
-      "sha256": "df6f023b6d453531a4e85bae0aa4d829badff780ea0523da99bfa6af30b5f107"
+      "bytes": 5505,
+      "sha256": "8ce765dd8396a837ab331f6afc41cc8a28238dc0e071c1e01ca8ec68d0558839"
     },
     "themes/mfd_paper.js": {
-      "bytes": 5456,
-      "sha256": "e855d967b97da2b927b7d20cc161ce436b076315af038f4c31832be83047238a"
+      "bytes": 5514,
+      "sha256": "9db458b041386e55a910069c147d27d3f3179f6562bab1f50b02c6a412b1bdef"
     },
     "themes/mfd_scarlet.js": {
-      "bytes": 5463,
-      "sha256": "9be2272dd4a81b481dbd17f7a4a4d641e625464d7219221ca111378fb84727b5"
+      "bytes": 5521,
+      "sha256": "24be2982b9cfb88e0ef3426114280542328bab414823f92e59613f30cc5510f3"
     },
     "themes/mfd_stealth.js": {
-      "bytes": 5463,
-      "sha256": "a9fb30bf4b6b0d1f810bf26ead3e9abd8e2d05515feb79c9ec129a4a069902a8"
+      "bytes": 5521,
+      "sha256": "c7471997dfcaab88c04ce3fcd8e224c87b8594467bb93b0f08a9806f10feda2f"
     },
     "themes/miasma.js": {
-      "bytes": 4782,
-      "sha256": "5d3a06523b762bb038aa525b7d237bf3e2b5c69a6983701d10c6d355b81d6409"
+      "bytes": 4840,
+      "sha256": "fcefd7c87c67793b0411fa18bcd120c97014af3ad531677b2ccf9f34392affe6"
     },
     "themes/midnight.js": {
-      "bytes": 5553,
-      "sha256": "dcd9766180ded31e882069ce33c27ab819746be4ac1e385474ae35572373a0f3"
+      "bytes": 5611,
+      "sha256": "ebc72b99ae6227a03b71f054fc7f49d096d7ea349465fac0b98721e6b2ac4807"
     },
     "themes/molokai.js": {
-      "bytes": 4750,
-      "sha256": "f0a322391b69e19da680ad4a83f81bee488d67b5fb92593dae804d5d1048400b"
+      "bytes": 4808,
+      "sha256": "7f57bebd66ea04c0a0f995f3e269c6cf6df86499d9ad2432c70c496bbd22326b"
     },
     "themes/monokai.js": {
-      "bytes": 5035,
-      "sha256": "54e0e19fbddcb827ab4ab90bc532b2f6eb5dced34c29911f34779bef7ec9de3b"
+      "bytes": 5093,
+      "sha256": "87bd364ce2134e0b94971ce77f86a8cb917162684885742bd1492853537ceeef"
     },
     "themes/monokai_nightasty_dark.js": {
-      "bytes": 5203,
-      "sha256": "2d333008d95218cd38577edf4c53bc00d573f5a92bb17efb6843d31fe66188a2"
+      "bytes": 5261,
+      "sha256": "324c98f204a77fce09554a5bdc77c3718f78628459d2eaaf277cfaea11cf06a9"
     },
     "themes/monokai_nightasty_light.js": {
-      "bytes": 5208,
-      "sha256": "e3d89a2d37c6b58dee0d0d13c42776d71e0dedf5496ea26c2863097194afbbe1"
+      "bytes": 5266,
+      "sha256": "ea593a0621c718e8e4f9ee0b650f16e0c4003e477db16952c34afd0c8b37b093"
     },
     "themes/monokai_pro.js": {
-      "bytes": 5051,
-      "sha256": "5fe1721504d5c044afadc168dbc8e42bad6dc08c2938249cf1238cae15659eea"
+      "bytes": 5109,
+      "sha256": "06041cc2e1b35b7537e25b586a60e35f4f344887d58b4ebec8d110f7fc6225bb"
     },
     "themes/monokai_pro_dark.js": {
-      "bytes": 6397,
-      "sha256": "80d6e7613e3b4c145d5a4888ab110e8eae2b931cf14f980212ceeac922703dea"
+      "bytes": 6455,
+      "sha256": "0fae4fac4752de091809ab29f3374bd8274b3d07a9797fa142f55235f05d4a79"
     },
     "themes/monokai_pro_machine.js": {
-      "bytes": 6409,
-      "sha256": "c70258a1828c0f0a30a7b0f422a3136bd0896773c12a941f5e23d792f8db8c71"
+      "bytes": 6467,
+      "sha256": "cb4a9e023999149eca6c0a68e66fe10ea00f6456439d2890d85d37512cf2b621"
     },
     "themes/monokai_pro_ristretto.js": {
-      "bytes": 6417,
-      "sha256": "b876419a76260d5d97dc74b674f3d66107bb4b2d365ddb03d04c9ce2061b5cce"
+      "bytes": 6475,
+      "sha256": "9b59758333e6f0c83520189912f698b8f3c37f11dcb1bfa1cfb32ee8e4c1fec7"
     },
     "themes/monokai_pro_spectrum.js": {
-      "bytes": 6413,
-      "sha256": "d483907b07b06d2b00481a1b5f901ca9fda668e37204593589e5f03fac202880"
+      "bytes": 6471,
+      "sha256": "91328cc270f7c48c20676a87a8365e643627b6a143b9a251c63d76c081d9836a"
     },
     "themes/monokai_soda.js": {
-      "bytes": 5055,
-      "sha256": "81fc42c705c29e20bcf1979364db8ee570b3dbf239b2f5b54e7a70c9c93df532"
+      "bytes": 5113,
+      "sha256": "a381fbbe8168e6e1019a75515018b9042ce0037a202eb502bf11a62bfb6ab191"
     },
     "themes/moonfly.js": {
-      "bytes": 6657,
-      "sha256": "c1ebf2c381f9c0a273d2f8105d26813bb7609a0893af628dd4ec5be437c71b77"
+      "bytes": 6715,
+      "sha256": "ae089d78aa1f2e21e1b569d9eb46c6d9e8db813929390ca64d91154036beedc5"
     },
     "themes/neobones_dark.js": {
-      "bytes": 5653,
-      "sha256": "ca2715afa8b5b2a052c37b4b89533a9e57ac8bf2c1354dcefdef028296c34e30"
+      "bytes": 5711,
+      "sha256": "6b3d3caa0ac6ec14222a8fdc9a0b97b16a6290f78122d32bc37bc23a722857b0"
     },
     "themes/neobones_light.js": {
-      "bytes": 5658,
-      "sha256": "b480120cfa96142d2187936684f185e80300b94ab3ac66ca3cbf587e7f50a72a"
+      "bytes": 5716,
+      "sha256": "3a7995befbd25c2cfc904e8bf6a22e89f50169bd842f3a7be74e096cc7d7fba4"
     },
     "themes/neofusion.js": {
-      "bytes": 5259,
-      "sha256": "4f1ee05b030dc9dacc6498ea9e43157eca8c3d9201b90c5b1d1427ca559e1b29"
+      "bytes": 5317,
+      "sha256": "5861aa293e76062d6a0231835b9b7fdf0b1ada8b387a7fe9b9c362bcf307e102"
     },
     "themes/neomodern_gyokuro_dark.js": {
-      "bytes": 4830,
-      "sha256": "6f9b8b4d23df160dc3a09343df2efdc7e8e7744d64d1736ff9b695b4e3b24345"
+      "bytes": 4888,
+      "sha256": "d5e89a160487a0bbd1c3612079cccde49292bc8b4bdf3162d7b54e8e726f4124"
     },
     "themes/neomodern_gyokuro_light.js": {
-      "bytes": 4835,
-      "sha256": "e6ffee99ba835a9ad55ec87db475ca2040b90de27f8bbacfc78fcd801d694568"
+      "bytes": 4893,
+      "sha256": "edc634da5f73ec8d889f3156fb36cfe00a5e61bffeeb12946cc6c018da98be3c"
     },
     "themes/neomodern_hojicha_dark.js": {
-      "bytes": 4830,
-      "sha256": "46917f0f6b88a8a9c70519ed62cffdf9a31282cea5bf29c150af8d2492b7c253"
+      "bytes": 4888,
+      "sha256": "a329298d9fc06c28967ef8a91e91907fb668d7a52209fb70bb6ea662574323ab"
     },
     "themes/neomodern_hojicha_light.js": {
-      "bytes": 4835,
-      "sha256": "1446e22d8c5862c5121e3457ef51d88ebea09c4ce0779eccdb0117b66d9bcf85"
+      "bytes": 4893,
+      "sha256": "564a075e7604cf14f7c7e20753480301726ac3e39377740ba314b32412b48761"
     },
     "themes/neomodern_iceclimber_dark.js": {
-      "bytes": 4842,
-      "sha256": "a4619a6f98f3ac5561e419a6dd872137093833e0c22074f21a6628e8b84c98c3"
+      "bytes": 4900,
+      "sha256": "5c10b34f3664bbb4f376947e32d07e42f1c2bc3f5f6c683d7d09f69ac6079ce1"
     },
     "themes/neomodern_iceclimber_light.js": {
-      "bytes": 4847,
-      "sha256": "ebd93bfe4daafe7df5675ecaa3052388d23c16ed1f63dd41cb6d898e10d607f3"
+      "bytes": 4905,
+      "sha256": "770eddf68f939b2a8d2001c38b8cfeb99b32cad74378c34fae52d2af2c48b147"
     },
     "themes/neomodern_moon_dark.js": {
-      "bytes": 4818,
-      "sha256": "e1a20153f6154d33f802e7106bf54788cced3eed88900ad1be992d669fde5086"
+      "bytes": 4876,
+      "sha256": "f854ebf55d7bfb012cb9925feb9e41f3167ffaf77c6efa7e29342a02f99c277d"
     },
     "themes/neomodern_moon_light.js": {
-      "bytes": 4823,
-      "sha256": "8eea39a9af8794d094d570098876330be93488310b4a20c7c84b6423dac5dd13"
+      "bytes": 4881,
+      "sha256": "1c10b3ced8edf88475e34a1b21217c085ef40ee1dc45755f1f293937bb6a8dac"
     },
     "themes/neomodern_roseprime_dark.js": {
-      "bytes": 4838,
-      "sha256": "16bdaf632a0a8b636a593857527489da54529207c929e1e212ba2f20f23d821d"
+      "bytes": 4896,
+      "sha256": "2d12cb1871e49e8ee3f924c6a0d652065ec5b6ce027e8030c6f275db049f3110"
     },
     "themes/neomodern_roseprime_light.js": {
-      "bytes": 4843,
-      "sha256": "ecd23234fba03f22411471ee5ba968ef5a2a1ca992efd525f1eb23597d09a3f4"
+      "bytes": 4901,
+      "sha256": "d1c9555af537f80b6bbe2a804a97367f08c8789dd05f740da190f8837ac8ec56"
     },
     "themes/neosolarized.js": {
-      "bytes": 4619,
-      "sha256": "dd952e6236ac117ef32804d246c7357a6722258e4d46e60f7da5e2c058773b2d"
+      "bytes": 4677,
+      "sha256": "3b6fdd1c4a2dc2e1738aaff73e41112d08537c1824b838217990579920b09b6a"
     },
     "themes/neosolarized2_dark.js": {
-      "bytes": 5483,
-      "sha256": "4139f55416f2da70ea13aa0dc679f8e94e7a72551a8dbf2f8f461c6e0e5e8828"
+      "bytes": 5541,
+      "sha256": "30ff8c9f0d073cd6375e887d9a1d8586bcd4a4e22315890f2c216e41968d77a3"
     },
     "themes/neosolarized2_light.js": {
-      "bytes": 5488,
-      "sha256": "4864a6eeb7072070729bf824aaaed2c5277671193ed4e3523972ceac1247e33b"
+      "bytes": 5546,
+      "sha256": "ee4cfe80080d17f937fee505931e4b38b2822a3cee658388bee954971a2d0853"
     },
     "themes/neovim_dark.js": {
-      "bytes": 4802,
-      "sha256": "423a61ffd964682941133ab0f5fd964c435aaf8a568848552c08874182e76b19"
+      "bytes": 4860,
+      "sha256": "ce04e3954c74887c3e36694ca446a6ffa38b6fb84dbbe7d732976bfdbf53600b"
     },
     "themes/neovim_light.js": {
-      "bytes": 4807,
-      "sha256": "ea489914122ab923c806838eb1c87847f3ce905f21c118e3d8ffa66fafbdbffd"
+      "bytes": 4865,
+      "sha256": "09c3122086a631e3f0c62cf56dd928be218ada5c45f18f6c15e206ad02d1edb6"
     },
     "themes/night_owl.js": {
-      "bytes": 6777,
-      "sha256": "5d0f4fab53113e81ca51c84dfa28dadc66be0699f99381843837d2ad83079a9b"
+      "bytes": 6835,
+      "sha256": "c6415a5a527fde71f1220e3e8374a7269a67df9fc8c3a74fc78b6565394aeb1b"
     },
     "themes/nightfly.js": {
-      "bytes": 6661,
-      "sha256": "d998eabaa53211e24d0e2aa117cb67f2a048b4f7ed70915bc37d526bde10875f"
+      "bytes": 6719,
+      "sha256": "ab3e7221ab45061c8e22941243cfb214848b1dfa5e164ed63ac37cb7230fda2c"
     },
     "themes/nightfox.js": {
-      "bytes": 5156,
-      "sha256": "853c29ab2e3cb96360ccd4961e37c1e1c6dbdace2afe93f5d1b0ab5aa0229deb"
+      "bytes": 5214,
+      "sha256": "cf9751e9d1a6caf3d05213674543f0b17012400736733f3bb611922812f878d2"
     },
     "themes/nord.js": {
-      "bytes": 4482,
-      "sha256": "1dd4fd489371cab7059bf8daf8ee349663937e361ef194ec8b09b73bf6a54c99"
+      "bytes": 4540,
+      "sha256": "cbbcbff4598155fd29969e29cb6fc77bcc89a802d2ac21d67aa16a277ff21e08"
     },
     "themes/nordbones.js": {
-      "bytes": 5413,
-      "sha256": "6e0a64b972691ce3b5450d37afbdb774bc059407deba6b2e7affe17f43936250"
+      "bytes": 5471,
+      "sha256": "9403e7f2374b3965823ab6b3f6b30fb335e5629bd0088e538d91f13317cec995"
     },
     "themes/nordern.js": {
-      "bytes": 9327,
-      "sha256": "d9c28afa7e7e448706e27369ba8da579564cee65501e2757af0483e0bcda21db"
+      "bytes": 9385,
+      "sha256": "49b7144e6b7a7a4a4f1088398b5bde725724a8a20bbbeda96de1e8d5003112b8"
     },
     "themes/nordfox.js": {
-      "bytes": 5152,
-      "sha256": "02468d5edff9cf0fa43e0b191366e437f838649eb1aa2f3164619c2353135151"
+      "bytes": 5210,
+      "sha256": "1f310fb5d37c1c8c75bca10b5b828582db5675f989ef3dd0ae4280f2b26454c5"
     },
     "themes/nordic.js": {
-      "bytes": 5146,
-      "sha256": "32fa2274a3b360fdd5dd65a27506a26f31264edd9a751097d50f0b80ce70b80f"
+      "bytes": 5204,
+      "sha256": "27b8df2e7f340adcf973e8e7431750539f44dac4ebbd3bcd4770310a3621874e"
     },
     "themes/obscure.js": {
-      "bytes": 5607,
-      "sha256": "c43a1c2a0ea2fcbe8a0d66e701d229c56c9bc4265af79a5db3ecf96a2962b562"
+      "bytes": 5665,
+      "sha256": "bc123e5de9c74ff6257357499e212c624e1ebabe5b2a43031826e2ea436fcc64"
     },
     "themes/oceanic_next.js": {
-      "bytes": 4756,
-      "sha256": "446cf436bca61730c59e6ca66f064575154443e21b6d0bd9af0002cc5e659753"
+      "bytes": 4814,
+      "sha256": "5bfbdaad478c6cd419797b5aba57a6fafe606700ca51149b3e9a373c70eeb426"
     },
     "themes/ofirkai.js": {
-      "bytes": 5430,
-      "sha256": "d4c62f6d9c59ac9a1a7c9762a7cf84ec2db5c2c00369765d09b95ca73890d98c"
+      "bytes": 5488,
+      "sha256": "09af5bd70acff777ac66b0954bda796164fef9ea8a33255b388a84e269ce3098"
     },
     "themes/oldworld.js": {
-      "bytes": 5210,
-      "sha256": "a74d6aa94abf7ddb8805180b1c1bd0cfe1a97b49229d038c2207cadac11ee689"
+      "bytes": 5268,
+      "sha256": "27df9623668696e64a8979394f7e60b092360982ecc68862d3ce57038137b0eb"
     },
     "themes/oldworld_cooler.js": {
-      "bytes": 5238,
-      "sha256": "625a232a7402ac6a9c3c9e2613d66c11b5d4ac2b77dc1238d7c85dc4c82afc62"
+      "bytes": 5296,
+      "sha256": "1c783ce2445682e45ac834d81aad6e58aae8319e24559f660ad33505d88d48cf"
     },
     "themes/oldworld_oled.js": {
-      "bytes": 5230,
-      "sha256": "bfa4e4b236764805c25884edc6e2f310936622af67267fa38958600cd5c43a77"
+      "bytes": 5288,
+      "sha256": "5a082dcb65a87e7b5e30323f32a10840a8403cd64260be243d459d2fcaed4157"
     },
     "themes/one_monokai.js": {
-      "bytes": 4968,
-      "sha256": "b1b59916ec0f95922e846b99dcd93cc919022589bef22781d3aaf3e51c884f7c"
+      "bytes": 5026,
+      "sha256": "44e87b5c5867cec28f931c31b9c20481a2e3635bd1f8a0e82fcf4925095196b1"
     },
     "themes/onedark.js": {
-      "bytes": 7684,
-      "sha256": "dea884a965300552a6e3766037deba66700ebfdae11aad4a87fc5d5bdde7c832"
+      "bytes": 7742,
+      "sha256": "20dc3c718307d43ac0c68654c6e766e08d42c0a8070f9d87e4b3cb1ba54fd2f7"
     },
     "themes/onedark_cool.js": {
-      "bytes": 5154,
-      "sha256": "f279da2e19e7d390272c7d5ec8a113654897ab6fe7b75b6999179dc72464f8be"
+      "bytes": 5212,
+      "sha256": "3b053fe2af9053496916047c187ff2dce4f65369944691d8da286b1d2d875427"
     },
     "themes/onedark_darker.js": {
-      "bytes": 5162,
-      "sha256": "c3d27faaac7211308194352a73efb8b7b8535fc2e6f92e860827e6d763cc3f49"
+      "bytes": 5220,
+      "sha256": "586f8cb6556e14c1c2a3ffe0fb04d54947df3eb0ddf6067f05be86e116779173"
     },
     "themes/onedark_deep.js": {
-      "bytes": 5154,
-      "sha256": "bcd0dc4566833f88b269afac821b8d14bc445ef9dea810bd2044faa2ac9f29aa"
+      "bytes": 5212,
+      "sha256": "91d9c72cfd980599040b622291fc776638b04c0f2257f567fec038d7258cbb4e"
     },
     "themes/onedark_light.js": {
-      "bytes": 5159,
-      "sha256": "6675c6ecff843fad3d43bc426f946c2fd97f2e572e96ea3b6d770d3422f3c585"
+      "bytes": 5217,
+      "sha256": "ae3d355bf8a520e8cba10c5edc27d9c30466546308c4a9544fa763ac5970c567"
     },
     "themes/onedark_warm.js": {
-      "bytes": 5154,
-      "sha256": "a95f6c758ef5f4bc33f7696c6ef1a2524d3b2f4e68da9c0839ec0bcf944e1552"
+      "bytes": 5212,
+      "sha256": "adc55523e300d8951f0e002bcc0a8bad618274c019c4173beb39dcce07b341bd"
     },
     "themes/onedark_warmer.js": {
-      "bytes": 5162,
-      "sha256": "09701ef3f91ff73994147c0ea295a24491b639c20e9bdb5cce50cc588d1216e8"
+      "bytes": 5220,
+      "sha256": "ab98c5af7d0f0844575e0172575ca3dce5c7d59cf98f628e4fde3f2ec2da082f"
     },
     "themes/onedarkpro_dark.js": {
-      "bytes": 7716,
-      "sha256": "1961d63709fbcbd6d3308cdb3faf7af9087e73b719ca9efb6db7ab3c60ca5ad9"
+      "bytes": 7774,
+      "sha256": "ad4049a4aae6eb33cb0d5ed424f827084319905e219a758f8ba00dfac52eb009"
     },
     "themes/onedarkpro_vivid.js": {
-      "bytes": 7720,
-      "sha256": "dea74597c5d44291c9a892e99b410faed1aae1a5b4fdbc9713cc571adc2fe453"
+      "bytes": 7778,
+      "sha256": "37c444e4f7e3f491d4414c538956919f3f056f0a1ee7bf7498a63cbb858f6d3c"
     },
     "themes/onelight.js": {
-      "bytes": 7689,
-      "sha256": "f6b79d4f230dbff3a03eaeedc3b73b8db60d5a28a04ccc38f867b63c4dc0081f"
+      "bytes": 7747,
+      "sha256": "3bf956f19460525b44e47159b27e679d7bd5b6f365dbd1854cf60e40ce10facf"
     },
     "themes/onenord_dark.js": {
-      "bytes": 5059,
-      "sha256": "f2e822dbf0d49176b416aaa0ed1b7b55a91449e8534fe346df659f0e6c4ce3e9"
+      "bytes": 5117,
+      "sha256": "0e9bda3574a11507e682af890d365da217b4da6bebaab8fef3cb7640ae9b2af2"
     },
     "themes/onenord_light.js": {
-      "bytes": 5064,
-      "sha256": "8b91c7d2debf69bce00c412d0e11a7f0a494c79e3ff941d7b88ad764a531de8e"
+      "bytes": 5122,
+      "sha256": "1d76c73fcdeea9459d218a6303e5d8eeb06dbda840f0c81519de6347e07631ec"
     },
     "themes/oxocarbon_dark.js": {
-      "bytes": 5090,
-      "sha256": "30337c47297ebf3d8bc392f1aa0ee48a9b06fd9165508dc94c9e05a01d11daed"
+      "bytes": 5148,
+      "sha256": "1354e5c838403ca162137e6ae54f6f919603005edd16e09a976659d0d7963359"
     },
     "themes/oxocarbon_light.js": {
-      "bytes": 5095,
-      "sha256": "1fcd1890c1876e603be430bef151e7d948d60e70097d1af725a13ab32dfd9f24"
+      "bytes": 5153,
+      "sha256": "b2381bc87a8017f75b5fbc0fe0ab95e68b4009d992331de934d08861656b5e4f"
     },
     "themes/palenightfall.js": {
-      "bytes": 4608,
-      "sha256": "11e85c40634261af1942ee4838ca4fa0e43027a563328090f9343f0ea423f50e"
+      "bytes": 4666,
+      "sha256": "5bc893f27527e853aa7d95dd330de81b9807603d4b84fb589711ad8637ff01dc"
     },
     "themes/papercolor_dark.js": {
-      "bytes": 4772,
-      "sha256": "865483e0dfcf6ed1696e7ff4c483a0a4ff7d23fbe08a6bd2e5b534ef733da540"
+      "bytes": 4830,
+      "sha256": "04d1cfc3d0e5065a83febdb3ed14b7ce03a8f719fb858592acb1f988963344c4"
     },
     "themes/papercolor_light.js": {
-      "bytes": 4777,
-      "sha256": "c83cbc3083e6579d81e83d45678c527ef38147092ec161f1ff9c3ffd12c31bbf"
+      "bytes": 4835,
+      "sha256": "912d871c1746d5732a75a467f91ea454cc32302177025bebed837b5462c94889"
     },
     "themes/rosebones_dark.js": {
-      "bytes": 5177,
-      "sha256": "14e46ed9505e5197718a9db2d3fda150c32844d6ae8b3eb9f6f25008dfc74499"
+      "bytes": 5235,
+      "sha256": "759170f88f6ceb26894038f00d3c3c19648b321df2c55ff61563a7b5cdc90418"
     },
     "themes/rosebones_light.js": {
-      "bytes": 5182,
-      "sha256": "29a875c2ebc377e01af529d2319df6ea272768c74940a1ff54d7c6ca98916de7"
+      "bytes": 5240,
+      "sha256": "64aa2a41cfa255685bae4817182030e1e4b5dce177e61c68991f9dae810ea57c"
     },
     "themes/rosepine_dark.js": {
-      "bytes": 5739,
-      "sha256": "c905feb3a238a7c03a3a50802b4b5eed761eb5202ea05d151a24323199f6dcf6"
+      "bytes": 5797,
+      "sha256": "d3b7047c15512d361eb25166a18f594c4f78562c0b43f97c07ccd0ad42eff151"
     },
     "themes/rosepine_dawn.js": {
-      "bytes": 5740,
-      "sha256": "3ef93010063b770bf0131a4a42fb49fb7236f7b3d1a1759c06b4cdde72c63a31"
+      "bytes": 5798,
+      "sha256": "feb946017366db89ed5e3fbfd30fc10b0d163440a2f82bda73fe1ce95cadad38"
     },
     "themes/rosepine_moon.js": {
-      "bytes": 5739,
-      "sha256": "a574a6ad4484b605ce348ab3ebe4a9c443a73fb9bd7a40c552a1f27603b5b70f"
+      "bytes": 5797,
+      "sha256": "73bf9c7aa5311415c13ea7cf3bf4351f4ab1d9a38a27f630a073eb821efd5d2b"
     },
     "themes/seoulbones_dark.js": {
-      "bytes": 5349,
-      "sha256": "0c1db610f2c1c5a2052f1d013ffe59650445a423080258cf422c66041882bff7"
+      "bytes": 5407,
+      "sha256": "b03cfbd2e9b052f2d5686a1ff8651e62088a3be15e0ae708684ab1c2d9cd8cf3"
     },
     "themes/seoulbones_light.js": {
-      "bytes": 5354,
-      "sha256": "3cc08f7d6c9b5ae453a30a0e9e9b44e6ac919ecd00bad327d5fc77f35f9fe744"
+      "bytes": 5412,
+      "sha256": "d57c83d3b12ea952b3f26c5c3bb4a37785b2f0ff9919b581b31c82cb768044a6"
     },
     "themes/solarized_autumn_dark.js": {
-      "bytes": 5148,
-      "sha256": "2f9f63b625ecde567229cbfb64bc15e16c3bd3f9efe3bcdbf685d6764058d888"
+      "bytes": 5206,
+      "sha256": "7d9788f253e39effd62c50f48089435434552076e199e03d0b60b5c7ed4adb67"
     },
     "themes/solarized_autumn_light.js": {
-      "bytes": 5165,
-      "sha256": "2c193ac21eff959c18ae68e15963717dfe2217514831bfb46ce5228c50c5f6d8"
+      "bytes": 5223,
+      "sha256": "7b5a7b2f36e0ce0514524f1346512cd01ebe743e817488e64e8c7f82c8182ba5"
     },
     "themes/solarized_osaka_dark.js": {
-      "bytes": 5631,
-      "sha256": "caa83826331ef2461c3ccac1e51d6ae247ec11fe0b757b867fb01407b05940f7"
+      "bytes": 5689,
+      "sha256": "fe2ee945a90a52de934eea92f50daf969297ffc93b477c7a349ea479ef057bd7"
     },
     "themes/solarized_osaka_light.js": {
-      "bytes": 5636,
-      "sha256": "daf3159f664ab6544902356ba024cb35fa3e06aaa134b1cf6faa6051cb713c2f"
+      "bytes": 5694,
+      "sha256": "063d9eca7bf9dd8503059efc55060616cc0f534a0283a3d3dfc52d113bce3e18"
     },
     "themes/solarized_spring_dark.js": {
-      "bytes": 5148,
-      "sha256": "8b0182365e50316667ccc25c10da450526e6043090f1f18bf6f49131c27fb105"
+      "bytes": 5206,
+      "sha256": "20c1d6f039b800ead159b01a68fafac383c6b50ea39dc52ab9c19304fe275c0a"
     },
     "themes/solarized_spring_light.js": {
-      "bytes": 5165,
-      "sha256": "1878cb4a368075328702b5fadd721c8d20a0cf8fb67b2e78eda30a233cda169e"
+      "bytes": 5223,
+      "sha256": "a89c824aed4dda19d00154a243edd61358533c75ecdcdc97ca00dda4a17467b7"
     },
     "themes/solarized_summer_dark.js": {
-      "bytes": 5106,
-      "sha256": "96bf716f6ec1a3498d3d300315713d38bf7bbbc31242df285df960d346d79713"
+      "bytes": 5164,
+      "sha256": "b4ea6ca77184f99a4ef1dcba144d5f1ba749224633f1ff7d22c0b2423c35361b"
     },
     "themes/solarized_summer_light.js": {
-      "bytes": 5123,
-      "sha256": "dde11e0f5afb42a7bc211c70edeb605e541d9287ab508e4eb2d858d8334e8db0"
+      "bytes": 5181,
+      "sha256": "dd64d6cebec6118a2d719c47077ef8ad790dd1f12544b633ed7638410a09d99d"
     },
     "themes/solarized_winter_dark.js": {
-      "bytes": 5292,
-      "sha256": "c374bf9723067719b38139645117e684a4301c634007337f94248111dad54d83"
+      "bytes": 5350,
+      "sha256": "1a910460e1ceba1fc30aac8446e6c3a39b23e839f131df4a08da17cf0992453f"
     },
     "themes/solarized_winter_light.js": {
-      "bytes": 5285,
-      "sha256": "80ea58f47af7605a9016805e8d63ac5e6d204eb2bf2c3abd0ac05631051f3fa6"
+      "bytes": 5343,
+      "sha256": "0bd1f33da2308c9237e06eeeab4306de80fecc7635e9f96db714fdde12280fc0"
     },
     "themes/sonokai_andromeda.js": {
-      "bytes": 5746,
-      "sha256": "573a73943dfcc554d9c0036dcf20d851b712557c14dce8fbe58dceb7d15d8e9f"
+      "bytes": 5804,
+      "sha256": "01cbaf79483960bc1cf534a64216be67d9cfe8bd64f32ca3e57f30b6f05c57c3"
     },
     "themes/sonokai_atlantis.js": {
-      "bytes": 5742,
-      "sha256": "3fc3d7b0f1266778f5e0fc835c7ddea2ee220780d46223d34ff2657347ff9acd"
+      "bytes": 5800,
+      "sha256": "315769140b1e77c31219454802e4800e7fd2af2b1f2696bf832c1e6e284b5034"
     },
     "themes/sonokai_default.js": {
-      "bytes": 5738,
-      "sha256": "b2cb6ccf43cab736287d28d0e59a043d74635ec355072759bd2cb27ef6824f5c"
+      "bytes": 5796,
+      "sha256": "604785506f7f592ea47e8bd024d66606a582fcddb5028c55b16bfe3975e65e3c"
     },
     "themes/sonokai_espresso.js": {
-      "bytes": 5742,
-      "sha256": "724dabc1f99a1fee0ed8debb33731c121a5dee7c7522448f84e8cb9f2c87dc29"
+      "bytes": 5800,
+      "sha256": "76838c43152c85c7d238234535cda4c3441e1e7f464541f6d7acc22104c6428c"
     },
     "themes/sonokai_maia.js": {
-      "bytes": 5726,
-      "sha256": "6ad238526d0b427c95afdd2d444ae97e304c8f2b54b10ffb02c1b15a2df6aa00"
+      "bytes": 5784,
+      "sha256": "3c03fa1d5e9c010ea9f2b897762ad3c22378a7951346f6cb079036981f00f48f"
     },
     "themes/sonokai_shusia.js": {
-      "bytes": 5734,
-      "sha256": "5c58259a026f37cacf0bea968077bdc6596b5d048aecf22c0bf27baa3d472d72"
+      "bytes": 5792,
+      "sha256": "adce9251eb2c12f2e309705421fb7d9aaae87fd445f5dd043ac20c55d1027367"
     },
     "themes/srcery.js": {
-      "bytes": 5225,
-      "sha256": "e777c5b4c8e20ddedaa27f155627d5b9ac9b645eda31b29a502b127cb53a9467"
+      "bytes": 5283,
+      "sha256": "8359f342c062a134dbbd199c1f79397a2dfbf2849dadff36d09036d62eb91dfe"
     },
     "themes/synthweave.js": {
-      "bytes": 5074,
-      "sha256": "9e8c15decb97485f0e4711f48b759e9927f617fe529d5a4198be3d1447e60e61"
+      "bytes": 5132,
+      "sha256": "7f1d723aee9eaa2e76a544c156709d6c04835440829172f6d183807ae8e3959c"
     },
     "themes/synthweave_aqua.js": {
-      "bytes": 5094,
-      "sha256": "2908467e8893213d37a699ca61521749d48078b9a0046e223fa60097083f81a5"
+      "bytes": 5152,
+      "sha256": "c25f60a7600949104503e289584b617aa5ab56776dab5b9976e059ad8441d7c7"
     },
     "themes/terafox.js": {
-      "bytes": 5152,
-      "sha256": "560209027ef87e52a5be452b00fda1bf7afc74a029efabe48a43a758764dcb1c"
+      "bytes": 5210,
+      "sha256": "79bbd4aa796dbba7696a786c8899c2cf96048e6e032d419e5622eeed88f23d5a"
     },
     "themes/token_dark.js": {
-      "bytes": 5070,
-      "sha256": "c28d12e79a7e72f8954fd4f1bb2ff6ecd0422e524f90e9f094f040f6a305e858"
+      "bytes": 5128,
+      "sha256": "94fd421cc036a02d860763046959ecb55315e890b430335f21600e31a48cf2d5"
     },
     "themes/token_flint_dark.js": {
-      "bytes": 5094,
-      "sha256": "6d3fad355dbe5725de2d13afc6b674968cb7f646d173ae3bee3f40b68f689000"
+      "bytes": 5152,
+      "sha256": "3b404e945e8d6f70d96041d4bf58a95c0272e99b31ad2fda8e9ec2e052c57efe"
     },
     "themes/token_flint_light.js": {
-      "bytes": 5099,
-      "sha256": "c28abfdade228471f2b2401d27f973728a3fa4e9c0b30045f14d55ffbfb3a584"
+      "bytes": 5157,
+      "sha256": "0445fd7a7049d3d4a63742aaa49f09c6242c2bde6c51b6602f06ae0abc9c6e1d"
     },
     "themes/token_light.js": {
-      "bytes": 5075,
-      "sha256": "0b119d54e6a885e72b5040c8bbafd25184a8b0352b25a04aee5746e686c0c995"
+      "bytes": 5133,
+      "sha256": "0542fc0179a57b49a2dbda007fc8903d011fa2738826bfe2caf5a85b1f3dae5b"
     },
     "themes/token_meridian_dark.js": {
-      "bytes": 5106,
-      "sha256": "467b4a8097ea7b0340aa91c21dcb352aec58446678f9af545a47cd8115746979"
+      "bytes": 5164,
+      "sha256": "6be7a252aaff2afc1d385ad1dfe0addd31304961f70723819f0d02742df6c0c4"
     },
     "themes/token_meridian_light.js": {
-      "bytes": 5111,
-      "sha256": "610f36d55cd0f1bcbb71a2a40d1e3906462394f19938fa2f401522fa90bf5339"
+      "bytes": 5169,
+      "sha256": "9d02c2d69760cab376134d81e819a4a8f1e4a0c1172d078ceaec187ec9fd4740"
     },
     "themes/token_temper_dark.js": {
-      "bytes": 5098,
-      "sha256": "9bf95b956a48255df9933500c75c64a4ec43eeb6fc119c61f087eb10104660c9"
+      "bytes": 5156,
+      "sha256": "0fa44b8bfe66e740b2dfe0bf77a48255d69c51088c425f65824f4b761f897a68"
     },
     "themes/token_temper_light.js": {
-      "bytes": 5103,
-      "sha256": "afce694de7db3b7a9e7b171a84d32a2927b1b30a14a83b98a0f12699916781df"
+      "bytes": 5161,
+      "sha256": "9c594de61be0b99986fb90a447eb02996effedf36536c0481eebd1e594626f69"
     },
     "themes/token_ultra_dark.js": {
-      "bytes": 5094,
-      "sha256": "2cfc4b5af8701a1fd69aa8ff858e949f3b4ec4d61fa0e8b9ef83aecd277bf40b"
+      "bytes": 5152,
+      "sha256": "008236df79e02728a64ca7d5b0263e130ec05f2af28ec166084633bd577c94e5"
     },
     "themes/token_ultra_light.js": {
-      "bytes": 5099,
-      "sha256": "4f4821140b23982a6f0065e3b3d1d3c031b7a98bc9d6118736e3ce951965ee74"
+      "bytes": 5157,
+      "sha256": "d8ef014c68640d480a6730f8fd23eac060f6268da54c157bd202afff559ee2bd"
     },
     "themes/tokyobones_dark.js": {
-      "bytes": 5349,
-      "sha256": "28d918618dd170be4f99120b9d63019a2bfb7ed970b9bd3bdc4863d43ebbd724"
+      "bytes": 5407,
+      "sha256": "fb06481b2d3fe629b6eef055ccfb80e4667dd84123a2711dfcd64d52d85ff8c0"
     },
     "themes/tokyobones_light.js": {
-      "bytes": 5354,
-      "sha256": "3fcb27246ee6d34fc399007a5d5407fdc69b7417c35591ba0046685c4ebee5ef"
+      "bytes": 5412,
+      "sha256": "2a21ff16bc524bc9748c7180c1c2b027b08743e3a07ce3665d59b8652269ad04"
     },
     "themes/tokyonight_day.js": {
-      "bytes": 5799,
-      "sha256": "49c444751fb1e27ff51af034ead041c1a309e7bf56473c75388c3853f0bf6866"
+      "bytes": 5857,
+      "sha256": "aa0ed8dbc16baa85d707be746ca2f7bb0ca156c5fcaa07b02283338317f00b0e"
     },
     "themes/tokyonight_moon.js": {
-      "bytes": 5802,
-      "sha256": "d4861154964494d281d6056817ea8f9c5424c6964b5f58fcbc4e225c8d9f1668"
+      "bytes": 5860,
+      "sha256": "94ba628abbf943e04dd2a142402a2a68564b85e2321e604e576443ddb74731b3"
     },
     "themes/tokyonight_night.js": {
-      "bytes": 5806,
-      "sha256": "e776904d5218cf78734edc56f62fa28a7df9f6555e0403afdd639676bab7db83"
+      "bytes": 5864,
+      "sha256": "9f8a9d04312abbdc14c0231dfe2cfdddab72b23f8993206d8c1165703f121e66"
     },
     "themes/tokyonight_storm.js": {
-      "bytes": 5806,
-      "sha256": "a588fb03cd30025066deee768ed3a2ed2ba91582d07a8d7f7205489092ebe596"
+      "bytes": 5864,
+      "sha256": "39cc1ef0129ae82afe7297f4aecc3bcdefa6db134940fb6353a9e075107dde39"
     },
     "themes/vague.js": {
-      "bytes": 5108,
-      "sha256": "f03a657d207192ee97d9ee37be1c06ddaf3262c1addc5945976eb20bc277b467"
+      "bytes": 5166,
+      "sha256": "d05b480b6b4134bb710634bd0b1177c5a62a43abb549deb200297b284e3c30dc"
     },
     "themes/vesper.js": {
-      "bytes": 4655,
-      "sha256": "9baba48ef1251d49a68ae285abd368a90279b4fba3f1f6ce6f5e99ac74498c28"
+      "bytes": 4713,
+      "sha256": "40e634b61dd0c9c3a34053db428844c825d68d8ae861c34b54980e1b9502f345"
     },
     "themes/vimbones.js": {
-      "bytes": 5578,
-      "sha256": "4bdc082a4b9459ef33d0d072a96831e0a2457c0437ca2280a2ed80364946848d"
+      "bytes": 5636,
+      "sha256": "77b91a5930c3281399cbb461cb088f094e352dbbc6253afe76e90e9b1fa0863b"
     },
     "themes/vscode_dark.js": {
-      "bytes": 5672,
-      "sha256": "3327cdf53c741c5ad0edec89f35f247418673387ce744d7709e33da4e2ae2044"
+      "bytes": 5730,
+      "sha256": "6cdefa081de69bb81acffcbaf64f7c542a5400078505b6453d73f6fbecd23784"
     },
     "themes/vscode_light.js": {
-      "bytes": 5805,
-      "sha256": "83e5c8a562a52c088e17c3589add4391b8df239a877d418b4233f79ab821da60"
+      "bytes": 5863,
+      "sha256": "7d8b4b0ad450cecd6b0c3ddb173339e14c7ea689e5320003bf3c00f1d33c90d7"
     },
     "themes/xcode_dark.js": {
-      "bytes": 4893,
-      "sha256": "3c5a86948fa75a61141fe48bf41450ed23d2415dc34bc4c27aa7c9898243cb42"
+      "bytes": 4951,
+      "sha256": "a15d2a43dca8084794671b9a1d27b022d9399e6e01657b39a24f6e77d1fea621"
     },
     "themes/xcode_dark_hc.js": {
-      "bytes": 4905,
-      "sha256": "7dd7b46b807317c8648ad1adae615f31e14d077c10d63fd92b4286bcac199e97"
+      "bytes": 4963,
+      "sha256": "755b5bf5fab09ef9f79961857723b66d2867aa1c71f0de543172c5dd6b3dcaaf"
     },
     "themes/xcode_light.js": {
-      "bytes": 4898,
-      "sha256": "9919e83e5f6843ea9d5c5a1954f03caa26530f4e6c3eaaf18b437c558c301dbe"
+      "bytes": 4956,
+      "sha256": "4b70153e3f9d71ae8c9ca2740c61abca59fa897fd40f6cc06d2a24792401af56"
     },
     "themes/xcode_light_hc.js": {
-      "bytes": 4910,
-      "sha256": "8e869aa27de445c46c88d4511a4bec1caa3bcfcd4bc6774a5912aa68dde04fd3"
+      "bytes": 4968,
+      "sha256": "79726f034d9edad84b90574b933eab01e0adf0c8ab210cab1b24a485c216d040"
     },
     "themes/xcode_wwdc.js": {
-      "bytes": 4665,
-      "sha256": "1008458977a779d98a5e70734547e26c75390d4a010688c9ba28d39e551fd440"
+      "bytes": 4723,
+      "sha256": "8c175ef518bb6c531c4428cc249c9707ac8cda1dc6880368bbdf7d18d199a759"
     },
     "themes/zenbones_dark.js": {
-      "bytes": 5653,
-      "sha256": "cc975fa09f5d54673cbd1834b2c57c302dbee1d471dc98173084c2be7bc2477a"
+      "bytes": 5711,
+      "sha256": "30ef173c6711627ab3e142885ecdf394a730e16a2e65608cb90b9058cb672fa3"
     },
     "themes/zenbones_light.js": {
-      "bytes": 5658,
-      "sha256": "2a983b0cf1a47f40265cb428129e98ca1ba4c80baa47a8ed93f7488e839cb069"
+      "bytes": 5716,
+      "sha256": "da61f330099bfd8a4b8f287e629d1ca5c07e51db6ceff59f1e1e3f63710d2505"
     },
     "themes/zenburn.js": {
-      "bytes": 5048,
-      "sha256": "9a3230cd6571072c69e8ae3e6b70aa817843f76aec944de016ffbab84e6677a5"
+      "bytes": 5106,
+      "sha256": "3e8dfe70995b606628fae0cfefc8727dd0fd857f05787c51c60873cc4c167eb2"
     },
     "themes/zenburned.js": {
-      "bytes": 5325,
-      "sha256": "052220b326329f29c5844fb9a55d040831db4278322ed05b1963117c271e6f5f"
+      "bytes": 5383,
+      "sha256": "264c90b5912cef65f20b37e4c961db5bfa577694beda1bd7e6b7326f8eeb3373"
     },
     "themes/zenwritten_dark.js": {
-      "bytes": 5661,
-      "sha256": "9cbc379a61ab3ff096d93e3930db2aa2d947271cf2be18478858830f9ffb45bf"
+      "bytes": 5719,
+      "sha256": "e66aee61ff567ad298c89e514a1eded74f2cc883b591f9749240e2a2a00cf26d"
     },
     "themes/zenwritten_light.js": {
-      "bytes": 5666,
-      "sha256": "3f225216fcb9c56692b29c4dc8017003cefc21b25507d7bbb611451f00109c05"
+      "bytes": 5724,
+      "sha256": "d8fd5a5ce52569144157e93adb807d864d5e544687fc9379257a0bd181a5ba5d"
     },
     "themes/zephyr_dark.js": {
-      "bytes": 4624,
-      "sha256": "4fa9bed85ec36590d16387473eec15cc30535c8db85690d8d56c16a41e8f95c0"
+      "bytes": 4682,
+      "sha256": "cf58a319abd67b7c4d9b0b7beda00ba6948c8193cc5d81ba3d25e083a86c1f9c"
     },
     "tlaplus-BHHJFPLB-CTyCulBx.js": {
       "bytes": 548,
@@ -1776,7 +1786,7 @@
     },
     "vendor-licenses.txt": {
       "bytes": 8817,
-      "sha256": "6a8db3b9a24c1cf83dee04e662bcf274bfaae83f4d5881fa9cd1c6d1698bdf78"
+      "sha256": "a591ea7b710db46146d23304c5cb2b7a18dde2074b965637ce529843cfbc2d77"
     },
     "vhdl-EYFNS6BU-CnfxOu2d.js": {
       "bytes": 497,
@@ -1794,9 +1804,9 @@
       "bytes": 509,
       "sha256": "985dde01de003a2c4fdf72de210f008b3fdad69abe7c643c4c9003211b16111e"
     },
-    "web-tree-sitter-PL55ZHCW-C4sC36Bi.js": {
-      "bytes": 152489,
-      "sha256": "55573536af35c57dfea13f5d5c69db7ceaafc35a038d2383db71ffc996085764"
+    "web-tree-sitter-PL55ZHCW-CW1kPKE4.js": {
+      "bytes": 152631,
+      "sha256": "45dfc2ba65451ae25354f0bdc1a575e9157de7c52c1e3ccb99ceea8a63418dd4"
     },
     "wgsl-TIK6KIBL-86AYtCHe.js": {
       "bytes": 497,

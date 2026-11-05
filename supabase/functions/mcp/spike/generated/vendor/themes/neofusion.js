@@ -1,6 +1,7 @@
 /* eslint-disable -- Generated third-party code; see vendor-licenses.txt and vendor-manifest.json. */
 // themes/neofusion.ts
 var theme = {
+  $schema: "https://lumis.sh/schemas/themes/v1.0.0.json",
   name: "neofusion",
   appearance: "dark",
   revision: "c8ef24be527be37254bf8981fa3e6216dee4f8d8",

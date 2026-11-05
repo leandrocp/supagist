@@ -1,4 +1,4 @@
-@lumis-sh/wasm-angular@0.26.4
+@lumis-sh/wasm-angular@0.26.6
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -24,7 +24,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-arduino@0.26.3
+@lumis-sh/wasm-arduino@0.26.4
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -50,7 +50,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-asm@0.26.4
+@lumis-sh/wasm-asm@0.26.5
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -76,7 +76,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-astro@0.26.3
+@lumis-sh/wasm-astro@0.26.4
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -102,7 +102,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-bash@0.26.6
+@lumis-sh/wasm-bash@0.26.7
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -128,7 +128,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-bicep@0.26.2
+@lumis-sh/wasm-bend@0.26.0
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -154,7 +154,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-c@0.26.3
+@lumis-sh/wasm-bicep@0.26.3
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -180,7 +180,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-caddy@0.26.4
+@lumis-sh/wasm-c@0.26.4
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -206,7 +206,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-clojure@0.26.3
+@lumis-sh/wasm-caddy@0.26.5
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -232,7 +232,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-cmake@0.26.5
+@lumis-sh/wasm-clojure@0.26.4
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -258,7 +258,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-comment@0.26.3
+@lumis-sh/wasm-cmake@0.26.7
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -284,7 +284,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-commonlisp@0.26.4
+@lumis-sh/wasm-comment@0.26.4
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -310,7 +310,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-cpp@0.26.2
+@lumis-sh/wasm-commonlisp@0.26.5
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -336,7 +336,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-csharp@0.26.3
+@lumis-sh/wasm-cpp@0.26.3
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -362,7 +362,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-css@0.26.4
+@lumis-sh/wasm-csharp@0.26.4
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -388,7 +388,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-csv@0.26.3
+@lumis-sh/wasm-css@0.26.5
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -414,7 +414,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-d@0.26.3
+@lumis-sh/wasm-csv@0.26.4
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -440,7 +440,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-dart@0.26.4
+@lumis-sh/wasm-d@0.26.4
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -466,7 +466,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-diff@0.26.5
+@lumis-sh/wasm-dart@0.26.7
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -492,7 +492,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-dockerfile@0.26.3
+@lumis-sh/wasm-diff@0.26.6
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -518,7 +518,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-dot@0.26.2
+@lumis-sh/wasm-dockerfile@0.26.4
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -544,7 +544,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-editorconfig@0.26.3
+@lumis-sh/wasm-dot@0.26.3
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -570,7 +570,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-eex@0.26.3
+@lumis-sh/wasm-editorconfig@0.26.4
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -596,7 +596,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-elixir@0.26.5
+@lumis-sh/wasm-eex@0.26.4
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -622,7 +622,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-elm@0.26.3
+@lumis-sh/wasm-elixir@0.26.9
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -648,7 +648,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-embedded-template@0.26.4
+@lumis-sh/wasm-elm@0.26.4
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -674,7 +674,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-erlang@0.26.5
+@lumis-sh/wasm-embedded-template@0.26.5
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -700,7 +700,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-fish@0.26.2
+@lumis-sh/wasm-erlang@0.26.7
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -726,7 +726,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-fortran@0.26.3
+@lumis-sh/wasm-fish@0.26.3
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -752,7 +752,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-fsharp@0.26.8
+@lumis-sh/wasm-fortran@0.26.4
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -778,7 +778,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-gitattributes@0.26.3
+@lumis-sh/wasm-fsharp@0.26.9
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -804,7 +804,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-gitignore@0.26.2
+@lumis-sh/wasm-gitattributes@0.26.4
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -830,7 +830,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-gleam@0.26.6
+@lumis-sh/wasm-gitignore@0.26.3
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -856,7 +856,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-glimmer@0.26.3
+@lumis-sh/wasm-gleam@0.26.7
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -882,7 +882,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-glsl@0.26.3
+@lumis-sh/wasm-glimmer@0.26.4
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -908,7 +908,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-go@0.26.3
+@lumis-sh/wasm-glsl@0.26.4
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -934,7 +934,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-graphql@0.26.3
+@lumis-sh/wasm-go@0.26.5
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -960,7 +960,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-groovy@0.26.5
+@lumis-sh/wasm-graphql@0.26.4
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -986,7 +986,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-haskell@0.26.2
+@lumis-sh/wasm-groovy@0.26.6
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -1012,7 +1012,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-hcl@0.26.4
+@lumis-sh/wasm-haskell@0.26.4
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -1038,7 +1038,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-heex@0.26.3
+@lumis-sh/wasm-hcl@0.26.5
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -1064,7 +1064,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-html@0.26.4
+@lumis-sh/wasm-heex@0.26.4
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -1090,7 +1090,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-htmldjango@0.26.0
+@lumis-sh/wasm-html@0.26.5
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -1116,7 +1116,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-http@0.26.2
+@lumis-sh/wasm-htmldjango@0.26.1
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -1142,7 +1142,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-hurl@0.26.6
+@lumis-sh/wasm-http@0.26.3
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -1168,7 +1168,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-iex@0.26.2
+@lumis-sh/wasm-hurl@0.26.7
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -1194,7 +1194,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-ini@0.26.3
+@lumis-sh/wasm-iex@0.26.3
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -1220,7 +1220,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-java@0.26.3
+@lumis-sh/wasm-ini@0.26.4
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -1246,7 +1246,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-javadoc@0.26.3
+@lumis-sh/wasm-java@0.26.4
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -1272,7 +1272,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-javascript@0.26.4
+@lumis-sh/wasm-javadoc@0.26.4
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -1298,7 +1298,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-jinja@0.26.6
+@lumis-sh/wasm-javascript@0.26.5
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -1324,7 +1324,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-jinja_inline@0.26.5
+@lumis-sh/wasm-jinja@0.26.7
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -1350,7 +1350,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-jq@0.26.2
+@lumis-sh/wasm-jinja_inline@0.26.6
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -1376,7 +1376,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-json@0.26.5
+@lumis-sh/wasm-jq@0.26.3
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -1402,7 +1402,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-json5@0.26.3
+@lumis-sh/wasm-json@0.26.6
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -1428,7 +1428,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-julia@0.26.3
+@lumis-sh/wasm-json5@0.26.4
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -1454,7 +1454,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-just@0.26.3
+@lumis-sh/wasm-julia@0.26.4
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -1480,7 +1480,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-kdl@0.26.4
+@lumis-sh/wasm-just@0.26.4
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -1506,7 +1506,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-kotlin@0.26.5
+@lumis-sh/wasm-kdl@0.26.5
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -1532,7 +1532,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-latex@0.26.2
+@lumis-sh/wasm-kotlin@0.26.6
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -1558,7 +1558,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-liquid@0.26.3
+@lumis-sh/wasm-latex@0.26.3
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -1584,7 +1584,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-llvm@0.26.4
+@lumis-sh/wasm-lean@0.26.0
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -1610,7 +1610,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-lua@0.26.3
+@lumis-sh/wasm-liquid@0.26.4
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -1636,7 +1636,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-luadoc@0.26.3
+@lumis-sh/wasm-llvm@0.26.5
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -1662,7 +1662,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-make@0.26.3
+@lumis-sh/wasm-lua@0.26.4
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -1688,7 +1688,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-markdown@0.26.3
+@lumis-sh/wasm-luadoc@0.26.4
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -1714,7 +1714,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-markdown_inline@0.26.3
+@lumis-sh/wasm-make@0.26.4
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -1740,7 +1740,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-matlab@0.26.4
+@lumis-sh/wasm-markdown@0.26.5
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -1766,7 +1766,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-mermaid@0.26.2
+@lumis-sh/wasm-markdown_inline@0.26.5
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -1792,7 +1792,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-nginx@0.26.2
+@lumis-sh/wasm-matlab@0.26.5
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -1818,7 +1818,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-nim@0.26.3
+@lumis-sh/wasm-mermaid@0.26.3
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -1844,7 +1844,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-nix@0.26.3
+@lumis-sh/wasm-nginx@0.26.3
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -1870,7 +1870,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-nushell@0.26.7
+@lumis-sh/wasm-nim@0.26.4
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -1896,7 +1896,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-objc@0.26.2
+@lumis-sh/wasm-nix@0.26.4
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -1922,7 +1922,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-ocaml@0.26.4
+@lumis-sh/wasm-nushell@0.26.9
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -1948,7 +1948,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-ocaml_interface@0.26.4
+@lumis-sh/wasm-objc@0.26.3
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -1974,7 +1974,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-pascal@0.26.2
+@lumis-sh/wasm-ocaml@0.26.5
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -2000,7 +2000,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-perl@0.26.5
+@lumis-sh/wasm-ocaml_interface@0.26.5
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -2026,7 +2026,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-php@0.26.4
+@lumis-sh/wasm-pascal@0.26.3
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -2052,7 +2052,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-powershell@0.26.4
+@lumis-sh/wasm-perl@0.26.7
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -2078,7 +2078,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-prisma@0.26.3
+@lumis-sh/wasm-php@0.26.8
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -2104,7 +2104,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-protobuf@0.26.5
+@lumis-sh/wasm-powershell@0.26.6
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -2130,7 +2130,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-puppet@0.26.2
+@lumis-sh/wasm-prisma@0.26.4
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -2156,7 +2156,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-python@0.26.5
+@lumis-sh/wasm-protobuf@0.26.6
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -2182,7 +2182,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-qmljs@0.26.3
+@lumis-sh/wasm-puppet@0.26.3
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -2208,7 +2208,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-r@0.26.3
+@lumis-sh/wasm-python@0.26.6
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -2234,7 +2234,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-racket@0.26.4
+@lumis-sh/wasm-qmljs@0.26.4
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -2260,7 +2260,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-regex@0.26.3
+@lumis-sh/wasm-r@0.26.4
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -2286,7 +2286,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-rst@0.26.3
+@lumis-sh/wasm-racket@0.26.5
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -2312,7 +2312,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-ruby@0.26.4
+@lumis-sh/wasm-regex@0.26.4
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -2338,7 +2338,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-rust@0.26.5
+@lumis-sh/wasm-rst@0.26.4
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -2364,7 +2364,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-scala@0.26.4
+@lumis-sh/wasm-ruby@0.26.5
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -2390,7 +2390,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-scheme@0.26.4
+@lumis-sh/wasm-rust@0.26.6
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -2416,7 +2416,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-scss@0.26.2
+@lumis-sh/wasm-scala@0.26.7
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -2442,7 +2442,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-slim@0.26.0
+@lumis-sh/wasm-scheme@0.26.6
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -2468,7 +2468,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-solidity@0.26.3
+@lumis-sh/wasm-scss@0.26.3
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -2494,7 +2494,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-sql@0.26.4
+@lumis-sh/wasm-slim@0.26.1
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -2520,7 +2520,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-surface@0.26.3
+@lumis-sh/wasm-solidity@0.26.4
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -2546,7 +2546,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-svelte@0.26.3
+@lumis-sh/wasm-sql@0.26.6
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -2572,7 +2572,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-swift@0.26.3
+@lumis-sh/wasm-surface@0.26.4
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -2598,7 +2598,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-tcl@0.26.3
+@lumis-sh/wasm-svelte@0.26.4
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -2624,7 +2624,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-terraform@0.26.3
+@lumis-sh/wasm-swift@0.26.4
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -2650,7 +2650,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-tlaplus@0.26.0
+@lumis-sh/wasm-tcl@0.26.4
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -2676,7 +2676,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-toml@0.26.2
+@lumis-sh/wasm-terraform@0.26.4
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -2702,7 +2702,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-toon@0.26.4
+@lumis-sh/wasm-tlaplus@0.26.1
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -2728,7 +2728,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-tsx@0.26.3
+@lumis-sh/wasm-toml@0.26.3
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -2754,7 +2754,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-typescript@0.26.3
+@lumis-sh/wasm-toon@0.26.5
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -2780,7 +2780,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-typst@0.26.3
+@lumis-sh/wasm-tsx@0.26.4
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -2806,7 +2806,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-vhdl@0.26.3
+@lumis-sh/wasm-typescript@0.26.4
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -2832,7 +2832,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-vim@0.26.3
+@lumis-sh/wasm-typst@0.26.4
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -2858,7 +2858,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-vue@0.26.2
+@lumis-sh/wasm-vhdl@0.26.4
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -2884,7 +2884,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-wat@0.26.2
+@lumis-sh/wasm-vim@0.26.4
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -2910,7 +2910,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-wgsl@0.26.2
+@lumis-sh/wasm-vue@0.26.3
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -2936,7 +2936,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-xml@0.26.4
+@lumis-sh/wasm-wat@0.26.3
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -2962,7 +2962,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-yaml@0.26.3
+@lumis-sh/wasm-wgsl@0.26.3
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -2988,7 +2988,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-zig@0.26.2
+@lumis-sh/wasm-xml@0.26.5
 MIT License
 
 Copyright (c) 2025 Leandro Pereira
@@ -3014,7 +3014,59 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/wasm-zsh@0.26.2
+@lumis-sh/wasm-yaml@0.26.4
+MIT License
+
+Copyright (c) 2025 Leandro Pereira
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+---
+
+@lumis-sh/wasm-zig@0.26.3
+MIT License
+
+Copyright (c) 2025 Leandro Pereira
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+---
+
+@lumis-sh/wasm-zsh@0.26.3
 MIT License
 
 Copyright (c) 2025 Leandro Pereira

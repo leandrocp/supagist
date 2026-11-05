@@ -1,6 +1,7 @@
 /* eslint-disable -- Generated third-party code; see vendor-licenses.txt and vendor-manifest.json. */
 // themes/nightfox.ts
 var theme = {
+  $schema: "https://lumis.sh/schemas/themes/v1.0.0.json",
   name: "nightfox",
   appearance: "dark",
   revision: "4dacd3f0185a2227bdf3b6c0975a8f0bf87cac9a",

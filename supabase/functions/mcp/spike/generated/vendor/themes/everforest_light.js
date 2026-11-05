@@ -1,6 +1,7 @@
 /* eslint-disable -- Generated third-party code; see vendor-licenses.txt and vendor-manifest.json. */
 // themes/everforest_light.ts
 var theme = {
+  $schema: "https://lumis.sh/schemas/themes/v1.0.0.json",
   name: "everforest_light",
   appearance: "light",
   revision: "a0e9edc57379e8feafc6ba207c26dbb12fc1b6d8",

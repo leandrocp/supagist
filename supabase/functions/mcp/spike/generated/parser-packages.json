@@ -1,20 +1,20 @@
 {
   "@lumis-sh/wasm-angular": {
     "packageName": "@lumis-sh/wasm-angular",
-    "version": "0.26.4",
-    "definitionHash": "80926d5078519dac353f71bd6b554cba487d1d4f9882ad71975ab866f4fb1246",
+    "version": "0.26.6",
+    "definitionHash": "f88a8426380ed88ec1831d13272fe86ab33cc42a42c1de4e8d2daf5d5c8ca29f",
     "parser": {
       "name": "tree-sitter-angular",
       "grammarName": "angular",
       "upstreamVersion": "0.9.2",
       "revision": "1446e647e50df96f6d4b1039f121b10b5c2b2976",
-      "sha256": "67144b0a3eab35078b4fe2dabd7a91a76b3fd6b54e960f9c497bbea9de1e8298",
-      "size": 141650
+      "sha256": "3e2b8e9c4ad0760c5bf1e084b9b5321428a8fb76111d5fcf06026b3ea04790b5",
+      "size": 141569
     },
     "languages": {
       "angular": {
         "aliases": [],
-        "highlights": "; This file is auto-generated. Do not edit.\n; inherits: html_tags\n(tag_name) @tag \n\n; (erroneous_end_tag_name) @error ; we do not lint syntax errors\n(comment) @comment \n\n(attribute_name) @tag.attribute \n\n(attribute_value) \n\n((attribute\n  (quoted_attribute_value) @string)\n  (#set! priority 99))\n\n(text) @none \n\n((element\n  (start_tag\n    (tag_name) @_tag)\n  (text) @markup.heading)\n  (#eq? @_tag \"title\"))\n\n((element\n  (start_tag\n    (tag_name) @_tag)\n  (text) @markup.heading.1)\n  (#eq? @_tag \"h1\"))\n\n((element\n  (start_tag\n    (tag_name) @_tag)\n  (text) @markup.heading.2)\n  (#eq? @_tag \"h2\"))\n\n((element\n  (start_tag\n    (tag_name) @_tag)\n  (text) @markup.heading.3)\n  (#eq? @_tag \"h3\"))\n\n((element\n  (start_tag\n    (tag_name) @_tag)\n  (text) @markup.heading.4)\n  (#eq? @_tag \"h4\"))\n\n((element\n  (start_tag\n    (tag_name) @_tag)\n  (text) @markup.heading.5)\n  (#eq? @_tag \"h5\"))\n\n((element\n  (start_tag\n    (tag_name) @_tag)\n  (text) @markup.heading.6)\n  (#eq? @_tag \"h6\"))\n\n((element\n  (start_tag\n    (tag_name) @_tag)\n  (text) @markup.strong)\n  (#any-of? @_tag \"strong\" \"b\"))\n\n((element\n  (start_tag\n    (tag_name) @_tag)\n  (text) @markup.italic)\n  (#any-of? @_tag \"em\" \"i\"))\n\n((element\n  (start_tag\n    (tag_name) @_tag)\n  (text) @markup.strikethrough)\n  (#any-of? @_tag \"s\" \"del\"))\n\n((element\n  (start_tag\n    (tag_name) @_tag)\n  (text) @markup.underline)\n  (#eq? @_tag \"u\"))\n\n((element\n  (start_tag\n    (tag_name) @_tag)\n  (text) @markup.raw)\n  (#any-of? @_tag \"code\" \"kbd\"))\n\n((element\n  (start_tag\n    (tag_name) @_tag)\n  (text) @markup.link.label)\n  (#eq? @_tag \"a\"))\n\n\n\n[\n  \"<\"\n  \">\"\n  \"</\"\n  \"/>\"\n] @tag.delimiter\n\n\"=\" @operator\n\n(identifier) @variable\n\n(style_unit) @variable\n\n(pipe_operator) @operator\n\n(string) @string\n\n(number) @number\n\n(pipe_call\n  name: (identifier) @function)\n\n(pipe_call\n  arguments: (pipe_arguments\n    (identifier) @variable.parameter))\n\n(structural_directive\n  \"*\" @keyword\n  (identifier) @keyword)\n\n(attribute\n  (attribute_name) @variable.member\n  (#match? @variable.member \"#[\\\\s\\\\S]*\"))\n\n(binding_name\n  (identifier) @keyword)\n\n(class_binding\n  [\n    (identifier)\n    (class_name)\n  ] @keyword)\n\n(event_binding\n  (binding_name\n    (identifier) @keyword))\n\n(event_binding\n  \"\\\"\" @punctuation.delimiter)\n\n(property_binding\n  \"\\\"\" @punctuation.delimiter)\n\n(structural_assignment\n  operator: (identifier) @keyword)\n\n(member_expression\n  property: (identifier) @property)\n\n(call_expression\n  function: (identifier) @function)\n\n(call_expression\n  function: ((identifier) @function.builtin\n    (#eq? @function.builtin \"$any\")))\n\n(pair\n  key: ((identifier) @variable.builtin\n    (#eq? @variable.builtin \"$implicit\")))\n\n[\n  (control_keyword)\n  (special_keyword)\n] @keyword\n\n((control_keyword) @keyword.repeat\n  (#any-of? @keyword.repeat \"for\" \"empty\"))\n\n((control_keyword) @keyword.conditional\n  (#any-of? @keyword.conditional \"if\" \"else\" \"switch\" \"case\" \"default\"))\n\n((control_keyword) @keyword.coroutine\n  (#any-of? @keyword.coroutine \"defer\" \"placeholder\" \"loading\"))\n\n((control_keyword) @keyword.exception\n  (#eq? @keyword.exception \"error\"))\n\n((identifier) @boolean\n  (#any-of? @boolean \"true\" \"false\"))\n\n((identifier) @variable.builtin\n  (#any-of? @variable.builtin \"this\" \"$event\"))\n\n((identifier) @constant.builtin\n  (#eq? @constant.builtin \"null\"))\n\n[\n  (ternary_operator)\n  (conditional_operator)\n] @keyword.conditional.ternary\n\n[\n  \"(\"\n  \")\"\n  \"[\"\n  \"]\"\n  \"{\"\n  \"}\"\n  \"@\"\n] @punctuation.bracket\n\n(two_way_binding\n  [\n    \"[(\"\n    \")]\"\n  ] @punctuation.bracket)\n\n[\n  \"{{\"\n  \"}}\"\n] @punctuation.special\n\n(template_substitution\n  [\n    \"${\"\n    \"}\"\n  ] @punctuation.special)\n\n(template_chars) @string\n\n[\n  \";\"\n  \".\"\n  \",\"\n  \"?.\"\n] @punctuation.delimiter\n\n(nullish_coalescing_expression\n  (coalescing_operator) @operator)\n\n(concatenation_expression\n  \"+\" @operator)\n\n(icu_clause) @keyword.operator\n\n(icu_category) @keyword.conditional\n\n(binary_expression\n  [\n    \"-\"\n    \"&&\"\n    \"+\"\n    \"<\"\n    \"<=\"\n    \"=\"\n    \"==\"\n    \"===\"\n    \"!=\"\n    \"!==\"\n    \">\"\n    \">=\"\n    \"*\"\n    \"/\"\n    \"||\"\n    \"%\"\n  ] @operator)",
+        "highlights": "; This file is auto-generated. Do not edit.\n; inherits: html_tags\n(tag_name) @tag \n\n; (erroneous_end_tag_name) @error ; we do not lint syntax errors\n(comment) @comment \n\n(attribute_name) @tag.attribute \n\n(attribute_value) \n\n((attribute\n  (quoted_attribute_value) @string)\n  (#set! priority 99))\n\n(text) @none \n\n((element\n  (start_tag\n    (tag_name) @_tag)\n  (text) @markup.heading)\n  (#eq? @_tag \"title\"))\n\n((element\n  (start_tag\n    (tag_name) @_tag)\n  (text) @markup.heading.1)\n  (#eq? @_tag \"h1\"))\n\n((element\n  (start_tag\n    (tag_name) @_tag)\n  (text) @markup.heading.2)\n  (#eq? @_tag \"h2\"))\n\n((element\n  (start_tag\n    (tag_name) @_tag)\n  (text) @markup.heading.3)\n  (#eq? @_tag \"h3\"))\n\n((element\n  (start_tag\n    (tag_name) @_tag)\n  (text) @markup.heading.4)\n  (#eq? @_tag \"h4\"))\n\n((element\n  (start_tag\n    (tag_name) @_tag)\n  (text) @markup.heading.5)\n  (#eq? @_tag \"h5\"))\n\n((element\n  (start_tag\n    (tag_name) @_tag)\n  (text) @markup.heading.6)\n  (#eq? @_tag \"h6\"))\n\n((element\n  (start_tag\n    (tag_name) @_tag)\n  (text) @markup.strong)\n  (#any-of? @_tag \"strong\" \"b\"))\n\n((element\n  (start_tag\n    (tag_name) @_tag)\n  (text) @markup.italic)\n  (#any-of? @_tag \"em\" \"i\"))\n\n((element\n  (start_tag\n    (tag_name) @_tag)\n  (text) @markup.strikethrough)\n  (#any-of? @_tag \"s\" \"del\"))\n\n((element\n  (start_tag\n    (tag_name) @_tag)\n  (text) @markup.underline)\n  (#eq? @_tag \"u\"))\n\n((element\n  (start_tag\n    (tag_name) @_tag)\n  (text) @markup.raw)\n  (#any-of? @_tag \"code\" \"kbd\"))\n\n((element\n  (start_tag\n    (tag_name) @_tag)\n  (text) @markup.link.label)\n  (#eq? @_tag \"a\"))\n\n\n\n[\n  \"<\"\n  \">\"\n  \"</\"\n  \"/>\"\n] @tag.delimiter\n\n\"=\" @operator\n\n(identifier) @variable\n\n(style_unit) @variable\n\n(pipe_operator) @operator\n\n(string) @string\n\n(number) @number\n\n(pipe_call\n  name: (identifier) @function)\n\n(pipe_call\n  arguments: (pipe_arguments\n    (identifier) @variable.parameter))\n\n(structural_directive\n  \"*\" @keyword\n  (identifier) @keyword)\n\n(attribute\n  (attribute_name) @variable.member\n  (#match? @variable.member \"#[\\\\s\\\\S]*\"))\n\n(binding_name\n  (identifier) @keyword)\n\n(class_binding\n  [\n    (identifier)\n    (class_name)\n  ] @keyword)\n\n(event_binding\n  (binding_name\n    (identifier) @keyword))\n\n(event_binding\n  \"\\\"\" @punctuation.delimiter)\n\n(property_binding\n  [\n    \"\\\"\"\n    \"\\\"\\\"\"\n  ] @punctuation.delimiter)\n\n(structural_assignment\n  operator: (identifier) @keyword)\n\n(member_expression\n  property: (identifier) @property)\n\n(call_expression\n  function: (identifier) @function)\n\n(call_expression\n  function: ((identifier) @function.builtin\n    (#eq? @function.builtin \"$any\")))\n\n(pair\n  key: ((identifier) @variable.builtin\n    (#eq? @variable.builtin \"$implicit\")))\n\n[\n  (control_keyword)\n  (special_keyword)\n] @keyword\n\n((control_keyword) @keyword.repeat\n  (#any-of? @keyword.repeat \"for\" \"empty\"))\n\n((control_keyword) @keyword.conditional\n  (#any-of? @keyword.conditional \"if\" \"else\" \"switch\" \"case\" \"default\"))\n\n((control_keyword) @keyword.coroutine\n  (#any-of? @keyword.coroutine \"defer\" \"placeholder\" \"loading\"))\n\n((control_keyword) @keyword.exception\n  (#eq? @keyword.exception \"error\"))\n\n((identifier) @boolean\n  (#any-of? @boolean \"true\" \"false\"))\n\n((identifier) @variable.builtin\n  (#any-of? @variable.builtin \"this\" \"$event\"))\n\n((identifier) @constant.builtin\n  (#eq? @constant.builtin \"null\"))\n\n[\n  (ternary_operator)\n  (conditional_operator)\n] @keyword.conditional.ternary\n\n[\n  \"(\"\n  \")\"\n  \"[\"\n  \"]\"\n  \"{\"\n  \"}\"\n  \"@\"\n] @punctuation.bracket\n\n(two_way_binding\n  [\n    \"[(\"\n    \")]\"\n  ] @punctuation.bracket)\n\n[\n  \"{{\"\n  \"}}\"\n] @punctuation.special\n\n(template_substitution\n  [\n    \"${\"\n    \"}\"\n  ] @punctuation.special)\n\n(template_chars) @string\n\n[\n  \";\"\n  \".\"\n  \",\"\n  \"?.\"\n  \"!.\"\n] @punctuation.delimiter\n\n(nullish_coalescing_expression\n  (coalescing_operator) @operator)\n\n(concatenation_expression\n  \"+\" @operator)\n\n(icu_clause) @keyword.operator\n\n(icu_category) @keyword.conditional\n\n(binary_expression\n  [\n    \"-\"\n    \"&&\"\n    \"+\"\n    \"<\"\n    \"<=\"\n    \"=\"\n    \"==\"\n    \"===\"\n    \"!=\"\n    \"!==\"\n    \">\"\n    \">=\"\n    \"*\"\n    \"/\"\n    \"||\"\n    \"%\"\n  ] @operator)\n\n(arrow_function\n  \"=>\" @operator)\n\n(object\n  (spread\n    \"...\" @punctuation.special))\n\n(array\n  (spread\n    \"...\" @punctuation.special))\n\n(arguments\n  (spread\n    \"...\" @punctuation.special))",
         "injections": "; This file is auto-generated. Do not edit.\n; inherits: html_tags\n((comment) @injection.content\n  (#set! injection.language \"comment\"))\n\n; <style>...</style>\n; <style blocking> ...</style>\n; Add \"lang\" to predicate check so that vue/svelte can inherit this\n; without having this element being captured twice\n((style_element\n  (start_tag) @_no_type_lang\n  (raw_text) @injection.content)\n  (#not-match? @_no_type_lang \"[\\\\t-\\\\r ]lang[\\\\t-\\\\r ]*=\")\n  (#not-match? @_no_type_lang \"[\\\\t-\\\\r ]type[\\\\t-\\\\r ]*=\")\n  (#set! injection.language \"css\"))\n\n((style_element\n  (start_tag\n    (attribute\n      (attribute_name) @_type\n      (quoted_attribute_value\n        (attribute_value) @_css)))\n  (raw_text) @injection.content)\n  (#eq? @_type \"type\")\n  (#eq? @_css \"text/css\")\n  (#set! injection.language \"css\"))\n\n; <script>...</script>\n; <script defer>...</script>\n((script_element\n  (start_tag) @_no_type_lang\n  (raw_text) @injection.content)\n  (#not-match? @_no_type_lang \"[\\\\t-\\\\r ]lang[\\\\t-\\\\r ]*=\")\n  (#not-match? @_no_type_lang \"[\\\\t-\\\\r ]type[\\\\t-\\\\r ]*=\")\n  (#set! injection.language \"javascript\"))\n\n; <script type=\"foo/bar\">\n(script_element\n  (start_tag\n    (attribute\n      (attribute_name) @_attr\n      (#eq? @_attr \"type\")\n      (quoted_attribute_value\n        (attribute_value) @injection.language)))\n  (raw_text) @injection.content\n  (#gsub! @injection.language \"(.+)/(.+)\" \"%2\"))\n\n; <script type=\"importmap\">\n((script_element\n  (start_tag\n    (attribute\n      (attribute_name) @_attr\n      (#eq? @_attr \"type\")\n      (quoted_attribute_value\n        (attribute_value) @_type)))\n  (raw_text) @injection.content)\n  (#eq? @_type \"importmap\")\n  (#set! injection.language \"json\"))\n\n; <script type=\"module\">\n((script_element\n  (start_tag\n    (attribute\n      (attribute_name) @_attr\n      (#eq? @_attr \"type\")\n      (quoted_attribute_value\n        (attribute_value) @_type)))\n  (raw_text) @injection.content)\n  (#eq? @_type \"module\")\n  (#set! injection.language \"javascript\"))\n\n; <a style=\"/* css */\">\n((attribute\n  (attribute_name) @_attr\n  (quoted_attribute_value\n    (attribute_value) @injection.content))\n  (#eq? @_attr \"style\")\n  (#set! injection.language \"css\"))\n\n; lit-html style template interpolation\n; <a @click=${e => console.log(e)}>\n; <a @click=\"${e => console.log(e)}\">\n((attribute\n  (quoted_attribute_value\n    (attribute_value) @injection.content))\n  (#match? @injection.content \"\\\\$\\\\{\")\n  (#offset! @injection.content 0 2 0 -1)\n  (#set! injection.language \"javascript\"))\n\n((attribute\n  (attribute_value) @injection.content)\n  (#match? @injection.content \"\\\\$\\\\{\")\n  (#offset! @injection.content 0 2 0 -2)\n  (#set! injection.language \"javascript\"))\n\n; <input pattern=\"[0-9]\"> or <input pattern=[0-9]>\n(element\n  (_\n    (tag_name) @_tagname\n    (#eq? @_tagname \"input\")\n    (attribute\n      (attribute_name) @_attr\n      [\n        (quoted_attribute_value\n          (attribute_value) @injection.content)\n        (attribute_value) @injection.content\n      ]\n      (#eq? @_attr \"pattern\"))\n    (#set! injection.language \"regex\")))\n\n; <input type=\"checkbox\" onchange=\"this.closest('form').elements.output.value = this.checked\">\n(attribute\n  (attribute_name) @_name\n  (#match? @_name \"^on[a-z]+$\")\n  (quoted_attribute_value\n    (attribute_value) @injection.content)\n  (#set! injection.language \"javascript\"))\n",
         "locals": "; This file is auto-generated. Do not edit.\n; inherits: html\n(element) @local.scope\n",
         "brackets": "; This file is auto-generated. Do not edit.\n(\"(\" @open\n  \")\" @close)\n\n(\"[\" @open\n  \"]\" @close)\n\n(\"{\" @open\n  \"}\" @close)\n"
@@ -23,15 +23,15 @@
   },
   "@lumis-sh/wasm-arduino": {
     "packageName": "@lumis-sh/wasm-arduino",
-    "version": "0.26.3",
+    "version": "0.26.4",
     "definitionHash": "b276f71dc4fa481187896532a615f3a75d4c4a3a34bd423f4a58005d48103ba3",
     "parser": {
       "name": "tree-sitter-arduino",
       "grammarName": "arduino",
       "upstreamVersion": "0.24.0",
       "revision": "2f0c1223c50aa4b754136db544204c6fc99ffc77",
-      "sha256": "32c2f03ef198fb531443f3a232986345585c599ec6ee41d6bedc432624d844c5",
-      "size": 3541800
+      "sha256": "f928afdb7ebdfcdc72e3a63dbddc7f408ef58de95e89c392a7781ceae58c8422",
+      "size": 3541520
     },
     "languages": {
       "arduino": {
@@ -45,15 +45,15 @@
   },
   "@lumis-sh/wasm-asm": {
     "packageName": "@lumis-sh/wasm-asm",
-    "version": "0.26.4",
+    "version": "0.26.5",
     "definitionHash": "9dc09dc3aff5ade1aca833dc4cc1b96be5b3524b989a762d1b0b4a3e143b54c6",
     "parser": {
       "name": "tree-sitter-asm",
       "grammarName": "asm",
       "upstreamVersion": "0.24.0",
       "revision": "5bb5b03e3c1ce5853b5282b9fba060f7c7bbf11e",
-      "sha256": "32cd7043193f176c147dbb67364c035d44873af30e6feeee4378406d7dd30b91",
-      "size": 27668
+      "sha256": "743ec0e01cdc8cf37d2533002decb1f3a9e47ea3a8d83d197430a850874e2829",
+      "size": 27819
     },
     "languages": {
       "asm": {
@@ -66,15 +66,15 @@
   },
   "@lumis-sh/wasm-astro": {
     "packageName": "@lumis-sh/wasm-astro",
-    "version": "0.26.3",
+    "version": "0.26.4",
     "definitionHash": "45ed0d9b20f128ac68a9bf578fe6a272f082fa25c8ca3ef47ffc5f3bfb70e6ed",
     "parser": {
       "name": "tree-sitter-astro",
       "grammarName": "astro",
       "upstreamVersion": "0.0.1",
       "revision": "213f6e6973d9b456c6e50e86f19f66877e7ef0ee",
-      "sha256": "3a9f47689f91d6540ecc5906805ecf1e222ba5f4bcebb4c1e53fdf8d02078fc6",
-      "size": 28321
+      "sha256": "01a6d1a90c1f15d995c26ac00148ee6d0d29842a8474f7dd205fd420ed75fc3d",
+      "size": 28358
     },
     "languages": {
       "astro": {
@@ -88,15 +88,15 @@
   },
   "@lumis-sh/wasm-bash": {
     "packageName": "@lumis-sh/wasm-bash",
-    "version": "0.26.6",
+    "version": "0.26.7",
     "definitionHash": "f4670e5a2696275b4714871871054467290db8ec950aa95af714d78df40f61a7",
     "parser": {
       "name": "tree-sitter-bash",
       "grammarName": "bash",
       "upstreamVersion": "0.25.1",
       "revision": "382ed871c6c7d62eada5da06994d9515ae12edd7",
-      "sha256": "dde6611657d6ea382f6216db371e61f23b22e347592a565cdd47b979abe0523d",
-      "size": 1414349
+      "sha256": "9440d159d2afba2f1dd2de21e03b02f0b11e612ab2cb0ec1872ddc65ef5cbc0d",
+      "size": 1414078
     },
     "languages": {
       "bash": {
@@ -108,17 +108,37 @@
       }
     }
   },
+  "@lumis-sh/wasm-bend": {
+    "packageName": "@lumis-sh/wasm-bend",
+    "version": "0.26.0",
+    "definitionHash": "a479d5a70cb4c8357e7a4dab611e33626229b6db9195942d3d02f1bc5502e94e",
+    "parser": {
+      "name": "tree-sitter-bend",
+      "grammarName": "bend",
+      "upstreamVersion": "0.2.37",
+      "revision": "7e7b88b77103e4d9c11a68d719be8702e4d6ad7f",
+      "sha256": "6fe4c72fd5babad15b71bf83efcdec8961dabb854cb47889d90feb57c6f54ede",
+      "size": 204245
+    },
+    "languages": {
+      "bend": {
+        "aliases": [],
+        "highlights": "; This file is auto-generated. Do not edit.\n(identifier) @variable\n\n; TODO: lots of repetitive queries because of this, how can we fix it?\n(identifier\n  (path) @property\n  name: (_) @variable)\n\n(import_name\n  \"import\" @keyword\n  (os_path) @string)\n\n(import_from\n  \"from\" @keyword\n  (os_path) @string\n  \"import\" @keyword\n  (os_path) @string)\n\n(fun_function_definition\n  name: (identifier) @function)\n(fun_function_definition\n  name: (identifier (identifier) @function))\n\n(imp_function_definition\n  name: (identifier) @function)\n(imp_function_definition\n  name: (identifier (identifier) @function))\n(parameters) @variable.parameter\n\n(object_definition\n  name: (identifier) @type)\n(object_definition\n  name: (identifier (identifier) @type))\n(object_field\n  (identifier) @variable.member)\n(object_field\n  (identifier (identifier) @variable.member))\n\n(imp_type_definition\n  name: (identifier) @type)\n(imp_type_definition\n  name: (identifier (identifier) @type))\n(imp_type_constructor\n  (identifier) @constructor)\n(imp_type_constructor\n  (identifier (identifier) @constructor))\n(imp_type_constructor_field\n  (identifier) @variable.member)\n(imp_type_constructor_field\n  (identifier (identifier) @variable.member))\n\n(fun_type_definition\n  name: (identifier) @type)\n(fun_type_definition\n  name: (identifier (identifier) @type))\n(fun_type_constructor\n  (identifier) @constructor)\n(fun_type_constructor\n  (identifier (identifier) @constructor))\n(fun_type_constructor_fields\n  (identifier) @variable.member)\n(fun_type_constructor_fields\n  (identifier (identifier) @variable.member))\n\n(hvm_definition\n  name: (identifier) @function)\n(hvm_definition\n  name: (identifier (identifier) @function))\n(hvm_definition\n  code: (hvm_code) @string)\n\n(constructor\n  (identifier) @constructor)\n(constructor\n  (identifier (identifier) @constructor))\n(constructor\n  field: (identifier) @property)\n\n(call_expression\n  (identifier) @function.call)\n(call_expression\n  (identifier (identifier) @function.call))\n\n(switch_case\n  (switch_pattern) @character.special\n  (#eq? @character.special \"_\"))\n\n(integer) @number\n(float) @number.float\n\n(character) @character\n(comment) @comment\n(multiline_comment) @comment\n[\n (symbol)\n (string)\n] @string\n\n[\n  \":\"\n  \",\"\n  \";\"\n] @punctuation.delimiter\n\n[\n  \"[\"\n  \"]\"\n  \"(\"\n  \")\"\n  \"{\"\n  \"}\"\n] @punctuation.bracket\n\n[\n  \"-\"\n  \"-=\"\n  \"!=\"\n  \"*\"\n  \"**\"\n  \"*=\"\n  \"/\"\n  \"/=\"\n  \"&\"\n  \"%\"\n  \"^\"\n  \"+\"\n  \"+=\"\n  \"<\"\n  \"<=\"\n  \"=\"\n  \"==\"\n  \">\"\n  \">=\"\n  \"|\"\n  \"~\"\n  \"&\"\n  \"<-\"\n  \"&=\"\n  \"|=\"\n  \"^=\"\n  \"@=\"\n  \">>\"\n  \"<<\"\n] @operator\n\n[\n  \"if\"\n  \"elif\"\n  \"else\"\n] @keyword.conditional\n\n\n[\n \"def\"\n  \"@\"\n  \"λ\"\n  \"lambda\"\n  \"hvm\"\n] @keyword.function\n\n\"return\" @keyword.return\n\"for\" @keyword.repeat\n\n[\n  \"object\"\n  \"type\"\n] @keyword.type\n\n[\n  \"with\"\n  \"match\"\n  \"case\"\n  \"open\"\n  \"use\"\n  \"with\"\n  \"bend\"\n  \"when\"\n  \"fold\"\n  \"switch\"\n  \"ask\"\n  \"let\"\n  \"in\"\n] @keyword",
+        "brackets": "; This file is auto-generated. Do not edit.\n(\"(\" @open\n  \")\" @close)\n\n(\"[\" @open\n  \"]\" @close)\n\n(\"{\" @open\n  \"}\" @close)\n"
+      }
+    }
+  },
   "@lumis-sh/wasm-bicep": {
     "packageName": "@lumis-sh/wasm-bicep",
-    "version": "0.26.2",
+    "version": "0.26.3",
     "definitionHash": "870c165a48a715ce24a5e3df406963c2af85dc429c0c3e64c3409d20207c1d65",
     "parser": {
       "name": "tree-sitter-bicep",
       "grammarName": "bicep",
       "upstreamVersion": "1.1.0",
       "revision": "bff59884307c0ab009bd5e81afd9324b46a6c0f9",
-      "sha256": "d153dec51511826010dce2116ac9ff641452863cf16d66d6d636b8dc55231dbc",
-      "size": 149428
+      "sha256": "34e02b4b1f830fd421703dd549253fe4d9816646db848175e3e7debf32d5d028",
+      "size": 149533
     },
     "languages": {
       "bicep": {
@@ -132,15 +152,15 @@
   },
   "@lumis-sh/wasm-c": {
     "packageName": "@lumis-sh/wasm-c",
-    "version": "0.26.3",
+    "version": "0.26.4",
     "definitionHash": "ddca9bcfd5543c1fdc28c72f1315ecce8d1f4aedef6c04e071a1a91095a8b2a8",
     "parser": {
       "name": "tree-sitter-c",
       "grammarName": "c",
       "upstreamVersion": "0.24.2",
       "revision": "b780e47fc780ddc8da13afa35a3f4ed5c157823d",
-      "sha256": "636e9d3d52bc9bb853486493e1113d077df6d2e31982caa6f8bcb9c536502f9e",
-      "size": 646444
+      "sha256": "9cf585c624c7cb04173e6b2533d5d265eb9e91183c19e974f9bbdb060e892d4e",
+      "size": 646241
     },
     "languages": {
       "c": {
@@ -154,15 +174,15 @@
   },
   "@lumis-sh/wasm-caddy": {
     "packageName": "@lumis-sh/wasm-caddy",
-    "version": "0.26.4",
+    "version": "0.26.5",
     "definitionHash": "02c477965891a20e876c7f2981e33eb6722c9be5fe37e2da73ca00424f4c1908",
     "parser": {
       "name": "tree-sitter-caddy",
       "grammarName": "caddy",
       "upstreamVersion": "0.1.0",
       "revision": "b6e5870e059a09b1258712ad226a47be78f08d56",
-      "sha256": "b4467d31d592954e9a34091bd57078f8f68c5d79315736a76683c7c3656ec305",
-      "size": 49766
+      "sha256": "f51ffc912618f023a77f302681d712b764aacb140f46895488cf3861249378d9",
+      "size": 49971
     },
     "languages": {
       "caddy": {
@@ -175,15 +195,15 @@
   },
   "@lumis-sh/wasm-clojure": {
     "packageName": "@lumis-sh/wasm-clojure",
-    "version": "0.26.3",
+    "version": "0.26.4",
     "definitionHash": "0c4798630f2e2f95a46889ebd1a0d4da4271657fcac4e3d1547cb2cf11b29ca3",
     "parser": {
       "name": "tree-sitter-clojure",
       "grammarName": "clojure",
-      "upstreamVersion": "0.2.8",
+      "upstreamVersion": "0.2.9",
       "revision": "3a1ace906c151dd631cf6f149b5083f2b60e6a9e",
-      "sha256": "a68ae88b3391f0f5bbd0e509af8709d00fc523da969a9dc136d45194bbe3a3cc",
-      "size": 92374
+      "sha256": "cfef76a636492fb3c688087e35052b68a19e863726d8312735800176ab0679da",
+      "size": 92541
     },
     "languages": {
       "clojure": {
@@ -197,15 +217,15 @@
   },
   "@lumis-sh/wasm-cmake": {
     "packageName": "@lumis-sh/wasm-cmake",
-    "version": "0.26.5",
-    "definitionHash": "822fae0146df583107daa87bf0d271c09d605d0b0bc09081ef857bd589fcf865",
+    "version": "0.26.7",
+    "definitionHash": "48ae73cb9af7fa8d197bce9e374f73aafbb4b5d29daa9aded6c7ce996ef8955b",
     "parser": {
       "name": "tree-sitter-cmake",
       "grammarName": "cmake",
-      "upstreamVersion": "0.7.5",
-      "revision": "e997bd0b275ca525ce9befecedf5299031183661",
-      "sha256": "7b396da0903672d5ccf328458304ad2d74561db30812e43da6bdada0f6f1e62a",
-      "size": 79607
+      "upstreamVersion": "0.7.6",
+      "revision": "a3ec2b2144daf7132e7ee824d8cab9610523d10f",
+      "sha256": "ba7821cf6ee2d1a95dd0737a1a68eb226e7ad42c24d56429e1c3721140e1c6bc",
+      "size": 79690
     },
     "languages": {
       "cmake": {
@@ -218,15 +238,15 @@
   },
   "@lumis-sh/wasm-comment": {
     "packageName": "@lumis-sh/wasm-comment",
-    "version": "0.26.3",
+    "version": "0.26.4",
     "definitionHash": "32d3946248c1a99825a8c7ffeddf7b7b5e7a215741e5c31ce7d1385e0caf4e9d",
     "parser": {
       "name": "tree-sitter-comment",
       "grammarName": "comment",
       "upstreamVersion": "0.3.0",
       "revision": "689be73775bd2dd57b938b8e12bf50fec35a6ca3",
-      "sha256": "9c4e4cbfa351f899f8ebdc7cb545587c735778831d0d4b52bcda5d7b728755ca",
-      "size": 7370
+      "sha256": "7b426838b1096e7da3c02efed6ae5fa1f779939b2daa81249fc8b770b9e4f510",
+      "size": 7407
     },
     "languages": {
       "comment": {
@@ -238,15 +258,15 @@
   },
   "@lumis-sh/wasm-commonlisp": {
     "packageName": "@lumis-sh/wasm-commonlisp",
-    "version": "0.26.4",
+    "version": "0.26.5",
     "definitionHash": "b89b1469bae92eae6c6c9bba6a9108ec1c3721197be0db65ce7170d1615b5d18",
     "parser": {
       "name": "tree-sitter-commonlisp",
       "grammarName": "commonlisp",
       "upstreamVersion": "0.4.1",
       "revision": "9db594efb43574c5fe4a1f880568b1f0d0ee6057",
-      "sha256": "e57afb8f91fd323606ab8f1cb2200fe515d2764f4327bd196c18943e5b7c1c91",
-      "size": 802606
+      "sha256": "a3c6d0cb7ec6b00a37a7ab41602eb0800b2a3b64f9f8ee5c5ed3c857c3e078d1",
+      "size": 802301
     },
     "languages": {
       "commonlisp": {
@@ -260,15 +280,15 @@
   },
   "@lumis-sh/wasm-cpp": {
     "packageName": "@lumis-sh/wasm-cpp",
-    "version": "0.26.2",
+    "version": "0.26.3",
     "definitionHash": "a51e1801a1abeb038e6d90f913d532fc7c4e4e982562c5d3383c33daaad4e8ae",
     "parser": {
       "name": "tree-sitter-cpp",
       "grammarName": "cpp",
       "upstreamVersion": "0.23.4",
       "revision": "f41e1a044c8a84ea9fa8577fdd2eab92ec96de02",
-      "sha256": "bbbec7a8192d877b3448ce9c6e1edf50e8c4502509368b113e0acce812c47521",
-      "size": 3490763
+      "sha256": "05462cb6b75948b41710f76a1ee129f23d9641a02411187ba7364bf81396d706",
+      "size": 3490486
     },
     "languages": {
       "cpp": {
@@ -282,15 +302,15 @@
   },
   "@lumis-sh/wasm-csharp": {
     "packageName": "@lumis-sh/wasm-csharp",
-    "version": "0.26.3",
+    "version": "0.26.4",
     "definitionHash": "099f25ac7eed6596aa9bc6625af73b4df432da3fde7f87fe471acfee12934982",
     "parser": {
       "name": "tree-sitter-csharp",
       "grammarName": "c_sharp",
       "upstreamVersion": "0.23.5",
       "revision": "cac6d5fb595f5811a076336682d5d595ac1c9e85",
-      "sha256": "8412329db3403b42fbdac51b7931a01bd69cbdf893bb7ab6cced0ab9ae3f6c0e",
-      "size": 5355587
+      "sha256": "e16dea1c5815dfff1468567bcd31490d82209db47fac5da24ea1f710bf848ee8",
+      "size": 5355402
     },
     "languages": {
       "csharp": {
@@ -304,15 +324,15 @@
   },
   "@lumis-sh/wasm-css": {
     "packageName": "@lumis-sh/wasm-css",
-    "version": "0.26.4",
+    "version": "0.26.5",
     "definitionHash": "e2f36eca0acf54fe7f6665dfa592214648b2e62a530cc149cd388a77aa9fc5c4",
     "parser": {
       "name": "tree-sitter-css",
       "grammarName": "css",
       "upstreamVersion": "0.25.0",
       "revision": "dda5cfc5722c429eaba1c910ca32c2c0c5bb1a3f",
-      "sha256": "9698f040e0c57a25fac6cf3514820f4e8403947a120aa14412cba433f28d9106",
-      "size": 150358
+      "sha256": "b543e98fe1828eb575b29b58e4fff307a7c2a344af1f0f4824e08c8696d8022d",
+      "size": 150260
     },
     "languages": {
       "css": {
@@ -325,15 +345,15 @@
   },
   "@lumis-sh/wasm-csv": {
     "packageName": "@lumis-sh/wasm-csv",
-    "version": "0.26.3",
+    "version": "0.26.4",
     "definitionHash": "3b0ac9384518291168a77eb3521cf070b47c8f1059e50161daf0722dff774e04",
     "parser": {
       "name": "tree-sitter-csv",
       "grammarName": "csv",
       "upstreamVersion": "1.2.0",
       "revision": "cda48a5e890b30619da5bc3ff55be1b1d3d08c8d",
-      "sha256": "0929abfda7b81086733281da9800fc1ce46316c277869f6a7e5c2a22487e3835",
-      "size": 7410
+      "sha256": "1f6d3c31883c1f6432fa7362d84532d5fc102fd450177a36ab7dcd45025a2396",
+      "size": 7393
     },
     "languages": {
       "csv": {
@@ -345,15 +365,15 @@
   },
   "@lumis-sh/wasm-d": {
     "packageName": "@lumis-sh/wasm-d",
-    "version": "0.26.3",
+    "version": "0.26.4",
     "definitionHash": "475f807eee60886b5ee20d0e38c89c166224c2aa19cd5c8ba59b3f728cab9373",
     "parser": {
       "name": "tree-sitter-d",
       "grammarName": "d",
       "upstreamVersion": "0.8.2",
       "revision": "45e5f1e9d6de2c68591bc8e5ec662cf18e950b4a",
-      "sha256": "ab52c1bdf48aecd00fe7e4792e1d75e3376495a581a47e7c8fbd8ca1f99a127e",
-      "size": 3850455
+      "sha256": "33d93909bbba9dff3a860bdc6071c3599511ce9a717b93125373a9fa388a75c3",
+      "size": 3850204
     },
     "languages": {
       "d": {
@@ -367,19 +387,19 @@
   },
   "@lumis-sh/wasm-dart": {
     "packageName": "@lumis-sh/wasm-dart",
-    "version": "0.26.4",
-    "definitionHash": "fb831d8b6931dcb442d0623ff8a7b63123d24a1de0eab3833a2c1cd713958d12",
+    "version": "0.26.7",
+    "definitionHash": "376fdd90113c45b7fc504c7b4ea010ea1fb2f2a73442ef8ae3dd4cc53aceebba",
     "parser": {
       "name": "tree-sitter-dart",
       "grammarName": "dart",
       "upstreamVersion": "1.0.0",
-      "revision": "be07cf7118d3dba06236a3f19541685a68209934",
-      "sha256": "f743e6ecda0447cf330d012e9c8dc4f784d2a8874dbdec4b929b0dde87faec79",
-      "size": 1159597
+      "revision": "0038280b774b65c1b89ba7fec50624d8baed9fe1",
+      "sha256": "a2e3614410c88153dfc22b40b8e324c6b50d0bccbd72aae6ad7baed0b009e9f4",
+      "size": 1203430
     },
     "languages": {
       "dart": {
-        "aliases": [],
+        "aliases": ["flutter"],
         "highlights": "; This file is auto-generated. Do not edit.\n(identifier) @variable\n\n(dotted_identifier_list) @string\n\n; Methods\n; --------------------\n; TODO: add method/call_expression to grammar and\n; distinguish method call from variable access\n(function_expression_body\n  (identifier) @function.call)\n\n; ((identifier)(selector (argument_part)) @function)\n; NOTE: This query is a bit of a work around for the fact that the dart grammar doesn't\n; specifically identify a node as a function call\n(((identifier) @function.call\n  (#match? @function.call \"^_?[a-z]\"))\n  .\n  (selector\n    .\n    (argument_part))) @function.call\n\n; Annotations\n; --------------------\n(annotation\n  \"@\" @attribute\n  name: (identifier) @attribute)\n\n; Operators and Tokens\n; --------------------\n(template_substitution\n  \"$\" @punctuation.special\n  \"{\" @punctuation.special\n  \"}\" @punctuation.special) @none\n\n(template_substitution\n  \"$\" @punctuation.special\n  (identifier_dollar_escaped) @variable) @none\n\n(escape_sequence) @string.escape\n\n[\n  \"=>\"\n  \"..\"\n  \"??\"\n  \"==\"\n  \"!\"\n  \"?\"\n  \"&&\"\n  \"%\"\n  \"<\"\n  \">\"\n  \"=\"\n  \">=\"\n  \"<=\"\n  \"||\"\n  \">>>=\"\n  \">>=\"\n  \"<<=\"\n  \"&=\"\n  \"|=\"\n  \"??=\"\n  \"%=\"\n  \"+=\"\n  \"-=\"\n  \"*=\"\n  \"/=\"\n  \"^=\"\n  \"~/=\"\n  (shift_operator)\n  (multiplicative_operator)\n  (increment_operator)\n  (is_operator)\n  (prefix_operator)\n  (equality_operator)\n  (additive_operator)\n] @operator\n\n[\n  \"(\"\n  \")\"\n  \"[\"\n  \"]\"\n  \"{\"\n  \"}\"\n] @punctuation.bracket\n\n; Delimiters\n; --------------------\n[\n  \";\"\n  \".\"\n  \",\"\n  \":\"\n  \"?.\"\n  \"?\"\n] @punctuation.delimiter\n\n; Types\n; --------------------\n(class_definition\n  name: (identifier) @type)\n\n(constructor_signature\n  name: (identifier) @type)\n\n(scoped_identifier\n  scope: (identifier) @type)\n\n(function_signature\n  name: (identifier) @function.method)\n\n(getter_signature\n  (identifier) @function.method)\n\n(setter_signature\n  name: (identifier) @function.method)\n\n(enum_declaration\n  name: (identifier) @type)\n\n(enum_constant\n  name: (identifier) @type)\n\n(void_type) @type\n\n((scoped_identifier\n  scope: (identifier) @type\n  name: (identifier) @type)\n  (#match? @type \"^[A-Za-z]\"))\n\n(type_identifier) @type\n\n(type_alias\n  (type_identifier) @type.definition)\n\n(type_arguments\n  [\n    \"<\"\n    \">\"\n  ] @punctuation.bracket)\n\n; Variables\n; --------------------\n; var keyword\n(inferred_type) @keyword\n\n((identifier) @type\n  (#match? @type \"^_?[A-Z][\\\\s\\\\S]*[a-z]\")) ; catch Classes or IClasses not CLASSES\n\n\"Function\" @type\n\n; properties\n(unconditional_assignable_selector\n  (identifier) @property)\n\n(conditional_assignable_selector\n  (identifier) @property)\n\n(this) @variable.builtin\n\n; Parameters\n; --------------------\n(formal_parameter\n  (identifier) @variable.parameter)\n\n(named_argument\n  (label\n    (identifier) @variable.parameter))\n\n; Literals\n; --------------------\n[\n  (hex_integer_literal)\n  (decimal_integer_literal)\n  (decimal_floating_point_literal)\n  ; TODO: inaccessible nodes\n  ; (octal_integer_literal)\n  ; (hex_floating_point_literal)\n] @number\n\n(symbol_literal) @string.special.symbol\n\n(string_literal) @string\n\n(true) @boolean\n\n(false) @boolean\n\n(null_literal) @constant.builtin\n\n(comment) @comment \n\n(documentation_comment) @comment.documentation \n\n; Keywords\n; --------------------\n[\n  \"import\"\n  \"library\"\n  \"export\"\n  \"as\"\n  \"show\"\n  \"hide\"\n] @keyword.import\n\n; Reserved words (cannot be used as identifiers)\n[\n  ; TODO:\n  ; \"rethrow\" cannot be targeted at all and seems to be an invisible node\n  ; TODO:\n  ; the assert keyword cannot be specifically targeted\n  ; because the grammar selects the whole node or the content\n  ; of the assertion not just the keyword\n  ; assert\n  (case_builtin)\n  \"late\"\n  \"required\"\n  \"on\"\n  \"extends\"\n  \"in\"\n  \"is\"\n  \"new\"\n  \"super\"\n  \"with\"\n] @keyword\n\n[\n  \"class\"\n  \"enum\"\n  \"extension\"\n] @keyword.type\n\n\"return\" @keyword.return\n\n; Built in identifiers:\n; alone these are marked as keywords\n[\n  \"deferred\"\n  \"factory\"\n  \"get\"\n  \"implements\"\n  \"interface\"\n  \"library\"\n  \"operator\"\n  \"mixin\"\n  \"part\"\n  \"set\"\n  \"typedef\"\n] @keyword\n\n[\n  \"async\"\n  \"async*\"\n  \"sync*\"\n  \"await\"\n  \"yield\"\n] @keyword.coroutine\n\n[\n  (const_builtin)\n  (final_builtin)\n  \"abstract\"\n  \"covariant\"\n  \"external\"\n  \"static\"\n  \"final\"\n  \"base\"\n  \"sealed\"\n] @keyword.modifier\n\n; when used as an identifier:\n((identifier) @variable.builtin\n  (#any-of? @variable.builtin\n    \"abstract\" \"as\" \"covariant\" \"deferred\" \"dynamic\" \"export\" \"external\" \"factory\" \"Function\" \"get\"\n    \"implements\" \"import\" \"interface\" \"library\" \"operator\" \"mixin\" \"part\" \"set\" \"static\" \"typedef\"))\n\n[\n  \"if\"\n  \"else\"\n  \"switch\"\n  \"default\"\n] @keyword.conditional\n\n(conditional_expression\n  [\n    \"?\"\n    \":\"\n  ] @keyword.conditional.ternary)\n\n[\n  \"try\"\n  \"throw\"\n  \"catch\"\n  \"finally\"\n  (break_statement)\n] @keyword.exception\n\n[\n  \"do\"\n  \"while\"\n  \"continue\"\n  \"for\"\n] @keyword.repeat",
         "injections": "; This file is auto-generated. Do not edit.\n((comment) @injection.content\n  (#set! injection.language \"comment\"))",
         "locals": "; This file is auto-generated. Do not edit.\n; Definitions\n(function_signature\n  name: (identifier) @local.definition.function)\n\n(formal_parameter\n  name: (identifier) @local.definition.parameter)\n\n(initialized_variable_definition\n  name: (identifier) @local.definition.var)\n\n(initialized_identifier\n  (identifier) @local.definition.var)\n\n(static_final_declaration\n  (identifier) @local.definition.var)\n\n; References\n(identifier) @local.reference\n\n; Scopes\n(class_definition\n  body: (_) @local.scope)\n\n[\n  (block)\n  (if_statement)\n  (for_statement)\n  (while_statement)\n  (try_statement)\n  (catch_clause)\n  (finally_clause)\n] @local.scope",
@@ -389,15 +409,15 @@
   },
   "@lumis-sh/wasm-diff": {
     "packageName": "@lumis-sh/wasm-diff",
-    "version": "0.26.5",
+    "version": "0.26.6",
     "definitionHash": "3f233bc1300f652057c1caf14b09a1b72ebfe61621f96d4d65e98119aa18dd70",
     "parser": {
       "name": "tree-sitter-diff",
       "grammarName": "diff",
       "upstreamVersion": "0.2.0",
       "revision": "ada384ac7bfc1307f32de474620120add29998fb",
-      "sha256": "2f6b806b1aed3b3bcdc7f1144d2a654cd751a914a50a49610cdc41010454b09f",
-      "size": 61504
+      "sha256": "359dfc8f3d2884b17650f5b2678fbbb1dbc008ec731ced8b3ab1bc32c24a7ceb",
+      "size": 61464
     },
     "languages": {
       "diff": {
@@ -410,15 +430,15 @@
   },
   "@lumis-sh/wasm-dockerfile": {
     "packageName": "@lumis-sh/wasm-dockerfile",
-    "version": "0.26.3",
+    "version": "0.26.4",
     "definitionHash": "6938e53c60b97afe0d917326d2e3ac3f3162f0cfe46af30c5c8b1e994cfd184d",
     "parser": {
       "name": "tree-sitter-dockerfile",
       "grammarName": "dockerfile",
       "upstreamVersion": "0.2.0",
       "revision": "868e44ce378deb68aac902a9db68ff82d2299dd0",
-      "sha256": "be7debc39ac7fde1b13517b33619a1a268adbc3766b1f8d6296d3637a49aa288",
-      "size": 55320
+      "sha256": "1f6948b9abaa0a6228ee7a356ec68071a8bd55fb9fd9b16e67d2fd2fdf7accb9",
+      "size": 55129
     },
     "languages": {
       "dockerfile": {
@@ -431,15 +451,15 @@
   },
   "@lumis-sh/wasm-dot": {
     "packageName": "@lumis-sh/wasm-dot",
-    "version": "0.26.2",
+    "version": "0.26.3",
     "definitionHash": "8f21254119ae30c1af86b572868bdd49599a327add29f4b6b1cb37c6a9fc8b9a",
     "parser": {
       "name": "tree-sitter-dot",
       "grammarName": "dot",
       "upstreamVersion": "0.1.5",
       "revision": "80327abbba6f47530edeb0df9f11bd5d5c93c14d",
-      "sha256": "740243e9662742fa7d4e00b108747a99e207c4382081ba027d14315b7e10e383",
-      "size": 27724
+      "sha256": "0bbd16b235a63774aaa41789bbd441ce8440ed33570ef61f60e9843f37c4dbf4",
+      "size": 27903
     },
     "languages": {
       "dot": {
@@ -452,15 +472,15 @@
   },
   "@lumis-sh/wasm-editorconfig": {
     "packageName": "@lumis-sh/wasm-editorconfig",
-    "version": "0.26.3",
+    "version": "0.26.4",
     "definitionHash": "753993c5627043f35c29b70f0c05de0b1581a83100ceeb57435cc323bc6e8158",
     "parser": {
       "name": "tree-sitter-editorconfig",
       "grammarName": "editorconfig",
       "upstreamVersion": "2.0.0",
       "revision": "c4d5e725e1bbf683b223f4bebe83142cefe68da5",
-      "sha256": "864697ff1e52ff588dfbd54618e01721ff449051994b448e166a41cf69d57e29",
-      "size": 11129
+      "sha256": "fa67a3a12b78d1c6ffb685defdd6351b3bd3848d543a14df3d1f3a1486342b7a",
+      "size": 11196
     },
     "languages": {
       "editorconfig": {
@@ -473,15 +493,15 @@
   },
   "@lumis-sh/wasm-eex": {
     "packageName": "@lumis-sh/wasm-eex",
-    "version": "0.26.3",
+    "version": "0.26.4",
     "definitionHash": "eb0c89f4422bcc846e7bfabe0c3e15f6a743d1fdd4b34da3fa0e94bb7dd0605f",
     "parser": {
       "name": "tree-sitter-eex",
       "grammarName": "eex",
       "upstreamVersion": "0.1.0",
       "revision": "f742f2fe327463335e8671a87c0b9b396905d1d1",
-      "sha256": "18c74f5a88b4acb8b17c760785fdd67055630a71268b32131dfee82f58befa39",
-      "size": 7482
+      "sha256": "730ffe7ccfe798cd3f90a89d33fd3a224221bf783c935e0574829b8b07df3195",
+      "size": 7620
     },
     "languages": {
       "eex": {
@@ -494,37 +514,37 @@
   },
   "@lumis-sh/wasm-elixir": {
     "packageName": "@lumis-sh/wasm-elixir",
-    "version": "0.26.5",
-    "definitionHash": "db7edc263b34e5ea1aa3a5b73d823e0f5d64fa505fa147ef33dd58a73b85d89f",
+    "version": "0.26.9",
+    "definitionHash": "db28cc2a30cd964c7b12caf93f68a1f478c754dce600f888e46661ceb008690b",
     "parser": {
       "name": "tree-sitter-elixir",
       "grammarName": "elixir",
       "upstreamVersion": "0.3.5",
       "revision": "e2d9e6e0e76b0c436fa48a0b8c32a031d0cbdf49",
-      "sha256": "3d875f7c1a26af9106752a16a1ab31e3fa22f60de37aba2860edd3277335ad57",
-      "size": 1645111
+      "sha256": "26353341131cbbcfd594637223016d7c4a596072205e1f177d495bff4af2c6c0",
+      "size": 1644961
     },
     "languages": {
       "elixir": {
         "aliases": [],
-        "highlights": "; This file is auto-generated. Do not edit.\n; Punctuation\n[\n  \",\"\n  \";\"\n] @punctuation.delimiter\n\n[\n  \"(\"\n  \")\"\n  \"<<\"\n  \">>\"\n  \"[\"\n  \"]\"\n  \"{\"\n  \"}\"\n] @punctuation.bracket\n\n\"%\" @punctuation.special\n\n; Identifiers\n(identifier) @variable\n\n; Unused Identifiers\n((identifier) @comment\n  (#match? @comment \"^_\"))\n\n; Comments\n(comment) @comment \n\n; Strings\n(string) @string\n\n; Modules\n(alias) @module\n\n; Atoms & Keywords\n[\n  (atom)\n  (quoted_atom)\n  (keyword)\n  (quoted_keyword)\n] @string.special.symbol\n\n; Interpolation\n(interpolation\n  [\n    \"#{\"\n    \"}\"\n  ] @string.special)\n\n; Escape sequences\n(escape_sequence) @string.escape\n\n; Integers\n(integer) @number\n\n; Floats\n(float) @number.float\n\n; Characters\n[\n  (char)\n  (charlist)\n] @character\n\n; Booleans\n(boolean) @boolean\n\n; Nil\n(nil) @constant.builtin\n\n; Operators\n(operator_identifier) @operator\n\n(unary_operator\n  operator: _ @operator)\n\n(binary_operator\n  operator: _ @operator)\n\n; Pipe Operator\n(binary_operator\n  operator: \"|>\"\n  right: (identifier) @function)\n\n(dot\n  operator: _ @operator)\n\n(stab_clause\n  operator: _ @operator)\n\n; Local Function Calls\n(call\n  target: (identifier) @function.call)\n\n; Remote Function Calls\n(call\n  target: (dot\n    left: [\n      (atom) @type\n      (_)\n    ]\n    right: (identifier) @function.call)\n  (arguments))\n\n; Definition Function Calls\n(call\n  target: ((identifier) @keyword.function\n    (#any-of? @keyword.function\n      \"def\" \"defdelegate\" \"defexception\" \"defguard\" \"defguardp\" \"defimpl\" \"defmacro\" \"defmacrop\"\n      \"defmodule\" \"defn\" \"defnp\" \"defoverridable\" \"defp\" \"defprotocol\" \"defstruct\"))\n  (arguments\n    [\n      (call\n        (identifier) @function)\n      (identifier) @function\n      (binary_operator\n        left: (call\n          target: (identifier) @function)\n        operator: \"when\")\n    ])?)\n\n; Kernel Keywords & Special Forms\n(call\n  target: ((identifier) @keyword\n    (#any-of? @keyword\n      \"alias\" \"case\" \"catch\" \"cond\" \"else\" \"for\" \"if\" \"import\" \"quote\" \"raise\" \"receive\" \"require\"\n      \"reraise\" \"super\" \"throw\" \"try\" \"unless\" \"unquote\" \"unquote_splicing\" \"use\" \"with\")))\n\n; Special Constants\n((identifier) @constant.builtin\n  (#any-of? @constant.builtin \"__CALLER__\" \"__DIR__\" \"__ENV__\" \"__MODULE__\" \"__STACKTRACE__\"))\n\n; Reserved Keywords\n[\n  \"after\"\n  \"catch\"\n  \"do\"\n  \"end\"\n  \"fn\"\n  \"rescue\"\n  \"when\"\n  \"else\"\n] @keyword\n\n; Operator Keywords\n[\n  \"and\"\n  \"in\"\n  \"not in\"\n  \"not\"\n  \"or\"\n] @keyword.operator\n\n; Capture Operator\n(unary_operator\n  operator: \"&\"\n  operand: [\n    (integer) @operator\n    (binary_operator\n      left: [\n        (call\n          target: (dot\n            left: (_)\n            right: (identifier) @function))\n        (identifier) @function\n      ]\n      operator: \"/\"\n      right: (integer) @operator)\n  ])\n\n; Non-String Sigils\n(sigil\n  \"~\" @string.special\n  (sigil_name) @string.special @_sigil_name\n  quoted_start: _ @string.special\n  quoted_end: _ @string.special\n  ((sigil_modifiers) @string.special)?\n  (#not-any-of? @_sigil_name \"s\" \"S\"))\n\n; String Sigils\n(sigil\n  \"~\" @string\n  (sigil_name) @string @_sigil_name\n  quoted_start: _ @string\n  (quoted_content) @string\n  quoted_end: _ @string\n  ((sigil_modifiers) @string)?\n  (#any-of? @_sigil_name \"s\" \"S\"))\n\n; Module attributes\n(unary_operator\n  operator: \"@\"\n  operand: [\n    (identifier)\n    (call\n      target: (identifier))\n  ] @constant) @constant\n\n; Documentation\n(unary_operator\n  operator: \"@\"\n  operand: (call\n    target: ((identifier) @_identifier\n      (#any-of? @_identifier \"moduledoc\" \"typedoc\" \"shortdoc\" \"doc\")) @comment.documentation\n    (arguments\n      [\n        (string)\n        (boolean)\n        (charlist)\n        (sigil\n          \"~\" @comment.documentation\n          (sigil_name) @comment.documentation\n          quoted_start: _ @comment.documentation\n          (quoted_content) @comment.documentation\n          quoted_end: _ @comment.documentation)\n      ] @comment.documentation))) @comment.documentation\n; * doc string\n(unary_operator\n  operator: \"@\" @comment.doc\n  operand: (call\n    target: (identifier) @comment.doc.__attribute__\n    (arguments\n      [\n        (string) @comment.doc\n        (charlist) @comment.doc\n        (sigil\n          quoted_start: _ @comment.doc\n          quoted_end: _ @comment.doc) @comment.doc\n        (boolean) @comment.doc\n      ]))\n  (#any-of? @comment.doc.__attribute__ \"moduledoc\" \"typedoc\" \"doc\"))\n",
+        "highlights": "; This file is auto-generated. Do not edit.\n; Upstream's String Sigils and Documentation patterns capture `(quoted_content)`\n; with no anchor. A lowercase sigil's body parses as alternating\n; `quoted_content` and `escape_sequence` siblings, so every chunk opened a match\n; that stayed in progress until `quoted_end`, and tree-sitter compares the open\n; matches of a pattern with each other after every node. A regex with a few\n; hundred escapes took seconds and matched nothing, because `#any-of?` only runs\n; once a match completes. Here the string sigil pattern captures the whole node,\n; as tree-sitter-elixir's own query does, and the documentation pattern stops at\n; the delimiters, so a sigil's content takes the color of the node around it.\n\n; Punctuation\n[\n  \",\"\n  \";\"\n] @punctuation.delimiter\n\n[\n  \"(\"\n  \")\"\n  \"<<\"\n  \">>\"\n  \"[\"\n  \"]\"\n  \"{\"\n  \"}\"\n] @punctuation.bracket\n\n\"%\" @punctuation.special\n\n; Identifiers\n(identifier) @variable\n\n; Unused Identifiers\n((identifier) @comment\n  (#match? @comment \"^_\"))\n\n; Comments\n(comment) @comment\n\n; Strings\n(string) @string\n\n; Modules\n(alias) @module\n\n; Atoms & Keywords\n[\n  (atom)\n  (quoted_atom)\n  (keyword)\n  (quoted_keyword)\n] @string.special.symbol\n\n; Interpolation\n(interpolation\n  [\n    \"#{\"\n    \"}\"\n  ] @string.special)\n\n; Escape sequences\n(escape_sequence) @string.escape\n\n; Integers\n(integer) @number\n\n; Floats\n(float) @number.float\n\n; Characters\n[\n  (char)\n  (charlist)\n] @character\n\n; Booleans\n(boolean) @boolean\n\n; Nil\n(nil) @constant.builtin\n\n; Operators\n(operator_identifier) @operator\n\n(unary_operator\n  operator: _ @operator)\n\n(binary_operator\n  operator: _ @operator)\n\n; Pipe Operator\n(binary_operator\n  operator: \"|>\"\n  right: (identifier) @function)\n\n(dot\n  operator: _ @operator)\n\n(stab_clause\n  operator: _ @operator)\n\n; Local Function Calls\n(call\n  target: (identifier) @function.call)\n\n; Remote Function Calls\n(call\n  target: (dot\n    left: [\n      (atom) @type\n      (_)\n    ]\n    right: (identifier) @function.call)\n  (arguments))\n\n; Definition Function Calls\n(call\n  target: ((identifier) @keyword.function\n    (#any-of? @keyword.function\n      \"def\" \"defdelegate\" \"defexception\" \"defguard\" \"defguardp\" \"defimpl\" \"defmacro\" \"defmacrop\"\n      \"defmodule\" \"defn\" \"defnp\" \"defoverridable\" \"defp\" \"defprotocol\" \"defstruct\"))\n  (arguments\n    [\n      (call\n        (identifier) @function)\n      (identifier) @function\n      (binary_operator\n        left: (call\n          target: (identifier) @function)\n        operator: \"when\")\n    ])?)\n\n; Kernel Keywords & Special Forms\n(call\n  target: ((identifier) @keyword\n    (#any-of? @keyword\n      \"alias\" \"case\" \"catch\" \"cond\" \"else\" \"for\" \"if\" \"import\" \"quote\" \"raise\" \"receive\" \"require\"\n      \"reraise\" \"super\" \"throw\" \"try\" \"unless\" \"unquote\" \"unquote_splicing\" \"use\" \"with\")))\n\n; Special Constants\n((identifier) @constant.builtin\n  (#any-of? @constant.builtin \"__CALLER__\" \"__DIR__\" \"__ENV__\" \"__MODULE__\" \"__STACKTRACE__\"))\n\n; Reserved Keywords\n[\n  \"after\"\n  \"catch\"\n  \"do\"\n  \"end\"\n  \"fn\"\n  \"rescue\"\n  \"when\"\n  \"else\"\n] @keyword\n\n; Operator Keywords\n[\n  \"and\"\n  \"in\"\n  \"not in\"\n  \"not\"\n  \"or\"\n] @keyword.operator\n\n; Capture Operator\n(unary_operator\n  operator: \"&\"\n  operand: [\n    (integer) @operator\n    (binary_operator\n      left: [\n        (call\n          target: (dot\n            left: (_)\n            right: (identifier) @function))\n        (identifier) @function\n      ]\n      operator: \"/\"\n      right: (integer) @operator)\n  ])\n\n; Non-String Sigils\n(sigil\n  \"~\" @string.special\n  (sigil_name) @string.special @_sigil_name\n  quoted_start: _ @string.special\n  quoted_end: _ @string.special\n  ((sigil_modifiers) @string.special)?\n  (#not-any-of? @_sigil_name \"s\" \"S\"))\n\n; String Sigils\n(sigil\n  \"~\" @string\n  (sigil_name) @string @_sigil_name\n  quoted_start: _ @string\n  quoted_end: _ @string\n  ((sigil_modifiers) @string)?\n  (#any-of? @_sigil_name \"s\" \"S\")) @string\n\n; Module attributes\n(unary_operator\n  operator: \"@\"\n  operand: [\n    (identifier)\n    (call\n      target: (identifier))\n  ] @constant) @constant\n\n; Documentation\n(unary_operator\n  operator: \"@\"\n  operand: (call\n    target: ((identifier) @_identifier\n      (#any-of? @_identifier \"moduledoc\" \"typedoc\" \"shortdoc\" \"doc\")) @comment.documentation\n    (arguments\n      [\n        (string)\n        (boolean)\n        (charlist)\n        (sigil\n          \"~\" @comment.documentation\n          (sigil_name) @comment.documentation\n          quoted_start: _ @comment.documentation\n          quoted_end: _ @comment.documentation)\n      ] @comment.documentation))) @comment.documentation\n\n; * doc string\n(unary_operator\n  operator: \"@\" @comment.doc\n  operand: (call\n    target: (identifier) @comment.doc.__attribute__\n    (arguments\n      [\n        (string) @comment.doc\n        (charlist) @comment.doc\n        (sigil\n          quoted_start: _ @comment.doc\n          quoted_end: _ @comment.doc) @comment.doc\n        (boolean) @comment.doc\n      ]))\n  (#any-of? @comment.doc.__attribute__ \"moduledoc\" \"typedoc\" \"doc\"))\n\n; Upstream gives every do @keyword, unlike defmodule's @keyword.function.\n(call\n  target: (identifier) @_definition\n  (do_block\n    \"do\" @keyword.function)\n  (#eq? @_definition \"defmodule\"))\n",
         "injections": "; This file is auto-generated. Do not edit.\n; Comments\n((comment) @injection.content\n  (#set! injection.language \"comment\"))\n\n; Documentation\n(unary_operator\n  operator: \"@\"\n  operand: (call\n    target: ((identifier) @_identifier\n      (#any-of? @_identifier \"moduledoc\" \"typedoc\" \"shortdoc\" \"doc\"))\n    (arguments\n      [\n        (string\n          (quoted_content) @injection.content)\n        (sigil\n          (quoted_content) @injection.content)\n      ])\n    (#set! injection.language \"markdown\")))\n\n; HEEx\n(sigil\n  (sigil_name) @_sigil_name\n  (quoted_content) @injection.content\n  (#any-of? @_sigil_name \"H\" \"LVN\")\n  (#set! injection.language \"heex\"))\n\n; Surface\n(sigil\n  (sigil_name) @_sigil_name\n  (quoted_content) @injection.content\n  (#eq? @_sigil_name \"F\")\n  (#set! injection.language \"surface\"))\n\n; Zigler\n(sigil\n  (sigil_name) @_sigil_name\n  (quoted_content) @injection.content\n  (#any-of? @_sigil_name \"E\" \"L\")\n  (#set! injection.language \"eex\"))\n\n(sigil\n  (sigil_name) @_sigil_name\n  (quoted_content) @injection.content\n  (#any-of? @_sigil_name \"z\" \"Z\")\n  (#set! injection.language \"zig\"))\n\n; Regex\n(sigil\n  (sigil_name) @_sigil_name\n  (quoted_content) @injection.content\n  (#any-of? @_sigil_name \"r\" \"R\")\n  (#set! injection.language \"regex\"))\n\n; Json\n(sigil\n  (sigil_name) @_sigil_name\n  (quoted_content) @injection.content\n  (#any-of? @_sigil_name \"j\" \"J\")\n  (#set! injection.language \"json\"))\n; Phoenix HTML template\n((sigil\n  (sigil_name) @_sigil_name\n  (quoted_content) @injection.content)\n (#eq? @_sigil_name \"HOLO\")\n (#set! injection.language \"heex\")\n (#set! injection.combined))\n\n; GPUI template\n((sigil\n  (sigil_name) @_sigil_name\n  (quoted_content) @injection.content)\n (#eq? @_sigil_name \"GPUI\")\n (#set! injection.language \"heex\")\n (#set! injection.combined))\n\n; SQL injection\n((sigil\n  (sigil_name) @_sigil_name\n  (quoted_content) @injection.content)\n (#eq? @_sigil_name \"SQL\")\n (#set! injection.language \"sql\")\n (#set! injection.combined))\n\n; Markdown\n((sigil\n  (sigil_name) @_sigil_name\n  (quoted_content) @injection.content)\n (#eq? @_sigil_name \"MD\")\n (#set! injection.language \"markdown\")\n (#set! injection.combined))\n\n; Lua\n((sigil\n  (sigil_name) @_sigil_name\n  (quoted_content) @injection.content)\n (#eq? @_sigil_name \"LUA\")\n (#set! injection.language \"lua\")\n (#set! injection.combined))\n\n; Python\n((sigil\n  (sigil_name) @_sigil_name\n  (quoted_content) @injection.content)\n (#eq? @_sigil_name \"PY\")\n (#set! injection.language \"python\")\n (#set! injection.combined))\n\n; JavaScript\n((sigil\n  (sigil_name) @_sigil_name\n  (quoted_content) @injection.content)\n (#eq? @_sigil_name \"JS\")\n (#set! injection.language \"javascript\")\n (#set! injection.combined))\n\n; Svelte\n((sigil\n  (sigil_name) @_sigil_name\n  (quoted_content) @injection.content)\n (#eq? @_sigil_name \"V\")\n (#set! injection.language \"svelte\")\n (#set! injection.combined))\n\n; Vue\n((sigil\n  (sigil_name) @_sigil_name\n  (quoted_content) @injection.content)\n (#eq? @_sigil_name \"VUE\")\n (#set! injection.language \"vue\")\n (#set! injection.combined))\n",
-        "locals": "; This file is auto-generated. Do not edit.\n; References\n(identifier) @local.reference\n\n(alias) @local.reference\n\n; Module Definitions\n(call\n  target: ((identifier) @_identifier\n    (#eq? @_identifier \"defmodule\"))\n  (arguments\n    (alias) @local.definition.type))\n\n; Pattern Match Definitions\n(binary_operator\n  ; format-ignore\n  left: \n    [\n      (identifier) @local.definition.var\n      (_ (identifier) @local.definition.var)\n      (_ (_ (identifier) @local.definition.var))\n      (_ (_ (_ (identifier) @local.definition.var)))\n      (_ (_ (_ (_ (identifier) @local.definition.var))))\n      (_ (_ (_ (_ (_ (identifier) @local.definition.var)))))\n      (_ (_ (_ (_ (_ (_ (identifier) @local.definition.var))))))\n      (_ (_ (_ (_ (_ (_ (_ (identifier) @local.definition.var)))))))\n      (_ (_ (_ (_ (_ (_ (_ (_ (identifier) @local.definition.var))))))))\n      (_ (_ (_ (_ (_ (_ (_ (_ (_ (identifier) @local.definition.var)))))))))\n      (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (identifier) @local.definition.var))))))))))\n      (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (identifier) @local.definition.var)))))))))))\n      (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (identifier) @local.definition.var))))))))))))\n      (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (identifier) @local.definition.var)))))))))))))\n      (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (identifier) @local.definition.var))))))))))))))\n      (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (identifier) @local.definition.var)))))))))))))))\n      (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (identifier) @local.definition.var))))))))))))))))\n      (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (identifier) @local.definition.var)))))))))))))))))\n      (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (identifier) @local.definition.var))))))))))))))))))\n      (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (identifier) @local.definition.var)))))))))))))))))))\n      (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (identifier) @local.definition.var))))))))))))))))))))\n    ]\n  operator: \"=\")\n\n; Stab Clause Definitions\n; format-ignore\n(stab_clause\n  left:\n    [\n     (arguments\n      [\n        (identifier) @local.definition.var\n        (_ (identifier) @local.definition.var)\n        (_ (_ (identifier) @local.definition.var))\n        (_ (_ (_ (identifier) @local.definition.var)))\n        (_ (_ (_ (_ (identifier) @local.definition.var))))\n        (_ (_ (_ (_ (_ (identifier) @local.definition.var)))))\n        (_ (_ (_ (_ (_ (_ (identifier) @local.definition.var))))))\n        (_ (_ (_ (_ (_ (_ (_ (identifier) @local.definition.var)))))))\n        (_ (_ (_ (_ (_ (_ (_ (_ (identifier) @local.definition.var))))))))\n        (_ (_ (_ (_ (_ (_ (_ (_ (_ (identifier) @local.definition.var)))))))))\n        (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (identifier) @local.definition.var))))))))))\n        (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (identifier) @local.definition.var)))))))))))\n        (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (identifier) @local.definition.var))))))))))))\n        (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (identifier) @local.definition.var)))))))))))))\n        (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (identifier) @local.definition.var))))))))))))))\n        (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (identifier) @local.definition.var)))))))))))))))\n        (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (identifier) @local.definition.var))))))))))))))))\n        (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (identifier) @local.definition.var)))))))))))))))))\n        (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (identifier) @local.definition.var))))))))))))))))))\n        (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (identifier) @local.definition.var)))))))))))))))))))\n        (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (identifier) @local.definition.var))))))))))))))))))))\n      ])\n\n    (binary_operator\n      left:\n        (arguments\n          ; format-ignore\n          [\n            (identifier) @local.definition.var\n            (_ (identifier) @local.definition.var)\n            (_ (_ (identifier) @local.definition.var))\n            (_ (_ (_ (identifier) @local.definition.var)))\n            (_ (_ (_ (_ (identifier) @local.definition.var))))\n            (_ (_ (_ (_ (_ (identifier) @local.definition.var)))))\n            (_ (_ (_ (_ (_ (_ (identifier) @local.definition.var))))))\n            (_ (_ (_ (_ (_ (_ (_ (identifier) @local.definition.var)))))))\n            (_ (_ (_ (_ (_ (_ (_ (_ (identifier) @local.definition.var))))))))\n            (_ (_ (_ (_ (_ (_ (_ (_ (_ (identifier) @local.definition.var)))))))))\n            (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (identifier) @local.definition.var))))))))))\n            (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (identifier) @local.definition.var)))))))))))\n            (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (identifier) @local.definition.var))))))))))))\n            (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (identifier) @local.definition.var)))))))))))))\n            (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (identifier) @local.definition.var))))))))))))))\n            (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (identifier) @local.definition.var)))))))))))))))\n            (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (identifier) @local.definition.var))))))))))))))))\n            (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (identifier) @local.definition.var)))))))))))))))))\n            (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (identifier) @local.definition.var))))))))))))))))))\n            (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (identifier) @local.definition.var)))))))))))))))))))\n            (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (identifier) @local.definition.var))))))))))))))))))))\n          ])\n      operator: \"when\")\n    ])\n\n; Aliases\n; format-ignore\n(call\n  target:\n    ((identifier) @_identifier\n      (#any-of? @_identifier \"require\" \"alias\" \"use\" \"import\"))\n  (arguments\n    [\n      (alias) @local.definition.import\n      (_ (alias) @local.definition.import)\n      (_ (_ (alias) @local.definition.import))\n      (_ (_ (_ (alias) @local.definition.import)))\n      (_ (_ (_ (_ (alias) @local.definition.import))))\n    ]))\n\n; Local Function Definitions & Scopes\n; format-ignore\n(call\n  target:\n    ((identifier) @_identifier\n      (#any-of? @_identifier \"def\" \"defp\" \"defmacro\" \"defmacrop\" \"defguard\" \"defguardp\" \"defn\" \"defnp\" \"for\"))\n  (arguments\n    [\n      (identifier) @local.definition.function\n      (binary_operator\n        left: (identifier) @local.definition.function\n        operator: \"when\")\n      (binary_operator\n        (identifier) @local.definition.parameter)\n      (call\n        target: (identifier) @local.definition.function\n        (arguments\n          [\n            (identifier) @local.definition.parameter\n            (_ (identifier) @local.definition.parameter)\n            (_ (_ (identifier) @local.definition.parameter))\n            (_ (_ (_ (identifier) @local.definition.parameter)))\n            (_ (_ (_ (_ (identifier) @local.definition.parameter))))\n            (_ (_ (_ (_ (_ (identifier) @local.definition.parameter)))))\n            (_ (_ (_ (_ (_ (_ (identifier) @local.definition.parameter))))))\n            (_ (_ (_ (_ (_ (_ (_ (identifier) @local.definition.parameter)))))))\n            (_ (_ (_ (_ (_ (_ (_ (_ (identifier) @local.definition.parameter))))))))\n            (_ (_ (_ (_ (_ (_ (_ (_ (_ (identifier) @local.definition.parameter)))))))))\n            (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (identifier) @local.definition.parameter))))))))))\n            (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (identifier) @local.definition.parameter)))))))))))\n            (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (identifier) @local.definition.parameter))))))))))))\n            (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (identifier) @local.definition.parameter)))))))))))))\n            (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (identifier) @local.definition.parameter))))))))))))))\n            (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (identifier) @local.definition.parameter)))))))))))))))\n            (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (identifier) @local.definition.parameter))))))))))))))))\n            (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (identifier) @local.definition.parameter)))))))))))))))))\n            (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (identifier) @local.definition.parameter))))))))))))))))))\n            (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (identifier) @local.definition.parameter)))))))))))))))))))\n            (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (identifier) @local.definition.parameter))))))))))))))))))))\n          ]))\n    ]?)\n  (#set! definition.function.scope parent)(do_block)?) @local.scope\n\n; ExUnit Test Definitions & Scopes\n; format-ignore\n(call\n  target:\n    ((identifier) @_identifier\n      (#eq? @_identifier \"test\"))\n  (arguments\n    [\n      (string)\n      ((string)\n        .\n        \",\"\n        .\n        [\n          (identifier) @local.definition.parameter\n          (_ (identifier) @local.definition.parameter)\n          (_ (_ (identifier) @local.definition.parameter))\n          (_ (_ (_ (identifier) @local.definition.parameter)))\n          (_ (_ (_ (_ (identifier) @local.definition.parameter))))\n          (_ (_ (_ (_ (_ (identifier) @local.definition.parameter)))))\n          (_ (_ (_ (_ (_ (_ (identifier) @local.definition.parameter))))))\n          (_ (_ (_ (_ (_ (_ (_ (identifier) @local.definition.parameter)))))))\n          (_ (_ (_ (_ (_ (_ (_ (_ (identifier) @local.definition.parameter))))))))\n          (_ (_ (_ (_ (_ (_ (_ (_ (_ (identifier) @local.definition.parameter)))))))))\n          (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (identifier) @local.definition.parameter))))))))))\n          (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (identifier) @local.definition.parameter)))))))))))\n          (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (identifier) @local.definition.parameter))))))))))))\n          (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (identifier) @local.definition.parameter)))))))))))))\n          (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (identifier) @local.definition.parameter))))))))))))))\n          (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (identifier) @local.definition.parameter)))))))))))))))\n          (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (identifier) @local.definition.parameter))))))))))))))))\n          (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (identifier) @local.definition.parameter)))))))))))))))))\n          (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (identifier) @local.definition.parameter))))))))))))))))))\n          (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (identifier) @local.definition.parameter)))))))))))))))))))\n          (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (_ (identifier) @local.definition.parameter))))))))))))))))))))\n        ])\n    ])\n  (do_block)?) @local.scope\n\n; Stab Clause Scopes\n(stab_clause) @local.scope",
+        "locals": "; This file is auto-generated. Do not edit.\n; Upstream captures Elixir definitions as `@local.definition.var`, `.parameter`,\n; `.function`, `.type` and `.import`, which the highlighter does not read. Their\n; patterns nest `(_ ...)` twenty levels deep under every `binary_operator` and\n; `call`, which made highlighting quadratic in the length of an operator chain\n; or a run of nested calls, so only the captures the highlighter reads remain.\n\n; References\n(identifier) @local.reference\n\n(alias) @local.reference\n\n; Local Function Scopes\n(call\n  target: ((identifier) @_identifier\n    (#any-of? @_identifier \"def\" \"defp\" \"defmacro\" \"defmacrop\" \"defguard\" \"defguardp\" \"defn\" \"defnp\" \"for\"))\n  (arguments)\n  (#set! definition.function.scope parent)\n  (do_block)?) @local.scope\n\n; ExUnit Test Scopes\n(call\n  target: ((identifier) @_identifier\n    (#eq? @_identifier \"test\"))\n  (arguments\n    (string))\n  (do_block)?) @local.scope\n\n; Stab Clause Scopes\n(stab_clause) @local.scope\n",
         "brackets": "; This file is auto-generated. Do not edit.\n(\"(\" @open\n  \")\" @close)\n\n(\"[\" @open\n  \"]\" @close)\n\n(\"{\" @open\n  \"}\" @close)\n"
       }
     }
   },
   "@lumis-sh/wasm-elm": {
     "packageName": "@lumis-sh/wasm-elm",
-    "version": "0.26.3",
+    "version": "0.26.4",
     "definitionHash": "31a2601b45a1e56d5c18cf16f683f7cc8c57496a7b5b5449d9ef6c7f4687524a",
     "parser": {
       "name": "tree-sitter-elm",
       "grammarName": "elm",
       "upstreamVersion": "5.9.4",
       "revision": "34815684e37cf299477e86a7d1e10d3ecb5486f9",
-      "sha256": "44d1718c7e750f82b1d4d18962b6cfb66142605a38b91ea128d32c271ad9cfc4",
-      "size": 185595
+      "sha256": "3472c213bb6f3c7e78fd8933c50dd59b49948617168251da28e9a70b15f98f52",
+      "size": 185687
     },
     "languages": {
       "elm": {
@@ -537,14 +557,14 @@
   },
   "@lumis-sh/wasm-embedded-template": {
     "packageName": "@lumis-sh/wasm-embedded-template",
-    "version": "0.26.4",
+    "version": "0.26.5",
     "definitionHash": "d802636592a18dbd49bf3d24cd344041431a58c0e4f07ee7b9b589c04816fd29",
     "parser": {
       "name": "tree-sitter-embedded-template",
       "grammarName": "embedded_template",
       "upstreamVersion": "0.25.0",
       "revision": "c70c1de07dedd532089c0c90835c8ed9fa694f5c",
-      "sha256": "3f9edaf7e87a38c0f7e1abec10381fcb96df9924eee2c33d2a211aaa36f6f44f",
+      "sha256": "1d49621369e797d2be46c80fdff124cc4e4aee958518c6e87f235038563e4e84",
       "size": 6408
     },
     "languages": {
@@ -564,15 +584,15 @@
   },
   "@lumis-sh/wasm-erlang": {
     "packageName": "@lumis-sh/wasm-erlang",
-    "version": "0.26.5",
-    "definitionHash": "67933909740641336aa78add4a322a097e04936608ac91baeea8ccae0228675a",
+    "version": "0.26.7",
+    "definitionHash": "6a8ca042bfe4d32d6cb6f5f1569ff95aa7e8093d6e2017078d636afa63ff90fc",
     "parser": {
       "name": "tree-sitter-erlang",
       "grammarName": "erlang",
-      "upstreamVersion": "0.20.0",
-      "revision": "67e7f7f05baf492ca2a7c0d9538761b242d33d95",
-      "sha256": "bcb9a661c5ed25ce6c35fd1ef6b46266b736e6293a64930ca87cc6edaea2885a",
-      "size": 452330
+      "upstreamVersion": "0.21.0",
+      "revision": "0386a11c835950f5e1ebfbcbf49863d8495de4e0",
+      "sha256": "d8ed8e25f6c894230ea56828de8af85a814e3e371dc207ca9454d0e57132d2ef",
+      "size": 452355
     },
     "languages": {
       "erlang": {
@@ -585,15 +605,15 @@
   },
   "@lumis-sh/wasm-fish": {
     "packageName": "@lumis-sh/wasm-fish",
-    "version": "0.26.2",
+    "version": "0.26.3",
     "definitionHash": "06b34eb108cb7055bde132e169978558ad6ad6325348160e54aae976f90390f9",
     "parser": {
       "name": "tree-sitter-fish",
       "grammarName": "fish",
       "upstreamVersion": "3.6.0",
       "revision": "aa074a0bacde8b5823c592574d7138f156a95776",
-      "sha256": "bc2866a168e452c269bdadd1a5fb0e5e296753b7608505ffd80a596031aaaf87",
-      "size": 78904
+      "sha256": "4d7f9995b8cefb2fb68adf6bcc73de05e1cddb5b48569f2e840d04ea7f78d0a9",
+      "size": 79370
     },
     "languages": {
       "fish": {
@@ -607,15 +627,15 @@
   },
   "@lumis-sh/wasm-fortran": {
     "packageName": "@lumis-sh/wasm-fortran",
-    "version": "0.26.3",
+    "version": "0.26.4",
     "definitionHash": "ccb912ea78a46edf293c7e6d8b2148e5f562892f99fca5b3b3117ab15dd1dbc8",
     "parser": {
       "name": "tree-sitter-fortran",
       "grammarName": "fortran",
       "upstreamVersion": "0.6.0",
       "revision": "48593829df8a929bfe58528eedcf405171921005",
-      "sha256": "043e61270aeb656b7ec06fe5d47e256fc504e614fac6d2de8e25e5265a9d24e5",
-      "size": 6713558
+      "sha256": "e4ca6a8dac7c28bbda1abdc2e7d27a37803cd81895d1812aefc2342fb6cfd6c7",
+      "size": 6713074
     },
     "languages": {
       "fortran": {
@@ -628,15 +648,15 @@
   },
   "@lumis-sh/wasm-fsharp": {
     "packageName": "@lumis-sh/wasm-fsharp",
-    "version": "0.26.8",
+    "version": "0.26.9",
     "definitionHash": "2980f330fccdfd09c07a07a9effedbc23ec8be9f3615030505d926eab4140161",
     "parser": {
       "name": "tree-sitter-fsharp",
       "grammarName": "fsharp",
       "upstreamVersion": "0.3.12",
       "revision": "aefd0c8741bdf3aeb827a228aa4a996a6536697e",
-      "sha256": "1eedfec8b51e0e85561350dd570cd2b5ea3e4230e5759783b936cbc68037ebdb",
-      "size": 11475053
+      "sha256": "0cd6b094e01d7a4cb36bf628b54fe1f6696c3dbbfab085da3f7925867a2b24c7",
+      "size": 11474634
     },
     "languages": {
       "fsharp": {
@@ -649,15 +669,15 @@
   },
   "@lumis-sh/wasm-gitattributes": {
     "packageName": "@lumis-sh/wasm-gitattributes",
-    "version": "0.26.3",
+    "version": "0.26.4",
     "definitionHash": "3481654b8f6e1a9d0a81b7358defed397c798e2c4f9356745fa5522202a7a973",
     "parser": {
       "name": "tree-sitter-gitattributes",
       "grammarName": "gitattributes",
       "upstreamVersion": "0.1.6",
       "revision": "0750b5904f37d6b2f47f6e4655001c2c35a172ec",
-      "sha256": "7bbd61ec51029038841ee6c3826086692e8bbd4984bcbacb45f4e29855be63ac",
-      "size": 21962
+      "sha256": "e5282f6e494dc89782a664ce2f2db23a6e73873f199a202b116e7488a804ffab",
+      "size": 21999
     },
     "languages": {
       "gitattributes": {
@@ -671,15 +691,15 @@
   },
   "@lumis-sh/wasm-gitignore": {
     "packageName": "@lumis-sh/wasm-gitignore",
-    "version": "0.26.2",
+    "version": "0.26.3",
     "definitionHash": "ff0ddfcf91fb472ad47c03652dfb6fbdab28672642642dd95a4718441d857315",
     "parser": {
       "name": "tree-sitter-gitignore",
       "grammarName": "gitignore",
       "upstreamVersion": "0.1.0",
       "revision": "f4685bf11ac466dd278449bcfe5fd014e94aa504",
-      "sha256": "a7b019358c93c2fed51e9ad0360588e77d9e30531acdb547658851ad09ddd90f",
-      "size": 12194
+      "sha256": "9ba1940efdaa40c92d2fd1f984223bc780688c8bf39f26321936e4a83576754e",
+      "size": 12211
     },
     "languages": {
       "gitignore": {
@@ -692,15 +712,15 @@
   },
   "@lumis-sh/wasm-gleam": {
     "packageName": "@lumis-sh/wasm-gleam",
-    "version": "0.26.6",
+    "version": "0.26.7",
     "definitionHash": "73567d3a998b20f3b587917513b8009dbafc2f38c6ab549dd0694dfd5051d2f3",
     "parser": {
       "name": "tree-sitter-gleam",
       "grammarName": "gleam",
       "upstreamVersion": "1.0.0",
       "revision": "fa6d0d94804f1b342e175865a3dbeb316ee5115e",
-      "sha256": "4f4375141ed881789795750c974774daf6958f3655dc835e58a47542c403f1cf",
-      "size": 439975
+      "sha256": "f85d5e073812b06958ef43927baa745f5fcea1aeb05f4eef1458e50ff9c7ae9a",
+      "size": 439907
     },
     "languages": {
       "gleam": {
@@ -714,15 +734,15 @@
   },
   "@lumis-sh/wasm-glimmer": {
     "packageName": "@lumis-sh/wasm-glimmer",
-    "version": "0.26.3",
+    "version": "0.26.4",
     "definitionHash": "1ca95d7f9a51afb7248d5f458acdb7d64bcb8f07ca8dfa8efc0ec9d56d43ede1",
     "parser": {
       "name": "tree-sitter-glimmer",
       "grammarName": "glimmer",
       "upstreamVersion": "1.3.0",
       "revision": "3e66b67efeba1a2001859f6e02d16e0bbdbf4a9b",
-      "sha256": "7b701270e45622e7b36afeef476f424cdf3bd17944d9369d55a8de67c5f6c6f8",
-      "size": 30954
+      "sha256": "653929d1180cc0bd59bfc1802d5585569f406385920c2fc944c80660ce37d50f",
+      "size": 30952
     },
     "languages": {
       "glimmer": {
@@ -736,15 +756,15 @@
   },
   "@lumis-sh/wasm-glsl": {
     "packageName": "@lumis-sh/wasm-glsl",
-    "version": "0.26.3",
+    "version": "0.26.4",
     "definitionHash": "44b0a55778155507122fbf16240c282c6c29c3e5e5475f9b114ed15b347a2324",
     "parser": {
       "name": "tree-sitter-glsl",
       "grammarName": "glsl",
       "upstreamVersion": "0.2.0",
       "revision": "e47b8b62b59d0e3529f1c31b03e025d6bd475044",
-      "sha256": "5ddc83271259a567d2558f66fd59715c9c1149fc0fc38d4b3da848bde4f9816e",
-      "size": 892828
+      "sha256": "3c8e9a94a525004f3d720c432efe537fefe180b7d736bc90198f9fa7d99dbc03",
+      "size": 892585
     },
     "languages": {
       "glsl": {
@@ -758,19 +778,19 @@
   },
   "@lumis-sh/wasm-go": {
     "packageName": "@lumis-sh/wasm-go",
-    "version": "0.26.3",
-    "definitionHash": "69f0a2cb450b128083d6f37ecdc8fafb89138bdbf52744e5006f2360b98fca51",
+    "version": "0.26.5",
+    "definitionHash": "339f464d9411d8b85672f771de0e2fee23dcb7fc7352ba480767a674ca6eaa93",
     "parser": {
       "name": "tree-sitter-go",
       "grammarName": "go",
       "upstreamVersion": "0.25.0",
       "revision": "1547678a9da59885853f5f5cc8a99cc203fa2e2c",
-      "sha256": "b2f4f9f7ba8eed474c9bba4706acbdb38f604520c9f71106afffabbc88e020c8",
-      "size": 219399
+      "sha256": "4f6a2c84045e3aa8ffaece0836b0ca8f3e8e40440e1fd3da38c27c83213c499e",
+      "size": 219602
     },
     "languages": {
       "go": {
-        "aliases": [],
+        "aliases": ["golang"],
         "highlights": "; This file is auto-generated. Do not edit.\n; Forked from tree-sitter-go\n; Copyright (c) 2014 Max Brunsfeld (The MIT License)\n;\n; Identifiers\n(type_identifier) @type\n\n(type_spec\n  name: (type_identifier) @type.definition)\n\n(field_identifier) @property\n\n(identifier) @variable\n\n(package_identifier) @module\n\n(parameter_declaration\n  (identifier) @variable.parameter)\n\n(variadic_parameter_declaration\n  (identifier) @variable.parameter)\n\n(label_name) @label\n\n(const_spec\n  name: (identifier) @constant)\n\n; Function calls\n(call_expression\n  function: (identifier) @function.call)\n\n(call_expression\n  function: (selector_expression\n    field: (field_identifier) @function.method.call))\n\n; Function definitions\n(function_declaration\n  name: (identifier) @function)\n\n(method_declaration\n  name: (field_identifier) @function.method)\n\n(method_elem\n  name: (field_identifier) @function.method)\n\n; Constructors\n((call_expression\n  (identifier) @constructor)\n  (#match? @constructor \"^[nN]ew[\\\\s\\\\S]+$\"))\n\n((call_expression\n  (identifier) @constructor)\n  (#match? @constructor \"^[mM]ake[\\\\s\\\\S]+$\"))\n\n; Operators\n[\n  \"--\"\n  \"-\"\n  \"-=\"\n  \":=\"\n  \"!\"\n  \"!=\"\n  \"...\"\n  \"*\"\n  \"*=\"\n  \"/\"\n  \"/=\"\n  \"&\"\n  \"&&\"\n  \"&=\"\n  \"&^\"\n  \"&^=\"\n  \"%\"\n  \"%=\"\n  \"^\"\n  \"^=\"\n  \"+\"\n  \"++\"\n  \"+=\"\n  \"<-\"\n  \"<\"\n  \"<<\"\n  \"<<=\"\n  \"<=\"\n  \"=\"\n  \"==\"\n  \">\"\n  \">=\"\n  \">>\"\n  \">>=\"\n  \"|\"\n  \"|=\"\n  \"||\"\n  \"~\"\n] @operator\n\n; Keywords\n[\n  \"break\"\n  \"const\"\n  \"continue\"\n  \"default\"\n  \"defer\"\n  \"goto\"\n  \"range\"\n  \"select\"\n  \"var\"\n  \"fallthrough\"\n] @keyword\n\n[\n  \"type\"\n  \"struct\"\n  \"interface\"\n] @keyword.type\n\n\"func\" @keyword.function\n\n\"return\" @keyword.return\n\n\"go\" @keyword.coroutine\n\n\"for\" @keyword.repeat\n\n[\n  \"import\"\n  \"package\"\n] @keyword.import\n\n[\n  \"else\"\n  \"case\"\n  \"switch\"\n  \"if\"\n] @keyword.conditional\n\n; Builtin types\n[\n  \"chan\"\n  \"map\"\n] @type.builtin\n\n((type_identifier) @type.builtin\n  (#any-of? @type.builtin\n    \"any\" \"bool\" \"byte\" \"comparable\" \"complex128\" \"complex64\" \"error\" \"float32\" \"float64\" \"int\"\n    \"int16\" \"int32\" \"int64\" \"int8\" \"rune\" \"string\" \"uint\" \"uint16\" \"uint32\" \"uint64\" \"uint8\"\n    \"uintptr\"))\n\n; Builtin functions\n((identifier) @function.builtin\n  (#any-of? @function.builtin\n    \"append\" \"cap\" \"clear\" \"close\" \"complex\" \"copy\" \"delete\" \"imag\" \"len\" \"make\" \"max\" \"min\" \"new\"\n    \"panic\" \"print\" \"println\" \"real\" \"recover\"))\n\n; Delimiters\n[\n  \".\"\n  \",\"\n  \":\"\n  \";\"\n] @punctuation.delimiter\n\n[\n  \"(\"\n  \")\"\n  \"{\"\n  \"}\"\n  \"[\"\n  \"]\"\n] @punctuation.bracket\n\n; Literals\n(interpreted_string_literal) @string\n\n(raw_string_literal) @string\n\n(rune_literal) @character\n\n(escape_sequence) @string.escape\n\n(int_literal) @number\n\n(float_literal) @number.float\n\n(imaginary_literal) @number\n\n[\n  (true)\n  (false)\n] @boolean\n\n[\n  (nil)\n  (iota)\n] @constant.builtin\n\n(keyed_element\n  .\n  (literal_element\n    (identifier) @variable.member))\n\n(field_declaration\n  name: (field_identifier) @variable.member)\n\n; Comments\n(comment) @comment \n\n; Doc Comments\n(source_file\n  .\n  (comment)+ @comment.documentation)\n\n(source_file\n  (comment)+ @comment.documentation\n  .\n  (const_declaration))\n\n(source_file\n  (comment)+ @comment.documentation\n  .\n  (function_declaration))\n\n(source_file\n  (comment)+ @comment.documentation\n  .\n  (type_declaration))\n\n(source_file\n  (comment)+ @comment.documentation\n  .\n  (var_declaration))\n\n; Spell\n((interpreted_string_literal) \n  (#not-has-parent?  import_spec))\n\n; Regex\n(call_expression\n  (selector_expression) @_function\n  (#any-of? @_function\n    \"regexp.Match\" \"regexp.MatchReader\" \"regexp.MatchString\" \"regexp.Compile\" \"regexp.CompilePOSIX\"\n    \"regexp.MustCompile\" \"regexp.MustCompilePOSIX\")\n  (argument_list\n    .\n    [\n      (raw_string_literal\n        (raw_string_literal_content) @string.regexp)\n      (interpreted_string_literal\n        (interpreted_string_literal_content) @string.regexp)\n    ]))",
         "injections": "; This file is auto-generated. Do not edit.\n((comment) @injection.content\n  (#set! injection.language \"comment\"))\n\n(call_expression\n  (selector_expression) @_function\n  (#any-of? @_function\n    \"regexp.Match\" \"regexp.MatchReader\" \"regexp.MatchString\" \"regexp.Compile\" \"regexp.CompilePOSIX\"\n    \"regexp.MustCompile\" \"regexp.MustCompilePOSIX\")\n  (argument_list\n    .\n    [\n      (raw_string_literal\n        (raw_string_literal_content) @injection.content)\n      (interpreted_string_literal\n        (interpreted_string_literal_content) @injection.content)\n    ]\n    (#set! injection.language \"regex\")))\n\n((comment) @injection.content\n  (#match? @injection.content \"/\\\\*!([a-zA-Z]+:)?re2c\")\n  (#set! injection.language \"re2c\"))\n\n((call_expression\n  function: (selector_expression\n    field: (field_identifier) @_method)\n  arguments: (argument_list\n    .\n    (interpreted_string_literal\n      (interpreted_string_literal_content) @injection.content)))\n  (#any-of? @_method \"Printf\" \"Sprintf\" \"Fatalf\" \"Scanf\" \"Errorf\" \"Skipf\" \"Logf\")\n  (#set! injection.language \"printf\"))\n\n((call_expression\n  function: (selector_expression\n    field: (field_identifier) @_method)\n  arguments: (argument_list\n    (_)\n    .\n    (interpreted_string_literal\n      (interpreted_string_literal_content) @injection.content)))\n  (#any-of? @_method \"Fprintf\" \"Fscanf\" \"Appendf\" \"Sscanf\")\n  (#set! injection.language \"printf\"))",
         "locals": "; This file is auto-generated. Do not edit.\n((function_declaration\n  name: (identifier) @local.definition.function) ; @function\n  )\n\n((method_declaration\n  name: (field_identifier) @local.definition.method) ; @function.method\n  )\n\n(short_var_declaration\n  left: (expression_list\n    (identifier) @local.definition.var))\n\n(var_spec\n  name: (identifier) @local.definition.var)\n\n(parameter_declaration\n  (identifier) @local.definition.var)\n\n(variadic_parameter_declaration\n  (identifier) @local.definition.var)\n\n(for_statement\n  (range_clause\n    left: (expression_list\n      (identifier) @local.definition.var)))\n\n(const_declaration\n  (const_spec\n    name: (identifier) @local.definition.var))\n\n(type_declaration\n  (type_spec\n    name: (type_identifier) @local.definition.type))\n\n; reference\n(identifier) @local.reference\n\n(type_identifier) @local.reference\n\n(field_identifier) @local.reference\n\n((package_identifier) @local.reference\n  (#set! reference.kind \"namespace\"))\n\n(package_clause\n  (package_identifier) @local.definition.namespace)\n\n(import_spec_list\n  (import_spec\n    name: (package_identifier) @local.definition.namespace))\n\n; Call references\n((call_expression\n  function: (identifier) @local.reference)\n  (#set! reference.kind \"call\"))\n\n((call_expression\n  function: (selector_expression\n    field: (field_identifier) @local.reference))\n  (#set! reference.kind \"call\"))\n\n((call_expression\n  function: (parenthesized_expression\n    (identifier) @local.reference))\n  (#set! reference.kind \"call\"))\n\n((call_expression\n  function: (parenthesized_expression\n    (selector_expression\n      field: (field_identifier) @local.reference)))\n  (#set! reference.kind \"call\"))\n\n; Scopes\n(func_literal) @local.scope\n\n(source_file) @local.scope\n\n(function_declaration) @local.scope\n\n(if_statement) @local.scope\n\n(block) @local.scope\n\n(expression_switch_statement) @local.scope\n\n(for_statement) @local.scope\n\n(method_declaration) @local.scope",
@@ -780,15 +800,15 @@
   },
   "@lumis-sh/wasm-graphql": {
     "packageName": "@lumis-sh/wasm-graphql",
-    "version": "0.26.3",
+    "version": "0.26.4",
     "definitionHash": "fe21f8bc0a50cdbd84685dc6a6ae883527cdb5c046780e35bb18f4690f0a1fca",
     "parser": {
       "name": "tree-sitter-graphql",
       "grammarName": "graphql",
-      "upstreamVersion": "0.2.1",
+      "upstreamVersion": "0.3.0",
       "revision": "5e66e961eee421786bdda8495ed1db045e06b5fe",
-      "sha256": "3cb5b779f2b12b1e888b80aee6f671e275974ecb0fae12939e227058d0d51087",
-      "size": 64462
+      "sha256": "29a6a9ccd138def458e91e56a342dc57476b3094af740a9132a726fad8413bcc",
+      "size": 64407
     },
     "languages": {
       "graphql": {
@@ -801,15 +821,15 @@
   },
   "@lumis-sh/wasm-groovy": {
     "packageName": "@lumis-sh/wasm-groovy",
-    "version": "0.26.5",
+    "version": "0.26.6",
     "definitionHash": "dc5e1f863d915f25ebcaafcb3095233706ae5f823e0542cd26a5d11426c6d546",
     "parser": {
       "name": "tree-sitter-groovy",
       "grammarName": "groovy",
       "upstreamVersion": "0.0.1",
       "revision": "2a6ddd558b6aa39c5b77d8db9fe9baf817486b2c",
-      "sha256": "1b009b627a52a99a36dd3f393e40b9945a06ba3e39bdc80ea0200d47f7d951ad",
-      "size": 878728
+      "sha256": "bf5200613c373b48c30a73762b2636f98b20d93f363b935eeb28581714744733",
+      "size": 878509
     },
     "languages": {
       "groovy": {
@@ -823,15 +843,15 @@
   },
   "@lumis-sh/wasm-haskell": {
     "packageName": "@lumis-sh/wasm-haskell",
-    "version": "0.26.2",
-    "definitionHash": "86cafcd829b076d51695f042a5e50589aa8d32486f0acac2612b78ef4d079edf",
+    "version": "0.26.4",
+    "definitionHash": "18960459267c19f05a6ffca0d25b5669ba10507169d7bc4ef2c3ff42274ed1e6",
     "parser": {
       "name": "tree-sitter-haskell",
       "grammarName": "haskell",
-      "upstreamVersion": "0.23.1",
-      "revision": "c30d812bc90827f1a54106a25bc9a6307f5cdcec",
-      "sha256": "746e4607716540c556b3e4b19d4eaef6f418fa9bcf6ad58aedb7e92b889e5805",
-      "size": 3846714
+      "upstreamVersion": "0.24.1",
+      "revision": "97288e585b0bd44199720280d067fa35bacd81ff",
+      "sha256": "e1a5a0605236416ecd12deece47bdd681968515d55278b16dd6f989ca60badb7",
+      "size": 3846936
     },
     "languages": {
       "haskell": {
@@ -845,15 +865,15 @@
   },
   "@lumis-sh/wasm-hcl": {
     "packageName": "@lumis-sh/wasm-hcl",
-    "version": "0.26.4",
+    "version": "0.26.5",
     "definitionHash": "2814b88793c0e20b93c0184995848ff306079cd6656c23af49f4d67d957a6c19",
     "parser": {
       "name": "tree-sitter-hcl",
       "grammarName": "hcl",
       "upstreamVersion": "1.1.0",
       "revision": "64ad62785d442eb4d45df3a1764962dafd5bc98b",
-      "sha256": "2d357c763397728e465bdd76c4bbc0ed80e323b86ba557f3ad30b14634873a95",
-      "size": 96443
+      "sha256": "e4fe0f1e957d3de9031b62d601eda225139e9db398d53c78271220e2b31171fb",
+      "size": 96492
     },
     "languages": {
       "hcl": {
@@ -866,15 +886,15 @@
   },
   "@lumis-sh/wasm-heex": {
     "packageName": "@lumis-sh/wasm-heex",
-    "version": "0.26.3",
+    "version": "0.26.4",
     "definitionHash": "fda279c60433e30e4d2bd17630c21e603d288e33a047e704146baf1a9cb02c40",
     "parser": {
       "name": "tree-sitter-heex",
       "grammarName": "heex",
       "upstreamVersion": "0.8.1",
       "revision": "008626a3fad379d17c81d5ed576edd9bd7a4fbf7",
-      "sha256": "a4bf8c53af112a28e58b6ec6038ed05cf4c7d1558ee67f147c59fabf8a533dde",
-      "size": 24831
+      "sha256": "fd9cf8602295f4984793087744851fd2023b243a096f81755a315c5655a118df",
+      "size": 24945
     },
     "languages": {
       "heex": {
@@ -888,15 +908,15 @@
   },
   "@lumis-sh/wasm-html": {
     "packageName": "@lumis-sh/wasm-html",
-    "version": "0.26.4",
+    "version": "0.26.5",
     "definitionHash": "051386cfcc478d8ebe511c4877347272aba597cbc50b0a061b00f343a008d444",
     "parser": {
       "name": "tree-sitter-html",
       "grammarName": "html",
       "upstreamVersion": "0.23.2",
       "revision": "7dfafded732a8ee82e8d8776619a56ddadb0bdd0",
-      "sha256": "78d30be06853bd0c14bd2e26737032a73c44bb095b9a56b1a5a2eeea5c85232f",
-      "size": 21399
+      "sha256": "57cf7f8f87fdadabfc70fcc263fab41ded001dfc68ac3c2ad9b94c7844729317",
+      "size": 21433
     },
     "languages": {
       "html": {
@@ -910,7 +930,7 @@
   },
   "@lumis-sh/wasm-htmldjango": {
     "packageName": "@lumis-sh/wasm-htmldjango",
-    "version": "0.26.0",
+    "version": "0.26.1",
     "definitionHash": "30781da7edb31314e17d9fa0ad9c00501e37d5d9e2fcb8f5b44e531dfbb06017",
     "parser": {
       "name": "tree-sitter-htmldjango",
@@ -931,15 +951,15 @@
   },
   "@lumis-sh/wasm-http": {
     "packageName": "@lumis-sh/wasm-http",
-    "version": "0.26.2",
+    "version": "0.26.3",
     "definitionHash": "8d7772d83e48629fdea60f56d29e7cab38c003bcee9c76b79a082f88da1bd220",
     "parser": {
       "name": "tree-sitter-http",
       "grammarName": "http",
       "upstreamVersion": "3.0.0",
       "revision": "db8b4398de90b6d0b6c780aba96aaa2cd8e9202c",
-      "sha256": "91e9797999ee528e471a75b74c5bc98ba6db753d6dfcfb1b6682a8e2d01b821e",
-      "size": 161008
+      "sha256": "6dba7f94ffb4f3b52a6989fdab79f3d45e646bda99092b454ea3946c6269b48a",
+      "size": 160895
     },
     "languages": {
       "http": {
@@ -952,7 +972,7 @@
   },
   "@lumis-sh/wasm-hurl": {
     "packageName": "@lumis-sh/wasm-hurl",
-    "version": "0.26.6",
+    "version": "0.26.7",
     "definitionHash": "f6718965f38b0c434e5f378a1adb9cfc5bcb9d15a0c694825d8bfc46b061188f",
     "parser": {
       "name": "tree-sitter-hurl",
@@ -973,15 +993,15 @@
   },
   "@lumis-sh/wasm-iex": {
     "packageName": "@lumis-sh/wasm-iex",
-    "version": "0.26.2",
+    "version": "0.26.3",
     "definitionHash": "b5cba1ea414a6d8a8346fb751ef3b5552365957d11a294026fa02631a60a2d8b",
     "parser": {
       "name": "tree-sitter-iex",
       "grammarName": "iex",
       "upstreamVersion": "0.0.1",
       "revision": "39f20bb51f502e32058684e893c0c0b00bb2332c",
-      "sha256": "d4f211d90a1bb6dcfba72cef52e6522c5881d9a286588a53ea5d2a811adf36bd",
-      "size": 7609
+      "sha256": "bc5ec7f6245b174b5c787463b059054f974c512499a79eb6844dd623c135a3af",
+      "size": 7859
     },
     "languages": {
       "iex": {
@@ -994,15 +1014,15 @@
   },
   "@lumis-sh/wasm-ini": {
     "packageName": "@lumis-sh/wasm-ini",
-    "version": "0.26.3",
+    "version": "0.26.4",
     "definitionHash": "f111641633617c24a87fdfe85bf69160cb9d8fb2a4c65356105a5ebaf52df18c",
     "parser": {
       "name": "tree-sitter-ini",
       "grammarName": "ini",
       "upstreamVersion": "1.4.0",
       "revision": "f0285fe577ad298ad79f8633e643ad60646e3027",
-      "sha256": "6df87fa101977d6b3d18bb4027ffe724f228d1d66164569de8a944c30c4c5f4b",
-      "size": 5914
+      "sha256": "66daca9771c29253e6d111bd6af5fa87a7b352908b294aa7b8bca2a2802ad628",
+      "size": 5969
     },
     "languages": {
       "ini": {
@@ -1015,15 +1035,15 @@
   },
   "@lumis-sh/wasm-java": {
     "packageName": "@lumis-sh/wasm-java",
-    "version": "0.26.3",
+    "version": "0.26.4",
     "definitionHash": "2c5ca7896100c02e99db084fece9be4ea6eee0ec2e95eb3e0f595544594c352d",
     "parser": {
       "name": "tree-sitter-java",
       "grammarName": "java",
       "upstreamVersion": "0.23.5",
       "revision": "94703d5a6bed02b98e438d7cad1136c01a60ba2c",
-      "sha256": "7ca4450fde4b76124e16782974c195d91813ba90b58758935ea3d52c2c9e2ab5",
-      "size": 421778
+      "sha256": "ce8ebda6c4d87fe5176ac86dccba9d1a82e5e429f2cc2cd4350f6f8669702183",
+      "size": 422006
     },
     "languages": {
       "java": {
@@ -1037,15 +1057,15 @@
   },
   "@lumis-sh/wasm-javadoc": {
     "packageName": "@lumis-sh/wasm-javadoc",
-    "version": "0.26.3",
+    "version": "0.26.4",
     "definitionHash": "e3b5baecbcf396b907e7f99f3dba9d7c57badd0a9912fa104dcec4e40544d147",
     "parser": {
       "name": "tree-sitter-javadoc",
       "grammarName": "javadoc",
       "upstreamVersion": "0.3.1",
       "revision": "e2f56b4d0df08f6ed5df8bae266f9e75b340a9ab",
-      "sha256": "081628cffdec1e2f04467e961da6cd81ca63d52206979fc1301b5155cc4f188d",
-      "size": 161980
+      "sha256": "fde820ac4125181ef4c17cc57025eeb50500ebf04dfe1e2586b1089e67d0c3a8",
+      "size": 161958
     },
     "languages": {
       "javadoc": {
@@ -1058,15 +1078,15 @@
   },
   "@lumis-sh/wasm-javascript": {
     "packageName": "@lumis-sh/wasm-javascript",
-    "version": "0.26.4",
+    "version": "0.26.5",
     "definitionHash": "cc4e380b414a18c833cd3e5d68a0e2dc2df0e1b5949f3b1122d53a848fb0044b",
     "parser": {
       "name": "tree-sitter-javascript",
       "grammarName": "javascript",
       "upstreamVersion": "0.25.0",
       "revision": "44c892e0be055ac465d5eeddae6d3e194424e7de",
-      "sha256": "08a820eb662cbdf14ffd71c66dee3169c3472feeb7b2e7c3a9ee156a06d337e5",
-      "size": 418049
+      "sha256": "78869fe841c92a0adaed35a081f662771011101f23b127c9d8741abdf37103d1",
+      "size": 418217
     },
     "languages": {
       "javascript": {
@@ -1080,15 +1100,15 @@
   },
   "@lumis-sh/wasm-jinja": {
     "packageName": "@lumis-sh/wasm-jinja",
-    "version": "0.26.6",
+    "version": "0.26.7",
     "definitionHash": "6c99391aaafaa780a37e6728e76bfd62a2c6eb03a189e4e471b7e28c61368aa2",
     "parser": {
       "name": "tree-sitter-jinja",
       "grammarName": "jinja",
       "upstreamVersion": "0.13.0",
       "revision": "c213d3745ccdcaaa858869181c7b1bf9557a025f",
-      "sha256": "f06c879c838ac6730dd2a15987e7672e987939847727e9635c919d0127a5bd97",
-      "size": 153552
+      "sha256": "f8cc0a3c76ae9592a3fe5c6cb3cb570bc8f709b7b094c17812c6e508cade887e",
+      "size": 153471
     },
     "languages": {
       "jinja": {
@@ -1101,15 +1121,15 @@
   },
   "@lumis-sh/wasm-jinja_inline": {
     "packageName": "@lumis-sh/wasm-jinja_inline",
-    "version": "0.26.5",
+    "version": "0.26.6",
     "definitionHash": "879c26b1aa0d0b32e323936c8edb744b69e2de72d914d1656a3a470448836f3b",
     "parser": {
       "name": "tree-sitter-jinja_inline",
       "grammarName": "jinja_inline",
       "upstreamVersion": "0.13.0",
       "revision": "c213d3745ccdcaaa858869181c7b1bf9557a025f",
-      "sha256": "775fca6f1845b91d7fc7cd528af5ab9c09b1d3850d4c980e209cd743835b1c39",
-      "size": 207435
+      "sha256": "84b922bcc473cfae98e0d517b3a921a4235f77bd74c687dcb0fdd3337db35796",
+      "size": 207331
     },
     "languages": {
       "jinja_inline": {
@@ -1122,15 +1142,15 @@
   },
   "@lumis-sh/wasm-jq": {
     "packageName": "@lumis-sh/wasm-jq",
-    "version": "0.26.2",
+    "version": "0.26.3",
     "definitionHash": "6fd5aea209e3bc76a3ae25d6f18b73f2422cdf13039da5da31776891c43937db",
     "parser": {
       "name": "tree-sitter-jq",
       "grammarName": "jq",
       "upstreamVersion": "1.0.0",
       "revision": "c204e36d2c3c6fce1f57950b12cabcc24e5cc4d9",
-      "sha256": "e5e9d2e94daf54d337d1eab7120e9cece8cf2fd1af24fc2199d8dd74831a15ee",
-      "size": 100759
+      "sha256": "56474db9f1e2261e2fef53d6f1f6c6c830f2a239ace3bb5d4333f753f3104f99",
+      "size": 100899
     },
     "languages": {
       "jq": {
@@ -1144,15 +1164,15 @@
   },
   "@lumis-sh/wasm-json": {
     "packageName": "@lumis-sh/wasm-json",
-    "version": "0.26.5",
+    "version": "0.26.6",
     "definitionHash": "e415f4070e42eb0465cbdb68eef641106b879c85e62b80c7addd78bced4a8b2f",
     "parser": {
       "name": "tree-sitter-json",
       "grammarName": "json",
       "upstreamVersion": "0.24.8",
       "revision": "ee35a6ebefcef0c5c416c0d1ccec7370cfca5a24",
-      "sha256": "c589ab7005dfb4d449a65136ff1f1c9b1e206360fe331b4b22f15cc4a023d791",
-      "size": 6825
+      "sha256": "980363dec112ee8a267de151f0c8b5a583e8fb6073ce9d1b4b80acb160680042",
+      "size": 6880
     },
     "languages": {
       "json": {
@@ -1166,15 +1186,15 @@
   },
   "@lumis-sh/wasm-json5": {
     "packageName": "@lumis-sh/wasm-json5",
-    "version": "0.26.3",
+    "version": "0.26.4",
     "definitionHash": "ac0b4b97cb0a326f445123554685b1b84590f7651bfbb6c5e003f222ac5168ad",
     "parser": {
       "name": "tree-sitter-json5",
       "grammarName": "json5",
       "upstreamVersion": "0.1.0",
       "revision": "aa630ef48903ab99e406a8acd2e2933077cc34e1",
-      "sha256": "58c1513274cd9e782ef5c3e4cd17589837eefd6b46af2283243bff6e831e40cf",
-      "size": 22551
+      "sha256": "1e9349a58cab4e425d520241e2aaf2d80c3dac10daa48a34bc3d32df4c812099",
+      "size": 22507
     },
     "languages": {
       "json5": {
@@ -1187,15 +1207,15 @@
   },
   "@lumis-sh/wasm-julia": {
     "packageName": "@lumis-sh/wasm-julia",
-    "version": "0.26.3",
+    "version": "0.26.4",
     "definitionHash": "3bfbcbe65ef3138a8aba607d3be7f2cb85901ab6efe8bc7d46741a2fce8dec38",
     "parser": {
       "name": "tree-sitter-julia",
       "grammarName": "julia",
       "upstreamVersion": "0.23.1",
       "revision": "a8e1262997d5a45520a06cbe1b86c0737d507054",
-      "sha256": "a6e8547f996813bb613da1e20c6205094815801ce235abf9884adcc25104d26d",
-      "size": 6370367
+      "sha256": "8f28424b4be7b234fcb838b3966a3b36974d510ff5b3444ef2e0dc4003dfd631",
+      "size": 6370200
     },
     "languages": {
       "julia": {
@@ -1209,15 +1229,15 @@
   },
   "@lumis-sh/wasm-just": {
     "packageName": "@lumis-sh/wasm-just",
-    "version": "0.26.3",
+    "version": "0.26.4",
     "definitionHash": "10a606ade4e222fab76580eeda3a32e022d588abb6a16962ae3d52ce0ea89fe7",
     "parser": {
       "name": "tree-sitter-just",
       "grammarName": "just",
       "upstreamVersion": "0.2.0",
       "revision": "5685543a6e64f66335e25518c9ae8ffa1dae3d01",
-      "sha256": "ca121c41aa921964c38ef583edf27508c8c65a4fc22553ae0e319591d0fd80eb",
-      "size": 47754
+      "sha256": "0a09315157f9eee4fe0bac98a8835ddc281e1d19c0fafb3705c10a2ccc68f25f",
+      "size": 47841
     },
     "languages": {
       "just": {
@@ -1231,15 +1251,15 @@
   },
   "@lumis-sh/wasm-kdl": {
     "packageName": "@lumis-sh/wasm-kdl",
-    "version": "0.26.4",
+    "version": "0.26.5",
     "definitionHash": "105c542de0b6aebb4798d9ad89d20ba41207fe61679e41f24e0cfc8827844eaf",
     "parser": {
       "name": "tree-sitter-kdl",
       "grammarName": "kdl",
       "upstreamVersion": "2.0.0",
       "revision": "e8ff98a113e175b84b92ec2096820517c1e10a66",
-      "sha256": "c3790bf86fedef394252e5976871f2d202d7a063fd2990682e40e8e0a094ed3a",
-      "size": 74076
+      "sha256": "99996db1e68f22d3b4aaa46a50a9309fd1b86a96879b48a44494cb03affc5c70",
+      "size": 74222
     },
     "languages": {
       "kdl": {
@@ -1253,15 +1273,15 @@
   },
   "@lumis-sh/wasm-kotlin": {
     "packageName": "@lumis-sh/wasm-kotlin",
-    "version": "0.26.5",
+    "version": "0.26.6",
     "definitionHash": "9d63b2c61f8439208cd4fc8292e2d3c1eff364636c2b469a045025e69c7e19ca",
     "parser": {
       "name": "tree-sitter-kotlin",
       "grammarName": "kotlin",
       "upstreamVersion": "0.3.8",
       "revision": "e1a2d5ad1f61f5740677183cd4125bb071cd2f30",
-      "sha256": "d935fff5f1a8fb7a6a7d050e0a54530c784e46225f65f78525139db9749dd774",
-      "size": 4130096
+      "sha256": "fb12daaa0cc7ee3eaa85950e213bf102beb881d29c78208ef89bb4fd3052b68a",
+      "size": 4129886
     },
     "languages": {
       "kotlin": {
@@ -1275,15 +1295,15 @@
   },
   "@lumis-sh/wasm-latex": {
     "packageName": "@lumis-sh/wasm-latex",
-    "version": "0.26.2",
+    "version": "0.26.3",
     "definitionHash": "ef65a093f4e6fad8fe764d0e1ced018c02a3f5a8bf525b8b3cf0e9550f17ece3",
     "parser": {
       "name": "tree-sitter-latex",
       "grammarName": "latex",
       "upstreamVersion": "0.6.0",
       "revision": "7e0ecdc02926c7b9b2e0c76003d4fe7b0944f957",
-      "sha256": "78011e6da81e107d82c70548ccd738e55d8a3f081e9f5e14f21954e847105911",
-      "size": 3720646
+      "sha256": "42f8dbe24ce60ca3cd0585c42c26234efe8cd66b1ccacc652a697f20cfeb4f09",
+      "size": 3720446
     },
     "languages": {
       "latex": {
@@ -1294,17 +1314,39 @@
       }
     }
   },
+  "@lumis-sh/wasm-lean": {
+    "packageName": "@lumis-sh/wasm-lean",
+    "version": "0.26.0",
+    "definitionHash": "22e90bd711a794d2af9c7ee3240449e311b54a310898836f2f04e90c84aeaf2e",
+    "parser": {
+      "name": "tree-sitter-lean",
+      "grammarName": "lean",
+      "upstreamVersion": "0.2.0",
+      "revision": "0d28e5d6e8c4755f5df7ef9bde3b6ec6f59fae94",
+      "sha256": "c920b31a30231d862c6c7a59c8377ef1cefa1a749292ec343bfdce6fed964b36",
+      "size": 8237562
+    },
+    "languages": {
+      "lean": {
+        "aliases": ["lean4"],
+        "highlights": "; This file is auto-generated. Do not edit.\n; Highlight queries for tree-sitter-lean.\n;\n; Capture names follow the nvim-treesitter capture convention, which maps\n; back to Lean's SemanticTokenType vocabulary (see\n;   lean4/src/Lean/Data/Lsp/LanguageFeatures.lean\n; for the authoritative list). When the Lean LSP server is attached, its\n; semantic tokens take precedence over these queries at runtime; the\n; queries provide the floor for offline/cold-start highlighting.\n\n; ---------- comments ------------------------------------------------------\n\n(line_comment)        @comment\n(block_comment)       @comment\n(doc_comment)         @comment.documentation\n(module_doc_comment)  @comment.documentation\n\n; ---------- literals ------------------------------------------------------\n\n(num_lit)             @number\n(scientific_lit)      @number.float\n(char_lit)            @character\n(str_lit)             @string\n(raw_string)          @string.special\n(interpolated_str)    @string\n(escape_sequence)     @string.escape\n(name_lit)            @string.special.symbol\n\n(true_const)          @boolean\n(false_const)         @boolean\n\n((sorry) @keyword.exception)    ; Lean tags `sorry`/`admit` as leanSorryLike\n\n; ---------- type-level constants ------------------------------------------\n\n(type_const)          @type.builtin\n(sort_const)          @type.builtin\n(prop_const)          @type.builtin\n\n; ---------- identifiers ---------------------------------------------------\n\n; Plain identifier — default to variable. More-specific queries below\n; override for declaration names, types, etc.\n(identifier)          @variable\n\n; Holes & meta-variables.\n(hole)                @variable.builtin\n(synth_hole)          @variable.builtin\n(named_hole (identifier) @variable.builtin)\n\n; ---------- declaration names --------------------------------------------\n\n(def       name: (identifier) @function)\n(theorem   name: (identifier) @function)\n(abbrev    name: (identifier) @function)\n(opaque    name: (identifier) @function)\n(constant  name: (identifier) @function)\n(axiom     name: (identifier) @function)\n(instance  name: (identifier) @function)\n\n(structure name: (identifier) @type)\n(inductive name: (identifier) @type)\n\n(ctor       name: (identifier) @constructor)\n(ctor_alt   name: (identifier) @constructor)\n\n(field      name: (identifier) @property)\n\n; Namespace / section names.\n(namespace name: (identifier) @namespace)\n(section   name: (identifier) @namespace)\n(end       name: (identifier) @namespace)\n\n; Universe names.\n(universe  name: (identifier) @type.parameter)\n\n; Import paths.\n(import    name: (identifier) @module)\n(open      namespace: (identifier) @module)\n(open      only: (identifier)      @function)\n(open      scoped: (identifier)    @module)\n(export    namespace: (identifier) @module)\n(export    only: (identifier)      @function)\n\n; Attribute names.\n(attributes name: (identifier) @attribute)\n\n; Projection / field access.\n(proj field: (identifier) @property)\n(proj field: (num_lit)    @number)\n\n; Named-argument labels.\n(paren arg_name: (identifier) @variable.parameter)\n\n; Function call: highlight the called name as @function when it's a\n; bare identifier.\n(app fn: (identifier) @function.call)\n\n; ---------- keywords ------------------------------------------------------\n\n; Module-system keywords. `module`/`prelude`/`public`/`meta`/`all` each\n; have a same-named rule wrapping the literal, so we query the rules\n; rather than the bare strings.\n(moduleTk)  @keyword.import\n(prelude)   @keyword.import\n(public)    @keyword.import\n(meta)      @keyword.import\n(all)       @keyword.import\n\"import\"    @keyword.import\n(public_section) @keyword.import\n\n[\n  \"namespace\"\n  \"section\"\n  \"end\"\n] @keyword\n\n[\n  \"def\"\n  \"theorem\"\n  \"example\"\n  \"abbrev\"\n  \"instance\"\n  \"axiom\"\n  \"opaque\"\n  \"constant\"\n  \"structure\"\n  \"inductive\"\n  \"class\"\n] @keyword\n\n[\n  \"variable\"\n  \"universe\"\n  \"universes\"\n  \"open\"\n  \"export\"\n  \"extends\"\n  \"deriving\"\n  \"where\"\n] @keyword\n\n[\n  \"noncomputable\"\n  \"partial\"\n  \"nonrec\"\n  \"private\"\n  \"protected\"\n  \"unsafe\"\n  \"mut\"\n  \"scoped\"\n  \"local\"\n] @keyword.modifier\n\n[\n  \"#check\"\n  \"#eval\"\n  \"#print\"\n  \"#reduce\"\n] @keyword.directive\n\n[\n  \"fun\"\n  \"λ\"\n] @keyword.function\n\n[\n  \"let\"\n  \"have\"\n  \"show\"\n  \"from\"\n] @keyword\n\n[\n  \"if\"\n  \"then\"\n  \"else\"\n] @keyword.conditional\n\n[\n  \"match\"\n  \"with\"\n] @keyword.conditional\n\n[\n  \"by\"\n  \"do\"\n] @keyword\n\n[\n  \"forall\"\n  \"∀\"\n  \"exists\"\n  \"∃\"\n] @keyword.operator\n\n; ---------- operators -----------------------------------------------------\n\n[\n  \"→\" \"->\" \"↔\" \"<->\" \"↦\" \"=>\"\n  \"∨\" \"||\" \"∧\" \"&&\" \"¬\" \"!\"\n  \"=\" \"≠\" \"!=\" \"<\" \"≤\" \"<=\" \">\" \"≥\" \">=\"\n  \"∈\" \"∉\" \"⊆\" \"⊂\" \"⊇\" \"⊃\"\n  \"≡\" \"≢\" \"~\" \"≃\" \"≅\"\n  \"::\" \"++\"\n  \"+\" \"-\" \"*\" \"/\" \"%\"\n  \"∪\" \"∩\" \"\\\\\"\n  \"^\" \"∘\"\n  \"|>\" \"<|\"\n  \">>\" \"<<\" \">>>\" \"<<<\"\n  \">>=\" \"=<<\"\n  \"<$>\" \"<*>\" \"<|>\" \"<&>\"\n  \"&&&\" \"|||\" \"^^^\"\n  \"←\" \"<-\"\n] @operator\n\n; ---------- punctuation ---------------------------------------------------\n\n[\":=\" \":\"] @operator\n[\",\" \";\" \"|\"] @punctuation.delimiter\n[\"(\" \")\" \"{\" \"}\" \"[\" \"]\" \"⟨\" \"⟩\" \"⦃\" \"⦄\" \"{{\" \"}}\"] @punctuation.bracket\n[\"@[\" \"]\"] @attribute\n\n; ---------- raw atoms ----------------------------------------------------\n\n[\"`\" \"'\" \"\\\"\" \"s!\\\"\" \"m!\\\"\"] @string",
+        "injections": "; This file is auto-generated. Do not edit.\n; Language injections for tree-sitter-lean.\n\n; Doc comments are Markdown / Verso content.\n((doc_comment) @injection.content\n  (#set! injection.language \"markdown\"))\n\n((module_doc_comment) @injection.content\n  (#set! injection.language \"markdown\"))\n\n; Raw string contents stay plain; no injection beyond default text.",
+        "locals": "; This file is auto-generated. Do not edit.\n; Scope-aware queries for tree-sitter-lean.\n\n; ---------- scopes -------------------------------------------------------\n\n[\n  (def)\n  (theorem)\n  (example)\n  (abbrev)\n  (instance)\n  (axiom)\n  (opaque)\n  (constant)\n  (structure)\n  (inductive)\n  (fun)\n  (let)\n  (have)\n  (forall)\n  (exists)\n  (match)\n  (match_alt)\n  (by)\n  (do_block)\n  (namespace)\n  (section)\n] @local.scope\n\n; ---------- definitions --------------------------------------------------\n\n(def       name: (identifier) @local.definition.function)\n(theorem   name: (identifier) @local.definition.function)\n(abbrev    name: (identifier) @local.definition.function)\n(opaque    name: (identifier) @local.definition.function)\n(constant  name: (identifier) @local.definition.function)\n(axiom     name: (identifier) @local.definition.function)\n(instance  name: (identifier) @local.definition.function)\n(structure name: (identifier) @local.definition.type)\n(inductive name: (identifier) @local.definition.type)\n\n(field     name: (identifier) @local.definition.field)\n(ctor      name: (identifier) @local.definition.constructor)\n(ctor_alt  name: (identifier) @local.definition.constructor)\n\n(namespace name: (identifier) @local.definition.namespace)\n\n(let     name: (identifier) @local.definition.var)\n(have    name: (identifier) @local.definition.var)\n(named_hole (identifier) @local.definition.var)\n\n(explicit_binder        name: (identifier) @local.definition.parameter)\n(implicit_binder        name: (identifier) @local.definition.parameter)\n(strict_implicit_binder name: (identifier) @local.definition.parameter)\n(instance_binder        name: (identifier) @local.definition.parameter)\n\n; ---------- references ---------------------------------------------------\n\n(identifier) @local.reference",
+        "brackets": "; This file is auto-generated. Do not edit.\n(\"(\" @open\n  \")\" @close)\n\n(\"[\" @open\n  \"]\" @close)\n\n(\"{\" @open\n  \"}\" @close)\n"
+      }
+    }
+  },
   "@lumis-sh/wasm-liquid": {
     "packageName": "@lumis-sh/wasm-liquid",
-    "version": "0.26.3",
+    "version": "0.26.4",
     "definitionHash": "56993727bb5b4b7585177321ad9a7bde7fa79350f6cd843f49815344ec2c6c46",
     "parser": {
       "name": "tree-sitter-liquid",
       "grammarName": "liquid",
       "upstreamVersion": "0.1.0",
       "revision": "e45dbac8c5fa95b1f0e00e7e0c04bc8855823391",
-      "sha256": "62c844015f19774a9eabdf97e0517610b84aa99c6f6ac1991421845be9cca9fe",
-      "size": 139314
+      "sha256": "57f74e359f984de8ff55169b44272dcbc85a18e225352270a38e7a485c8bf01a",
+      "size": 139384
     },
     "languages": {
       "liquid": {
@@ -1317,7 +1359,7 @@
   },
   "@lumis-sh/wasm-llvm": {
     "packageName": "@lumis-sh/wasm-llvm",
-    "version": "0.26.4",
+    "version": "0.26.5",
     "definitionHash": "8a96f1ce8c76d9d47ce8803dcfa40a30516dc52765181cab4b642d313877a14a",
     "parser": {
       "name": "tree-sitter-llvm",
@@ -1338,15 +1380,15 @@
   },
   "@lumis-sh/wasm-lua": {
     "packageName": "@lumis-sh/wasm-lua",
-    "version": "0.26.3",
+    "version": "0.26.4",
     "definitionHash": "30f233195635947a363f4cd659fe1f923cf6b8956c9e2ad268e584a25b48fc74",
     "parser": {
       "name": "tree-sitter-lua",
       "grammarName": "lua",
       "upstreamVersion": "0.5.0",
       "revision": "10fe0054734eec83049514ea2e718b2a56acd0c9",
-      "sha256": "b9983cfa71dec178bacab8670d535c528439c01e21cdf8b27d2c201c68fb389a",
-      "size": 55130
+      "sha256": "ef1d26cee430bb34dbd5e46b4bce4b76b5c977dfc5adf70b531784a3ac573936",
+      "size": 55183
     },
     "languages": {
       "lua": {
@@ -1360,15 +1402,15 @@
   },
   "@lumis-sh/wasm-luadoc": {
     "packageName": "@lumis-sh/wasm-luadoc",
-    "version": "0.26.3",
+    "version": "0.26.4",
     "definitionHash": "140a64af1d6a1c98019f56aaa42dc0dd2ab5c402281e80aad835ae533bef453f",
     "parser": {
       "name": "tree-sitter-luadoc",
       "grammarName": "luadoc",
       "upstreamVersion": "1.1.0",
       "revision": "873612aadd3f684dd4e631bdf42ea8990c57634e",
-      "sha256": "c446cc33b29514041b2dc1082501637779b1f7426544aea44ba4aebadafa034f",
-      "size": 171084
+      "sha256": "5243020b62d4561734886eb9cc772f5f2a80d927a3b0f2ef878910f4119c6851",
+      "size": 171004
     },
     "languages": {
       "luadoc": {
@@ -1380,15 +1422,15 @@
   },
   "@lumis-sh/wasm-make": {
     "packageName": "@lumis-sh/wasm-make",
-    "version": "0.26.3",
+    "version": "0.26.4",
     "definitionHash": "13a0eb3893d631a6295dda4fcb24b9ac738aff8208989e63e80802c6ec94da0b",
     "parser": {
       "name": "tree-sitter-make",
       "grammarName": "make",
       "upstreamVersion": "1.1.1",
       "revision": "5e9e8f8ff3387b0edcaa90f46ddf3629f4cfeb1d",
-      "sha256": "99c9821950d793f895e35595787fccb63b0a8e714462a9650d9c8fbc22328884",
-      "size": 154814
+      "sha256": "c5131a184703763ed80436dacc15a42b1486947eb3ef8d64a9c7fb4571fe4b7a",
+      "size": 154221
     },
     "languages": {
       "make": {
@@ -1401,15 +1443,15 @@
   },
   "@lumis-sh/wasm-markdown": {
     "packageName": "@lumis-sh/wasm-markdown",
-    "version": "0.26.3",
-    "definitionHash": "b4eb614ce58cd861d52b9665a109945d5f7651f1b075abed5d6828626bd70e17",
+    "version": "0.26.5",
+    "definitionHash": "39783ee17c4119cfd053d65fec3249e33998159951316c5e9ed07a20ca7ad088",
     "parser": {
       "name": "tree-sitter-markdown",
       "grammarName": "markdown",
-      "upstreamVersion": "0.5.3",
-      "revision": "f969cd3ae3f9fbd4e43205431d0ae286014c05b5",
-      "sha256": "9c19cee8c6cebcca0f69300ddadbd464f7cff8f18374d84d26520cea99526068",
-      "size": 421891
+      "upstreamVersion": "0.5.4",
+      "revision": "41ff24a6c775492c543b09228aeb98d1cd2b3a0f",
+      "sha256": "e4d2476fb62031b1d493fa58cd391b3b596e2c1a20778d8730daf6291a8b9a37",
+      "size": 429955
     },
     "languages": {
       "markdown": {
@@ -1428,15 +1470,15 @@
   },
   "@lumis-sh/wasm-markdown_inline": {
     "packageName": "@lumis-sh/wasm-markdown_inline",
-    "version": "0.26.3",
-    "definitionHash": "c7fe527ada911740c192c5b224e42871aba026a82f65d3ec3c1f992371d0ce26",
+    "version": "0.26.5",
+    "definitionHash": "8d07d22b2e27ee53ef9deff497e1d4459824d5ef0f76493660eb7fdb9344a7a9",
     "parser": {
       "name": "tree-sitter-markdown_inline",
       "grammarName": "markdown_inline",
-      "upstreamVersion": "0.5.3",
-      "revision": "f969cd3ae3f9fbd4e43205431d0ae286014c05b5",
-      "sha256": "fe706c51f04b92ce08d758f781103428a5e810fd734824dfe75d2a6c1ad8a02b",
-      "size": 426794
+      "upstreamVersion": "0.5.4",
+      "revision": "41ff24a6c775492c543b09228aeb98d1cd2b3a0f",
+      "sha256": "136759103bc5d608d0791cf0f33525df782a2f503fd2b3921ddb8b0452a6d659",
+      "size": 426811
     },
     "languages": {
       "markdown_inline": {
@@ -1449,15 +1491,15 @@
   },
   "@lumis-sh/wasm-matlab": {
     "packageName": "@lumis-sh/wasm-matlab",
-    "version": "0.26.4",
+    "version": "0.26.5",
     "definitionHash": "d64bb94b3ee44fffe514a724404564d35984caa5fea8e2b418b8dc45a28053a2",
     "parser": {
       "name": "tree-sitter-matlab",
       "grammarName": "matlab",
       "upstreamVersion": "1.3.1",
       "revision": "f03d0347acd8bb05d4edd8c845ac1718729e1fad",
-      "sha256": "0f2f381f010d81af18a9f132e77606dceb02ae705c5b2e3cb0eabff3f42083c3",
-      "size": 426535
+      "sha256": "744d656d6a8168a8d3c344fe157313ebdd001319c07c15a80254fe7472645825",
+      "size": 426476
     },
     "languages": {
       "matlab": {
@@ -1471,15 +1513,15 @@
   },
   "@lumis-sh/wasm-mermaid": {
     "packageName": "@lumis-sh/wasm-mermaid",
-    "version": "0.26.2",
+    "version": "0.26.3",
     "definitionHash": "944b985a60daea89137a435553fa59b5fc795c0f8760dbd9bdb87d1a904d0d43",
     "parser": {
       "name": "tree-sitter-mermaid",
       "grammarName": "mermaid",
       "upstreamVersion": "0.1.0",
       "revision": "90ae195b31933ceb9d079abfa8a3ad0a36fee4cc",
-      "sha256": "ac950880811d5392eee266c721c6120a29b3adf97f6bdf053ef73b9e2ed64517",
-      "size": 249676
+      "sha256": "e9ac9607d321ddbbf07a2efc509a9a0d2594a5a7cf9cd52a94edcff9c9748916",
+      "size": 249391
     },
     "languages": {
       "mermaid": {
@@ -1492,15 +1534,15 @@
   },
   "@lumis-sh/wasm-nginx": {
     "packageName": "@lumis-sh/wasm-nginx",
-    "version": "0.26.2",
+    "version": "0.26.3",
     "definitionHash": "a97bc66347064995cc1a8dfbca373b8aa3fcb544ff251669dbedcd0b17a4fd49",
     "parser": {
       "name": "tree-sitter-nginx",
       "grammarName": "nginx",
       "upstreamVersion": "1.0.1",
       "revision": "47ade644d754cce57974aac44d2c9450e823d4f4",
-      "sha256": "d2f259130b453296246d3a6bdea3c8187bfcc409b2b0645e5ad5ba97237f8a84",
-      "size": 119234
+      "sha256": "09ac1c94958f784e43e9ae58f5ec0c166ce12b1297cc1e6e1b5005312866ed2e",
+      "size": 119193
     },
     "languages": {
       "nginx": {
@@ -1513,15 +1555,15 @@
   },
   "@lumis-sh/wasm-nim": {
     "packageName": "@lumis-sh/wasm-nim",
-    "version": "0.26.3",
+    "version": "0.26.4",
     "definitionHash": "10d4e8022e5c9781920a887ee093e9540ee7968b5f9d8f54c43734cfe6d8fc64",
     "parser": {
       "name": "tree-sitter-nim",
       "grammarName": "nim",
       "upstreamVersion": "0.6.2",
       "revision": "897e5d346f0b59ed62b517cfb0f1a845ad8f0ab7",
-      "sha256": "b40e7a2822d5719fdc7d5f69b821cb31ff6817edf843ad6cae2f351ff7939991",
-      "size": 9224877
+      "sha256": "ee189c915ad1a8ad4c88db360eb0ed48e2b7c6303b8a151e0f52215b3f42a093",
+      "size": 9224689
     },
     "languages": {
       "nim": {
@@ -1535,15 +1577,15 @@
   },
   "@lumis-sh/wasm-nix": {
     "packageName": "@lumis-sh/wasm-nix",
-    "version": "0.26.3",
+    "version": "0.26.4",
     "definitionHash": "581b50b2ebc4c75987b689155917739e4a1a3e1a3be5295c1a3f21574d2cc1bd",
     "parser": {
       "name": "tree-sitter-nix",
       "grammarName": "nix",
       "upstreamVersion": "0.3.0",
       "revision": "ea1d87f7996be1329ef6555dcacfa63a69bd55c6",
-      "sha256": "d2069481079b5700bd3af19ffcba45ea9b14c87dedf94fae917ff2c46782e309",
-      "size": 83618
+      "sha256": "e8e23db3384a341ddab82307aaf9d2001df3c2d81843d4af29d6f08e857def7f",
+      "size": 83513
     },
     "languages": {
       "nix": {
@@ -1557,20 +1599,20 @@
   },
   "@lumis-sh/wasm-nushell": {
     "packageName": "@lumis-sh/wasm-nushell",
-    "version": "0.26.7",
-    "definitionHash": "44fa1bdb8fbc48353ffb4182146f035bd5d15464b012f3ed43717c3fdaa323b4",
+    "version": "0.26.9",
+    "definitionHash": "d09691012f4021477e5580e26434feeadc5fceae3411cfbdf6eef678e3aae3bc",
     "parser": {
       "name": "tree-sitter-nushell",
       "grammarName": "nu",
       "upstreamVersion": "0.0.1",
       "revision": "4f577aaa735154f934594b598a69ed7b1b707cf6",
-      "sha256": "b36eae2623769d80aab50507f86f9afdf21b5374459006bf42a0ebf573bb8abe",
-      "size": 2221458
+      "sha256": "fa02dc3b2c3e97a6b734b6c3449c0b18b6b89ff0093d8317d8eec718d3d60eaa",
+      "size": 2220895
     },
     "languages": {
       "nushell": {
         "aliases": ["nu"],
-        "highlights": "; This file is auto-generated. Do not edit.\n; ---\n; keywords\n[\n  \"let\"\n  \"mut\"\n  \"const\"\n] @keyword\n\n[\n  \"if\"\n  \"else\"\n  \"match\"\n] @keyword.conditional\n\n[\n  \"loop\"\n  \"while\"\n] @keyword.repeat\n\n\"def\" @keyword.function\n\n[\n  \"try\"\n  \"catch\"\n  \"error\"\n] @keyword.exception\n\n[\n  \"module\"\n  \"use\"\n] @keyword.import\n\n[\n  \"alias\"\n  \"export-env\"\n  \"export\"\n  \"extern\"\n] @keyword.modifier\n\n(decl_use\n  \"use\" @keyword)\n\n(ctrl_for\n  \"for\" @keyword\n  \"in\" @keyword)\n\n; ---\n; literals\n(val_number) @number\n\n(val_duration\n  unit: _ @variable.parameter)\n\n(val_filesize\n  unit: _ @variable.parameter)\n\n(val_binary\n  [\n    \"0b\"\n    \"0o\"\n    \"0x\"\n  ] @number\n  \"[\" @punctuation.bracket\n  digit: [\n    \",\" @punctuation.delimiter\n    (hex_digit) @number\n  ]\n  \"]\" @punctuation.bracket) @number\n\n(val_bool) @constant.builtin\n\n(val_nothing) @constant.builtin\n\n(val_string) @string\n\narg_str: (val_string) @variable.parameter\n\nfile_path: (val_string) @variable.parameter\n\n(val_date) @number\n\n(inter_escape_sequence) @constant.character.escape\n\n(escape_sequence) @constant.character.escape\n\n(val_interpolated\n  [\n    \"$\\\"\"\n    \"$\\'\"\n    \"\\\"\"\n    \"\\'\"\n  ] @string)\n\n(unescaped_interpolated_content) @string\n\n(escaped_interpolated_content) @string\n\n(expr_interpolated\n  [\n    \"(\"\n    \")\"\n  ] @variable.parameter)\n\n(raw_string_begin) @punctuation.special\n\n(raw_string_end) @punctuation.special\n\n; ---\n; operators\n(expr_binary\n  opr: _ @operator)\n\n(where_predicate\n  opr: _ @operator)\n\n(assignment\n  [\n    \"=\"\n    \"+=\"\n    \"-=\"\n    \"*=\"\n    \"/=\"\n    \"++=\"\n  ] @operator)\n\n(expr_unary\n  [\n    \"not\"\n    \"-\"\n  ] @operator)\n\n(val_range\n  [\n    \"..\"\n    \"..=\"\n    \"..<\"\n  ] @operator)\n\n[\n  \"=>\"\n  \"=\"\n  \"|\"\n] @operator\n\n[\n  \"o>\"\n  \"out>\"\n  \"e>\"\n  \"err>\"\n  \"e+o>\"\n  \"err+out>\"\n  \"o+e>\"\n  \"out+err>\"\n  \"o>>\"\n  \"out>>\"\n  \"e>>\"\n  \"err>>\"\n  \"e+o>>\"\n  \"err+out>>\"\n  \"o+e>>\"\n  \"out+err>>\"\n  \"e>|\"\n  \"err>|\"\n  \"e+o>|\"\n  \"err+out>|\"\n  \"o+e>|\"\n  \"out+err>|\"\n] @operator\n\n; ---\n; punctuation\n[\n  \",\"\n  \";\"\n] @punctuation.special\n\n(param_long_flag\n  \"--\" @punctuation.delimiter)\n\n(long_flag\n  \"--\" @punctuation.delimiter)\n\n(short_flag\n  \"-\" @punctuation.delimiter)\n\n(long_flag\n  \"=\" @punctuation.special)\n\n(short_flag\n  \"=\" @punctuation.special)\n\n(param_short_flag\n  \"-\" @punctuation.delimiter)\n\n(param_rest\n  \"...\" @punctuation.delimiter)\n\n(param_type\n  \":\" @punctuation.special)\n\n(param_value\n  \"=\" @punctuation.special)\n\n(param_completer\n  \"@\" @punctuation.special)\n\n(attribute\n  \"@\" @punctuation.special)\n\n(param_opt\n  \"?\" @punctuation.special)\n\n(returns\n  \"->\" @punctuation.special)\n\n[\n  \"(\"\n  \")\"\n  \"{\"\n  \"}\"\n  \"[\"\n  \"]\"\n  \"...[\"\n  \"...(\"\n  \"...{\"\n] @punctuation.bracket\n\nkey: (identifier) @property\n\n; ---\n; identifiers\n(param_rest\n  name: (_) @variable.parameter)\n\n(param_opt\n  name: (_) @variable.parameter)\n\n(parameter\n  param_name: (_) @variable.parameter)\n\n(param_completer\n  (cmd_identifier) @string)\n\n(param_long_flag\n  (long_flag_identifier) @attribute)\n\n(param_short_flag\n  (param_short_flag_identifier) @attribute)\n\n(attribute\n  (attribute_identifier) @attribute)\n\n(short_flag\n  (short_flag_identifier) @attribute)\n\n(long_flag_identifier) @attribute\n\n(scope_pattern\n  (wild_card) @function)\n\n(cmd_identifier) @function\n\n; generated with Nu 0.107.0\n; help commands\n; | where $it.command_type == built-in and $it.category != core\n; | each {$'\"($in.name | split row \" \" | $in.0)\"'}\n; | uniq\n; | str join ' '\n(command\n  head: (cmd_identifier) @function.builtin\n  (#any-of? @function.builtin\n    \"all\" \"ansi\" \"any\" \"append\" \"ast\" \"bits\" \"bytes\" \"cal\" \"cd\" \"char\" \"chunk-by\" \"chunks\" \"clear\"\n    \"collect\" \"columns\" \"compact\" \"complete\" \"config\" \"cp\" \"date\" \"debug\" \"decode\" \"default\"\n    \"detect\" \"drop\" \"du\" \"each\" \"encode\" \"enumerate\" \"every\" \"exec\" \"exit\" \"explain\" \"explore\"\n    \"fill\" \"filter\" \"find\" \"first\" \"flatten\" \"format\" \"from\" \"generate\" \"get\" \"glob\" \"grid\"\n    \"group-by\" \"hash\" \"headers\" \"histogram\" \"history\" \"http\" \"input\" \"insert\" \"inspect\" \"interleave\"\n    \"into\" \"is-empty\" \"is-not-empty\" \"is-terminal\" \"items\" \"job\" \"join\" \"keybindings\" \"kill\" \"last\"\n    \"length\" \"let-env\" \"lines\" \"load-env\" \"ls\" \"math\" \"merge\" \"metadata\" \"mkdir\" \"mktemp\" \"move\"\n    \"mv\" \"nu-check\" \"nu-highlight\" \"open\" \"panic\" \"par-each\" \"parse\" \"path\" \"plugin\" \"port\"\n    \"prepend\" \"print\" \"ps\" \"query\" \"random\" \"reduce\" \"reject\" \"rename\" \"reverse\" \"rm\" \"roll\"\n    \"rotate\" \"run-external\" \"save\" \"schema\" \"select\" \"seq\" \"shuffle\" \"skip\" \"sleep\" \"slice\" \"sort\"\n    \"sort-by\" \"split\" \"start\" \"stor\" \"str\" \"sys\" \"table\" \"take\" \"tee\" \"term\" \"timeit\" \"to\" \"touch\"\n    \"transpose\" \"tutor\" \"ulimit\" \"uname\" \"uniq\" \"uniq-by\" \"update\" \"upsert\" \"url\" \"values\" \"version\"\n    \"view\" \"watch\" \"which\" \"whoami\" \"window\" \"with-env\" \"wrap\" \"zip\"))\n\n(command\n  head: (cmd_identifier) @keyword.repeat\n  (#any-of? @keyword.repeat \"break\" \"continue\" \"return\"))\n\n(command\n  head: (cmd_identifier) @keyword\n  (#any-of? @keyword \"do\" \"source\" \"source-env\" \"hide\" \"hide-env\"))\n\n(command\n  head: (cmd_identifier) @keyword\n  .\n  arg_str: (val_string) @keyword.import\n  (#any-of? @keyword \"overlay\" \"error\"))\n\n(command\n  head: (cmd_identifier) @cmd\n  arg_str: (val_string) @keyword\n  (#eq? @cmd \"overlay\")\n  (#eq? @keyword \"as\"))\n\n(command\n  \"^\" @punctuation.delimiter\n  head: (_) @function)\n\n\"where\" @function.builtin\n\n(where_predicate\n  [\n    \"?\"\n    \"!\"\n  ] @punctuation.delimiter)\n\n(path\n  [\n    \".\"\n    \"?\"\n    \"!\"\n  ]* @punctuation.delimiter) @variable.parameter\n\n(stmt_let\n  (identifier) @variable)\n\n(val_variable\n  \"$\"? @punctuation.special\n  \"...$\"? @punctuation.special\n  [\n    (identifier) @variable\n    \"in\" @special\n    \"nu\" @namespace\n    \"env\" @constant\n  ]) @none\n\n(val_cellpath\n  \"$\" @punctuation.special)\n\n(record_entry\n  \":\" @punctuation.special)\n\n; ---\n; types\n(flat_type) @type\n\n(list_type\n  \"list\" @type.enum\n  [\n    \"<\"\n    \">\"\n  ] @punctuation.bracket)\n\n(collection_type\n  [\n    \"record\"\n    \"table\"\n  ] @type.enum)\n\n(collection_type\n  key: (_) @variable.parameter)\n\n(collection_type\n  [\n    \"<\"\n    \">\"\n  ] @punctuation.bracket)\n\n(collection_type\n  \":\" @punctuation.special)\n\n(composite_type\n  \"oneof\" @type.enum\n  [\n    \"<\"\n    \">\"\n  ] @punctuation.bracket)\n\n(shebang) @keyword.directive\n\n(comment) @comment\n\n((comment)+ @comment.documentation \n  .\n  (decl_def))\n\n(parameter\n  (comment) @comment.documentation )\n\n(command\n  head: ((cmd_identifier) @_cmd\n    (#match? @_cmd \"^\\\\s*(find|parse|split|str)$\"))\n  flag: (_\n    name: (_) @_flag\n    (#any-of? @_flag \"r\" \"regex\"))\n  .\n  arg: (_\n    (string_content) @string.regexp))\n\n(_\n  opr: [\n    \"=~\"\n    \"!~\"\n    \"like\"\n    \"not-like\"\n  ]\n  rhs: (_\n    (string_content) @string.regexp))\n\n(command\n  head: ((_) @_cmd\n    (#any-of? @_cmd \"nu\" \"$nu.current-exe\"))\n  flag: (_\n    name: (_) @_flag\n    (#any-of? @_flag \"c\" \"e\" \"commands\" \"execute\"))\n  .\n  arg: (_\n    (string_content) @string.code))",
+        "highlights": "; This file is auto-generated. Do not edit.\n; ---\n; keywords\n[\n  \"let\"\n  \"mut\"\n  \"const\"\n] @keyword\n\n[\n  \"if\"\n  \"else\"\n  \"match\"\n] @keyword.conditional\n\n[\n  \"loop\"\n  \"while\"\n] @keyword.repeat\n\n\"def\" @keyword.function\n\n[\n  \"try\"\n  \"catch\"\n  \"finally\"\n  \"error\"\n] @keyword.exception\n\n[\n  \"module\"\n  \"use\"\n] @keyword.import\n\n[\n  \"alias\"\n  \"export-env\"\n  \"export\"\n  \"extern\"\n] @keyword.modifier\n\n(decl_use\n  \"use\" @keyword)\n\n(ctrl_for\n  \"for\" @keyword\n  \"in\" @keyword)\n\n; ---\n; literals\n(val_number) @number\n\n(val_duration\n  unit: _ @variable.parameter)\n\n(val_filesize\n  unit: _ @variable.parameter)\n\n(val_binary\n  [\n    \"0b\"\n    \"0o\"\n    \"0x\"\n  ] @number\n  \"[\" @punctuation.bracket\n  digit: [\n    \",\" @punctuation.delimiter\n    (hex_digit) @number\n  ]\n  \"]\" @punctuation.bracket) @number\n\n(val_bool) @constant.builtin\n\n(val_nothing) @constant.builtin\n\n(val_string) @string\n\narg_str: (val_string) @variable.parameter\n\nfile_path: (val_string) @variable.parameter\n\n(val_date) @number\n\n(inter_escape_sequence) @constant.character.escape\n\n(escape_sequence) @constant.character.escape\n\n(val_interpolated\n  [\n    \"$\\\"\"\n    \"$\\'\"\n    \"\\\"\"\n    \"\\'\"\n  ] @string)\n\n(unescaped_interpolated_content) @string\n\n(escaped_interpolated_content) @string\n\n(expr_interpolated\n  [\n    \"(\"\n    \")\"\n  ] @variable.parameter)\n\n(raw_string_begin) @punctuation.special\n\n(raw_string_end) @punctuation.special\n\n; ---\n; operators\n(expr_binary\n  opr: _ @operator)\n\n(where_predicate\n  opr: _ @operator)\n\n(assignment\n  [\n    \"=\"\n    \"+=\"\n    \"-=\"\n    \"*=\"\n    \"/=\"\n    \"++=\"\n  ] @operator)\n\n(expr_unary\n  [\n    \"not\"\n    \"-\"\n  ] @operator)\n\n(val_range\n  [\n    \"..\"\n    \"..=\"\n    \"..<\"\n  ] @operator)\n\n[\n  \"=>\"\n  \"=\"\n  \"|\"\n] @operator\n\n[\n  \"o>\"\n  \"out>\"\n  \"e>\"\n  \"err>\"\n  \"e+o>\"\n  \"err+out>\"\n  \"o+e>\"\n  \"out+err>\"\n  \"o>>\"\n  \"out>>\"\n  \"e>>\"\n  \"err>>\"\n  \"e+o>>\"\n  \"err+out>>\"\n  \"o+e>>\"\n  \"out+err>>\"\n  \"e>|\"\n  \"err>|\"\n  \"e+o>|\"\n  \"err+out>|\"\n  \"o+e>|\"\n  \"out+err>|\"\n] @operator\n\n; ---\n; punctuation\n[\n  \",\"\n  \";\"\n] @punctuation.special\n\n(param_long_flag\n  \"--\" @punctuation.delimiter)\n\n(long_flag\n  \"--\" @punctuation.delimiter)\n\n(short_flag\n  \"-\" @punctuation.delimiter)\n\n(long_flag\n  \"=\" @punctuation.special)\n\n(short_flag\n  \"=\" @punctuation.special)\n\n(param_short_flag\n  \"-\" @punctuation.delimiter)\n\n(param_rest\n  \"...\" @punctuation.delimiter)\n\n(param_type\n  \":\" @punctuation.special)\n\n(param_value\n  \"=\" @punctuation.special)\n\n(param_completer\n  \"@\" @punctuation.special)\n\n(attribute\n  \"@\" @punctuation.special)\n\n(param_opt\n  \"?\" @punctuation.special)\n\n(returns\n  \"->\" @punctuation.special)\n\n[\n  \"(\"\n  \")\"\n  \"{\"\n  \"}\"\n  \"[\"\n  \"]\"\n  \"...[\"\n  \"...(\"\n  \"...{\"\n] @punctuation.bracket\n\nkey: (identifier) @property\n\n; ---\n; identifiers\n(param_rest\n  name: (_) @variable.parameter)\n\n(param_opt\n  name: (_) @variable.parameter)\n\n(parameter\n  param_name: (_) @variable.parameter)\n\n(param_completer\n  (cmd_identifier) @string)\n\n(param_long_flag\n  (long_flag_identifier) @attribute)\n\n(param_short_flag\n  (param_short_flag_identifier) @attribute)\n\n(attribute\n  (attribute_identifier) @attribute)\n\n(short_flag\n  (short_flag_identifier) @attribute)\n\n(long_flag_identifier) @attribute\n\n(scope_pattern\n  (wild_card) @function)\n\n(cmd_identifier) @function\n\n; generated with Nu 0.107.0\n; help commands\n; | where $it.command_type == built-in and $it.category != core\n; | each {$'\"($in.name | split row \" \" | $in.0)\"'}\n; | uniq\n; | str join ' '\n(command\n  head: (cmd_identifier) @function.builtin\n  (#any-of? @function.builtin\n    \"all\" \"ansi\" \"any\" \"append\" \"ast\" \"bits\" \"bytes\" \"cal\" \"cd\" \"char\" \"chunk-by\" \"chunks\" \"clear\"\n    \"collect\" \"columns\" \"compact\" \"complete\" \"config\" \"cp\" \"date\" \"debug\" \"decode\" \"default\"\n    \"detect\" \"drop\" \"du\" \"each\" \"encode\" \"enumerate\" \"every\" \"exec\" \"exit\" \"explain\" \"explore\"\n    \"fill\" \"filter\" \"find\" \"first\" \"flatten\" \"format\" \"from\" \"generate\" \"get\" \"glob\" \"grid\"\n    \"group-by\" \"hash\" \"headers\" \"histogram\" \"history\" \"http\" \"input\" \"insert\" \"inspect\" \"interleave\"\n    \"into\" \"is-empty\" \"is-not-empty\" \"is-terminal\" \"items\" \"job\" \"join\" \"keybindings\" \"kill\" \"last\"\n    \"length\" \"let-env\" \"lines\" \"load-env\" \"ls\" \"math\" \"merge\" \"metadata\" \"mkdir\" \"mktemp\" \"move\"\n    \"mv\" \"nu-check\" \"nu-highlight\" \"open\" \"panic\" \"par-each\" \"parse\" \"path\" \"plugin\" \"port\"\n    \"prepend\" \"print\" \"ps\" \"query\" \"random\" \"reduce\" \"reject\" \"rename\" \"reverse\" \"rm\" \"roll\"\n    \"rotate\" \"run-external\" \"save\" \"schema\" \"select\" \"seq\" \"shuffle\" \"skip\" \"sleep\" \"slice\" \"sort\"\n    \"sort-by\" \"split\" \"start\" \"stor\" \"str\" \"sys\" \"table\" \"take\" \"tee\" \"term\" \"timeit\" \"to\" \"touch\"\n    \"transpose\" \"tutor\" \"ulimit\" \"uname\" \"uniq\" \"uniq-by\" \"update\" \"upsert\" \"url\" \"values\" \"version\"\n    \"view\" \"watch\" \"which\" \"whoami\" \"window\" \"with-env\" \"wrap\" \"zip\"))\n\n(command\n  head: (cmd_identifier) @keyword.repeat\n  (#any-of? @keyword.repeat \"break\" \"continue\" \"return\"))\n\n(command\n  head: (cmd_identifier) @keyword\n  (#any-of? @keyword \"do\" \"source\" \"source-env\" \"hide\" \"hide-env\"))\n\n(command\n  head: (cmd_identifier) @keyword\n  .\n  arg_str: (val_string) @keyword.import\n  (#any-of? @keyword \"overlay\" \"error\"))\n\n(command\n  head: (cmd_identifier) @cmd\n  arg_str: (val_string) @keyword\n  (#eq? @cmd \"overlay\")\n  (#eq? @keyword \"as\"))\n\n(command\n  [\n  \"^\"\n  \"%\"\n  ] @punctuation.delimiter\n  head: (_) @function)\n\n\"where\" @function.builtin\n\n(where_predicate\n  [\n    \"?\"\n    \"!\"\n  ] @punctuation.delimiter)\n\n(path\n  [\n    \".\"\n    \"?\"\n    \"!\"\n  ]* @punctuation.delimiter) @variable.parameter\n\n(stmt_let\n  (identifier) @variable)\n\n(val_variable\n  \"$\"? @punctuation.special\n  \"...$\"? @punctuation.special\n  [\n    (identifier) @variable\n    \"in\" @special\n    \"nu\" @namespace\n    \"env\" @constant\n  ]) @none\n\n(val_cellpath\n  \"$\" @punctuation.special)\n\n(record_entry\n  \":\" @punctuation.special)\n\n; ---\n; types\n(flat_type) @type\n\n(list_type\n  \"list\" @type.enum\n  [\n    \"<\"\n    \">\"\n  ] @punctuation.bracket)\n\n(collection_type\n  [\n    \"record\"\n    \"table\"\n  ] @type.enum)\n\n(collection_type\n  key: (_) @variable.parameter)\n\n(collection_type\n  [\n    \"<\"\n    \">\"\n  ] @punctuation.bracket)\n\n(collection_type\n  \":\" @punctuation.special)\n\n(composite_type\n  \"oneof\" @type.enum\n  [\n    \"<\"\n    \">\"\n  ] @punctuation.bracket)\n\n(shebang) @keyword.directive\n\n(comment) @comment\n\n((comment)+ @comment.documentation \n  .\n  (decl_def))\n\n(parameter\n  (comment) @comment.documentation )\n\n(command\n  head: ((cmd_identifier) @_cmd\n    (#match? @_cmd \"^\\\\s*(find|parse|split|str)$\"))\n  flag: (_\n    name: (_) @_flag\n    (#any-of? @_flag \"r\" \"regex\"))\n  .\n  arg: (_\n    (string_content) @string.regexp))\n\n(_\n  opr: [\n    \"=~\"\n    \"!~\"\n    \"like\"\n    \"not-like\"\n  ]\n  rhs: (_\n    (string_content) @string.regexp))\n\n(command\n  head: ((_) @_cmd\n    (#any-of? @_cmd \"nu\" \"$nu.current-exe\"))\n  flag: (_\n    name: (_) @_flag\n    (#any-of? @_flag \"c\" \"e\" \"commands\" \"execute\"))\n  .\n  arg: (_\n    (string_content) @string.code))",
         "injections": "; This file is auto-generated. Do not edit.\n((comment) @injection.content\n  (#set! injection.language \"comment\"))\n\n(command\n  head: ((cmd_identifier) @_cmd\n    (#match? @_cmd \"^\\\\s*(find|parse|split|str)$\"))\n  flag: (_\n    name: (_) @_flag\n    (#any-of? @_flag \"r\" \"regex\"))\n  .\n  arg: (_\n    (string_content) @injection.content\n    (#set! injection.language \"regex\")))\n\n(_\n  opr: [\n    \"=~\"\n    \"!~\"\n    \"like\"\n    \"not-like\"\n  ]\n  rhs: (_\n    (string_content) @injection.content\n    (#set! injection.language \"regex\")))\n\n(command\n  head: (_) @_cmd\n  (#any-of? @_cmd \"nu\" \"$nu.current-exe\")\n  flag: (_\n    name: (_) @_flag\n    (#any-of? @_flag \"c\" \"e\" \"commands\" \"execute\"))\n  .\n  arg: (_\n    (string_content) @injection.content\n    (#set! injection.language \"nu\")))",
         "brackets": "; This file is auto-generated. Do not edit.\n(\"(\" @open\n  \")\" @close)\n\n(\"[\" @open\n  \"]\" @close)\n\n(\"{\" @open\n  \"}\" @close)\n"
       }
@@ -1578,15 +1620,15 @@
   },
   "@lumis-sh/wasm-objc": {
     "packageName": "@lumis-sh/wasm-objc",
-    "version": "0.26.2",
+    "version": "0.26.3",
     "definitionHash": "7ff5f0d2696596a915ca211fbe14468b39857405253ba5c08d32e61067df8461",
     "parser": {
       "name": "tree-sitter-objc",
       "grammarName": "objc",
       "upstreamVersion": "3.0.2",
       "revision": "18802acf31d0b5c1c1d50bdbc9eb0e1636cab9ed",
-      "sha256": "11f8c9630c3baf5d408c3fadae33557b1380d01808b560e53c735f74572bb819",
-      "size": 5378812
+      "sha256": "46ecbcebde9545563f48834dadd8e7852d4f940f3a2e9ddeaeb942e59d7d5e94",
+      "size": 5378463
     },
     "languages": {
       "objc": {
@@ -1600,15 +1642,15 @@
   },
   "@lumis-sh/wasm-ocaml": {
     "packageName": "@lumis-sh/wasm-ocaml",
-    "version": "0.26.4",
+    "version": "0.26.5",
     "definitionHash": "5d4d193725351d74ad96edaf379fb6fb7d78f664e37fb657c5b681704503eb71",
     "parser": {
       "name": "tree-sitter-ocaml",
       "grammarName": "ocaml",
       "upstreamVersion": "0.26.0",
       "revision": "e3c9cf368f68bffd2f81188229aefa7b434eda65",
-      "sha256": "6b7c2cdb1f817ef7d7c91720fff67ae4df4ff3ea83e7194f90745c17991f39ba",
-      "size": 4833970
+      "sha256": "f4b877b19677d3b2e0a8e06c3f768664372129122b2b304639f7f04323443fd7",
+      "size": 4833724
     },
     "languages": {
       "ocaml": {
@@ -1622,15 +1664,15 @@
   },
   "@lumis-sh/wasm-ocaml_interface": {
     "packageName": "@lumis-sh/wasm-ocaml_interface",
-    "version": "0.26.4",
+    "version": "0.26.5",
     "definitionHash": "d1c7a1461d48f38476a8f82eda1be37a34b95a8f7b4aa251a2d441b83303fe2a",
     "parser": {
       "name": "tree-sitter-ocaml_interface",
       "grammarName": "ocaml_interface",
       "upstreamVersion": "0.26.0",
       "revision": "e3c9cf368f68bffd2f81188229aefa7b434eda65",
-      "sha256": "f44818bf5f701f4893f6342d9e4dc5d709ef9a51b2cd5737b61b2d950bb03c60",
-      "size": 4092439
+      "sha256": "dd972cbbfac4c8d51223430a7a882c9d57b8523b5c7ddcc70b94449b4318e2d0",
+      "size": 4092193
     },
     "languages": {
       "ocaml_interface": {
@@ -1644,15 +1686,15 @@
   },
   "@lumis-sh/wasm-pascal": {
     "packageName": "@lumis-sh/wasm-pascal",
-    "version": "0.26.2",
+    "version": "0.26.3",
     "definitionHash": "80ea8dbdecd8eebe89f4d4281167fc2c38f220037c2c4d572d39bb3e36111e4c",
     "parser": {
       "name": "tree-sitter-pascal",
       "grammarName": "pascal",
       "upstreamVersion": "0.10.2",
       "revision": "042119eca2e18a60e56317fb06ee3ba5c32cb447",
-      "sha256": "bab2f603e610474f2527485ef466f3dd416d0c87917735f7bb654565dc8b985e",
-      "size": 722996
+      "sha256": "957c6e886de91c74d295b47017b13cbdcadc33ad76ecb642016653c60c998a6e",
+      "size": 723055
     },
     "languages": {
       "pascal": {
@@ -1666,15 +1708,15 @@
   },
   "@lumis-sh/wasm-perl": {
     "packageName": "@lumis-sh/wasm-perl",
-    "version": "0.26.5",
-    "definitionHash": "be0b36911633ee210fe2348ca5ff6107558be3433f8a6da4d2731dab9b615945",
+    "version": "0.26.7",
+    "definitionHash": "1146443f2492b9d94f5e5e112256b55671a7cfce36878e32676891d2cf36dfba",
     "parser": {
       "name": "tree-sitter-perl",
       "grammarName": "perl",
-      "upstreamVersion": "2.0.0",
-      "revision": "50904961d6a87c5191e611276aa2ecb9d66ca4ff",
-      "sha256": "07752c4e527664bb339a2157107f82cc13c4313646c2817df53947fcd8c010ad",
-      "size": 4773350
+      "upstreamVersion": "2.0.3",
+      "revision": "d0a9590e3150543032a3b1703fd082b3f4656e45",
+      "sha256": "49a6d830f88c4bda5f1a0df3d3eeeb333cfecdf11996e76b2af2cf7ee9c59a2b",
+      "size": 4756361
     },
     "languages": {
       "perl": {
@@ -1687,15 +1729,15 @@
   },
   "@lumis-sh/wasm-php": {
     "packageName": "@lumis-sh/wasm-php",
-    "version": "0.26.4",
-    "definitionHash": "855377cfd6cad74fd8526caa2b902fb80bf0bd0fe974871589c50096c2bdd2cf",
+    "version": "0.26.8",
+    "definitionHash": "f820afe2f58a88c8f3100593e8a0007c765715a58b0fd65521b9479025529405",
     "parser": {
       "name": "tree-sitter-php",
       "grammarName": "php",
-      "upstreamVersion": "0.24.2",
-      "revision": "5b5627faaa290d89eb3d01b9bf47c3bb9e797dea",
-      "sha256": "78400ce8fbdcb88d39318f910127065f1d7e3c98bb38163fcd67a6c2f4cd9596",
-      "size": 1067704
+      "upstreamVersion": "0.25.1",
+      "revision": "58d5643086ae60e93a3746cca648363ee97c8761",
+      "sha256": "d055c79e308bf5d3dc430dc0a7173249a68eda5009ad7315aa23240bce52dbae",
+      "size": 1088168
     },
     "languages": {
       "php": {
@@ -1709,15 +1751,15 @@
   },
   "@lumis-sh/wasm-powershell": {
     "packageName": "@lumis-sh/wasm-powershell",
-    "version": "0.26.4",
-    "definitionHash": "455be51d16f6a9e56ae84a336c5c95738ca1f60477aa810f35599807e005c925",
+    "version": "0.26.6",
+    "definitionHash": "62bdd602f3b0eb224120a31af032a01f5876845288700936bcabcc65cc8ea8f6",
     "parser": {
       "name": "tree-sitter-powershell",
       "grammarName": "powershell",
-      "upstreamVersion": "0.26.4",
-      "revision": "4ffe56d66aa926c28442befbb5b89d1437d7199c",
-      "sha256": "02aed080c24e5304c72b7179cfeee43cd9f61936d99ff725a9141109dd42d47e",
-      "size": 1060186
+      "upstreamVersion": "0.26.6",
+      "revision": "65ea6919e816a7ac142acec7ee72757f89db8439",
+      "sha256": "8565c6faf5276ef117f92fd743a67b1a0183bba0976b52e4b716b3e55a60111c",
+      "size": 1082555
     },
     "languages": {
       "powershell": {
@@ -1731,15 +1773,15 @@
   },
   "@lumis-sh/wasm-prisma": {
     "packageName": "@lumis-sh/wasm-prisma",
-    "version": "0.26.3",
+    "version": "0.26.4",
     "definitionHash": "2c9599f689cd8886aaf123bbe8194183379d83fb2a212f54c0eee7aaf352d6bc",
     "parser": {
       "name": "tree-sitter-prisma",
       "grammarName": "prisma",
       "upstreamVersion": "0.0.1",
       "revision": "f1c30d82a5bf0b70ce33ef431f4acd7fd69968a3",
-      "sha256": "7d026dc3c95e5ca9297b0f57206c8ff58194e129833100a6246810ab0d9a32a6",
-      "size": 16112
+      "sha256": "21b3066ab914c0a336f7f33b249b90514de621580a1ce73025bb2191104fee34",
+      "size": 16121
     },
     "languages": {
       "prisma": {
@@ -1752,15 +1794,15 @@
   },
   "@lumis-sh/wasm-protobuf": {
     "packageName": "@lumis-sh/wasm-protobuf",
-    "version": "0.26.5",
+    "version": "0.26.6",
     "definitionHash": "9098c8a5b9fde847f28f60f970f200d0d81d8bb8f6d1cee3ffb9fe7970970dfe",
     "parser": {
       "name": "tree-sitter-protobuf",
       "grammarName": "proto",
       "upstreamVersion": "0.6.0",
       "revision": "6c878d18628ebbff3474479d2fdd6d8ba1954c3e",
-      "sha256": "9971a6a516e4c528f600c4ddf39acfac0eca24cd6b514f91cfd12f03992e5a3c",
-      "size": 98342
+      "sha256": "5e93628b5311af19153c70fb9dddbbcd3efcfff1abd0ee5443c35e7d13ff5251",
+      "size": 98276
     },
     "languages": {
       "protobuf": {
@@ -1773,15 +1815,15 @@
   },
   "@lumis-sh/wasm-puppet": {
     "packageName": "@lumis-sh/wasm-puppet",
-    "version": "0.26.2",
+    "version": "0.26.3",
     "definitionHash": "6ea38ba73fc695521b97f78633e4d7323f11c0a17afdec7f6a797f0a637fe886",
     "parser": {
       "name": "tree-sitter-puppet",
       "grammarName": "puppet",
       "upstreamVersion": "1.3.0",
       "revision": "15f192929b7d317f5914de2b4accd37b349182a6",
-      "sha256": "0e5637884c4601fbe746eb15a83275e068234bc9b3caadc47eb52c7fc547d7c1",
-      "size": 135834
+      "sha256": "3d8672903393045a911357a5e702bb468bcafad75f6f7f29b18005dcdc8013a1",
+      "size": 135782
     },
     "languages": {
       "puppet": {
@@ -1795,15 +1837,15 @@
   },
   "@lumis-sh/wasm-python": {
     "packageName": "@lumis-sh/wasm-python",
-    "version": "0.26.5",
+    "version": "0.26.6",
     "definitionHash": "c1c944e3304143a8a69f056cc9460345952fb6a55a1bb84a890bb9b9dc2e882b",
     "parser": {
       "name": "tree-sitter-python",
       "grammarName": "python",
       "upstreamVersion": "0.25.0",
       "revision": "0e87bd70e972aff4e060d375166e750e3f498a8b",
-      "sha256": "fc6fbcc37aac7ad7a70d0ae77a397c4d075ed3152d54352ff339893005a06a72",
-      "size": 461287
+      "sha256": "7d8934e5bd5f808e44a8352722c06b1c11d30ea0f4a5bc0e4ace614a6e24cb0f",
+      "size": 459851
     },
     "languages": {
       "python": {
@@ -1817,15 +1859,15 @@
   },
   "@lumis-sh/wasm-qmljs": {
     "packageName": "@lumis-sh/wasm-qmljs",
-    "version": "0.26.3",
+    "version": "0.26.4",
     "definitionHash": "6f690e79f06f75a77ff9c36829a1730d3a5d63031bf85488cc5172140fe06162",
     "parser": {
       "name": "tree-sitter-qmljs",
       "grammarName": "qmljs",
       "upstreamVersion": "0.3.1",
       "revision": "de96ed62abded51fcdfcbeaaa120e0dd0d20c697",
-      "sha256": "dae105e51180ebe78b49279720a8eb2a17cc72492c444066f0fefebb24b681d5",
-      "size": 1657987
+      "sha256": "a3cf44af776058dd75f2f7b92035bfa64d5b42854b8c494f456a1289dfe51fa7",
+      "size": 1658257
     },
     "languages": {
       "qmljs": {
@@ -1838,15 +1880,15 @@
   },
   "@lumis-sh/wasm-r": {
     "packageName": "@lumis-sh/wasm-r",
-    "version": "0.26.3",
+    "version": "0.26.4",
     "definitionHash": "8cb7bbca7229613be34c93aef20df28caec6570f76be7155fc20e1a2d3896228",
     "parser": {
       "name": "tree-sitter-r",
       "grammarName": "r",
       "upstreamVersion": "1.3.0",
       "revision": "346d3707b8c9301f1051e8f6e32666e67529f7d2",
-      "sha256": "984de918a523ed72b9350d5a6378d5b3d014119ecd8d3f7b834dc8b32ecaae19",
-      "size": 492033
+      "sha256": "edc1996c32f902cb62ea3abb151e977fd10e652114a04442cf4caa1b9e2bd6ff",
+      "size": 492070
     },
     "languages": {
       "r": {
@@ -1860,15 +1902,15 @@
   },
   "@lumis-sh/wasm-racket": {
     "packageName": "@lumis-sh/wasm-racket",
-    "version": "0.26.4",
+    "version": "0.26.5",
     "definitionHash": "91d6b639cb90c7fba5668d4d039d8f1390be18823716d042c90a384bef228d45",
     "parser": {
       "name": "tree-sitter-racket",
       "grammarName": "racket",
       "upstreamVersion": "0.25.0",
       "revision": "b3cbbde75ce2de3079e33c7fe90bd41b1d45be48",
-      "sha256": "2353b094c38d29c4b46a3f2a5f79f76abaa39aef595175cfd4eb7a3107506b59",
-      "size": 126125
+      "sha256": "9da929f44f68ee1ccb4c6a5b6ee21aec2172912ba14702cf6ece328e2b519462",
+      "size": 126054
     },
     "languages": {
       "racket": {
@@ -1881,15 +1923,15 @@
   },
   "@lumis-sh/wasm-regex": {
     "packageName": "@lumis-sh/wasm-regex",
-    "version": "0.26.3",
+    "version": "0.26.4",
     "definitionHash": "c55e39cb365f5199f1cd70ac4f6f816233f9c60161f76068ebd93191be687e3c",
     "parser": {
       "name": "tree-sitter-regex",
       "grammarName": "regex",
       "upstreamVersion": "0.25.0",
       "revision": "b2ac15e27fce703d2f37a79ccd94a5c0cbe9720b",
-      "sha256": "34cee5e6fb005e3f2e7fd096dd23de60a1e59db27dd0d2f8b975ccbbe37c210c",
-      "size": 22285
+      "sha256": "db89e0d57a9a46d817a24d46ebbe4426788d142fef9a38fbc1b4430c989d85f5",
+      "size": 22165
     },
     "languages": {
       "regex": {
@@ -1901,15 +1943,15 @@
   },
   "@lumis-sh/wasm-rst": {
     "packageName": "@lumis-sh/wasm-rst",
-    "version": "0.26.3",
+    "version": "0.26.4",
     "definitionHash": "330749e9ea7a5d3cbb46a73744944af4cda8fd3c7ef508a4aea93c3eeb501003",
     "parser": {
       "name": "tree-sitter-rst",
       "grammarName": "rst",
       "upstreamVersion": "0.2.0",
       "revision": "ab09cab886a947c62a8c6fa94d3ad375f3f6a73d",
-      "sha256": "3f9afca984bffbb5326137853916e8963f8ac1bc4f2ccbd502a67900b07f2425",
-      "size": 62669
+      "sha256": "4cedcd4168f6e43619b1981194f0f815413fbcf69e03968fa511119225af1855",
+      "size": 62698
     },
     "languages": {
       "rst": {
@@ -1923,15 +1965,15 @@
   },
   "@lumis-sh/wasm-ruby": {
     "packageName": "@lumis-sh/wasm-ruby",
-    "version": "0.26.4",
+    "version": "0.26.5",
     "definitionHash": "76bf0b1eaeee82a38048d782641dc8d24be40bbe231d12b56f87d3c21fdc0d9d",
     "parser": {
       "name": "tree-sitter-ruby",
       "grammarName": "ruby",
       "upstreamVersion": "0.23.1",
       "revision": "8785f80df97f6b53a6005a5d842b8a1358fe3fdd",
-      "sha256": "a0701534335f73e5f84ebcfebce3bb0accfd16fb5d619390d73c2fac561024aa",
-      "size": 2141611
+      "sha256": "a3e1cde6a02b1ae907d4905a508e93b7d6de7849891520fa1b187dc478819e09",
+      "size": 2141373
     },
     "languages": {
       "ruby": {
@@ -1945,15 +1987,15 @@
   },
   "@lumis-sh/wasm-rust": {
     "packageName": "@lumis-sh/wasm-rust",
-    "version": "0.26.5",
+    "version": "0.26.6",
     "definitionHash": "a4ee9c153c66f995d081895c3e57a0a4eed81ebb91f2320a0810bbf51c3598dc",
     "parser": {
       "name": "tree-sitter-rust",
       "grammarName": "rust",
       "upstreamVersion": "0.24.2",
       "revision": "77a3747266f4d621d0757825e6b11edcbf991ca5",
-      "sha256": "34c51ee3e8c05a775e5e05163278bb73c79df149f7e8d648f84a54bd97466e84",
-      "size": 1118713
+      "sha256": "c588070df9632f13e674e5a9b3e78d69a9294c469cd183dd4684f52ad7fd9692",
+      "size": 1119132
     },
     "languages": {
       "rust": {
@@ -1967,15 +2009,15 @@
   },
   "@lumis-sh/wasm-scala": {
     "packageName": "@lumis-sh/wasm-scala",
-    "version": "0.26.4",
-    "definitionHash": "1f0c068c192a32c945891b600d5d7e02137690727bfef5a86040df8b898a5ab3",
+    "version": "0.26.7",
+    "definitionHash": "3e2c21af05e74f92961df30ce1677773c4026be80e36c0c3544f3869d2841cdc",
     "parser": {
       "name": "tree-sitter-scala",
       "grammarName": "scala",
-      "upstreamVersion": "0.26.2",
-      "revision": "b931fcc338390925eb893d70ad070033f5856ccf",
-      "sha256": "37d7fe5a91ca98941dc05493b0c05a0df0f36df5035890fa00b02497c68aaac3",
-      "size": 3973559
+      "upstreamVersion": "0.26.4",
+      "revision": "8c0b6d44bfd66bf7bc9a1fc15084ef17cef2f97e",
+      "sha256": "5d783b75dd78065d28d034e58c53f7a452cc5ceabb08d80faaed950ddfaf7f0b",
+      "size": 4102373
     },
     "languages": {
       "scala": {
@@ -1989,15 +2031,15 @@
   },
   "@lumis-sh/wasm-scheme": {
     "packageName": "@lumis-sh/wasm-scheme",
-    "version": "0.26.4",
-    "definitionHash": "35510658c8d812acec190c3e7c643404fc3330d0470f6631689ac74e7c43f1cf",
+    "version": "0.26.6",
+    "definitionHash": "a7700b3f7179c4a001de0904d8ceb41ebb5b2ac64d8adabdbd8e0293a3aaf539",
     "parser": {
       "name": "tree-sitter-scheme",
       "grammarName": "scheme",
-      "upstreamVersion": "0.24.7",
-      "revision": "1e4d38d650bf6b53930ec9d41a7000775c134039",
-      "sha256": "128a9ee019b51461c9c829a51af81ca9a70e8c28673ac711cb6f391d5a71ef6f",
-      "size": 124616
+      "upstreamVersion": "0.25.0",
+      "revision": "d57f35ab002940f83d7451bc87928261a9c8beb2",
+      "sha256": "311d1544a083d5401eae660d602a3c5b14f96fb354957ded88a4d75d4f7b5a9c",
+      "size": 113664
     },
     "languages": {
       "scheme": {
@@ -2010,15 +2052,15 @@
   },
   "@lumis-sh/wasm-scss": {
     "packageName": "@lumis-sh/wasm-scss",
-    "version": "0.26.2",
+    "version": "0.26.3",
     "definitionHash": "7bad66bfa400bf8472bbce06767d7f536a056307f31f019bc8807088481bc9be",
     "parser": {
       "name": "tree-sitter-scss",
       "grammarName": "scss",
       "upstreamVersion": "1.0.0",
       "revision": "c478c6868648eff49eb04a4df90d703dc45b312a",
-      "sha256": "fac977e66fd1b8814afeec09227c96609e3a0b601376deb95c114cb637552f1e",
-      "size": 149410
+      "sha256": "d5255bd2f541d56d7234ad7b9dcbb1772eca8296dde974b6c61a1c846385440c",
+      "size": 149319
     },
     "languages": {
       "scss": {
@@ -2031,7 +2073,7 @@
   },
   "@lumis-sh/wasm-slim": {
     "packageName": "@lumis-sh/wasm-slim",
-    "version": "0.26.0",
+    "version": "0.26.1",
     "definitionHash": "bc4564409cfd749e9325aef0fb81e501a3281963df170a83849174734a4ad4d8",
     "parser": {
       "name": "tree-sitter-slim",
@@ -2053,15 +2095,15 @@
   },
   "@lumis-sh/wasm-solidity": {
     "packageName": "@lumis-sh/wasm-solidity",
-    "version": "0.26.3",
+    "version": "0.26.4",
     "definitionHash": "9fdda4b131a71ba8cfb36fb8af00aa7e60771a946a062da7f302f2e5036480c5",
     "parser": {
       "name": "tree-sitter-solidity",
       "grammarName": "solidity",
       "upstreamVersion": "1.2.13",
       "revision": "048fe686cb1fde267243739b8bdbec8fc3a55272",
-      "sha256": "dbec50f9ff340a727d5ca4f15fc8182d70c58f9fc65f496fbcc36c2b5253c932",
-      "size": 513975
+      "sha256": "525c75eae42b7d4ad1ce27c11952b32be6c522c55291a1664c7d64a738e9d440",
+      "size": 514235
     },
     "languages": {
       "solidity": {
@@ -2074,20 +2116,20 @@
   },
   "@lumis-sh/wasm-sql": {
     "packageName": "@lumis-sh/wasm-sql",
-    "version": "0.26.4",
-    "definitionHash": "5fd23bf7a23558247bd7ce2045f85c2a6d1e552fdce60d4259fc3842916aa212",
+    "version": "0.26.6",
+    "definitionHash": "07ef3378dabf707a782b6c77a7ea551a24b3fdfc2c166a7a61f4c39215f8f9ce",
     "parser": {
       "name": "tree-sitter-sql",
       "grammarName": "sql",
       "upstreamVersion": "0.3.11",
       "revision": "7b51ecda191d36b92f5a90a8d1bc3faef1c7b8b8",
-      "sha256": "653617da5c47a5c221001d8283f917eb24bcc1c162d51e8d0307d3e77a06527c",
-      "size": 2475489
+      "sha256": "0eaa1d550c9a43d2ef96e9a5c90fff7d53fd39d07008d8d5d4b33d1ff9c5845c",
+      "size": 2475516
     },
     "languages": {
       "sql": {
         "aliases": ["psql"],
-        "highlights": "; This file is auto-generated. Do not edit.\n(invocation\n  (object_reference\n    name: (identifier) @function.call))\n\n[\n  (keyword_gist)\n  (keyword_btree)\n  (keyword_hash)\n  (keyword_spgist)\n  (keyword_gin)\n  (keyword_brin)\n  (keyword_array)\n] @function.call\n\n(object_reference\n  name: (identifier) @type)\n\n(relation\n  alias: (identifier) @variable)\n\n(field\n  name: (identifier) @variable.member)\n\n(column_definition\n  name: (identifier) @variable.member)\n\n(term\n  alias: (identifier) @variable)\n\n(term\n  value: (cast\n    name: (keyword_cast) @function.call\n    parameter: (literal)?))\n\n(literal) @string\n\n(comment) @comment @spell\n\n(marginalia) @comment\n\n((literal) @number\n  (#match? @number \"^[0-9]+$\"))\n\n((literal) @number.float\n  (#match? @number.float \"^[-]?[0-9]*\\\\.[0-9]*$\"))\n\n(parameter) @variable.parameter\n\n[\n  (keyword_true)\n  (keyword_false)\n] @boolean\n\n[\n  (keyword_asc)\n  (keyword_desc)\n  (keyword_terminated)\n  (keyword_escaped)\n  (keyword_unsigned)\n  (keyword_nulls)\n  (keyword_last)\n  (keyword_delimited)\n  (keyword_replication)\n  (keyword_auto_increment)\n  (keyword_default)\n  (keyword_collate)\n  (keyword_concurrently)\n  (keyword_engine)\n  (keyword_always)\n  (keyword_generated)\n  (keyword_preceding)\n  (keyword_following)\n  (keyword_first)\n  (keyword_current_timestamp)\n  (keyword_immutable)\n  (keyword_atomic)\n  (keyword_parallel)\n  (keyword_leakproof)\n  (keyword_safe)\n  (keyword_cost)\n  (keyword_strict)\n] @attribute\n\n[\n  (keyword_materialized)\n  (keyword_recursive)\n  (keyword_temp)\n  (keyword_temporary)\n  (keyword_unlogged)\n  (keyword_external)\n  (keyword_parquet)\n  (keyword_csv)\n  (keyword_rcfile)\n  (keyword_textfile)\n  (keyword_orc)\n  (keyword_avro)\n  (keyword_jsonfile)\n  (keyword_sequencefile)\n  (keyword_volatile)\n] @keyword.modifier\n\n[\n  (keyword_case)\n  (keyword_when)\n  (keyword_then)\n  (keyword_else)\n] @keyword.conditional\n\n[\n  (keyword_select)\n  (keyword_from)\n  (keyword_where)\n  (keyword_index)\n  (keyword_join)\n  (keyword_primary)\n  (keyword_delete)\n  (keyword_create)\n  (keyword_insert)\n  (keyword_merge)\n  (keyword_distinct)\n  (keyword_replace)\n  (keyword_update)\n  (keyword_into)\n  (keyword_overwrite)\n  (keyword_matched)\n  (keyword_values)\n  (keyword_value)\n  (keyword_attribute)\n  (keyword_set)\n  (keyword_left)\n  (keyword_right)\n  (keyword_outer)\n  (keyword_inner)\n  (keyword_full)\n  (keyword_order)\n  (keyword_partition)\n  (keyword_group)\n  (keyword_with)\n  (keyword_without)\n  (keyword_as)\n  (keyword_having)\n  (keyword_limit)\n  (keyword_offset)\n  (keyword_table)\n  (keyword_tables)\n  (keyword_key)\n  (keyword_references)\n  (keyword_foreign)\n  (keyword_constraint)\n  (keyword_force)\n  (keyword_use)\n  (keyword_for)\n  (keyword_if)\n  (keyword_exists)\n  (keyword_column)\n  (keyword_columns)\n  (keyword_cross)\n  (keyword_lateral)\n  (keyword_natural)\n  (keyword_alter)\n  (keyword_drop)\n  (keyword_add)\n  (keyword_view)\n  (keyword_end)\n  (keyword_is)\n  (keyword_using)\n  (keyword_between)\n  (keyword_window)\n  (keyword_no)\n  (keyword_data)\n  (keyword_type)\n  (keyword_rename)\n  (keyword_to)\n  (keyword_schema)\n  (keyword_owner)\n  (keyword_authorization)\n  (keyword_all)\n  (keyword_any)\n  (keyword_some)\n  (keyword_returning)\n  (keyword_begin)\n  (keyword_commit)\n  (keyword_rollback)\n  (keyword_transaction)\n  (keyword_only)\n  (keyword_like)\n  (keyword_similar)\n  (keyword_over)\n  (keyword_change)\n  (keyword_modify)\n  (keyword_after)\n  (keyword_before)\n  (keyword_range)\n  (keyword_rows)\n  (keyword_groups)\n  (keyword_exclude)\n  (keyword_current)\n  (keyword_ties)\n  (keyword_others)\n  (keyword_zerofill)\n  (keyword_format)\n  (keyword_fields)\n  (keyword_row)\n  (keyword_sort)\n  (keyword_compute)\n  (keyword_comment)\n  (keyword_location)\n  (keyword_cached)\n  (keyword_uncached)\n  (keyword_lines)\n  (keyword_stored)\n  (keyword_virtual)\n  (keyword_partitioned)\n  (keyword_analyze)\n  (keyword_explain)\n  (keyword_verbose)\n  (keyword_truncate)\n  (keyword_rewrite)\n  (keyword_optimize)\n  (keyword_vacuum)\n  (keyword_cache)\n  (keyword_language)\n  (keyword_called)\n  (keyword_conflict)\n  (keyword_declare)\n  (keyword_filter)\n  (keyword_function)\n  (keyword_input)\n  (keyword_name)\n  (keyword_oid)\n  (keyword_oids)\n  (keyword_precision)\n  (keyword_regclass)\n  (keyword_regnamespace)\n  (keyword_regproc)\n  (keyword_regtype)\n  (keyword_restricted)\n  (keyword_return)\n  (keyword_returns)\n  (keyword_separator)\n  (keyword_setof)\n  (keyword_stable)\n  (keyword_support)\n  (keyword_tblproperties)\n  (keyword_trigger)\n  (keyword_unsafe)\n  (keyword_admin)\n  (keyword_connection)\n  (keyword_cycle)\n  (keyword_database)\n  (keyword_encrypted)\n  (keyword_increment)\n  (keyword_logged)\n  (keyword_none)\n  (keyword_owned)\n  (keyword_password)\n  (keyword_reset)\n  (keyword_role)\n  (keyword_sequence)\n  (keyword_start)\n  (keyword_restart)\n  (keyword_tablespace)\n  (keyword_until)\n  (keyword_user)\n  (keyword_valid)\n  (keyword_action)\n  (keyword_definer)\n  (keyword_invoker)\n  (keyword_security)\n  (keyword_extension)\n  (keyword_version)\n  (keyword_out)\n  (keyword_inout)\n  (keyword_variadic)\n  (keyword_session)\n  (keyword_isolation)\n  (keyword_level)\n  (keyword_serializable)\n  (keyword_repeatable)\n  (keyword_read)\n  (keyword_write)\n  (keyword_committed)\n  (keyword_uncommitted)\n  (keyword_deferrable)\n  (keyword_names)\n  (keyword_zone)\n  (keyword_immediate)\n  (keyword_deferred)\n  (keyword_constraints)\n  (keyword_snapshot)\n  (keyword_characteristics)\n  (keyword_off)\n  (keyword_follows)\n  (keyword_precedes)\n  (keyword_each)\n  (keyword_instead)\n  (keyword_of)\n  (keyword_initially)\n  (keyword_old)\n  (keyword_new)\n  (keyword_referencing)\n  (keyword_statement)\n  (keyword_execute)\n  (keyword_procedure)\n] @keyword\n\n[\n  (keyword_restrict)\n  (keyword_unbounded)\n  (keyword_unique)\n  (keyword_cascade)\n  (keyword_delayed)\n  (keyword_high_priority)\n  (keyword_low_priority)\n  (keyword_ignore)\n  (keyword_nothing)\n  (keyword_check)\n  (keyword_option)\n  (keyword_local)\n  (keyword_cascaded)\n  (keyword_wait)\n  (keyword_nowait)\n  (keyword_metadata)\n  (keyword_incremental)\n  (keyword_bin_pack)\n  (keyword_noscan)\n  (keyword_stats)\n  (keyword_statistics)\n  (keyword_maxvalue)\n  (keyword_minvalue)\n] @keyword.modifier\n\n[\n  (keyword_int)\n  (keyword_null)\n  (keyword_boolean)\n  (keyword_binary)\n  (keyword_varbinary)\n  (keyword_image)\n  (keyword_bit)\n  (keyword_inet)\n  (keyword_character)\n  (keyword_smallserial)\n  (keyword_serial)\n  (keyword_bigserial)\n  (keyword_smallint)\n  (keyword_mediumint)\n  (keyword_bigint)\n  (keyword_tinyint)\n  (keyword_decimal)\n  (keyword_float)\n  (keyword_double)\n  (keyword_numeric)\n  (keyword_real)\n  (double)\n  (keyword_money)\n  (keyword_smallmoney)\n  (keyword_char)\n  (keyword_nchar)\n  (keyword_varchar)\n  (keyword_nvarchar)\n  (keyword_varying)\n  (keyword_text)\n  (keyword_string)\n  (keyword_uuid)\n  (keyword_json)\n  (keyword_jsonb)\n  (keyword_xml)\n  (keyword_bytea)\n  (keyword_enum)\n  (keyword_date)\n  (keyword_datetime)\n  (keyword_time)\n  (keyword_datetime2)\n  (keyword_datetimeoffset)\n  (keyword_smalldatetime)\n  (keyword_timestamp)\n  (keyword_timestamptz)\n  (keyword_geometry)\n  (keyword_geography)\n  (keyword_box2d)\n  (keyword_box3d)\n  (keyword_interval)\n] @type.builtin\n\n[\n  (keyword_in)\n  (keyword_and)\n  (keyword_or)\n  (keyword_not)\n  (keyword_by)\n  (keyword_on)\n  (keyword_do)\n  (keyword_union)\n  (keyword_except)\n  (keyword_intersect)\n] @keyword.operator\n\n[\n  \"+\"\n  \"-\"\n  \"*\"\n  \"/\"\n  \"%\"\n  \"^\"\n  \":=\"\n  \"=\"\n  \"<\"\n  \"<=\"\n  \"!=\"\n  \">=\"\n  \">\"\n  \"<>\"\n  (op_other)\n  (op_unary_other)\n] @operator\n\n[\n  \"(\"\n  \")\"\n] @punctuation.bracket\n\n[\n  \";\"\n  \",\"\n  \".\"\n] @punctuation.delimiter\n",
+        "highlights": "; This file is auto-generated. Do not edit.\n(invocation\n  (object_reference\n    name: (identifier) @function.call))\n\n[\n  (keyword_gist)\n  (keyword_btree)\n  (keyword_hash)\n  (keyword_spgist)\n  (keyword_gin)\n  (keyword_brin)\n  (keyword_array)\n  (keyword_object_id)\n] @function.call\n\n(object_reference\n  name: (identifier) @type)\n\n(relation\n  alias: (identifier) @variable)\n\n(field\n  name: (identifier) @variable.member)\n\n(column_definition\n  name: (identifier) @variable.member)\n\n(term\n  alias: (identifier) @variable)\n\n(term\n  value: (cast\n    name: (keyword_cast) @function.call\n    parameter: (literal)?))\n\n(literal) @string\n\n(comment) @comment @spell\n\n(marginalia) @comment\n\n((literal) @number\n  (#match? @number \"^[0-9]+$\"))\n\n((literal) @number.float\n  (#match? @number.float \"^[-]?[0-9]*\\\\.[0-9]*$\"))\n\n(parameter) @variable.parameter\n\n[\n  (keyword_true)\n  (keyword_false)\n] @boolean\n\n[\n  (keyword_asc)\n  (keyword_desc)\n  (keyword_terminated)\n  (keyword_escaped)\n  (keyword_unsigned)\n  (keyword_nulls)\n  (keyword_last)\n  (keyword_delimited)\n  (keyword_replication)\n  (keyword_auto_increment)\n  (keyword_default)\n  (keyword_collate)\n  (keyword_concurrently)\n  (keyword_engine)\n  (keyword_always)\n  (keyword_generated)\n  (keyword_preceding)\n  (keyword_following)\n  (keyword_first)\n  (keyword_current_timestamp)\n  (keyword_immutable)\n  (keyword_atomic)\n  (keyword_parallel)\n  (keyword_leakproof)\n  (keyword_safe)\n  (keyword_cost)\n  (keyword_strict)\n] @attribute\n\n[\n  (keyword_materialized)\n  (keyword_recursive)\n  (keyword_temp)\n  (keyword_temporary)\n  (keyword_unlogged)\n  (keyword_external)\n  (keyword_parquet)\n  (keyword_csv)\n  (keyword_rcfile)\n  (keyword_textfile)\n  (keyword_orc)\n  (keyword_avro)\n  (keyword_jsonfile)\n  (keyword_sequencefile)\n  (keyword_volatile)\n] @keyword.modifier\n\n[\n  (keyword_case)\n  (keyword_when)\n  (keyword_then)\n  (keyword_else)\n] @keyword.conditional\n\n[\n  (keyword_select)\n  (keyword_from)\n  (keyword_where)\n  (keyword_index)\n  (keyword_join)\n  (keyword_primary)\n  (keyword_delete)\n  (keyword_create)\n  (keyword_show)\n  (keyword_unload)\n  (keyword_insert)\n  (keyword_merge)\n  (keyword_distinct)\n  (keyword_replace)\n  (keyword_update)\n  (keyword_into)\n  (keyword_overwrite)\n  (keyword_matched)\n  (keyword_values)\n  (keyword_value)\n  (keyword_attribute)\n  (keyword_set)\n  (keyword_left)\n  (keyword_right)\n  (keyword_outer)\n  (keyword_inner)\n  (keyword_full)\n  (keyword_order)\n  (keyword_partition)\n  (keyword_group)\n  (keyword_with)\n  (keyword_without)\n  (keyword_as)\n  (keyword_having)\n  (keyword_limit)\n  (keyword_offset)\n  (keyword_table)\n  (keyword_tables)\n  (keyword_key)\n  (keyword_references)\n  (keyword_foreign)\n  (keyword_constraint)\n  (keyword_force)\n  (keyword_use)\n  (keyword_for)\n  (keyword_if)\n  (keyword_exists)\n  (keyword_column)\n  (keyword_columns)\n  (keyword_cross)\n  (keyword_lateral)\n  (keyword_natural)\n  (keyword_alter)\n  (keyword_drop)\n  (keyword_add)\n  (keyword_view)\n  (keyword_end)\n  (keyword_is)\n  (keyword_using)\n  (keyword_between)\n  (keyword_window)\n  (keyword_no)\n  (keyword_data)\n  (keyword_type)\n  (keyword_rename)\n  (keyword_to)\n  (keyword_schema)\n  (keyword_owner)\n  (keyword_authorization)\n  (keyword_all)\n  (keyword_any)\n  (keyword_some)\n  (keyword_returning)\n  (keyword_begin)\n  (keyword_commit)\n  (keyword_rollback)\n  (keyword_transaction)\n  (keyword_only)\n  (keyword_like)\n  (keyword_similar)\n  (keyword_over)\n  (keyword_change)\n  (keyword_modify)\n  (keyword_after)\n  (keyword_before)\n  (keyword_range)\n  (keyword_rows)\n  (keyword_groups)\n  (keyword_exclude)\n  (keyword_current)\n  (keyword_ties)\n  (keyword_others)\n  (keyword_zerofill)\n  (keyword_format)\n  (keyword_fields)\n  (keyword_row)\n  (keyword_sort)\n  (keyword_compute)\n  (keyword_comment)\n  (keyword_location)\n  (keyword_cached)\n  (keyword_uncached)\n  (keyword_lines)\n  (keyword_stored)\n  (keyword_virtual)\n  (keyword_partitioned)\n  (keyword_analyze)\n  (keyword_explain)\n  (keyword_verbose)\n  (keyword_truncate)\n  (keyword_rewrite)\n  (keyword_optimize)\n  (keyword_vacuum)\n  (keyword_cache)\n  (keyword_language)\n  (keyword_called)\n  (keyword_conflict)\n  (keyword_declare)\n  (keyword_filter)\n  (keyword_function)\n  (keyword_input)\n  (keyword_name)\n  (keyword_oid)\n  (keyword_oids)\n  (keyword_precision)\n  (keyword_regclass)\n  (keyword_regnamespace)\n  (keyword_regproc)\n  (keyword_regtype)\n  (keyword_restricted)\n  (keyword_return)\n  (keyword_returns)\n  (keyword_separator)\n  (keyword_setof)\n  (keyword_stable)\n  (keyword_support)\n  (keyword_tblproperties)\n  (keyword_trigger)\n  (keyword_unsafe)\n  (keyword_admin)\n  (keyword_connection)\n  (keyword_cycle)\n  (keyword_database)\n  (keyword_encrypted)\n  (keyword_increment)\n  (keyword_logged)\n  (keyword_none)\n  (keyword_owned)\n  (keyword_password)\n  (keyword_reset)\n  (keyword_role)\n  (keyword_sequence)\n  (keyword_start)\n  (keyword_restart)\n  (keyword_tablespace)\n  (keyword_until)\n  (keyword_user)\n  (keyword_valid)\n  (keyword_action)\n  (keyword_definer)\n  (keyword_invoker)\n  (keyword_security)\n  (keyword_extension)\n  (keyword_version)\n  (keyword_out)\n  (keyword_inout)\n  (keyword_variadic)\n  (keyword_ordinality)\n  (keyword_session)\n  (keyword_isolation)\n  (keyword_level)\n  (keyword_serializable)\n  (keyword_repeatable)\n  (keyword_read)\n  (keyword_write)\n  (keyword_committed)\n  (keyword_uncommitted)\n  (keyword_deferrable)\n  (keyword_names)\n  (keyword_zone)\n  (keyword_immediate)\n  (keyword_deferred)\n  (keyword_constraints)\n  (keyword_snapshot)\n  (keyword_characteristics)\n  (keyword_off)\n  (keyword_follows)\n  (keyword_precedes)\n  (keyword_each)\n  (keyword_instead)\n  (keyword_of)\n  (keyword_initially)\n  (keyword_old)\n  (keyword_new)\n  (keyword_referencing)\n  (keyword_statement)\n  (keyword_execute)\n  (keyword_procedure)\n  (keyword_copy)\n  (keyword_delimiter)\n  (keyword_encoding)\n  (keyword_escape)\n  (keyword_force_not_null)\n  (keyword_force_null)\n  (keyword_force_quote)\n  (keyword_freeze)\n  (keyword_header)\n  (keyword_match)\n  (keyword_program)\n  (keyword_quote)\n  (keyword_stdin)\n  (keyword_extended)\n  (keyword_main)\n  (keyword_plain)\n  (keyword_storage)\n  (keyword_compression)\n  (keyword_duplicate)\n] @keyword\n\n[\n  (keyword_restrict)\n  (keyword_unbounded)\n  (keyword_unique)\n  (keyword_cascade)\n  (keyword_delayed)\n  (keyword_high_priority)\n  (keyword_low_priority)\n  (keyword_ignore)\n  (keyword_nothing)\n  (keyword_check)\n  (keyword_option)\n  (keyword_local)\n  (keyword_cascaded)\n  (keyword_wait)\n  (keyword_nowait)\n  (keyword_metadata)\n  (keyword_incremental)\n  (keyword_bin_pack)\n  (keyword_noscan)\n  (keyword_stats)\n  (keyword_statistics)\n  (keyword_maxvalue)\n  (keyword_minvalue)\n] @keyword.modifier\n\n[\n  (keyword_int)\n  (keyword_null)\n  (keyword_boolean)\n  (keyword_binary)\n  (keyword_varbinary)\n  (keyword_image)\n  (keyword_bit)\n  (keyword_inet)\n  (keyword_character)\n  (keyword_smallserial)\n  (keyword_serial)\n  (keyword_bigserial)\n  (keyword_smallint)\n  (keyword_mediumint)\n  (keyword_bigint)\n  (keyword_tinyint)\n  (keyword_decimal)\n  (keyword_float)\n  (keyword_double)\n  (keyword_numeric)\n  (keyword_real)\n  (double)\n  (keyword_money)\n  (keyword_smallmoney)\n  (keyword_char)\n  (keyword_nchar)\n  (keyword_varchar)\n  (keyword_nvarchar)\n  (keyword_varying)\n  (keyword_text)\n  (keyword_string)\n  (keyword_uuid)\n  (keyword_json)\n  (keyword_jsonb)\n  (keyword_xml)\n  (keyword_bytea)\n  (keyword_enum)\n  (keyword_date)\n  (keyword_datetime)\n  (keyword_time)\n  (keyword_datetime2)\n  (keyword_datetimeoffset)\n  (keyword_smalldatetime)\n  (keyword_timestamp)\n  (keyword_timestamptz)\n  (keyword_geometry)\n  (keyword_geography)\n  (keyword_box2d)\n  (keyword_box3d)\n  (keyword_interval)\n] @type.builtin\n\n[\n  (keyword_in)\n  (keyword_and)\n  (keyword_or)\n  (keyword_not)\n  (keyword_by)\n  (keyword_on)\n  (keyword_do)\n  (keyword_union)\n  (keyword_except)\n  (keyword_intersect)\n] @keyword.operator\n\n[\n  \"+\"\n  \"-\"\n  \"*\"\n  \"/\"\n  \"%\"\n  \"^\"\n  \":=\"\n  \"=\"\n  \"<\"\n  \"<=\"\n  \"!=\"\n  \">=\"\n  \">\"\n  \"<>\"\n  (op_other)\n  (op_unary_other)\n] @operator\n\n[\n  \"(\"\n  \")\"\n] @punctuation.bracket\n\n[\n  \";\"\n  \",\"\n  \".\"\n] @punctuation.delimiter\n",
         "injections": "; This file is auto-generated. Do not edit.\n((comment) @injection.content\n  (#set! injection.language \"comment\"))\n\n((marginalia) @injection.content\n  (#set! injection.language \"comment\"))",
         "brackets": "; This file is auto-generated. Do not edit.\n(\"(\" @open\n  \")\" @close)\n\n(\"[\" @open\n  \"]\" @close)\n\n(\"{\" @open\n  \"}\" @close)\n"
       }
@@ -2095,15 +2137,15 @@
   },
   "@lumis-sh/wasm-surface": {
     "packageName": "@lumis-sh/wasm-surface",
-    "version": "0.26.3",
+    "version": "0.26.4",
     "definitionHash": "10079c3921764b3964386b4c01aeff227098185b0915a01385de809a11aaeb0f",
     "parser": {
       "name": "tree-sitter-surface",
       "grammarName": "surface",
       "upstreamVersion": "0.2.0",
       "revision": "21b7676859c1187645a27ff301f76738af5dfd44",
-      "sha256": "e2ec92bb909ada846e7b69975945974d2ce7c13bf4135c4f3ce8d2459a338877",
-      "size": 28022
+      "sha256": "43f2ad1e0ab910429a6f118d895436d418a8f5fa4567517fd4962feed153cd8b",
+      "size": 28144
     },
     "languages": {
       "surface": {
@@ -2116,15 +2158,15 @@
   },
   "@lumis-sh/wasm-svelte": {
     "packageName": "@lumis-sh/wasm-svelte",
-    "version": "0.26.3",
+    "version": "0.26.4",
     "definitionHash": "0e61008caef9146ac35dc1c87ea3bf76b3b1f2d078ffc00c5b7b295f12573ea9",
     "parser": {
       "name": "tree-sitter-svelte",
       "grammarName": "svelte",
       "upstreamVersion": "1.0.2",
       "revision": "bf4eff70e5297506e9f255389ce77fa393ed744b",
-      "sha256": "3b9a6ac30efd86a37c9bdd66ca09b1fb093dd1f1338b06eaab20c44fb890efc6",
-      "size": 49633
+      "sha256": "85cd45f11abaae949cf116856cb5382ce808bd8fbcb450587de74b0cfa9a757b",
+      "size": 49667
     },
     "languages": {
       "svelte": {
@@ -2138,15 +2180,15 @@
   },
   "@lumis-sh/wasm-swift": {
     "packageName": "@lumis-sh/wasm-swift",
-    "version": "0.26.3",
+    "version": "0.26.4",
     "definitionHash": "723d01b80f5f7af42f7015e916367ea7882860e0948ee63d907c7b34960756fe",
     "parser": {
       "name": "tree-sitter-swift",
       "grammarName": "swift",
       "upstreamVersion": "0.7.3",
       "revision": "b8b22bffbb3441780e6471665bacfb263741c86a",
-      "sha256": "88def22102e36be1f2a612cbca2911af7acbb5a775893975f84e111910568144",
-      "size": 3826974
+      "sha256": "9d8bdf84792b0c2d2b9c645ee0b3aef2bd94884f101c230b02da8b574f4fa831",
+      "size": 3826605
     },
     "languages": {
       "swift": {
@@ -2160,15 +2202,15 @@
   },
   "@lumis-sh/wasm-tcl": {
     "packageName": "@lumis-sh/wasm-tcl",
-    "version": "0.26.3",
+    "version": "0.26.4",
     "definitionHash": "f5e9d8f2ce43e58fff2305c7c15ca2d4684e353dc1c5b80d697f424ef3a9a594",
     "parser": {
       "name": "tree-sitter-tcl",
       "grammarName": "tcl",
       "upstreamVersion": "0.1.0",
       "revision": "850a72ab6436e06645b33b11cfa60cbdb04b1f01",
-      "sha256": "387c1d9c2ba9493a06e3792f42c6df36ad7a49ef2ba37c2277f6baa356c7f5f7",
-      "size": 86319
+      "sha256": "34363896b14d9ec4a0cb3999ade5d44f4fd04c578ee9b6f1614109df5b882382",
+      "size": 86035
     },
     "languages": {
       "tcl": {
@@ -2181,15 +2223,15 @@
   },
   "@lumis-sh/wasm-terraform": {
     "packageName": "@lumis-sh/wasm-terraform",
-    "version": "0.26.3",
+    "version": "0.26.4",
     "definitionHash": "a4196bfed3d62a752f02ca202e14a806da47aac2d9b2b8fe687589faf5ff6faa",
     "parser": {
       "name": "tree-sitter-terraform",
       "grammarName": "terraform",
       "upstreamVersion": "1.2.0",
       "revision": "fad991865fee927dd1de5e172fb3f08ac674d914",
-      "sha256": "60920ee699da0264d6d425a1584d321d3024bee61c5796dfb9967c82d62b55b2",
-      "size": 96507
+      "sha256": "3a2d20f739c11a988eb58dc08de54fc1bd2df5660537c94ecad18aaecd02c246",
+      "size": 96556
     },
     "languages": {
       "terraform": {
@@ -2202,7 +2244,7 @@
   },
   "@lumis-sh/wasm-tlaplus": {
     "packageName": "@lumis-sh/wasm-tlaplus",
-    "version": "0.26.0",
+    "version": "0.26.1",
     "definitionHash": "d004df76e24087f92340eb9c857454d64bf7759511741d5e7a6b5bc84d9fe23b",
     "parser": {
       "name": "tree-sitter-tlaplus",
@@ -2224,15 +2266,15 @@
   },
   "@lumis-sh/wasm-toml": {
     "packageName": "@lumis-sh/wasm-toml",
-    "version": "0.26.2",
+    "version": "0.26.3",
     "definitionHash": "4a92ecbc09d08672d37949c831e02c0e63e240ac1b9bbef9e824fc969ac3e3d4",
     "parser": {
       "name": "tree-sitter-toml",
       "grammarName": "toml",
       "upstreamVersion": "0.7.0",
       "revision": "64b56832c2cffe41758f28e05c756a3a98d16f41",
-      "sha256": "7cf314a320fbf2ea84e7f8d680729d089efede611a372b937d50de653507019a",
-      "size": 26652
+      "sha256": "6be619e4a01e3017b7847f44cbec4717de45274ffddf224716ffe90e9a12e4c5",
+      "size": 26747
     },
     "languages": {
       "toml": {
@@ -2246,15 +2288,15 @@
   },
   "@lumis-sh/wasm-toon": {
     "packageName": "@lumis-sh/wasm-toon",
-    "version": "0.26.4",
+    "version": "0.26.5",
     "definitionHash": "7ffd630f6976cbb2016b0d043ea267a10618e86b7169d0acdc303c7122e7c6f3",
     "parser": {
       "name": "tree-sitter-toon",
       "grammarName": "toon",
       "upstreamVersion": "0.1.3",
       "revision": "dda6988067d2ccd4c3cfa04068f792bc3300d1e8",
-      "sha256": "91245d3808cc8c63fc2850e99faac92fd5e49d9deb9449a5e5f4629fd176acf9",
-      "size": 52848
+      "sha256": "2a89dab1a15f87da99bf12d1920d622b869a4dcfccd31e295f704e916ac48034",
+      "size": 52729
     },
     "languages": {
       "toon": {
@@ -2266,15 +2308,15 @@
   },
   "@lumis-sh/wasm-tsx": {
     "packageName": "@lumis-sh/wasm-tsx",
-    "version": "0.26.3",
+    "version": "0.26.4",
     "definitionHash": "1d5e7de8b2b834b1e07b784f8ff6f3106fe4709f608926e140895f4312d30920",
     "parser": {
       "name": "tree-sitter-tsx",
       "grammarName": "tsx",
       "upstreamVersion": "0.23.2",
       "revision": "f975a621f4e7f532fe322e13c4f79495e0a7b2e7",
-      "sha256": "28fd7df7f2531af8deefa41c42b1f38a42b16141f8864d335439704eaf6cb465",
-      "size": 1450769
+      "sha256": "d22870bb483c5152f8db460671638fc121e1ec9f1a1e7b789703857317b3054a",
+      "size": 1450817
     },
     "languages": {
       "tsx": {
@@ -2288,15 +2330,15 @@
   },
   "@lumis-sh/wasm-typescript": {
     "packageName": "@lumis-sh/wasm-typescript",
-    "version": "0.26.3",
+    "version": "0.26.4",
     "definitionHash": "d069451966fdb12ba8f6d22774ab8ed39f4729e0c5994164eb857dc3acfdf158",
     "parser": {
       "name": "tree-sitter-typescript",
       "grammarName": "typescript",
       "upstreamVersion": "0.23.2",
       "revision": "f975a621f4e7f532fe322e13c4f79495e0a7b2e7",
-      "sha256": "13677574a6375e1b12e98579850c55a4db5952ad8bacd673110007ac7cfd7e69",
-      "size": 1418221
+      "sha256": "2786d04b639f4496ee8a74c2b9ac16ee26e6e73107e9332f7fbeb49775824e15",
+      "size": 1418386
     },
     "languages": {
       "typescript": {
@@ -2310,15 +2352,15 @@
   },
   "@lumis-sh/wasm-typst": {
     "packageName": "@lumis-sh/wasm-typst",
-    "version": "0.26.3",
+    "version": "0.26.4",
     "definitionHash": "786720fad4e662cb458917bc3dc18a874d905bf42cbb844eec68d55052f0a195",
     "parser": {
       "name": "tree-sitter-typst",
       "grammarName": "typst",
       "upstreamVersion": "0.12.1",
       "revision": "46cf4ded12ee974a70bf8457263b67ad7ee0379d",
-      "sha256": "63e5742f78172c31178ca3db9469caab6930435940a7f5ee381a1f2448eb1492",
-      "size": 773916
+      "sha256": "29259272aeea70dd063e5230bfd7bbca1a340513f36729aae2076418ab90e3f6",
+      "size": 774153
     },
     "languages": {
       "typst": {
@@ -2331,15 +2373,15 @@
   },
   "@lumis-sh/wasm-vhdl": {
     "packageName": "@lumis-sh/wasm-vhdl",
-    "version": "0.26.3",
+    "version": "0.26.4",
     "definitionHash": "f8f6aba5f7e6bc9a9886e3f81afe425f4ef1ee3ef60860f34baaf38cceba969b",
     "parser": {
       "name": "tree-sitter-vhdl",
       "grammarName": "vhdl",
       "upstreamVersion": "1.4.0",
       "revision": "58114f35d0865e348692256bfc5ae661fc1efb0c",
-      "sha256": "ef44941ba6e7da1f777addee7f48a90a7de1ef57e4b53e9e110de4f61c632a82",
-      "size": 1576904
+      "sha256": "d03507bab31702e84fc6dc18caa3fbae26baf417bf8e73708d49747e566db5ac",
+      "size": 1576833
     },
     "languages": {
       "vhdl": {
@@ -2352,15 +2394,15 @@
   },
   "@lumis-sh/wasm-vim": {
     "packageName": "@lumis-sh/wasm-vim",
-    "version": "0.26.3",
+    "version": "0.26.4",
     "definitionHash": "f56e1c2795ec60bfde08011e954a2b17a569bb83b3fb063e8ab1c19168793861",
     "parser": {
       "name": "tree-sitter-vim",
       "grammarName": "vim",
       "upstreamVersion": "0.8.1",
       "revision": "3092fcd99eb87bbd0fc434aa03650ba58bd5b43b",
-      "sha256": "0598c05a828342ead0cba4d26ae55a6fd2aff34c9215db60f6a3b2e82460ba79",
-      "size": 1271252
+      "sha256": "1fd44b568fc2d9441fe4627e6f845db35bf77b45074fc12a7848c237fbfb479b",
+      "size": 1454858
     },
     "languages": {
       "vim": {
@@ -2374,15 +2416,15 @@
   },
   "@lumis-sh/wasm-vue": {
     "packageName": "@lumis-sh/wasm-vue",
-    "version": "0.26.2",
+    "version": "0.26.3",
     "definitionHash": "23892ad5055ac17220a1190cfc45997abd7142f72f67d1a947d13f796407a31a",
     "parser": {
       "name": "tree-sitter-vue",
       "grammarName": "vue",
       "upstreamVersion": "0.1.0",
       "revision": "ce8011a414fdf8091f4e4071752efc376f4afb08",
-      "sha256": "0e7829716cef1d1f2ee3297e6ec682ab221fce2355a42b1e28afecfddc32d4b1",
-      "size": 32416
+      "sha256": "8c679db0cf3d3e07f70dfc91e18f5e1dee4de24f9966ce1784ddc2801a41ea69",
+      "size": 32497
     },
     "languages": {
       "vue": {
@@ -2395,15 +2437,15 @@
   },
   "@lumis-sh/wasm-wat": {
     "packageName": "@lumis-sh/wasm-wat",
-    "version": "0.26.2",
+    "version": "0.26.3",
     "definitionHash": "817b0d9f8c1f8f2e922d51bb1099a12e2fd9bc6dabe46f6c4fbb47e5a16969cd",
     "parser": {
       "name": "tree-sitter-wat",
       "grammarName": "wat",
       "upstreamVersion": "0.1.0",
       "revision": "2ca28a9f9d709847bf7a3de0942a84e912f59088",
-      "sha256": "edf2bd95088091a8301bd2a3631886d7695c54f8cdfb3299326e6dc7ee99c4ad",
-      "size": 207439
+      "sha256": "d67ceb67acbd6786b91b7d549683570194c30619d3cf75eae82c18fb25222646",
+      "size": 207364
     },
     "languages": {
       "wat": {
@@ -2415,15 +2457,15 @@
   },
   "@lumis-sh/wasm-wgsl": {
     "packageName": "@lumis-sh/wasm-wgsl",
-    "version": "0.26.2",
+    "version": "0.26.3",
     "definitionHash": "32659c4d3b7933583c01c2ac2916c9f6900a6d1cd5389039d244c51dbde8c320",
     "parser": {
       "name": "tree-sitter-wgsl",
       "grammarName": "wgsl",
       "upstreamVersion": "0.0.6",
       "revision": "40259f3c77ea856841a4e0c4c807705f3e4a2b65",
-      "sha256": "5c22e3227360ef90436f804136533e7b9d82037e9df9d1e8fc72923c2e3f1bf4",
-      "size": 69087
+      "sha256": "e2abfe3521769fcafd620844e24b57ccecc3e9a0c2329f3866f1ad0c62eeaf2d",
+      "size": 69140
     },
     "languages": {
       "wgsl": {
@@ -2436,15 +2478,15 @@
   },
   "@lumis-sh/wasm-xml": {
     "packageName": "@lumis-sh/wasm-xml",
-    "version": "0.26.4",
+    "version": "0.26.5",
     "definitionHash": "dd36158a349aad20e809cf402719a21baf0481e781f3da5d9ae69c82f04886c4",
     "parser": {
       "name": "tree-sitter-xml",
       "grammarName": "xml",
       "upstreamVersion": "0.7.0",
       "revision": "87cc03f6576036feb5ff083be6e03ad7885e06cd",
-      "sha256": "0fae84abd4fe00e998e413b17ab1855fdef334e7a1f0cf4cdf2fb71aaed2de63",
-      "size": 52032
+      "sha256": "4b4a0305145a797fec158c11f83f2bee446b9ed25772ab33717b0c76dcf7a487",
+      "size": 52088
     },
     "languages": {
       "xml": {
@@ -2458,15 +2500,15 @@
   },
   "@lumis-sh/wasm-yaml": {
     "packageName": "@lumis-sh/wasm-yaml",
-    "version": "0.26.3",
+    "version": "0.26.4",
     "definitionHash": "653c563d8cefd3a19128ced2b0b90ae8c993744fa31e2550340088f5a1fc4f19",
     "parser": {
       "name": "tree-sitter-yaml",
       "grammarName": "yaml",
       "upstreamVersion": "0.7.2",
       "revision": "f1790f0a8246a650466bfd342b1c2c373c14b76c",
-      "sha256": "8193a8c24bc9990f459afcd229bfb1c7219622b2ca0c2581d28659361c188b6f",
-      "size": 197478
+      "sha256": "760303a063ca5bf9914405b0871884dc3dc0bb778af93fd9f6c440d7c78803d5",
+      "size": 197337
     },
     "languages": {
       "yaml": {
@@ -2480,15 +2522,15 @@
   },
   "@lumis-sh/wasm-zig": {
     "packageName": "@lumis-sh/wasm-zig",
-    "version": "0.26.2",
+    "version": "0.26.3",
     "definitionHash": "cfb5a4426010151bb2da0a370f22f3dddbaf920d75233d3aa98b455cf0b39db8",
     "parser": {
       "name": "tree-sitter-zig",
       "grammarName": "zig",
       "upstreamVersion": "1.1.2",
       "revision": "b670c8df85a1568f498aa5c8cae42f51a90473c0",
-      "sha256": "de2889d1610b165c47d5791967f84db20e56e8efedc551bb960a394e8779e621",
-      "size": 698328
+      "sha256": "8edafd9922e42f2d3c15d1a4361e8403cf810440c4043ea83571c13df955a8a3",
+      "size": 698400
     },
     "languages": {
       "zig": {
@@ -2502,7 +2544,7 @@
   },
   "@lumis-sh/wasm-zsh": {
     "packageName": "@lumis-sh/wasm-zsh",
-    "version": "0.26.2",
+    "version": "0.26.3",
     "definitionHash": "709912c1afb265fbb7cf5f4d03a17220a52e3f59c3018ad7e5444e7943e06d5c",
     "parser": {
       "name": "tree-sitter-zsh",

@@ -1,6 +1,7 @@
 /* eslint-disable -- Generated third-party code; see vendor-licenses.txt and vendor-manifest.json. */
 // themes/obscure.ts
 var theme = {
+  $schema: "https://lumis.sh/schemas/themes/v1.0.0.json",
   name: "obscure",
   appearance: "dark",
   revision: "6c2ee734099de2f95a79a1577cd231f7fe2d38a6",

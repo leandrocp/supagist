@@ -1,6 +1,7 @@
 /* eslint-disable -- Generated third-party code; see vendor-licenses.txt and vendor-manifest.json. */
 // themes/miasma.ts
 var theme = {
+  $schema: "https://lumis.sh/schemas/themes/v1.0.0.json",
   name: "miasma",
   appearance: "dark",
   revision: "627f2e1cac91de0d1d4dd7472b506a30f41b2b7d",

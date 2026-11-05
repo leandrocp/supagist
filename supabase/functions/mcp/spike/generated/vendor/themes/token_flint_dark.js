@@ -1,6 +1,7 @@
 /* eslint-disable -- Generated third-party code; see vendor-licenses.txt and vendor-manifest.json. */
 // themes/token_flint_dark.ts
 var theme = {
+  $schema: "https://lumis.sh/schemas/themes/v1.0.0.json",
   name: "token_flint_dark",
   appearance: "dark",
   revision: "3454326ab2c1a025e157e559ef8c6e3e2be01ef2",

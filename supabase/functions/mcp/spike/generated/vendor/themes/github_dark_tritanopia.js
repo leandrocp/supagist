@@ -1,6 +1,7 @@
 /* eslint-disable -- Generated third-party code; see vendor-licenses.txt and vendor-manifest.json. */
 // themes/github_dark_tritanopia.ts
 var theme = {
+  $schema: "https://lumis.sh/schemas/themes/v1.0.0.json",
   name: "github_dark_tritanopia",
   appearance: "dark",
   revision: "c106c9472154d6b2c74b74565616b877ae8ed31d",

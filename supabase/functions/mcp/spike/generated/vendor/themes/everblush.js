@@ -1,6 +1,7 @@
 /* eslint-disable -- Generated third-party code; see vendor-licenses.txt and vendor-manifest.json. */
 // themes/everblush.ts
 var theme = {
+  $schema: "https://lumis.sh/schemas/themes/v1.0.0.json",
   name: "everblush",
   appearance: "dark",
   revision: "678f808d81801b983b6fb8296fb17ba1b2785d7c",

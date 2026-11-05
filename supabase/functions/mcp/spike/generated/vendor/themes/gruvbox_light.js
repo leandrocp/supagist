@@ -1,6 +1,7 @@
 /* eslint-disable -- Generated third-party code; see vendor-licenses.txt and vendor-manifest.json. */
 // themes/gruvbox_light.ts
 var theme = {
+  $schema: "https://lumis.sh/schemas/themes/v1.0.0.json",
   name: "gruvbox_light",
   appearance: "light",
   revision: "154eb5ff5b96d0641307113fa385eaf0d36d9796",

@@ -1,6 +1,7 @@
 /* eslint-disable -- Generated third-party code; see vendor-licenses.txt and vendor-manifest.json. */
 // themes/cobalt2.ts
 var theme = {
+  $schema: "https://lumis.sh/schemas/themes/v1.0.0.json",
   name: "cobalt2",
   appearance: "dark",
   revision: "0cc17f3491feba19ed62b2d9622577f7822a0113",

@@ -1,6 +1,7 @@
 /* eslint-disable -- Generated third-party code; see vendor-licenses.txt and vendor-manifest.json. */
 // themes/doom_one_dark.ts
 var theme = {
+  $schema: "https://lumis.sh/schemas/themes/v1.0.0.json",
   name: "doom_one_dark",
   appearance: "dark",
   revision: "beae92173315c7282f6897e666cfd67fbf0f3ac9",

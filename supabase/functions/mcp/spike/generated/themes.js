@@ -1,4 +1,4 @@
-// Local copies of exact @lumis-sh/themes@0.4.3 data modules.
+// Local copies of exact @lumis-sh/themes@0.4.4 data modules.
 export const themes = {
   adwaita_dark: () => import("./vendor/themes/adwaita_dark.js"),
   adwaita_light: () => import("./vendor/themes/adwaita_light.js"),

@@ -1,6 +1,7 @@
 /* eslint-disable -- Generated third-party code; see vendor-licenses.txt and vendor-manifest.json. */
 // themes/sonokai_maia.ts
 var theme = {
+  $schema: "https://lumis.sh/schemas/themes/v1.0.0.json",
   name: "sonokai_maia",
   appearance: "dark",
   revision: "b023c5280b16fe2366f5e779d8d2756b3e5ee9c3",

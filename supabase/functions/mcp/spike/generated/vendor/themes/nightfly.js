@@ -1,6 +1,7 @@
 /* eslint-disable -- Generated third-party code; see vendor-licenses.txt and vendor-manifest.json. */
 // themes/nightfly.ts
 var theme = {
+  $schema: "https://lumis.sh/schemas/themes/v1.0.0.json",
   name: "nightfly",
   appearance: "dark",
   revision: "2c31d07ce05efa92bcb7f893f9c74a846226c898",

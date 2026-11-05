@@ -1,6 +1,7 @@
 /* eslint-disable -- Generated third-party code; see vendor-licenses.txt and vendor-manifest.json. */
 // themes/xcode_light.ts
 var theme = {
+  $schema: "https://lumis.sh/schemas/themes/v1.0.0.json",
   name: "xcode_light",
   appearance: "light",
   revision: "c57b4df378952382eb0c8aa93614d1d70f35798a",

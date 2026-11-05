@@ -1,6 +1,7 @@
 /* eslint-disable -- Generated third-party code; see vendor-licenses.txt and vendor-manifest.json. */
 // themes/darkvoid.ts
 var theme = {
+  $schema: "https://lumis.sh/schemas/themes/v1.0.0.json",
   name: "darkvoid",
   appearance: "dark",
   revision: "45be993a5617e05811b6b293c05e6aded7003cc9",

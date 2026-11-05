@@ -1,6 +1,7 @@
 /* eslint-disable -- Generated third-party code; see vendor-licenses.txt and vendor-manifest.json. */
 // themes/flexoki_dark.ts
 var theme = {
+  $schema: "https://lumis.sh/schemas/themes/v1.0.0.json",
   name: "flexoki_dark",
   appearance: "dark",
   revision: "c3e2251e813d29d885a7cbbe9808a7af234d845d",

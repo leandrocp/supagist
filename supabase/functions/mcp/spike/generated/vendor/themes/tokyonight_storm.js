@@ -1,6 +1,7 @@
 /* eslint-disable -- Generated third-party code; see vendor-licenses.txt and vendor-manifest.json. */
 // themes/tokyonight_storm.ts
 var theme = {
+  $schema: "https://lumis.sh/schemas/themes/v1.0.0.json",
   name: "tokyonight_storm",
   appearance: "dark",
   revision: "cdc07ac78467a233fd62c493de29a17e0cf2b2b6",

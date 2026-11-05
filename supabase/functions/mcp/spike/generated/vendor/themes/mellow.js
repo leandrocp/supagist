@@ -1,6 +1,7 @@
 /* eslint-disable -- Generated third-party code; see vendor-licenses.txt and vendor-manifest.json. */
 // themes/mellow.ts
 var theme = {
+  $schema: "https://lumis.sh/schemas/themes/v1.0.0.json",
   name: "mellow",
   appearance: "dark",
   revision: "6273b7f0ddf6ac2b75021b3bc0bd8b3305cfeef1",

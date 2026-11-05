@@ -1,6 +1,7 @@
 /* eslint-disable -- Generated third-party code; see vendor-licenses.txt and vendor-manifest.json. */
 // themes/matte_black.ts
 var theme = {
+  $schema: "https://lumis.sh/schemas/themes/v1.0.0.json",
   name: "matte_black",
   appearance: "dark",
   revision: "a8a039f5d6189b28d76fa0221e64965efec7e996",

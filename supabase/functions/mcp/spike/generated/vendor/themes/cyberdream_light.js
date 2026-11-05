@@ -1,9 +1,10 @@
 /* eslint-disable -- Generated third-party code; see vendor-licenses.txt and vendor-manifest.json. */
 // themes/cyberdream_light.ts
 var theme = {
+  $schema: "https://lumis.sh/schemas/themes/v1.0.0.json",
   name: "cyberdream_light",
   appearance: "light",
-  revision: "39e1fda12c0704e01029b286a4c7e77e33a0c5cd",
+  revision: "8ed987565d081a8ebeda0bac939c22a0f451d074",
   license: "MIT",
   highlights: {
     attribute: { fg: "#008c99" },
@@ -22,7 +23,7 @@ var theme = {
     "constant.builtin": { fg: "#f40064" },
     "constant.macro": { fg: "#008c99" },
     constructor: { fg: "#f40064" },
-    "diff.delta": { fg: "#007373" },
+    "diff.delta": { fg: "#0057d1" },
     "diff.minus": { fg: "#d11500" },
     "diff.minus.word": { bg: "#ffc0ae" },
     "diff.plus": { fg: "#008b0c" },

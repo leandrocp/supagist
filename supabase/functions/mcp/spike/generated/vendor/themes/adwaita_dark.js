@@ -1,6 +1,7 @@
 /* eslint-disable -- Generated third-party code; see vendor-licenses.txt and vendor-manifest.json. */
 // themes/adwaita_dark.ts
 var theme = {
+  $schema: "https://lumis.sh/schemas/themes/v1.0.0.json",
   name: "adwaita_dark",
   appearance: "dark",
   revision: "c607954f7b2cf56b24e921db0dab4749f3430a22",

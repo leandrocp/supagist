@@ -1,6 +1,7 @@
 /* eslint-disable -- Generated third-party code; see vendor-licenses.txt and vendor-manifest.json. */
 // themes/catppuccin_macchiato.ts
 var theme = {
+  $schema: "https://lumis.sh/schemas/themes/v1.0.0.json",
   name: "catppuccin_macchiato",
   appearance: "dark",
   revision: "edefef779ab08ce1a4a404713e3012b0d202bd35",

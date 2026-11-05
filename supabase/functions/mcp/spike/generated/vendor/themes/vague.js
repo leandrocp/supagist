@@ -1,6 +1,7 @@
 /* eslint-disable -- Generated third-party code; see vendor-licenses.txt and vendor-manifest.json. */
 // themes/vague.ts
 var theme = {
+  $schema: "https://lumis.sh/schemas/themes/v1.0.0.json",
   name: "vague",
   appearance: "dark",
   revision: "73f8aaa866bf3d14dd0b0ab9e48c11794c1cb7ab",

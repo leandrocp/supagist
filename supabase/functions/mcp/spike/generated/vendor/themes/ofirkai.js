@@ -1,6 +1,7 @@
 /* eslint-disable -- Generated third-party code; see vendor-licenses.txt and vendor-manifest.json. */
 // themes/ofirkai.ts
 var theme = {
+  $schema: "https://lumis.sh/schemas/themes/v1.0.0.json",
   name: "ofirkai",
   appearance: "dark",
   revision: "f51d56db89a36674b39395efce5dc431778ef343",

@@ -1,6 +1,7 @@
 /* eslint-disable -- Generated third-party code; see vendor-licenses.txt and vendor-manifest.json. */
 // themes/night_owl.ts
 var theme = {
+  $schema: "https://lumis.sh/schemas/themes/v1.0.0.json",
   name: "night_owl",
   appearance: "dark",
   revision: "86ed124c2f7e118670649701288e024444bf91e5",

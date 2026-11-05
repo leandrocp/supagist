@@ -1,6 +1,7 @@
 /* eslint-disable -- Generated third-party code; see vendor-licenses.txt and vendor-manifest.json. */
 // themes/edge_aura.ts
 var theme = {
+  $schema: "https://lumis.sh/schemas/themes/v1.0.0.json",
   name: "edge_aura",
   appearance: "dark",
   revision: "7ec78c21bd8f0b2b0b47043bb1e730c561647c72",

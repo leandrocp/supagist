@@ -1,6 +1,7 @@
 /* eslint-disable -- Generated third-party code; see vendor-licenses.txt and vendor-manifest.json. */
 // themes/citruszest.ts
 var theme = {
+  $schema: "https://lumis.sh/schemas/themes/v1.0.0.json",
   name: "citruszest",
   appearance: "dark",
   revision: "e6fed9ec3d0ac190b1387379c138ba5e23a1f4f9",

@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { extraLanguages } from "./lib/lumis-extra-languages";
 
 // Read at request time by lib/snippet-render.ts.
 const SNIPPET_RENDER_FILES = [
@@ -61,8 +62,14 @@ const nextConfig: NextConfig = {
   // resvg (PNG for /api/render) is a native addon too.
   // The parser bundle stays external so server routes that import the export
   // renderer (the share image, the live thumbnail) don't also get Turbopack's
-  // copy of every parser, which put them over Vercel's 250 MB limit.
-  serverExternalPackages: ["@lumis-sh/lumis", "@resvg/resvg-js", "@lumis-sh/wasm-bundle-full"],
+  // copy of every parser, which put them over Vercel's 250 MB limit. The
+  // parsers passed next to the bundle stay external for the same reason.
+  serverExternalPackages: [
+    "@lumis-sh/lumis",
+    "@resvg/resvg-js",
+    "@lumis-sh/wasm-bundle-full",
+    ...extraLanguages.map((language) => language.packageName),
+  ],
   // It also finds the installed @lumis-sh/wasm-* parsers at runtime, from the
   // project directory, which file tracing cannot follow. Without these the
   // deployed saved view would fall back to plain text for every snippet.

@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import full from "@lumis-sh/wasm-bundle-full";
+import { extraLanguages } from "../lib/lumis-extra-languages";
 
 // Real syntax and a token owned by each grammar, not arbitrary text that could
 // silently succeed through plain-text fallback. Optional injected grammars are
@@ -11,6 +12,7 @@ const samples: Record<string, [code: string, token: string]> = {
   asm: ["mov eax, 42", "42"],
   astro: ['<div title="hello">world</div>', "div"],
   bash: ['echo "hello"', '"hello"'],
+  bend: ["def main():\n  return 42", "def"],
   bicep: ["param answer int = 42", "param"],
   c: ["int answer = 42;", "int"],
   caddy: ['localhost {\n respond "hello"\n}', "localhost"],
@@ -67,6 +69,7 @@ const samples: Record<string, [code: string, token: string]> = {
   kdl: ["answer 42", "42"],
   kotlin: ["val answer = 42", "val"],
   latex: ["\\section{Hello}", "\\section"],
+  lean: ["def answer : Nat := 42", "def"],
   liquid: ["{% if true %}hello{% endif %}", "if"],
   llvm: ["define i32 @answer() { ret i32 42 }", "define"],
   lua: ["local answer = 42", "local"],
@@ -128,8 +131,10 @@ const samples: Record<string, [code: string, token: string]> = {
   plaintext: ["plain <text> & no syntax", ""],
 };
 
-test("parser fixtures cover the full bundle and plaintext", () => {
-  expect(Object.keys(samples).sort()).toEqual([...Object.keys(full), "plaintext"].sort());
+test("parser fixtures cover the full bundle, the extra languages and plaintext", () => {
+  expect(Object.keys(samples).sort()).toEqual(
+    [...Object.keys(full), ...extraLanguages.map((language) => language.id), "plaintext"].sort(),
+  );
 });
 
 for (const [language, [code, token]] of Object.entries(samples)) {

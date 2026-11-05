@@ -1,6 +1,7 @@
 /* eslint-disable -- Generated third-party code; see vendor-licenses.txt and vendor-manifest.json. */
 // themes/fluoromachine_retrowave.ts
 var theme = {
+  $schema: "https://lumis.sh/schemas/themes/v1.0.0.json",
   name: "fluoromachine_retrowave",
   appearance: "dark",
   revision: "a279f667168e742df059caf1f1f4daf1de24f4f8",

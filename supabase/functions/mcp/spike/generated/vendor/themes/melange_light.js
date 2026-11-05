@@ -1,6 +1,7 @@
 /* eslint-disable -- Generated third-party code; see vendor-licenses.txt and vendor-manifest.json. */
 // themes/melange_light.ts
 var theme = {
+  $schema: "https://lumis.sh/schemas/themes/v1.0.0.json",
   name: "melange_light",
   appearance: "light",
   revision: "ce42f6b629beeaa00591ba73a77d3eeac4cf28ce",

@@ -1,6 +1,7 @@
 /* eslint-disable -- Generated third-party code; see vendor-licenses.txt and vendor-manifest.json. */
 // themes/jellybeans.ts
 var theme = {
+  $schema: "https://lumis.sh/schemas/themes/v1.0.0.json",
   name: "jellybeans",
   appearance: "dark",
   revision: "d5989265b5256cb296b5772c73e57490e84f69b1",

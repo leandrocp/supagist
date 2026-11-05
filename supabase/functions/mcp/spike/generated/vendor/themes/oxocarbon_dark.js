@@ -1,6 +1,7 @@
 /* eslint-disable -- Generated third-party code; see vendor-licenses.txt and vendor-manifest.json. */
 // themes/oxocarbon_dark.ts
 var theme = {
+  $schema: "https://lumis.sh/schemas/themes/v1.0.0.json",
   name: "oxocarbon_dark",
   appearance: "dark",
   revision: "cd6523a0836d6e8ee823d343149fd06c7b71fdde",

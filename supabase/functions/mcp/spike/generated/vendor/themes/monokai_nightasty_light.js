@@ -1,6 +1,7 @@
 /* eslint-disable -- Generated third-party code; see vendor-licenses.txt and vendor-manifest.json. */
 // themes/monokai_nightasty_light.ts
 var theme = {
+  $schema: "https://lumis.sh/schemas/themes/v1.0.0.json",
   name: "monokai_nightasty_light",
   appearance: "light",
   revision: "5731bc3c01e6c94a709021e5ee31070840e47584",

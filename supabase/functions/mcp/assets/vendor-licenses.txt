@@ -1,4 +1,4 @@
-@lumis-sh/lumis@0.10.1
+@lumis-sh/lumis@0.10.4
 MIT License
 
 Copyright (c) 2026 Leandro Pereira
@@ -24,7 +24,7 @@ SOFTWARE.
 
 ---
 
-@lumis-sh/themes@0.4.3
+@lumis-sh/themes@0.4.4
 MIT License
 
 Copyright (c) 2026 Leandro Pereira

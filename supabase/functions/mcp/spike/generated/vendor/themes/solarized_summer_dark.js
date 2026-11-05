@@ -1,6 +1,7 @@
 /* eslint-disable -- Generated third-party code; see vendor-licenses.txt and vendor-manifest.json. */
 // themes/solarized_summer_dark.ts
 var theme = {
+  $schema: "https://lumis.sh/schemas/themes/v1.0.0.json",
   name: "solarized_summer_dark",
   appearance: "dark",
   revision: "a8085e29883ddcfb39bd46197eb32ef00df05368",

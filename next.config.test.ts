@@ -37,6 +37,10 @@ describe("Next.js production security configuration", () => {
     // Bundling the Node entry fails the build, and file tracing cannot see the
     // parsers Lumis resolves from the project directory at runtime.
     expect(nextConfig.serverExternalPackages).toContain("@lumis-sh/lumis");
+    // Bundling them copies every parser into the server output.
+    expect(nextConfig.serverExternalPackages).toEqual(
+      expect.arrayContaining(["@lumis-sh/wasm-bundle-full", "@lumis-sh/wasm-haskell"]),
+    );
     expect(nextConfig.outputFileTracingIncludes?.["/\\[snippet\\]"]).toEqual([
       "./node_modules/@lumis-sh/wasm-*/**/*",
     ]);

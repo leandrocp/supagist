@@ -517,7 +517,7 @@ async function Module2(moduleArg = {}) {
       if (condition) throw new Error(message);
     }
     __name(failIf, "failIf");
-    if (binary2 instanceof WebAssembly.Module) {
+    if (Object.prototype.toString.call(binary2) === "[object WebAssembly.Module]") {
       var dylinkSection = WebAssembly.Module.customSections(binary2, "dylink.0");
       failIf(dylinkSection.length === 0, "need dylink section");
       binary2 = new Uint8Array(dylinkSection[0]);
@@ -950,7 +950,7 @@ async function Module2(moduleArg = {}) {
         if (flags.loadAsync)
           return (async () => {
             var instance2;
-            if (binary instanceof WebAssembly.Module)
+            if (Object.prototype.toString.call(binary) === "[object WebAssembly.Module]")
               instance2 = new WebAssembly.Instance(binary, info);
             else
               ({ module: binary, instance: instance2 } = await WebAssembly.instantiate(
@@ -959,7 +959,10 @@ async function Module2(moduleArg = {}) {
               ));
             return postInstantiation(binary, instance2);
           })();
-        var module = binary instanceof WebAssembly.Module ? binary : new WebAssembly.Module(binary);
+        var module =
+          Object.prototype.toString.call(binary) === "[object WebAssembly.Module]"
+            ? binary
+            : new WebAssembly.Module(binary);
         var instance = new WebAssembly.Instance(module, info);
         return postInstantiation(module, instance);
       }

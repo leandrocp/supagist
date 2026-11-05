@@ -1,6 +1,7 @@
 /* eslint-disable -- Generated third-party code; see vendor-licenses.txt and vendor-manifest.json. */
 // themes/neovim_light.ts
 var theme = {
+  $schema: "https://lumis.sh/schemas/themes/v1.0.0.json",
   name: "neovim_light",
   appearance: "light",
   revision: "306a05526ada86a7b30af95c5cc81ffba93fef97",

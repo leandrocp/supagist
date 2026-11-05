@@ -1,6 +1,7 @@
 /* eslint-disable -- Generated third-party code; see vendor-licenses.txt and vendor-manifest.json. */
 // themes/bamboo_multiplex.ts
 var theme = {
+  $schema: "https://lumis.sh/schemas/themes/v1.0.0.json",
   name: "bamboo_multiplex",
   appearance: "dark",
   revision: "1309bc88bffcf1bedc3e84e7fa9004de93da774a",

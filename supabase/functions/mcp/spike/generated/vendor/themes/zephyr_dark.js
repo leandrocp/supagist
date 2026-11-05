@@ -1,6 +1,7 @@
 /* eslint-disable -- Generated third-party code; see vendor-licenses.txt and vendor-manifest.json. */
 // themes/zephyr_dark.ts
 var theme = {
+  $schema: "https://lumis.sh/schemas/themes/v1.0.0.json",
   name: "zephyr_dark",
   appearance: "dark",
   revision: "7fd86b7164442d3b5ec2c81b2694d040e716b5cf",

@@ -1,6 +1,7 @@
 /* eslint-disable -- Generated third-party code; see vendor-licenses.txt and vendor-manifest.json. */
 // themes/zenburn.ts
 var theme = {
+  $schema: "https://lumis.sh/schemas/themes/v1.0.0.json",
   name: "zenburn",
   appearance: "dark",
   revision: "f5ee12b30119499c7fa7f95719cd7c5aab9f9f29",

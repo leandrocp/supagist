@@ -1,6 +1,7 @@
 /* eslint-disable -- Generated third-party code; see vendor-licenses.txt and vendor-manifest.json. */
 // themes/oceanic_next.ts
 var theme = {
+  $schema: "https://lumis.sh/schemas/themes/v1.0.0.json",
   name: "oceanic_next",
   appearance: "dark",
   revision: "09833f72d5ba23de2e8bcae18f479f326f5f677a",

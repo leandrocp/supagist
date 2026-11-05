@@ -4,6 +4,7 @@ import full from "@lumis-sh/wasm-bundle-full";
 import { htmlInline } from "@lumis-sh/lumis/formatters";
 import githubDark from "@lumis-sh/themes/github_dark";
 import { clientHighlighterPromise } from "./lumis-client";
+import { extraLanguages } from "./lumis-extra-languages";
 
 // Node fetch cannot read file: URLs. Supply the real installed WASM bytes at
 // that I/O boundary; parsing and rendering still use Lumis's browser runtime.
@@ -18,7 +19,12 @@ afterAll(() => fileFetch.mockRestore());
 describe("Lumis browser bundle", () => {
   it("registers the full catalog without eagerly compiling every parser", async () => {
     const highlighter = await clientHighlighterPromise;
-    expect(highlighter.registeredLanguages).toEqual(expect.arrayContaining(Object.keys(full)));
+    expect(highlighter.registeredLanguages).toEqual(
+      expect.arrayContaining([
+        ...Object.keys(full),
+        ...extraLanguages.map((language) => language.id),
+      ]),
+    );
     expect(highlighter.languages).not.toContain("python");
   });
 
@@ -36,6 +42,8 @@ describe("Lumis browser bundle", () => {
     ["cmake", "project(supagist)"],
     ["elixir", 'IO.puts("hello")'],
     ["markdown", "**bold**"],
+    // Left out of wasm-bundle-full 0.2; registered from its own package.
+    ["haskell", 'main = putStrLn "hello"'],
   ])("highlights %s with the installed parser", async (language, code) => {
     const highlighter = await clientHighlighterPromise;
     await highlighter.loadLanguage(language);

@@ -1,6 +1,7 @@
 /* eslint-disable -- Generated third-party code; see vendor-licenses.txt and vendor-manifest.json. */
 // themes/kanagawa_dragon.ts
 var theme = {
+  $schema: "https://lumis.sh/schemas/themes/v1.0.0.json",
   name: "kanagawa_dragon",
   appearance: "dark",
   revision: "bb85e4bfc8d89b0e62c8fa53ccdd13d12e2f77b3",

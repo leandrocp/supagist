@@ -1,6 +1,7 @@
 /* eslint-disable -- Generated third-party code; see vendor-licenses.txt and vendor-manifest.json. */
 // themes/vesper.ts
 var theme = {
+  $schema: "https://lumis.sh/schemas/themes/v1.0.0.json",
   name: "vesper",
   appearance: "dark",
   revision: "1717b1ad657c94bec3fc2bdebb0c55452d9fe46d",

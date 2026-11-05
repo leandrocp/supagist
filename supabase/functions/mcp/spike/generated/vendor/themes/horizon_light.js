@@ -1,6 +1,7 @@
 /* eslint-disable -- Generated third-party code; see vendor-licenses.txt and vendor-manifest.json. */
 // themes/horizon_light.ts
 var theme = {
+  $schema: "https://lumis.sh/schemas/themes/v1.0.0.json",
   name: "horizon_light",
   appearance: "light",
   revision: "b4d7b1e7c3aa77aea31b9ced8960e49fd8682c47",

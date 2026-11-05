@@ -1,6 +1,7 @@
 /* eslint-disable -- Generated third-party code; see vendor-licenses.txt and vendor-manifest.json. */
 // themes/deepwhite.ts
 var theme = {
+  $schema: "https://lumis.sh/schemas/themes/v1.0.0.json",
   name: "deepwhite",
   appearance: "light",
   revision: "ccad56bb5eb7d29258980cfc0a716eb87bcad69e",

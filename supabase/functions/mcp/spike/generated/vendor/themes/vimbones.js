@@ -1,6 +1,7 @@
 /* eslint-disable -- Generated third-party code; see vendor-licenses.txt and vendor-manifest.json. */
 // themes/vimbones.ts
 var theme = {
+  $schema: "https://lumis.sh/schemas/themes/v1.0.0.json",
   name: "vimbones",
   appearance: "light",
   revision: "8304d8df9b823ff11e103afa62f38c39f534abe6",

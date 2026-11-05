@@ -1,6 +1,7 @@
 /* eslint-disable -- Generated third-party code; see vendor-licenses.txt and vendor-manifest.json. */
 // themes/oldworld.ts
 var theme = {
+  $schema: "https://lumis.sh/schemas/themes/v1.0.0.json",
   name: "oldworld",
   appearance: "dark",
   revision: "db072a0bd2c90035fc3a57a73014cb54d3902f1f",

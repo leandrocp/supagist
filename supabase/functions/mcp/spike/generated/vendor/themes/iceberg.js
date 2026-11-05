@@ -1,6 +1,7 @@
 /* eslint-disable -- Generated third-party code; see vendor-licenses.txt and vendor-manifest.json. */
 // themes/iceberg.ts
 var theme = {
+  $schema: "https://lumis.sh/schemas/themes/v1.0.0.json",
   name: "iceberg",
   appearance: "dark",
   revision: "23835d5ed696436f716cbfdb56a93a7850fe3b18",

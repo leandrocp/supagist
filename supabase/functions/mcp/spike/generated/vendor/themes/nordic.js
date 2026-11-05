@@ -1,6 +1,7 @@
 /* eslint-disable -- Generated third-party code; see vendor-licenses.txt and vendor-manifest.json. */
 // themes/nordic.ts
 var theme = {
+  $schema: "https://lumis.sh/schemas/themes/v1.0.0.json",
   name: "nordic",
   appearance: "dark",
   revision: "9fb62116b891184049c50ca6ffb0d3bc100a1a6e",

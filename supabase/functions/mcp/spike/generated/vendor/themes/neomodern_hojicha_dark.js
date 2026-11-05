@@ -1,6 +1,7 @@
 /* eslint-disable -- Generated third-party code; see vendor-licenses.txt and vendor-manifest.json. */
 // themes/neomodern_hojicha_dark.ts
 var theme = {
+  $schema: "https://lumis.sh/schemas/themes/v1.0.0.json",
   name: "neomodern_hojicha_dark",
   appearance: "dark",
   revision: "d41469578922a23d75a0d9e8deef1e34837230a6",

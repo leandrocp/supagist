@@ -1,6 +1,7 @@
 /* eslint-disable -- Generated third-party code; see vendor-licenses.txt and vendor-manifest.json. */
 // themes/papercolor_light.ts
 var theme = {
+  $schema: "https://lumis.sh/schemas/themes/v1.0.0.json",
   name: "papercolor_light",
   appearance: "light",
   revision: "0cfe64ffb24c21a6101b5f994ca342a74c977aef",

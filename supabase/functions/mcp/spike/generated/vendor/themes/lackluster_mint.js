@@ -1,6 +1,7 @@
 /* eslint-disable -- Generated third-party code; see vendor-licenses.txt and vendor-manifest.json. */
 // themes/lackluster_mint.ts
 var theme = {
+  $schema: "https://lumis.sh/schemas/themes/v1.0.0.json",
   name: "lackluster_mint",
   appearance: "dark",
   revision: "70dd682e564784893b984deb51dd5ddd263c8cc7",

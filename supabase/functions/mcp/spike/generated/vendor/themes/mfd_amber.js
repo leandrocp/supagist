@@ -1,6 +1,7 @@
 /* eslint-disable -- Generated third-party code; see vendor-licenses.txt and vendor-manifest.json. */
 // themes/mfd_amber.ts
 var theme = {
+  $schema: "https://lumis.sh/schemas/themes/v1.0.0.json",
   name: "mfd_amber",
   appearance: "dark",
   revision: "72ae627792960a7e490cb5242a78c570d02ba775",

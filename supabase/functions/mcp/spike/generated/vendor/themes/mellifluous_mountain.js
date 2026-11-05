@@ -1,6 +1,7 @@
 /* eslint-disable -- Generated third-party code; see vendor-licenses.txt and vendor-manifest.json. */
 // themes/mellifluous_mountain.ts
 var theme = {
+  $schema: "https://lumis.sh/schemas/themes/v1.0.0.json",
   name: "mellifluous_mountain",
   appearance: "dark",
   revision: "ec0575bdb63594c5e7fba6eb9607b009aa1fb74e",

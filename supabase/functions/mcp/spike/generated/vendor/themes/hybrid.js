@@ -1,6 +1,7 @@
 /* eslint-disable -- Generated third-party code; see vendor-licenses.txt and vendor-manifest.json. */
 // themes/hybrid.ts
 var theme = {
+  $schema: "https://lumis.sh/schemas/themes/v1.0.0.json",
   name: "hybrid",
   appearance: "dark",
   revision: "0eafd5f0e1223073bdc7c02aedfd85bff029aa5c",
