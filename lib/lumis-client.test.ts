@@ -20,12 +20,10 @@ describe("Lumis browser bundle", () => {
   it("registers the full catalog without eagerly compiling every parser", async () => {
     const highlighter = await clientHighlighterPromise;
     expect(highlighter.registeredLanguages).toEqual(
-      expect.arrayContaining([
-        ...Object.keys(full),
-        ...extraLanguages.map((language) => language.id),
-      ]),
+      expect.arrayContaining([...Object.keys(full), ...Object.keys(extraLanguages)]),
     );
     expect(highlighter.languages).not.toContain("python");
+    expect(highlighter.languages).not.toContain("haskell");
   });
 
   it("ships compatible language exports for every lazy bundle entry", async () => {

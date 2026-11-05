@@ -1,5 +1,5 @@
 import type { NextConfig } from "next";
-import { extraLanguages } from "./lib/lumis-extra-languages";
+import { extraLanguagePackages } from "./lib/lumis-extra-languages";
 
 // Read at request time by lib/snippet-render.ts.
 const SNIPPET_RENDER_FILES = [
@@ -68,7 +68,7 @@ const nextConfig: NextConfig = {
     "@lumis-sh/lumis",
     "@resvg/resvg-js",
     "@lumis-sh/wasm-bundle-full",
-    ...extraLanguages.map((language) => language.packageName),
+    ...extraLanguagePackages,
   ],
   // It also finds the installed @lumis-sh/wasm-* parsers at runtime, from the
   // project directory, which file tracing cannot follow. Without these the

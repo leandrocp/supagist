@@ -133,7 +133,7 @@ const samples: Record<string, [code: string, token: string]> = {
 
 test("parser fixtures cover the full bundle, the extra languages and plaintext", () => {
   expect(Object.keys(samples).sort()).toEqual(
-    [...Object.keys(full), ...extraLanguages.map((language) => language.id), "plaintext"].sort(),
+    [...Object.keys(full), ...Object.keys(extraLanguages), "plaintext"].sort(),
   );
 });
 
