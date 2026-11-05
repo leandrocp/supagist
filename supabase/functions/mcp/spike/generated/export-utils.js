@@ -985,6 +985,87 @@ export function wrapTokenLine(tokens, maxChars) {
  * fetches them from the app; the server passes its own (lib/snippet-render.ts).
  */
 
+/** Where an export put its card, in the SVG's output pixels (its width/height). */
+
+async function exportFontFace(fontId, loadFont) {
+  const exportFont = EXPORT_FONTS.find((f) => f.id === fontId) ?? EXPORT_FONTS[0];
+  const fontFamily = exportFont.file
+    ? `"${exportFont.family}",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace`
+    : exportFont.family;
+  let fontStyleBlock = "";
+  if (exportFont.file) {
+    const b64 = await loadFont(exportFont.file);
+    fontStyleBlock = `<style>@font-face{font-family:'${exportFont.family}';font-style:normal;font-weight:400;src:url('data:font/ttf;base64,${b64}') format('truetype')}</style>`;
+  }
+  return { exportFont, fontFamily, fontStyleBlock };
+}
+
+/**
+ * An export's canvas without its card: the background gradient, brand layers,
+ * scene lighting and pattern. Shared by the export and by the scene a share
+ * image extends an export onto (lib/og-compose-render.ts).
+ */
+function renderCanvasBackdrop(
+  background,
+  totalWidth,
+  totalHeight,
+  viewport,
+  fontFamily,
+  patternDataUrl,
+  extraDefs,
+  rim = true,
+) {
+  const scene = background.scene;
+  const patternMarkup = patternDataUrl
+    ? `<image href="${escapeXml(patternDataUrl)}" xlink:href="${escapeXml(patternDataUrl)}" ` +
+      `x="0" y="0" width="${totalWidth}" height="${totalHeight}" preserveAspectRatio="xMidYMid slice"/>`
+    : "";
+  return (
+    `<defs>` +
+    `<linearGradient id="outerBg" x1="0%" y1="0%" x2="100%" y2="100%">` +
+    `<stop offset="0%" stop-color="${escapeXml(background.from)}"/>` +
+    `<stop offset="100%" stop-color="${escapeXml(background.to)}"/>` +
+    `</linearGradient>` +
+    extraDefs +
+    `</defs>` +
+    `<rect width="${totalWidth}" height="${totalHeight}" fill="url(#outerBg)"/>` +
+    (background.decoration
+      ? renderBrandLayers(background.decoration.layers, viewport, fontFamily)
+      : "") +
+    (scene ? renderBrandCanvasLayers(scene, totalWidth, totalHeight, rim ? viewport : null) : "") +
+    patternMarkup
+  );
+}
+
+/**
+ * The canvas `background` draws behind an export, at `width`×`height` and
+ * with no card: the export's own background redrawn at another size.
+ */
+export async function createExportSceneSvg(background, width, height, fontId, runtime) {
+  const { fontFamily, fontStyleBlock } = await exportFontFace(
+    fontId,
+    runtime?.loadFontBase64 ?? loadFontBase64,
+  );
+  const loadImage = runtime?.loadImageDataUrl ?? loadImageDataUrl;
+  const patternDataUrl = background.patternUrl ? await loadImage(background.patternUrl) : null;
+  return (
+    `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">` +
+    fontStyleBlock +
+    renderCanvasBackdrop(
+      background,
+      width,
+      height,
+      { left: 0, top: 0, width, height },
+      fontFamily,
+      patternDataUrl,
+      background.scene ? renderBrandSceneDefs(background.scene) : "",
+      // The rim outlines an export's edge; a redrawn scene has none.
+      false,
+    ) +
+    `</svg>`
+  );
+}
+
 // height: when provided (e.g. OG image), clips to fit and keeps the passed width.
 //         when undefined, both dimensions are computed from the code content.
 export async function createHighlightedSvg(
@@ -1040,15 +1121,7 @@ export async function createHighlightedSvg(
 
   const commentTokenStyle = { color: editorFg, bold: false, italic: true };
 
-  const exportFont = EXPORT_FONTS.find((f) => f.id === fontId) ?? EXPORT_FONTS[0];
-  const fontFamily = exportFont.file
-    ? `"${exportFont.family}",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace`
-    : exportFont.family;
-  let fontStyleBlock = "";
-  if (exportFont.file) {
-    const b64 = await loadFont(exportFont.file);
-    fontStyleBlock = `<style>@font-face{font-family:'${exportFont.family}';font-style:normal;font-weight:400;src:url('data:font/ttf;base64,${b64}') format('truetype')}</style>`;
-  }
+  const { exportFont, fontFamily, fontStyleBlock } = await exportFontFace(fontId, loadFont);
 
   const innerPaddingPx = normalizeExportInnerPadding(innerPadding);
   const codeFontSize = normalizeExportFontSize(fontSize);
@@ -1532,33 +1605,22 @@ export async function createHighlightedSvg(
         `<feDropShadow dx="0" dy="${dropShadow.y}" stdDeviation="${dropShadow.blur / 2}" flood-color="${escapeXml(dropShadow.color)}" flood-opacity="${dropShadow.opacity}"/>` +
         `</filter>`
       : "";
-  const sceneCanvasLayers = scene
-    ? renderBrandCanvasLayers(scene, totalWidth, totalHeight, viewport)
-    : "";
   const sceneFrame = scene
     ? renderBrandFrame(scene, outerPaddingPx, actualWidth, actualHeight, cardRadius)
     : "";
 
   let bgSection;
   if (background) {
-    const patternMarkup = patternDataUrl
-      ? `<image href="${escapeXml(patternDataUrl)}" xlink:href="${escapeXml(patternDataUrl)}" ` +
-        `x="0" y="0" width="${totalWidth}" height="${totalHeight}" preserveAspectRatio="xMidYMid slice"/>`
-      : "";
     bgSection =
-      `<defs>` +
-      `<linearGradient id="outerBg" x1="0%" y1="0%" x2="100%" y2="100%">` +
-      `<stop offset="0%" stop-color="${escapeXml(background.from)}"/>` +
-      `<stop offset="100%" stop-color="${escapeXml(background.to)}"/>` +
-      `</linearGradient>` +
-      sceneDefs +
-      `</defs>` +
-      `<rect width="${totalWidth}" height="${totalHeight}" fill="url(#outerBg)"/>` +
-      (background.decoration
-        ? renderBrandLayers(background.decoration.layers, viewport, fontFamily)
-        : "") +
-      sceneCanvasLayers +
-      patternMarkup +
+      renderCanvasBackdrop(
+        background,
+        totalWidth,
+        totalHeight,
+        viewport,
+        fontFamily,
+        patternDataUrl,
+        sceneDefs,
+      ) +
       brandDecoration +
       cardRect +
       sceneFrame;
@@ -1766,8 +1828,25 @@ export async function createHighlightedSvg(
     `</rdf:RDF>` +
     `</metadata>`;
 
+  const svgWidth = aspectRatio ? EXPORT_CANVAS_16_9.width : totalWidth;
+  const svgHeight = aspectRatio ? EXPORT_CANVAS_16_9.height : totalHeight;
+  if (runtime?.onLayout) {
+    const k = svgWidth / viewport.width;
+    runtime.onLayout({
+      width: svgWidth,
+      height: svgHeight,
+      card: {
+        left: (outerPaddingPx - viewport.left) * k,
+        top: (outerPaddingPx - viewport.top) * k,
+        width: actualWidth * k,
+        height: actualHeight * k,
+      },
+      codeFontPx: codeFontSize * k,
+    });
+  }
+
   return (
-    `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${aspectRatio ? EXPORT_CANVAS_16_9.width : totalWidth}" height="${aspectRatio ? EXPORT_CANVAS_16_9.height : totalHeight}" viewBox="${viewport.left} ${viewport.top} ${viewport.width} ${viewport.height}">` +
+    `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${svgWidth}" height="${svgHeight}" viewBox="${viewport.left} ${viewport.top} ${viewport.width} ${viewport.height}">` +
     metadataMarkup +
     fontStyleBlock +
     avatarPatternsBlock +
@@ -1911,7 +1990,7 @@ function renderBrandCanvasLayers(
   scene,
   totalWidth,
   totalHeight,
-  /** Visible canvas area; the rim outlines it rather than the padded canvas. */
+  /** Visible canvas area; the rim outlines it rather than the padded canvas. Null: no rim. */
   rim,
 ) {
   const glowLayers = scene.glows
@@ -1923,7 +2002,9 @@ function renderBrandCanvasLayers(
   return (
     glowLayers +
     `<rect data-scene-layer="vignette" width="${totalWidth}" height="${totalHeight}" fill="url(#brand-vignette)"/>` +
-    `<rect data-scene-layer="canvas-rim" x="${rim.left + 0.5}" y="${rim.top + 0.5}" width="${Math.max(0, rim.width - 1)}" height="${Math.max(0, rim.height - 1)}" rx="${scene.canvasRadius}" ry="${scene.canvasRadius}" fill="none" stroke="${escapeXml(scene.canvasBorder)}" stroke-width="1"/>`
+    (rim
+      ? `<rect data-scene-layer="canvas-rim" x="${rim.left + 0.5}" y="${rim.top + 0.5}" width="${Math.max(0, rim.width - 1)}" height="${Math.max(0, rim.height - 1)}" rx="${scene.canvasRadius}" ry="${scene.canvasRadius}" fill="none" stroke="${escapeXml(scene.canvasBorder)}" stroke-width="1"/>`
+      : "")
   );
 }
 

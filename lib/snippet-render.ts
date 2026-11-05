@@ -1,7 +1,14 @@
 import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
-import { createHighlightedSvg, EXPORT_WIDTH, type ExportRuntime } from "@/lib/export-utils";
+import {
+  createExportSceneSvg,
+  createHighlightedSvg,
+  EXPORT_WIDTH,
+  type ExportAspectRatio,
+  type ExportLayout,
+  type ExportRuntime,
+} from "@/lib/export-utils";
 import { rasterizeSvg } from "@/lib/render-api";
 import { findExportBackground, parseSnippetAppearance } from "@/lib/snippet-appearance";
 import parsers from "@/supabase/functions/mcp/spike/generated/parser-packages.json";
@@ -96,6 +103,18 @@ const runtime: ExportRuntime = {
   },
 };
 
+/** resvg reads TTF, not woff2, and needs the emoji face embedded. */
+async function forResvg(svg: string): Promise<string> {
+  emojiFace ??= readFile(EMOJI_FONT).then(
+    (bytes) =>
+      `@font-face{font-family:'Noto Emoji';src:url('data:font/ttf;base64,${bytes.toString("base64")}') format('truetype')}`,
+  );
+  return svg
+    .replace("data:font/woff2;base64,", "data:font/ttf;base64,")
+    .replace("format('woff2')", "format('truetype')")
+    .replace("</style>", `${await emojiFace}</style>`);
+}
+
 /**
  * The full canonical render with its canvas, as Save as PNG draws it, at
  * `pixelRatio` (2× by default).
@@ -104,8 +123,22 @@ export async function renderSnippetPng(
   snippet: RenderableSnippet,
   { pixelRatio = 2 }: { pixelRatio?: number } = {},
 ): Promise<Uint8Array> {
+  const { svg } = await renderSnippetSvg(snippet);
+  const { png } = await rasterizeSvg(svg, pixelRatio);
+  return new Uint8Array(png);
+}
+
+/**
+ * The export as resvg-ready SVG, with where its card is. `aspectRatio`
+ * overrides the stored one (the share image asks for the 16:9 render).
+ */
+export async function renderSnippetSvg(
+  snippet: RenderableSnippet,
+  options: { aspectRatio?: ExportAspectRatio | null } = {},
+): Promise<{ svg: string; layout: ExportLayout }> {
   const appearance = parseSnippetAppearance(snippet.appearance);
   const background = findExportBackground(appearance.background);
+  let layout: ExportLayout | null = null;
   const svg = await createHighlightedSvg(
     snippet.code,
     snippet.filename,
@@ -135,18 +168,24 @@ export async function renderSnippetPng(
     appearance.footer,
     appearance.fontSize,
     false,
-    appearance.aspectRatio,
+    options.aspectRatio === undefined ? appearance.aspectRatio : options.aspectRatio,
     appearance.ligatures,
-    runtime,
+    { ...runtime, onLayout: (value) => (layout = value) },
   );
-  emojiFace ??= readFile(EMOJI_FONT).then(
-    (bytes) =>
-      `@font-face{font-family:'Noto Emoji';src:url('data:font/ttf;base64,${bytes.toString("base64")}') format('truetype')}`,
-  );
-  const ttf = svg
-    .replace("data:font/woff2;base64,", "data:font/ttf;base64,")
-    .replace("format('woff2')", "format('truetype')")
-    .replace("</style>", `${await emojiFace}</style>`);
-  const { png } = await rasterizeSvg(ttf, pixelRatio);
-  return new Uint8Array(png);
+  return { svg: await forResvg(svg), layout: layout! };
+}
+
+/**
+ * The snippet's background (its canvas with no card) at `width`×`height`,
+ * resvg-ready; null when the snippet has no background.
+ */
+export async function renderSnippetSceneSvg(
+  snippet: Pick<RenderableSnippet, "appearance" | "font_id">,
+  width: number,
+  height: number,
+): Promise<string | null> {
+  const background = findExportBackground(parseSnippetAppearance(snippet.appearance).background);
+  if (!background) return null;
+  const fontId = snippet.font_id === "system" ? "jetbrains" : snippet.font_id;
+  return forResvg(await createExportSceneSvg(background, width, height, fontId, runtime));
 }
