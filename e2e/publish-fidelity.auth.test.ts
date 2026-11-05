@@ -47,9 +47,14 @@ async function look(page: Page) {
   // The composer highlights after its WASM loads; wait for the theme colour.
   await expect(keyword).toHaveAttribute("style", /color/);
   // The composer canvas transitions its padding; measure where it settles.
-  await page.evaluate(() =>
-    Promise.all(document.getAnimations().map((animation) => animation.finished)),
-  );
+  // Only the card's own animations: the home hero loops forever.
+  await page.evaluate(() => {
+    const card = document.querySelector('[data-testid="snippet-card"]')!;
+    const root = card.closest('[data-testid="snippet-canvas"]') ?? card;
+    return Promise.all(
+      root.getAnimations({ subtree: true }).map((animation) => animation.finished),
+    );
+  });
   return page.evaluate(() => {
     const card = document.querySelector<HTMLElement>('[data-testid="snippet-card"]')!;
     const canvas = document.querySelector<HTMLElement>('[data-testid="snippet-canvas"]');
