@@ -100,7 +100,7 @@ import { publishSnippet } from "@/app/actions/publish";
 import { createDraftPng, createDraftSvg, createSnippetImages } from "@/lib/snippet-images";
 import { WINDOW_DECORATIONS, parseSnippetAppearance } from "@/lib/snippet-appearance";
 import { toast } from "sonner";
-import { markJustPublished, play } from "@/lib/motion";
+import { EDIT_HINT_KEY, markJustPublished, play, pressIntroSeal } from "@/lib/motion";
 import { ClipboardType, FileImage, FileText } from "lucide-react";
 import { copyRichText, createRichTextClipboard } from "@/lib/rich-text-export";
 
@@ -242,6 +242,8 @@ export function HomeComposer({ full = false }: HomeComposerProps) {
   const [backgroundQuery, setBackgroundQuery] = useState("");
   const [exportMenuOpen, setExportMenuOpen] = useState(false);
   const [showAuthBanner, setShowAuthBanner] = useState(false);
+  // The home card's "click and type" hint, until the visitor first edits it.
+  const [hintSeen, setHintSeen] = useState(false);
   const authBannerTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const effectiveViewerLabel = getEffectiveViewerLabel(viewerLabel, DEV_MODE);
 
@@ -305,6 +307,7 @@ export function HomeComposer({ full = false }: HomeComposerProps) {
       }
     }
 
+    setHintSeen(window.localStorage.getItem(EDIT_HINT_KEY) !== null);
     setIsHydrated(true);
   }, []);
 
@@ -396,6 +399,40 @@ export function HomeComposer({ full = false }: HomeComposerProps) {
       easing: "ease-out",
     });
   }, [previewLook]);
+  // Editor first: on desktop the home card opens focused, caret at the end,
+  // once the lazily loaded editor mounts. Phones skip it (no keyboard pop).
+  useEffect(() => {
+    const canvas = previewCanvasRef.current;
+    if (full || !canvas || !window.matchMedia?.("(min-width: 1024px)").matches) return;
+    const focus = () => {
+      const textarea = canvas.querySelector("textarea");
+      if (!textarea) return false;
+      if (document.activeElement === document.body) {
+        textarea.focus({ preventScroll: true });
+        textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+      }
+      return true;
+    };
+    if (focus()) return;
+    const observer = new MutationObserver(() => focus() && observer.disconnect());
+    observer.observe(canvas, { childList: true, subtree: true });
+    return () => observer.disconnect();
+  }, [full]);
+
+  // The first edit or paste presses the intro seal and retires the hint.
+  const edited = useRef(false);
+  const handleFirstEdit = (event: React.SyntheticEvent) => {
+    if (full || edited.current || !(event.target instanceof HTMLTextAreaElement)) return;
+    edited.current = true;
+    pressIntroSeal();
+    setHintSeen(true);
+    try {
+      window.localStorage.setItem(EDIT_HINT_KEY, "1");
+    } catch {
+      // The hint just shows again next visit.
+    }
+  };
+
   const outerCanvasPadding = selectedBackground ? draft.outerPadding : 0;
   const exportReactions = useMemo(
     () =>
@@ -704,6 +741,123 @@ export function HomeComposer({ full = false }: HomeComposerProps) {
       </div>
     ) : null;
 
+  const actionButtons = (
+    <ButtonGroup className="grid w-full grid-cols-2 gap-3 font-sans sm:flex sm:w-auto [&>*]:rounded-full!">
+      <Popover open={exportMenuOpen} onOpenChange={setExportMenuOpen}>
+        <PopoverTrigger asChild>
+          <Button variant="outline" disabled={busy} className={actionButtonClass}>
+            {isExporting ? (
+              <Spinner data-icon="inline-start" />
+            ) : exported ? (
+              <Check data-icon="inline-start" className="pop-in" />
+            ) : (
+              <Download data-icon="inline-start" />
+            )}
+            Export
+            <ChevronDown data-icon="inline-end" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent
+          side="top"
+          align="end"
+          className="w-64 border-border bg-popover p-2 text-popover-foreground"
+        >
+          <div className="flex flex-col gap-1">
+            <Button variant="ghost" disabled={busy} onClick={handleCopy} className={menuItemClass}>
+              {copied ? (
+                <Check data-icon="inline-start" className="pop-in" />
+              ) : (
+                <Copy data-icon="inline-start" />
+              )}
+              {copied ? "Copied" : "Copy code"}
+            </Button>
+            <Button
+              variant="ghost"
+              disabled={busy}
+              onClick={() => void handleExportPng()}
+              className={menuItemClass}
+            >
+              <Download data-icon="inline-start" />
+              PNG image
+            </Button>
+            <Button
+              variant="ghost"
+              disabled={busy}
+              onClick={() => void handleExportSvg()}
+              className={menuItemClass}
+            >
+              <FileImage data-icon="inline-start" />
+              SVG image
+            </Button>
+            <Button
+              variant="ghost"
+              disabled={busy}
+              onClick={handleDownloadRaw}
+              className={menuItemClass}
+            >
+              <FileText data-icon="inline-start" />
+              Source file
+            </Button>
+            <Button
+              variant="ghost"
+              disabled={busy}
+              onClick={handleCopyRichText}
+              className={menuItemClass}
+            >
+              <ClipboardType data-icon="inline-start" />
+              Copy as rich text
+            </Button>
+          </div>
+        </PopoverContent>
+      </Popover>
+      {/* Publish, split like GitHub's "Create gist": the menu picks
+                public or private first. */}
+      <ButtonGroup className="w-full sm:w-auto">
+        <Button
+          disabled={busy || (Boolean(effectiveViewerLabel) && isOverLimit)}
+          onClick={handlePublish}
+          className="h-11 flex-1 pr-4 pl-6"
+        >
+          {isPublishing ? (
+            <Spinner data-icon="inline-start" />
+          ) : visibility === "private" ? (
+            <Lock data-icon="inline-start" />
+          ) : (
+            <Upload data-icon="inline-start" />
+          )}
+          {visibility === "private" ? "Publish private" : "Publish"}
+        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              disabled={busy}
+              aria-label="Choose who can see it"
+              className="h-11 w-11 border-l border-primary-foreground/20"
+            >
+              <ChevronDown />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent side="top" align="end" className="w-72">
+            <DropdownMenuLabel>Who can see it</DropdownMenuLabel>
+            <DropdownMenuRadioGroup
+              value={visibility}
+              onValueChange={(value) => setVisibility(value as SnippetVisibility)}
+            >
+              {SNIPPET_VISIBILITIES.map(({ id, label, hint }) => (
+                <DropdownMenuRadioItem key={id} value={id}>
+                  <span className="flex flex-col gap-0.5">
+                    <span className="font-medium">{label}</span>
+                    <span className="text-xs text-muted-foreground">{hint}</span>
+                  </span>
+                </DropdownMenuRadioItem>
+              ))}
+            </DropdownMenuRadioGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </ButtonGroup>
+    </ButtonGroup>
+  );
+
   return (
     <section
       data-testid="composer-shell"
@@ -720,11 +874,13 @@ export function HomeComposer({ full = false }: HomeComposerProps) {
       >
         <div
           data-testid="preview-pane"
+          onInput={handleFirstEdit}
+          onPaste={handleFirstEdit}
           className={cn(
-            "relative flex min-h-[clamp(13rem,34dvh,22rem)] flex-col items-center justify-center overflow-auto",
+            "relative flex flex-col items-center justify-center overflow-auto",
             full
-              ? "lg:col-start-1 lg:row-start-1 lg:min-h-0"
-              : "rounded-2xl md:bg-surf2/60 md:p-8 lg:max-h-[min(72dvh,46rem)]",
+              ? "min-h-[clamp(13rem,34dvh,22rem)] lg:col-start-1 lg:row-start-1 lg:min-h-0"
+              : "min-h-[250px] rounded-2xl p-1.5 md:min-h-[300px] md:bg-surf2/60 md:px-8 md:pt-7 md:pb-9 lg:max-h-[min(72dvh,46rem)]",
           )}
         >
           {showAuthBanner ? (
@@ -752,15 +908,36 @@ export function HomeComposer({ full = false }: HomeComposerProps) {
             </div>
           ) : null}
 
+          {!full ? (
+            <p
+              data-testid="edit-hint"
+              aria-hidden={hintSeen}
+              className={cn(
+                "mb-[18px] flex items-center gap-2.5 text-sm font-medium text-muted-foreground transition-opacity duration-300",
+                hintSeen && "opacity-0",
+              )}
+            >
+              <span className="max-md:hidden">Click the card and type, or paste your code</span>
+              <span className="md:hidden">Tap the card to type or paste your code</span>
+              <kbd className="rounded-md bg-background px-1.5 py-0.5 font-mono text-xs text-foreground max-md:hidden">
+                ⌘V
+              </kbd>
+            </p>
+          ) : null}
+
           <div
             ref={previewCanvasRef}
             data-testid={selectedBackground ? "snippet-canvas" : undefined}
             data-background={selectedBackground?.label}
+            data-invite={!full && !hintSeen ? "" : undefined}
             className={cn(
               "relative isolate box-border max-w-full overflow-hidden rounded-sm transition-all",
+              !full && "composer-card",
             )}
             style={
               {
+                // The focus ring follows the card's corners when there is no canvas.
+                ...(!full && !selectedBackground ? { borderRadius: draft.cornerRadius } : {}),
                 ...canvasStyle,
                 ...previewAspectStyle,
                 "--preview-outer-padding": previewCanvasPadding,
@@ -825,6 +1002,18 @@ export function HomeComposer({ full = false }: HomeComposerProps) {
               footer={previewFooter}
             />
           </div>
+
+          {!full ? (
+            <p
+              data-testid="composer-counts"
+              className="mt-3 self-end font-mono text-xs text-muted-foreground md:absolute md:right-5 md:bottom-3.5 md:mt-0"
+            >
+              {lineCount} lines ·{" "}
+              <span className={cn(isOverLimit && "font-medium text-destructive")}>
+                {charCount.toLocaleString()} / 8,000 characters
+              </span>
+            </p>
+          ) : null}
         </div>
 
         <div
@@ -844,8 +1033,10 @@ export function HomeComposer({ full = false }: HomeComposerProps) {
 
               <div
                 className={cn(
-                  "grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2",
-                  !full && "lg:grid-cols-[repeat(4,minmax(0,1fr))_auto] lg:items-end",
+                  "grid min-w-0 gap-4",
+                  full
+                    ? "grid-cols-1 sm:grid-cols-2"
+                    : "grid-cols-2 items-end sm:grid-cols-3 lg:grid-cols-[220px_auto_190px_auto_1fr_auto]",
                 )}
               >
                 <div className="flex min-w-0 flex-col gap-1">
@@ -856,7 +1047,7 @@ export function HomeComposer({ full = false }: HomeComposerProps) {
                   />
                 </div>
 
-                <div className="flex min-w-0 flex-col gap-1">
+                <div className={cn("flex min-w-0 flex-col gap-1", !full && "lg:w-[220px]")}>
                   <span className={panelLabelClass}>Theme</span>
                   <div className="flex h-11 items-center gap-2 text-foreground">
                     <ThemePicker
@@ -1015,16 +1206,20 @@ export function HomeComposer({ full = false }: HomeComposerProps) {
                 ) : null}
 
                 {!full ? (
-                  <Button
-                    asChild
-                    variant="outline"
-                    className="h-11 px-5 sm:col-span-full lg:col-auto"
-                  >
-                    <Link href="/compose">
-                      <SlidersHorizontal data-icon="inline-start" />
-                      All options
-                    </Link>
-                  </Button>
+                  <>
+                    <Button asChild variant="outline" className="h-11 px-5">
+                      <Link href="/compose">
+                        <SlidersHorizontal data-icon="inline-start" />
+                        All options
+                      </Link>
+                    </Button>
+                    <div
+                      data-testid="composer-actions"
+                      className="col-span-2 sm:justify-self-end lg:col-span-1 lg:col-start-6"
+                    >
+                      {actionButtons}
+                    </div>
+                  </>
                 ) : (
                   <div className="col-span-full pt-2">
                     <div className="flex flex-col gap-4">
@@ -1481,149 +1676,30 @@ export function HomeComposer({ full = false }: HomeComposerProps) {
           </ScrollArea>
         </div>
 
-        <div
-          data-testid="composer-actions"
-          className={cn(
-            "flex min-w-0 shrink-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between",
-            full && "lg:col-start-1 lg:row-start-2",
-          )}
-        >
-          <div className="flex min-w-0 flex-wrap items-center gap-x-5 gap-y-1 font-mono text-[13px] text-muted-foreground">
-            <span className="hidden lg:inline">Export or publish</span>
-            <div className="contents">
-              <span className="font-mono">
-                {draft.aspectRatio
-                  ? `${EXPORT_CANVAS_16_9.width} × ${EXPORT_CANVAS_16_9.height}`
-                  : `${exportDimensions.width} × ${exportDimensions.height}`}
-                px
-              </span>
-              <span className="font-mono">{lineCount} lines</span>
-              <span className={cn("font-mono", isOverLimit && "font-medium text-destructive")}>
-                {charCount.toLocaleString()} / 8,000 characters
-              </span>
+        {full ? (
+          <div
+            data-testid="composer-actions"
+            className="flex min-w-0 shrink-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between lg:col-start-1 lg:row-start-2"
+          >
+            <div className="flex min-w-0 flex-wrap items-center gap-x-5 gap-y-1 font-mono text-[13px] text-muted-foreground">
+              <span className="hidden lg:inline">Export or publish</span>
+              <div className="contents">
+                <span className="font-mono">
+                  {draft.aspectRatio
+                    ? `${EXPORT_CANVAS_16_9.width} × ${EXPORT_CANVAS_16_9.height}`
+                    : `${exportDimensions.width} × ${exportDimensions.height}`}
+                  px
+                </span>
+                <span className="font-mono">{lineCount} lines</span>
+                <span className={cn("font-mono", isOverLimit && "font-medium text-destructive")}>
+                  {charCount.toLocaleString()} / 8,000 characters
+                </span>
+              </div>
             </div>
-          </div>
 
-          <ButtonGroup className="grid w-full grid-cols-2 gap-3 font-sans sm:flex sm:w-auto [&>*]:rounded-full!">
-            <Popover open={exportMenuOpen} onOpenChange={setExportMenuOpen}>
-              <PopoverTrigger asChild>
-                <Button variant="outline" disabled={busy} className={actionButtonClass}>
-                  {isExporting ? (
-                    <Spinner data-icon="inline-start" />
-                  ) : exported ? (
-                    <Check data-icon="inline-start" className="pop-in" />
-                  ) : (
-                    <Download data-icon="inline-start" />
-                  )}
-                  Export
-                  <ChevronDown data-icon="inline-end" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent
-                side="top"
-                align="end"
-                className="w-64 border-border bg-popover p-2 text-popover-foreground"
-              >
-                <div className="flex flex-col gap-1">
-                  <Button
-                    variant="ghost"
-                    disabled={busy}
-                    onClick={handleCopy}
-                    className={menuItemClass}
-                  >
-                    {copied ? (
-                      <Check data-icon="inline-start" className="pop-in" />
-                    ) : (
-                      <Copy data-icon="inline-start" />
-                    )}
-                    {copied ? "Copied" : "Copy code"}
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    disabled={busy}
-                    onClick={() => void handleExportPng()}
-                    className={menuItemClass}
-                  >
-                    <Download data-icon="inline-start" />
-                    PNG image
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    disabled={busy}
-                    onClick={() => void handleExportSvg()}
-                    className={menuItemClass}
-                  >
-                    <FileImage data-icon="inline-start" />
-                    SVG image
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    disabled={busy}
-                    onClick={handleDownloadRaw}
-                    className={menuItemClass}
-                  >
-                    <FileText data-icon="inline-start" />
-                    Source file
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    disabled={busy}
-                    onClick={handleCopyRichText}
-                    className={menuItemClass}
-                  >
-                    <ClipboardType data-icon="inline-start" />
-                    Copy as rich text
-                  </Button>
-                </div>
-              </PopoverContent>
-            </Popover>
-            {/* Publish, split like GitHub's "Create gist": the menu picks
-                public or private first. */}
-            <ButtonGroup className="w-full sm:w-auto">
-              <Button
-                disabled={busy || (Boolean(effectiveViewerLabel) && isOverLimit)}
-                onClick={handlePublish}
-                className="h-11 flex-1 pr-4 pl-6"
-              >
-                {isPublishing ? (
-                  <Spinner data-icon="inline-start" />
-                ) : visibility === "private" ? (
-                  <Lock data-icon="inline-start" />
-                ) : (
-                  <Upload data-icon="inline-start" />
-                )}
-                {visibility === "private" ? "Publish private" : "Publish"}
-              </Button>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    disabled={busy}
-                    aria-label="Choose who can see it"
-                    className="h-11 w-11 border-l border-primary-foreground/20"
-                  >
-                    <ChevronDown />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent side="top" align="end" className="w-72">
-                  <DropdownMenuLabel>Who can see it</DropdownMenuLabel>
-                  <DropdownMenuRadioGroup
-                    value={visibility}
-                    onValueChange={(value) => setVisibility(value as SnippetVisibility)}
-                  >
-                    {SNIPPET_VISIBILITIES.map(({ id, label, hint }) => (
-                      <DropdownMenuRadioItem key={id} value={id}>
-                        <span className="flex flex-col gap-0.5">
-                          <span className="font-medium">{label}</span>
-                          <span className="text-xs text-muted-foreground">{hint}</span>
-                        </span>
-                      </DropdownMenuRadioItem>
-                    ))}
-                  </DropdownMenuRadioGroup>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </ButtonGroup>
-          </ButtonGroup>
-        </div>
+            {actionButtons}
+          </div>
+        ) : null}
       </div>
     </section>
   );

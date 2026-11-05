@@ -69,6 +69,28 @@ export function takeJustPublished(path: string, now = Date.now()): JustPublished
   return { path: marker.path, copied: marker.copied === true };
 }
 
+/** sessionStorage: the home intro envelope has played in this session. */
+export const INTRO_PLAYED_KEY = "sg-intro-played";
+/** sessionStorage: the first edit has pressed the intro seal in this session. */
+export const FIRST_PRESS_KEY = "sg-first-press";
+/** localStorage: the visitor has edited the card, so the "type here" hint is done. */
+export const EDIT_HINT_KEY = "seenEditHint";
+
+/**
+ * The first edit or paste of the session presses the home intro's seal: "your
+ * snippet is being sealed". The attribute stays set; removing it would replay
+ * the stamp-in. Reduced motion is handled in CSS (nothing moves).
+ */
+export function pressIntroSeal(): void {
+  try {
+    if (window.sessionStorage.getItem(FIRST_PRESS_KEY)) return;
+    window.sessionStorage.setItem(FIRST_PRESS_KEY, "1");
+  } catch {
+    return;
+  }
+  document.querySelector(".intro-env")?.setAttribute("data-pressed", "");
+}
+
 export function prefersReducedMotion(): boolean {
   return (
     typeof window !== "undefined" &&

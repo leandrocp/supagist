@@ -41,16 +41,20 @@ describe("Home", () => {
     expect(footer.textContent).not.toContain("Backgrounds by ray.so");
   });
 
-  it("headlines the hero with Code worth sharing", () => {
+  it("opens editor first: a one-line headline, the intro envelope and no extra call to action", () => {
     render(<Home />);
-    expect(screen.getByRole("heading", { level: 1 }).textContent).toBe("Code worthsharing.");
+    expect(screen.getByRole("heading", { level: 1 }).textContent).toBe("Code worth sharing.");
+    expect(screen.getByTestId("intro-envelope").getAttribute("aria-hidden")).toBe("true");
+    // The card is the call to action; the big looping envelope is gone.
+    expect(screen.queryByRole("link", { name: "Create a snippet" })).toBeNull();
+    expect(screen.queryByTestId("hero-envelope")).toBeNull();
   });
 
-  it("sends both agent skill links to the on-site /agents quickstart", () => {
+  it("sends both agent links to the on-site /agents quickstart", () => {
     render(<Home />);
     const links = [
       screen.getByRole("link", { name: /get the skill/i }),
-      screen.getByRole("link", { name: /get the agent skill/i }),
+      screen.getByRole("link", { name: /render it from your agent/i }),
     ];
     for (const link of links) {
       expect(link.getAttribute("href")).toBe("/agents");

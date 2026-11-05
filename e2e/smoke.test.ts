@@ -9,11 +9,11 @@ test("home page loads and shows the supagist brand", async ({ page }) => {
 });
 
 test("agent skill stays discoverable and reachable across viewport sizes", async ({ page }) => {
-  // site/v1: a strip above the nav from md up, and the hero's secondary
-  // action at every width.
+  // site/v1: a strip above the nav from md up, and the intro's inline link
+  // at every width.
   await page.goto("/");
   const strip = page.getByRole("complementary", { name: "Supagist agent skill" });
-  const link = page.getByRole("link", { name: /agent skill/i });
+  const link = page.getByRole("link", { name: /render it from your agent/i });
   await expect(link).toHaveAttribute("href", "/agents");
   for (const width of [375, 768, 1280]) {
     await page.setViewportSize({ width, height: 812 });

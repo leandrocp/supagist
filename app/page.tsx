@@ -1,9 +1,8 @@
 import type { CSSProperties } from "react";
 import { AppNav } from "@/components/app-nav";
-import { HeroEnvelope } from "@/components/brand/hero-envelope";
+import { IntroEnvelope } from "@/components/brand/intro-envelope";
 import { HomeComposer } from "@/components/home-composer";
 import { SiteFooter } from "@/components/site-footer";
-import { Button } from "@/components/ui/button";
 import { ArrowRight, Terminal } from "lucide-react";
 import Link from "next/link";
 
@@ -28,56 +27,45 @@ export default function Home() {
         </Link>
       </aside>
 
-      <AppNav showPresence />
+      <AppNav showPresence className="mx-auto w-full max-w-[1296px]" />
 
+      {/* Editor first: a short centred intro, then the card itself is the call
+          to action. Nav, intro, editor and controls share one column. */}
       <section
         aria-labelledby="hero-title"
-        className="relative grid items-center gap-8 overflow-x-clip px-5 pt-6 pb-10 md:px-12 lg:grid-cols-[minmax(0,40rem)_minmax(0,1fr)] lg:gap-6 lg:pt-6 lg:pb-12 lg:pl-16"
+        className="mx-auto flex w-full max-w-[1296px] flex-col items-center px-5 pt-4 pb-3 text-center md:px-12 md:pt-6 md:pb-6"
       >
-        <div className="flex flex-col">
-          {/* Light entrance. The h1 only moves (no fade) so its first paint,
-              the page's LCP, is not held back. */}
-          <p className="eyebrow rise-in text-wax-text">Your code, sealed and sent</p>
-          <h1
-            id="hero-title"
-            className="rise mt-4 font-display text-[44px] leading-[0.98] text-foreground md:mt-4 md:text-[72px] xl:text-[88px]"
+        <IntroEnvelope />
+        {/* Light entrance. The h1 only moves (no fade) so its first paint,
+            the page's LCP, is not held back. */}
+        <p className="eyebrow rise-in mt-4 text-wax-text md:mt-[18px]">
+          Your code, sealed and sent
+        </p>
+        <h1
+          id="hero-title"
+          className="rise mt-3 font-display text-[40px] leading-none text-foreground md:mt-4 md:text-[64px]"
+        >
+          Code worth sharing.
+        </h1>
+        <p
+          style={{ "--i": 1 } as CSSProperties}
+          className="rise-in mt-3 max-w-[760px] text-[17px] leading-normal text-muted-foreground md:text-[18px] md:leading-[27px]"
+        >
+          Paste your code into the card, pick a look, and share it. Or{" "}
+          <Link
+            href="/agents"
+            className="rounded-sm py-3 font-semibold whitespace-nowrap text-postal hover:underline focus-visible:focus-ring"
           >
-            Code worth
-            <br />
-            sharing.
-          </h1>
-          <p
-            style={{ "--i": 1 } as CSSProperties}
-            className="rise-in mt-4 max-w-[540px] text-[17px] leading-normal text-muted-foreground md:mt-5 md:text-[20px]"
-          >
-            Turn a snippet into a beautiful, branded card. Seal it, share it, or render it straight
-            from your agent.
-          </p>
-          <div
-            style={{ "--i": 2 } as CSSProperties}
-            className="rise-in mt-6 flex flex-wrap items-center gap-x-[22px] gap-y-3 md:mt-7"
-          >
-            <Button asChild size="lg">
-              <a href="#composer">Create a snippet</a>
-            </Button>
-            <Link
-              href="/agents"
-              className="inline-flex min-h-11 items-center gap-0.5 rounded-full px-1 text-[17px] font-semibold text-postal hover:underline focus-visible:focus-ring"
-            >
-              <span className="md:hidden">Agent skill</span>
-              <span className="hidden md:inline">Get the agent skill</span>
-              <ArrowRight aria-hidden="true" className="size-4" />
-            </Link>
-          </div>
-        </div>
-
-        {/* Envelope B with the real product card laid in front of its lower
-            left, as if it just came out. */}
-        <HeroEnvelope />
+            render it from your agent →
+          </Link>
+        </p>
       </section>
 
-      {/* The composer itself is the page's subject below the fold. */}
-      <section id="composer" aria-label="Create a snippet" className="scroll-mt-4 px-5 md:px-12">
+      <section
+        id="composer"
+        aria-label="Create a snippet"
+        className="mx-auto w-full max-w-[1296px] scroll-mt-4 px-5 md:px-12"
+      >
         <HomeComposer />
       </section>
 

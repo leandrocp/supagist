@@ -57,6 +57,7 @@ vi.mock("next/dynamic", () => ({
           <button type="button" onClick={() => onPickReaction?.(1, "🔥")}>
             Mock add reaction
           </button>
+          <textarea aria-label="Code" />
           {footer ? <div data-testid="preview-footer">{footer}</div> : null}
         </div>
       );
@@ -117,6 +118,8 @@ vi.mock("@/lib/supabase/client", () => ({
 afterEach(() => {
   cleanup();
   window.localStorage.clear();
+  window.sessionStorage.clear();
+  document.querySelector(".intro-env")?.remove();
 });
 
 describe("HomeComposer controls", () => {
@@ -230,6 +233,34 @@ describe("HomeComposer controls", () => {
     fireEvent.click(screen.getByRole("button", { name: "Theme" }));
     expect(screen.getByRole("button", { name: "Brand" }).textContent).toContain("Tailwind");
     expect(screen.getByTestId("snippet-canvas").getAttribute("data-background")).toBe("Tailwind");
+  });
+
+  it("invites the first edit, then presses the intro seal once per session", () => {
+    const envelope = document.body.appendChild(document.createElement("div"));
+    envelope.className = "intro-env";
+    render(<HomeComposer />);
+
+    const hint = screen.getByTestId("edit-hint");
+    expect(hint.textContent).toContain("Click the card and type, or paste your code");
+    expect(hint.className).not.toContain("opacity-0");
+    expect(screen.getByTestId("preview-pane").querySelector("[data-invite]")).not.toBeNull();
+    expect(screen.getByTestId("composer-counts").textContent).toBe(
+      "3 lines · 64 / 8,000 characters",
+    );
+
+    fireEvent.input(screen.getByLabelText("Code"));
+    expect(envelope.hasAttribute("data-pressed")).toBe(true);
+    // The hint fades but keeps its space, so the card does not jump.
+    expect(hint.className).toContain("opacity-0");
+    expect(screen.getByTestId("preview-pane").querySelector("[data-invite]")).toBeNull();
+
+    // Next visit in the same session: no hint, and the seal stays put.
+    cleanup();
+    envelope.removeAttribute("data-pressed");
+    render(<HomeComposer />);
+    expect(screen.getByTestId("edit-hint").className).toContain("opacity-0");
+    fireEvent.paste(screen.getByLabelText("Code"));
+    expect(envelope.hasAttribute("data-pressed")).toBe(false);
   });
 
   it("puts Background in All options, following Brand until one is picked by hand", () => {

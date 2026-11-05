@@ -768,6 +768,129 @@
   animation: hero-crack-right 560ms cubic-bezier(0.4, 0, 0.8, 0.6) both;
 }
 
+/* The home intro's small envelope (IntroEnvelope): Envelope B with the R3
+   seal. Once per session it arrives and the seal stamps in, reusing the
+   hero's seal, ripple and thump; the first edit presses the seal again. No
+   idle loop. Each moving element animates transform and opacity only. */
+@keyframes intro-arrive {
+  from {
+    opacity: 0;
+    transform: translateY(-12px) rotate(-3deg);
+  }
+}
+/* The press reuses the thump under its own name: a CSS animation only
+   restarts when its name changes. */
+@keyframes intro-thump {
+  40% {
+    transform: rotate(-3deg) scale(0.975, 0.96);
+  }
+  70% {
+    transform: rotate(-3deg) scale(1.01);
+  }
+}
+@keyframes intro-press-thump {
+  40% {
+    transform: rotate(-3deg) scale(0.975, 0.96);
+  }
+  70% {
+    transform: rotate(-3deg) scale(1.01);
+  }
+}
+@keyframes intro-press {
+  35% {
+    transform: translateY(1px) scale(0.9, 0.86) rotate(-12deg);
+  }
+  70% {
+    transform: scale(1.05, 1.03) rotate(-9deg);
+  }
+}
+@keyframes intro-press-ripple {
+  0% {
+    opacity: 0.45;
+    transform: scale(0.7);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.9);
+  }
+}
+.intro-env {
+  position: relative;
+  width: 132px;
+  height: 80px;
+  animation: 0.52s cubic-bezier(0.2, 0.7, 0.3, 1) 0.15s backwards intro-arrive;
+}
+.intro-env-body {
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform: rotate(-3deg);
+  box-shadow: 0 14px 24px -12px rgb(74 52 22 / 0.35);
+  animation: 0.38s ease-out 0.74s intro-thump;
+}
+.dark .intro-env-body {
+  box-shadow: 0 14px 24px -12px rgb(0 0 0 / 0.9);
+}
+.intro-env-body img {
+  width: 100%;
+  height: 100%;
+}
+.intro-seal {
+  position: absolute;
+  top: 58%;
+  left: 50%;
+  width: 40px;
+  height: 40px;
+  margin: -20px 0 0 -20px;
+}
+.intro-seal img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform: rotate(-10deg);
+  filter: drop-shadow(0 1px 1.5px rgb(0 0 0 / 0.35));
+  animation: 0.42s cubic-bezier(0.5, 0, 0.7, 1) 0.52s backwards hero-seal;
+}
+.intro-seal-ripple {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px rgb(199 54 43 / 0.55);
+  opacity: 0;
+  animation: 0.7s cubic-bezier(0.2, 0.7, 0.3, 1) 0.77s hero-seal-ripple;
+}
+.intro-env[data-played],
+.intro-env[data-played] * {
+  animation: none;
+}
+.intro-env[data-pressed] .intro-seal img {
+  animation: 0.36s cubic-bezier(0.3, 0, 0.3, 1) intro-press;
+}
+.intro-env[data-pressed] .intro-env-body {
+  animation: 0.32s ease-out 0.04s intro-press-thump;
+}
+.intro-env[data-pressed] .intro-seal-ripple {
+  animation: 0.6s cubic-bezier(0.2, 0.7, 0.3, 1) 0.06s intro-press-ripple;
+}
+
+/* The home composer's card: a postal-blue ring while it is focused, or while
+   it invites the first edit, and a wax caret. Page chrome only: exports are
+   drawn from the draft, never from this element. */
+.composer-card {
+  outline: 2px solid transparent;
+  outline-offset: 3px;
+}
+.composer-card:hover {
+  outline: 1px solid hsl(var(--postal) / 0.4);
+}
+.composer-card:focus-within,
+.composer-card[data-invite] {
+  outline: 2px solid hsl(var(--postal));
+}
+.composer-card textarea {
+  caret-color: hsl(var(--wax)) !important;
+}
+
 /* A soft wash that fades out: a live comment from someone else, a saved edit. */
 @keyframes arrive-glow {
   0% {
@@ -864,6 +987,18 @@
   }
   .reaction-pulse {
     opacity: 0;
+  }
+  /* The intro envelope only fades in; the first edit moves nothing. */
+  .intro-env,
+  .intro-seal img {
+    animation: 0.2s ease-out both fade-in;
+  }
+  .intro-env-body,
+  .intro-seal-ripple,
+  .intro-env[data-pressed] .intro-seal img,
+  .intro-env[data-pressed] .intro-env-body,
+  .intro-env[data-pressed] .intro-seal-ripple {
+    animation: none;
   }
   /* The hero keeps its first frame: no loop runs, and no pointer tilt. */
   .hero-tilt {

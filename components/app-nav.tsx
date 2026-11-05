@@ -8,11 +8,13 @@ import { HomePresence } from "@/components/home-presence";
 import { MobileMenu } from "@/components/mobile-menu";
 import { NavLinks } from "@/components/nav-links";
 import { ThemeSwitcher } from "@/components/theme-switcher";
-import { hasEnvVars } from "@/lib/utils";
+import { cn, hasEnvVars } from "@/lib/utils";
 
 type Props = {
   /** Live lobby presence belongs to the composer, so only the home page asks for it. */
   showPresence?: boolean;
+  /** The home page centres the bar on its content column. */
+  className?: string;
 };
 
 /**
@@ -23,13 +25,16 @@ type Props = {
  *
  * Below md the destinations and the theme choice move into `MobileMenu`.
  */
-export function AppNav({ showPresence = false }: Props) {
+export function AppNav({ showPresence = false, className }: Props) {
   const showEnvWarning = process.env.NODE_ENV === "development" && !hasEnvVars;
 
   return (
     <nav
       data-testid="app-nav"
-      className="flex h-16 shrink-0 items-center justify-between gap-4 px-5 md:h-[76px] md:px-12"
+      className={cn(
+        "flex h-16 shrink-0 items-center justify-between gap-4 px-5 md:h-[76px] md:px-12",
+        className,
+      )}
     >
       <div className="flex shrink-0 items-center gap-[34px]">
         <Link
