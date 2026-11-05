@@ -2,6 +2,8 @@
 
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
+import AgentsPage from "./agents/page";
 import DataHelpPage from "./help/data/page";
 import PrivacyPage from "./privacy/page";
 import TermsPage from "./terms/page";
@@ -48,6 +50,7 @@ describe("legal pages", () => {
     ["terms", TermsPage],
     ["privacy", PrivacyPage],
     ["data help", DataHelpPage],
+    ["agents", AgentsPage],
   ])("%s has a table of contents whose links all land on a heading", (_name, Page) => {
     render(<Page />);
     const toc = screen.getByRole("navigation", { name: "On this page" });
@@ -75,5 +78,23 @@ describe("legal pages", () => {
     render(<PrivacyPage />);
     expect(screen.getByRole("link", { name: "/account" }).getAttribute("href")).toBe("/account");
     expect(screen.queryByText(/do not read, change or delete/)).toBeNull();
+  });
+});
+
+describe("agents quickstart", () => {
+  it("shows the same install and MCP commands as the README", () => {
+    const { container } = render(<AgentsPage />);
+    const blocks = Array.from(container.querySelectorAll("pre")).map((pre) => pre.textContent!);
+    const readme = readFileSync("README.md", "utf8");
+    for (const command of [
+      "npx skills add leandrocp/supagist --skill supagist",
+      "claude mcp add --transport http supagist https://supagist.app/mcp",
+      "codex mcp add supagist --url https://supagist.app/mcp",
+      "amp mcp add supagist https://supagist.app/mcp",
+    ]) {
+      expect(readme, command).toContain(command);
+      expect(blocks.some((block) => block.includes(command)), command).toBe(true);
+    }
+    expect(screen.getByRole("heading", { name: "Try it" })).toBeTruthy();
   });
 });

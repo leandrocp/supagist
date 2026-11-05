@@ -12,11 +12,9 @@ test("agent skill stays discoverable and reachable across viewport sizes", async
   // site/v1: a strip above the nav from md up, and the hero's secondary
   // action at every width.
   await page.goto("/");
-  const SKILL = "https://github.com/leandrocp/supagist#supagist-agent-skill";
   const strip = page.getByRole("complementary", { name: "Supagist agent skill" });
   const link = page.getByRole("link", { name: /agent skill/i });
-  await expect(link).toHaveAttribute("href", SKILL);
-  await expect(link).toHaveAttribute("target", "_blank");
+  await expect(link).toHaveAttribute("href", "/agents");
   for (const width of [375, 768, 1280]) {
     await page.setViewportSize({ width, height: 812 });
     if (width < 768) await expect(strip).toBeHidden();
@@ -33,17 +31,12 @@ test("agent skill stays discoverable and reachable across viewport sizes", async
   }
   await link.focus();
   await expect(link).toBeFocused();
-  // Stub only the external destination; exercise the real link and new-tab behavior.
-  await page
-    .context()
-    .route("https://github.com/leandrocp/supagist**", (route) =>
-      route.fulfill({ contentType: "text/html", body: "Skill installation instructions" }),
-    );
-  const popupPromise = page.waitForEvent("popup");
   await page.keyboard.press("Enter");
-  const popup = await popupPromise;
-  await expect(popup).toHaveURL(SKILL);
-  await popup.close();
+  await expect(page).toHaveURL(/\/agents$/);
+  await expect(page.getByRole("heading", { name: "Install the skill" })).toBeVisible();
+  await expect(page.getByText("npx skills add leandrocp/supagist --skill supagist")).toBeVisible();
+  await page.setViewportSize({ width: 375, height: 812 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
 });
 
 test("home page has a code editor area", async ({ page }) => {

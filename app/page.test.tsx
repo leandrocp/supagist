@@ -40,4 +40,16 @@ describe("Home", () => {
     expect(footer.textContent).toContain("Inspired by ray.so");
     expect(footer.textContent).not.toContain("Backgrounds by ray.so");
   });
+
+  it("sends both agent skill links to the on-site /agents quickstart", () => {
+    render(<Home />);
+    const links = [
+      screen.getByRole("link", { name: /get the skill/i }),
+      screen.getByRole("link", { name: /get the agent skill/i }),
+    ];
+    for (const link of links) {
+      expect(link.getAttribute("href")).toBe("/agents");
+      expect(link.getAttribute("target")).toBeNull();
+    }
+  });
 });

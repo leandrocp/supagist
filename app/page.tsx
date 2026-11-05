@@ -4,9 +4,8 @@ import { Envelope } from "@/components/brand/envelope";
 import { HomeComposer } from "@/components/home-composer";
 import { SiteFooter } from "@/components/site-footer";
 import { Button } from "@/components/ui/button";
-import { ArrowUpRight, Terminal } from "lucide-react";
-
-const SKILL_URL = "https://github.com/leandrocp/supagist#supagist-agent-skill";
+import { ArrowRight, Terminal } from "lucide-react";
+import Link from "next/link";
 
 export default function Home() {
   return (
@@ -20,16 +19,13 @@ export default function Home() {
         <span className="hidden text-muted-foreground lg:inline">
           Create branded code images from Claude Code, Codex, OpenCode, Amp, and more.
         </span>
-        <a
-          href={SKILL_URL}
-          target="_blank"
-          rel="noopener noreferrer"
+        <Link
+          href="/agents"
           className="inline-flex items-center gap-0.5 rounded-sm font-semibold text-postal hover:underline focus-visible:focus-ring"
         >
           Get the skill
-          <ArrowUpRight aria-hidden="true" className="size-3.5" />
-          <span className="sr-only"> (opens in a new tab)</span>
-        </a>
+          <ArrowRight aria-hidden="true" className="size-3.5" />
+        </Link>
       </aside>
 
       <AppNav showPresence />
@@ -64,17 +60,14 @@ export default function Home() {
             <Button asChild size="lg">
               <a href="#composer">Create a snippet</a>
             </Button>
-            <a
-              href={SKILL_URL}
-              target="_blank"
-              rel="noopener noreferrer"
+            <Link
+              href="/agents"
               className="inline-flex min-h-11 items-center gap-0.5 rounded-full px-1 text-[17px] font-semibold text-postal hover:underline focus-visible:focus-ring"
             >
               <span className="md:hidden">Agent skill</span>
               <span className="hidden md:inline">Get the agent skill</span>
-              <ArrowUpRight aria-hidden="true" className="size-4" />
-              <span className="sr-only"> (opens in a new tab)</span>
-            </a>
+              <ArrowRight aria-hidden="true" className="size-4" />
+            </Link>
           </div>
         </div>
 
