@@ -1012,7 +1012,7 @@ export function HomeComposer({ full = false }: HomeComposerProps) {
               data-testid="composer-counts"
               className="mt-3 self-end font-mono text-xs text-muted-foreground md:absolute md:right-5 md:bottom-3.5 md:mt-0"
             >
-              {lineCount} lines ·{" "}
+              <span>{lineCount} lines</span> ·{" "}
               <span className={cn(isOverLimit && "font-medium text-destructive")}>
                 {charCount.toLocaleString()} / 8,000 characters
               </span>
