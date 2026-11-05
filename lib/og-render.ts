@@ -126,14 +126,29 @@ export async function renderOgImage(snippet: OgSnippet): Promise<OgImage> {
     padding: background ? appearance.outerPadding * ratio : 0,
   });
 
-  // The rest of the frame: the render's own background, blurred out to the
-  // edges, or for a card with no background, the editor colour.
+  // The rest of the frame: the render's own edge pixels (its background)
+  // carried out to the frame and softened, so it reads as one picture; for
+  // a card with no background, the editor colour.
   const frame = OG_SIZE;
+  const fitted = await sharp(png)
+    .extract(layout.crop)
+    .resize(layout.width, layout.height)
+    .png()
+    .toBuffer();
+  const margins = {
+    top: layout.top,
+    bottom: frame.height - layout.top - layout.height,
+    left: layout.left,
+    right: frame.width - layout.left - layout.width,
+  };
   const backdrop = background
-    ? await sharp(png)
-        .resize(Math.round(frame.width / 8), Math.round(frame.height / 8), { fit: "cover" })
-        .blur(6)
-        .resize(frame.width, frame.height)
+    ? await sharp(
+        await sharp(fitted)
+          .extend({ ...margins, extendWith: "copy" })
+          .png()
+          .toBuffer(),
+      )
+        .blur(12)
         .png()
         .toBuffer()
     : await sharp({
@@ -148,11 +163,6 @@ export async function renderOgImage(snippet: OgSnippet): Promise<OgImage> {
         .png()
         .toBuffer();
 
-  const fitted = await sharp(png)
-    .extract(layout.crop)
-    .resize(layout.width, layout.height)
-    .png()
-    .toBuffer();
   const composed = await sharp(backdrop)
     .composite([{ input: fitted, left: layout.left, top: layout.top }])
     .png()

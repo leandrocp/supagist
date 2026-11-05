@@ -22,7 +22,7 @@ export const OG_BAND = { height: 40, inset: 20, seal: 20, fontSize: 15 } as cons
  * Bump when the picture changes for the same snippet (a new layout or band),
  * so platforms that cache previews by URL fetch the new one.
  */
-export const OG_LAYOUT_VERSION = "export-v1";
+export const OG_LAYOUT_VERSION = "export-v2";
 
 /** The share of the frame the render should cover when it can. */
 export const OG_MIN_COVERAGE = 0.9;
