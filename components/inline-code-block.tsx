@@ -525,6 +525,15 @@ export function InlineCodeBlock({
     center: "justify-center text-center",
     right: "justify-end text-right",
   } as const;
+  // Labels size to their content, so a filename only truncates when the bar
+  // has no room for it; the export sizes the card to fit them. A centred
+  // label takes its width first and equal side tracks keep it centred.
+  const headerCenterUsed =
+    (resolvedHeader.showFilename && resolvedHeader.filenamePosition === "center") ||
+    (resolvedHeader.showLanguage && resolvedHeader.languagePosition === "center");
+  const headerColumnsClass = headerCenterUsed
+    ? "grid-cols-[minmax(0,1fr)_minmax(0,max-content)_minmax(0,1fr)]"
+    : "grid-cols-[minmax(0,max-content)_minmax(0,1fr)_minmax(0,max-content)]";
   const renderHeaderMetadata = (
     position: (typeof headerPositions)[number],
     allowFilename: boolean,
@@ -587,7 +596,7 @@ export function InlineCodeBlock({
         ) : showBrandHeader ? (
           <div
             data-testid="brand-header-strip"
-            className="grid h-9 grid-cols-3 items-center gap-2 border-b px-4 text-xs"
+            className={cn("grid h-9 items-center gap-2 border-b px-4 text-xs", headerColumnsClass)}
             style={{ backgroundColor: cardFill, borderColor: c.border, color: c.headerText }}
           >
             {headerPositions.map((position) => (
@@ -622,7 +631,8 @@ export function InlineCodeBlock({
             </div>
             <div
               className={cn(
-                "grid min-w-0 flex-1 grid-cols-[minmax(0,0.8fr)_minmax(0,1.4fr)_minmax(0,0.8fr)] items-center gap-2 text-xs",
+                "grid min-w-0 flex-1 items-center gap-2 text-xs",
+                headerColumnsClass,
                 headerMetadataInsetClass,
               )}
               style={{ color: c.headerText }}

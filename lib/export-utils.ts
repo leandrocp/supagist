@@ -170,6 +170,12 @@ const LUMIS_HILL_RIGHT = { x: 211.45, y: 197.05 } as const;
 /** The `lumis` window controls: the sun's ends and middle (violet, coral, gold). */
 export const LUMIS_HEADER_DASHES = [0, 2, 4].map((band) => LUMIS_SUN_BANDS[band]!.color);
 const MONO_ADVANCE_EM = 0.6;
+/**
+ * Advance of the 12px header labels. The widest bundled mono (Hack, 0.602em)
+ * and system fallbacks run past 0.6em, so pad it; an underestimate truncates
+ * the preview's filename and lets the export's right label overrun its inset.
+ */
+const HEADER_LABEL_CHAR_WIDTH = 12 * 0.61;
 
 export function isBrandHeaderDecoration(
   decoration: WindowDecoration,
@@ -893,7 +899,7 @@ function headerRequiredWidth(
   const widths = { left: 0, center: 0, right: 0 };
   const add = (position: keyof typeof widths, text: string) => {
     if (!text) return;
-    widths[position] += (widths[position] > 0 ? 14 : 0) + text.length * 7;
+    widths[position] += (widths[position] > 0 ? 14 : 0) + text.length * HEADER_LABEL_CHAR_WIDTH;
   };
 
   if (settings.showFilename && allowFilename) {
@@ -917,13 +923,27 @@ function headerRequiredWidth(
       ? leftInset + widths.left + 14 + widths.right + rightInset
       : 0;
 
-  return Math.max(
-    leftInset + widths.left + rightInset,
-    centerInset * 2 + widths.center,
-    leftInset + widths.right + rightInset,
-    leftCenter,
-    centerRight,
-    leftRight,
+  // The preview lays the labels out in a three-column grid with an 8px gap on
+  // each side of the centre column, which is there even when it is empty. A
+  // centred label keeps its full width and the sides split the rest evenly.
+  const previewGrid =
+    leftInset +
+    rightInset +
+    16 +
+    (widths.center > 0
+      ? widths.center + 2 * Math.max(widths.left, widths.right)
+      : widths.left + widths.right);
+
+  return Math.ceil(
+    Math.max(
+      leftInset + widths.left + rightInset,
+      centerInset * 2 + widths.center,
+      leftInset + widths.right + rightInset,
+      leftCenter,
+      centerRight,
+      leftRight,
+      previewGrid,
+    ),
   );
 }
 
@@ -1890,7 +1910,8 @@ export async function createHighlightedSvg(
     .map((position) => {
       const positionItems = headerItems.filter((item) => item.position === position);
       const contentWidth = positionItems.reduce(
-        (sum, item, index) => sum + item.text.length * 7 + (index > 0 ? headerGap : 0),
+        (sum, item, index) =>
+          sum + item.text.length * HEADER_LABEL_CHAR_WIDTH + (index > 0 ? headerGap : 0),
         0,
       );
       let cursor =
@@ -1904,7 +1925,7 @@ export async function createHighlightedSvg(
         .map((item, index) => {
           if (index > 0) cursor += headerGap;
           const markup = `<text x="${cursor}" y="${dotsY}" font-size="${item.size}" font-family="${escapeXml(fontFamily)}" dominant-baseline="middle" fill="${chromeColor}" fill-opacity="${item.opacity}">${escapeXml(item.text)}</text>`;
-          cursor += item.text.length * 7;
+          cursor += item.text.length * HEADER_LABEL_CHAR_WIDTH;
           return markup;
         })
         .join("");

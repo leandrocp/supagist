@@ -339,6 +339,34 @@ describe("estimateExportDimensions", () => {
     expect(dimensions).toEqual({ width: 240, height: 56 });
   });
 
+  it("sizes the card so long header labels fit at the widest font's advance", () => {
+    const filename = "install_supagist_with_a_long_name.exs";
+    // Hack's 0.602em at the 12px label size, the widest bundled monospace.
+    const labelWidth = (text: string) => text.length * 12 * (1233 / 2048);
+    const fits = (filenamePosition: "left" | "center", minContent: number) => {
+      const { width } = estimateExportDimensions({
+        code: "x",
+        filename,
+        language: "elixir",
+        theme: "github_light",
+        windowDecoration: "minimal",
+        header: {
+          enabled: true,
+          showFilename: true,
+          showLanguage: true,
+          filenamePosition,
+          languagePosition: "right",
+        },
+      });
+      // 18px chrome insets each side; the preview grid has two 8px gaps.
+      expect(width).toBeGreaterThanOrEqual(36 + 16 + minContent);
+    };
+
+    fits("left", labelWidth(filename) + labelWidth("Elixir"));
+    // A centred label keeps both sides equal, so they each reserve the wider one.
+    fits("center", labelWidth(filename) + 2 * labelWidth("Elixir"));
+  });
+
   it("does not bake export scale into logical image dimensions", () => {
     const dimensions = estimateExportDimensions({
       code: "const x = 1;",

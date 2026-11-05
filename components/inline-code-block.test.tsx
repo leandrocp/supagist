@@ -247,6 +247,34 @@ describe("InlineCodeBlock preview mode", () => {
     );
   });
 
+  it("sizes side header labels to their content when the centre is empty", () => {
+    const sideHeader = {
+      enabled: true,
+      showFilename: true,
+      showLanguage: true,
+      filenamePosition: "left",
+      languagePosition: "right",
+    } as const;
+    const { rerender } = render(
+      <InlineCodeBlock {...baseProps} header={sideHeader} showChromeActions={false} />,
+    );
+    // Fixed column shares truncated a side filename while the bar had room.
+    const columns = () =>
+      screen.getByText("snippet.ts").parentElement?.parentElement?.parentElement?.className;
+    expect(columns()).toContain(
+      "grid-cols-[minmax(0,max-content)_minmax(0,1fr)_minmax(0,max-content)]",
+    );
+
+    rerender(
+      <InlineCodeBlock
+        {...baseProps}
+        header={{ ...sideHeader, filenamePosition: "center" }}
+        showChromeActions={false}
+      />,
+    );
+    expect(columns()).toContain("grid-cols-[minmax(0,1fr)_minmax(0,max-content)_minmax(0,1fr)]");
+  });
+
   it("can disable the header without affecting language inference", async () => {
     render(
       <InlineCodeBlock

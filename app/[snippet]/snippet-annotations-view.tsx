@@ -980,7 +980,12 @@ export function SnippetAnnotationsView({
           style={{
             backgroundColor: c.header,
             borderColor: brandFrame?.cardBorder?.color ?? c.border,
-            gridTemplateColumns: "1fr auto 1fr",
+            // With the centre empty, let a side label use the free width
+            // instead of half the bar, as the composer preview does.
+            gridTemplateColumns:
+              filenamePosition === "center" || languagePosition === "center"
+                ? "1fr auto 1fr"
+                : "minmax(0,max-content) minmax(0,1fr) minmax(0,max-content)",
           }}
         >
           <div className="flex min-w-0 items-center gap-[7px]">
