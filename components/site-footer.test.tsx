@@ -19,6 +19,7 @@ describe("SiteFooter", () => {
   it("keeps the project and credit links", () => {
     render(<SiteFooter />);
 
+    expect(screen.getByRole("link", { name: "Agents" }).getAttribute("href")).toBe("/agents");
     expect(screen.getByRole("link", { name: "Terms" }).getAttribute("href")).toBe("/terms");
     expect(screen.getByRole("link", { name: "Privacy" }).getAttribute("href")).toBe("/privacy");
     expect(screen.getByRole("link", { name: "Your data" }).getAttribute("href")).toBe("/help/data");

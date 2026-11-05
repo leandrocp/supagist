@@ -34,6 +34,7 @@ describe("AppNav", () => {
     expect(within(left).getByRole("link", { name: "Snippets" }).getAttribute("href")).toBe(
       "/snippets",
     );
+    expect(within(left).getByRole("link", { name: "Agents" }).getAttribute("href")).toBe("/agents");
     expect(within(right).getByRole("button", { name: "account" })).toBeTruthy();
   });
 

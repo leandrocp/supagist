@@ -10,6 +10,7 @@ const LINKS = [
     external: true,
   },
   { href: "https://github.com/leandrocp/supagist", label: "GitHub", external: true },
+  { href: "/agents", label: "Agents", external: false },
   { href: "/terms", label: "Terms", external: false },
   { href: "/privacy", label: "Privacy", external: false },
   { href: "/help/data", label: "Your data", external: false },

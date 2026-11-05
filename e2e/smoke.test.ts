@@ -145,20 +145,22 @@ test("lobby presence leaves navigation readable on mobile and remains visible ab
         // Below md the destinations live in the menu (site/v1 mobile nav).
         const menu = nav.getByRole("button", { name: "Menu" });
         await menu.click();
-        const item = page.getByRole("menuitem", { name: "Snippets", exact: true });
-        await expect(item).toBeInViewport();
+        for (const name of ["Snippets", "Agents"])
+          await expect(page.getByRole("menuitem", { name, exact: true })).toBeInViewport();
         await page.keyboard.press("Escape");
         continue;
       }
-      const snippets = nav.getByRole("link", { name: "Snippets", exact: true });
-      await expect(snippets).toBeVisible();
-      const snippetsBox = (await snippets.boundingBox())!;
-      expect(snippetsBox.x + snippetsBox.width).toBeLessThanOrEqual(accountBox.x);
+      await expect(nav.getByRole("link", { name: "Snippets", exact: true })).toBeVisible();
+      // Agents is the last destination, so it is the one that could reach the account area.
+      const agents = nav.getByRole("link", { name: "Agents", exact: true });
+      await expect(agents).toBeVisible();
+      const agentsBox = (await agents.boundingBox())!;
+      expect(agentsBox.x + agentsBox.width).toBeLessThanOrEqual(accountBox.x);
       // Visibility alone does not detect another element covering the link.
       // Mid-height: the pill's rounded corners are outside its hit area.
-      await snippets.click({
+      await agents.click({
         trial: true,
-        position: { x: snippetsBox.width - 1, y: snippetsBox.height / 2 },
+        position: { x: agentsBox.width - 1, y: agentsBox.height / 2 },
       });
     }
   } finally {

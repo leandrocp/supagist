@@ -7,6 +7,7 @@ import { cn, hasEnvVars } from "@/lib/utils";
 export const NAV_LINKS = [
   { href: "/", label: "New" },
   { href: "/snippets", label: "Snippets" },
+  { href: "/agents", label: "Agents" },
 ] as const;
 
 /** The nav's destinations. The current page reads in ink, the rest muted. */

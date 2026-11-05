@@ -17,7 +17,7 @@ type Props = {
 
 /**
  * The single app bar, shared by every page that has chrome: the flat seal and
- * wordmark, then New and Snippets; account and theme on the right. It spans
+ * wordmark, then New, Snippets and Agents; account and theme on the right. It spans
  * the page at the page padding (48 px desktop, 20 px mobile) and has no rule
  * under it: the site separates by tone, never by lines.
  *
