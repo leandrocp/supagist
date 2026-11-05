@@ -409,17 +409,363 @@
   animation: rise 520ms cubic-bezier(0.2, 0.7, 0.3, 1) both;
 }
 
-/* The home hero's card sliding out of the envelope (transform only). */
-@keyframes card-out {
-  from {
-    transform: translate3d(8%, -22%, 0);
+/* The home hero (HeroEnvelope). One unit, --u, is 1/660 of the envelope's
+   width, the artwork's own coordinate space. React steps data-phase; every
+   movement below is a transition or keyframe keyed on it. */
+.hero-scene {
+  --px: 0;
+  --py: 0;
+  --env-back: #eaddca;
+  --env-flap: #f7f2e9;
+  --env-inside: #ddcdb5;
+  --env-side: #eee2d1;
+  --env-bottom: #f0e7d8;
+  --env-shadow:
+    0 40px 70px -30px hsl(var(--shadow-tint) / 0.32), 0 6px 16px -6px hsl(var(--shadow-tint) / 0.18);
+  --ink: #b3261e;
+  container-type: inline-size;
+  aspect-ratio: 660 / 600;
+  perspective: 1400px;
+}
+.dark .hero-scene {
+  --env-back: #0e0e0e;
+  --env-flap: #222;
+  --env-inside: #151515;
+  --env-side: #171717;
+  --env-bottom: #1c1c1c;
+  --env-shadow: 0 40px 70px -30px rgb(0 0 0 / 0.8), 0 6px 16px -6px rgb(0 0 0 / 0.6);
+  --ink: #e5534b;
+}
+.hero-tilt {
+  --u: calc(100cqw / 660);
+  transform: rotateX(calc(var(--py) * -5deg)) rotateY(calc(var(--px) * 7deg));
+  transition: transform 500ms cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+
+/* The envelope and everything in it. It is sent off to the top right and the
+   next one is slid in from the right, overshooting a little as it lands. */
+.hero-rig {
+  position: absolute;
+  top: calc(var(--u) * 200);
+  left: 0;
+  width: calc(var(--u) * 660);
+  height: calc(var(--u) * 400);
+  transform: rotate(-2.2deg);
+  transition: transform 900ms cubic-bezier(0.2, 1.25, 0.4, 1);
+}
+.hero-scene[data-phase="send"] .hero-rig {
+  transform: translate(150%, -55%) rotate(24deg) scale(0.5);
+  transition: transform 700ms cubic-bezier(0.55, 0, 0.8, 0.2);
+}
+.hero-scene[data-phase="away"] .hero-rig {
+  transform: translate(140%, 12%) rotate(16deg);
+  transition: none;
+}
+.hero-body {
+  position: absolute;
+  inset: 0;
+}
+.hero-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.hero-back {
+  border-radius: calc(var(--u) * 6);
+  box-shadow: var(--env-shadow);
+  z-index: 1;
+}
+.hero-pocket {
+  z-index: 4;
+  overflow: visible;
+}
+
+/* The flap folds on its top edge. Closed it lies over the card; open it
+   stands up behind it. z-index swaps halfway through the fold. */
+.hero-flap {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 60%;
+  transform-origin: top center;
+  transform-style: preserve-3d;
+  transform: perspective(calc(var(--u) * 1600)) rotateX(0deg);
+  z-index: 5;
+  transition:
+    transform 560ms cubic-bezier(0.5, 0, 0.3, 1),
+    z-index 0s linear 280ms;
+}
+.hero-scene:is(
+    [data-phase="reading"],
+    [data-phase="insert"],
+    [data-phase="open"],
+    [data-phase="rise"]
+  )
+  .hero-flap {
+  transform: perspective(calc(var(--u) * 1600)) rotateX(180deg);
+  z-index: 2;
+}
+.hero-flap-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  filter: drop-shadow(0 calc(var(--u) * 5) calc(var(--u) * 6) rgb(0 0 0 / 0.14));
+}
+.hero-flap-inside {
+  transform: rotateX(180deg);
+}
+
+/* The postmark is inked on the flap after the seal, and stays until the
+   letter is opened and the flap turns away. */
+.hero-postmark {
+  position: absolute;
+  top: calc(var(--u) * 20);
+  left: calc(var(--u) * 400);
+  width: calc(var(--u) * 210);
+  color: var(--ink);
+  opacity: 0;
+  transform: rotate(-9deg);
+  mix-blend-mode: multiply;
+}
+.dark .hero-postmark {
+  mix-blend-mode: screen;
+}
+.hero-scene:is(
+    [data-phase="post"],
+    [data-phase="send"],
+    [data-phase="away"],
+    [data-phase="arrive"],
+    [data-phase="crack"],
+    [data-phase="open"]
+  )
+  .hero-postmark {
+  opacity: 0.72;
+}
+@keyframes hero-postmark {
+  0% {
+    opacity: 0;
+    transform: rotate(-9deg) scale(1.7);
   }
-  to {
-    transform: none;
+  55% {
+    opacity: 0.9;
+    transform: rotate(-9deg) scale(0.94);
+  }
+  100% {
+    opacity: 0.72;
+    transform: rotate(-9deg);
   }
 }
-.card-out {
-  animation: card-out 760ms cubic-bezier(0.2, 0.75, 0.25, 1) 120ms both;
+.hero-scene[data-phase="post"] .hero-postmark {
+  animation: hero-postmark 320ms cubic-bezier(0.5, 0, 0.6, 1) both;
+}
+
+/* The code card: out of the envelope while it is read, inside it otherwise.
+   Hidden once the flap covers it, so it never shows between the flaps. */
+.hero-card {
+  position: absolute;
+  z-index: 3;
+  top: calc(var(--u) * -95);
+  left: calc(var(--u) * 80);
+  width: calc(var(--u) * 500);
+  overflow: hidden;
+  border-radius: calc(var(--u) * 14);
+  background: var(--c-bg);
+  color: var(--c-fg);
+  box-shadow:
+    0 calc(var(--u) * 24) calc(var(--u) * 48) calc(var(--u) * -16) rgb(0 0 0 / 0.38),
+    0 0 0 1px rgb(0 0 0 / 0.08);
+  font-family: var(--font-plex-mono), ui-monospace, monospace;
+  transform: translateY(calc(var(--u) * 125)) scale(0.94);
+  opacity: 0;
+  transition:
+    transform 850ms cubic-bezier(0.6, 0, 0.3, 1),
+    opacity 0s linear 300ms,
+    background-color 0s;
+}
+.hero-scene:is([data-phase="reading"], [data-phase="rise"]) .hero-card {
+  transform: rotate(-2.5deg);
+  opacity: 1;
+  transition:
+    transform 750ms cubic-bezier(0.25, 1.35, 0.45, 1),
+    opacity 0s;
+}
+.hero-scene:is([data-phase="insert"], [data-phase="open"]) .hero-card {
+  opacity: 1;
+}
+.hero-scene[data-phase="insert"] .hero-card {
+  transition:
+    transform 850ms cubic-bezier(0.6, 0, 0.3, 1),
+    opacity 0s;
+}
+.hero-card-bar {
+  display: flex;
+  align-items: center;
+  height: calc(var(--u) * 44);
+  padding: 0 calc(var(--u) * 18);
+  border-bottom: 1px solid var(--c-border);
+  color: var(--c-muted);
+  font-size: calc(var(--u) * 13);
+}
+.hero-card-dots {
+  display: flex;
+  gap: calc(var(--u) * 7);
+}
+.hero-card-dots i {
+  width: calc(var(--u) * 12);
+  height: calc(var(--u) * 12);
+  border-radius: 9999px;
+}
+.hero-card-file {
+  flex: 1;
+  text-align: center;
+}
+.hero-card-code {
+  margin: 0;
+  padding: calc(var(--u) * 22) calc(var(--u) * 26);
+  font: inherit;
+  font-size: calc(var(--u) * 19);
+  line-height: 1.75;
+  white-space: pre;
+}
+@keyframes hero-caret {
+  50% {
+    opacity: 0;
+  }
+}
+.hero-caret {
+  display: inline-block;
+  width: 0.55ch;
+  height: 1.15em;
+  margin-left: 1px;
+  vertical-align: text-bottom;
+  background: currentColor;
+  animation: hero-caret 1s steps(1) infinite;
+}
+
+/* The seal on the flap tip: stamped down from above, then cracked in two
+   when the next letter is opened. */
+.hero-seal {
+  position: absolute;
+  z-index: 6;
+  top: calc(var(--u) * 168);
+  left: calc(var(--u) * 276);
+  width: calc(var(--u) * 120);
+  height: calc(var(--u) * 120);
+  pointer-events: none;
+}
+.hero-seal img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  filter: drop-shadow(0 calc(var(--u) * 3) calc(var(--u) * 3) rgb(0 0 0 / 0.35));
+}
+.hero-scene:is(
+    [data-phase="seal"],
+    [data-phase="post"],
+    [data-phase="send"],
+    [data-phase="away"],
+    [data-phase="arrive"]
+  )
+  .hero-seal-whole {
+  opacity: 1;
+  transform: rotate(-10deg);
+}
+@keyframes hero-seal {
+  0% {
+    opacity: 0;
+    transform: translateY(-60%) scale(2.6) rotate(-40deg);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(0.82, 0.9) rotate(-6deg);
+  }
+  80% {
+    transform: scale(1.06, 1.02) rotate(-11deg);
+  }
+  100% {
+    opacity: 1;
+    transform: rotate(-10deg);
+  }
+}
+.hero-scene[data-phase="seal"] .hero-seal-whole {
+  animation: hero-seal 420ms cubic-bezier(0.5, 0, 0.7, 1) both;
+}
+@keyframes hero-seal-ripple {
+  from {
+    opacity: 0.6;
+    transform: scale(0.6);
+  }
+  to {
+    opacity: 0;
+    transform: scale(2.3);
+  }
+}
+.hero-seal::after {
+  content: "";
+  position: absolute;
+  inset: 8%;
+  border-radius: 9999px;
+  border: calc(var(--u) * 3) solid var(--color-wax);
+  opacity: 0;
+}
+.hero-scene[data-phase="seal"] .hero-seal::after {
+  animation: hero-seal-ripple 700ms cubic-bezier(0.2, 0.7, 0.3, 1) 250ms both;
+}
+/* The envelope gives a little under the stamp. */
+@keyframes hero-thump {
+  40% {
+    transform: scale(0.975, 0.96);
+  }
+  70% {
+    transform: scale(1.01);
+  }
+}
+.hero-scene[data-phase="seal"] .hero-body {
+  animation: hero-thump 380ms ease-out 220ms;
+}
+.hero-seal-left {
+  clip-path: polygon(0 0, 54% 0, 46% 28%, 57% 50%, 44% 72%, 52% 100%, 0 100%);
+}
+.hero-seal-right {
+  clip-path: polygon(54% 0, 100% 0, 100% 100%, 52% 100%, 44% 72%, 57% 50%, 46% 28%);
+}
+@keyframes hero-crack-left {
+  0% {
+    opacity: 1;
+    transform: rotate(-10deg);
+  }
+  25% {
+    opacity: 1;
+    transform: translate(-3%, 1%) rotate(-14deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-70%, 90%) rotate(-70deg);
+  }
+}
+@keyframes hero-crack-right {
+  0% {
+    opacity: 1;
+    transform: rotate(-10deg);
+  }
+  25% {
+    opacity: 1;
+    transform: translate(3%, 1%) rotate(-6deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(70%, 80%) rotate(50deg);
+  }
+}
+.hero-scene[data-phase="crack"] .hero-seal-left {
+  animation: hero-crack-left 560ms cubic-bezier(0.4, 0, 0.8, 0.6) both;
+}
+.hero-scene[data-phase="crack"] .hero-seal-right {
+  animation: hero-crack-right 560ms cubic-bezier(0.4, 0, 0.8, 0.6) both;
 }
 
 /* A soft wash that fades out: a live comment from someone else, a saved edit. */
@@ -510,7 +856,6 @@
     animation: fade-out 160ms ease-in both;
   }
   .stamp-ink,
-  .card-out,
   .chip-pop,
   [data-chip-pop="1"],
   .rise,
@@ -519,6 +864,10 @@
   }
   .reaction-pulse {
     opacity: 0;
+  }
+  /* The hero keeps its first frame: no loop runs, and no pointer tilt. */
+  .hero-tilt {
+    transform: none;
   }
   .press:active:not(:disabled) {
     scale: none;

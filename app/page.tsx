@@ -1,6 +1,6 @@
 import type { CSSProperties } from "react";
 import { AppNav } from "@/components/app-nav";
-import { Envelope } from "@/components/brand/envelope";
+import { HeroEnvelope } from "@/components/brand/hero-envelope";
 import { HomeComposer } from "@/components/home-composer";
 import { SiteFooter } from "@/components/site-footer";
 import { Button } from "@/components/ui/button";
@@ -32,7 +32,7 @@ export default function Home() {
 
       <section
         aria-labelledby="hero-title"
-        className="relative grid items-center gap-10 overflow-x-clip px-5 pt-[34px] pb-14 md:px-12 lg:grid-cols-[minmax(0,40rem)_minmax(0,1fr)] lg:gap-6 lg:pt-14 lg:pb-[90px] lg:pl-16"
+        className="relative grid items-center gap-8 overflow-x-clip px-5 pt-6 pb-10 md:px-12 lg:grid-cols-[minmax(0,40rem)_minmax(0,1fr)] lg:gap-6 lg:pt-6 lg:pb-12 lg:pl-16"
       >
         <div className="flex flex-col">
           {/* Light entrance. The h1 only moves (no fade) so its first paint,
@@ -40,22 +40,22 @@ export default function Home() {
           <p className="eyebrow rise-in text-wax-text">Your code, sealed and sent</p>
           <h1
             id="hero-title"
-            className="rise mt-4 font-display text-[44px] leading-[0.98] text-foreground md:mt-[22px] md:text-[76px] xl:text-[96px]"
+            className="rise mt-4 font-display text-[44px] leading-[0.98] text-foreground md:mt-4 md:text-[72px] xl:text-[88px]"
           >
             Code worth
             <br />
-            sending.
+            sharing.
           </h1>
           <p
             style={{ "--i": 1 } as CSSProperties}
-            className="rise-in mt-4 max-w-[540px] text-[17px] leading-normal text-muted-foreground md:mt-[26px] md:text-[21px]"
+            className="rise-in mt-4 max-w-[540px] text-[17px] leading-normal text-muted-foreground md:mt-5 md:text-[20px]"
           >
             Turn a snippet into a beautiful, branded card. Seal it, share it, or render it straight
             from your agent.
           </p>
           <div
             style={{ "--i": 2 } as CSSProperties}
-            className="rise-in mt-6 flex flex-wrap items-center gap-x-[22px] gap-y-3 md:mt-[34px]"
+            className="rise-in mt-6 flex flex-wrap items-center gap-x-[22px] gap-y-3 md:mt-7"
           >
             <Button asChild size="lg">
               <a href="#composer">Create a snippet</a>
@@ -72,24 +72,8 @@ export default function Home() {
         </div>
 
         {/* Envelope B with the real product card laid in front of its lower
-            left, as if it just came out. Decorative: the h1 says it. */}
-        <div aria-hidden="true" className="relative pb-[16%] lg:pb-[12%]">
-          <Envelope className="ml-auto w-[min(100%,660px)]">
-            {/* The card slides out of the envelope (transform only). */}
-            <div className="card-out absolute top-[62%] left-0 w-[71%] rotate-3 lg:-left-[2%]">
-              {/* A real render of the default card (github_light, macOS
-                  window) from the Supagist renderer, at 2×. */}
-              <img
-                src="/brand/hero-card.png"
-                alt=""
-                width={856}
-                height={362}
-                decoding="async"
-                className="w-full rounded-xl shadow-[0_30px_60px_-20px_rgb(0_0_0/0.35),0_0_0_1px_rgb(0_0_0/0.06)]"
-              />
-            </div>
-          </Envelope>
-        </div>
+            left, as if it just came out. */}
+        <HeroEnvelope />
       </section>
 
       {/* The composer itself is the page's subject below the fold. */}

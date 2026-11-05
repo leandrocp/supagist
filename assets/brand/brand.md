@@ -16,7 +16,7 @@ Status: proposal. Nothing published, uploaded or committed.
 **Proposed sample lines** (none is live copy; Leandro to approve):
 | Where | Line |
 |---|---|
-| Hero h1 | Code worth sending. |
+| Hero h1 | Code worth sharing. |
 | Hero sub | Turn a snippet into a beautiful, branded card. Seal it, share it, or render it straight from your agent. |
 | Tagline / README | Your code, sealed and sent. |
 | Publish button helper | Sealed. Anyone with the link can open it. |

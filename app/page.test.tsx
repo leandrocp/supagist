@@ -41,6 +41,11 @@ describe("Home", () => {
     expect(footer.textContent).not.toContain("Backgrounds by ray.so");
   });
 
+  it("headlines the hero with Code worth sharing", () => {
+    render(<Home />);
+    expect(screen.getByRole("heading", { level: 1 }).textContent).toBe("Code worthsharing.");
+  });
+
   it("sends both agent skill links to the on-site /agents quickstart", () => {
     render(<Home />);
     const links = [
