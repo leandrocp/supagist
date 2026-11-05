@@ -121,6 +121,8 @@ export async function generateMetadata({ params }: Props) {
     openGraph: {
       title,
       description: alt,
+      // WhatsApp asks for og:url alongside the title and image.
+      url: `/${param}`,
       images,
     },
     twitter: {
