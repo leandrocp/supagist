@@ -20,11 +20,13 @@ for most brands, and `lumis`, `mdex-purple` and `inertia` (commits `9024dac`,
 ## Out of scope: themes, fonts and new renderer features
 
 - **Themes stay in Lumis.** A preset points at an existing Lumis theme id. If
-  no theme fits the brand, stop and add one to Lumis first with the
-  `lumis-add-theme` skill in
-  [leandrocp/lumis](https://github.com/leandrocp/lumis). Supagist picks it up
-  when it upgrades `@lumis-sh/themes`. Don't add a theme to
-  `lib/brand-themes.ts` or hand-write token colours.
+  no theme fits the brand, stop and add one to Lumis first with its
+  [`lumis-add-theme`](https://github.com/leandrocp/lumis/blob/main/skills/lumis-add-theme/SKILL.md)
+  skill (`npx skills add leandrocp/lumis --skill lumis-add-theme`). Lumis
+  themes come from permissively licensed Neovim colorschemes, so a brand
+  without one can't get a theme of its own; pick the closest existing theme.
+  Supagist picks up a new Lumis theme when it upgrades `@lumis-sh/themes`.
+  Don't add a theme to `lib/brand-themes.ts` or hand-write token colours.
 - **Fonts** are limited to `system`, `jetbrains`, `fira`, `geist` and `hack`.
   The database checks `font_id`, so a new font needs a migration and the
   maintainer's OK. Pick one of the five.

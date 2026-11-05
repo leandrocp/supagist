@@ -180,6 +180,13 @@ describe("supagist-add-brand skill", () => {
       expect(template, item).toContain(item);
   });
 
+  it("sends theme work to the Lumis lumis-add-theme skill", () => {
+    expect(skill).toContain(
+      "https://github.com/leandrocp/lumis/blob/main/skills/lumis-add-theme/SKILL.md",
+    );
+    expect(skill).toContain("npx skills add leandrocp/lumis --skill lumis-add-theme");
+  });
+
   it("names the digest test that pins the shipped presets", () => {
     const tests = readFileSync(join(__dirname, "brand-presets.test.ts"), "utf8");
     const name = "leaves the shipped presets exactly as they were";
