@@ -1109,7 +1109,7 @@ export function HomeComposer({ full = false }: HomeComposerProps) {
                             }
                             className="rounded-sm font-semibold text-postal hover:underline focus-visible:focus-ring"
                           >
-                            Reset to {selectedBrand ? "brand" : "theme"} default
+                            Reset to {draft.brandId ? "brand" : "theme"} default
                           </button>
                         </span>
                       ) : (

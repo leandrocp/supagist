@@ -24,17 +24,17 @@ const BASE_APPEARANCE = {
 describe("background defaulting", () => {
   const DRAFT = { ...BASE_APPEARANCE, brandId: null, backgroundOverride: false };
 
-  it("follows the Brand, then the Theme when the Brand turns Custom, and back", () => {
+  it("keeps the Brand's background when a Theme change turns the Brand Custom, and back", () => {
     const supabase = getBrandPreset("supabase")!;
     const branded = pickBrandPreset(DRAFT, supabase);
     expect(branded.background).toBe("Supabase");
     expect(backgroundSource(branded)).toBe("brand");
 
-    // github_light is not Supabase's theme: Brand is Custom, no outer canvas.
+    // github_light is not Supabase's theme: Brand is Custom, canvas stays.
     const themed = withDefaultBackground({ ...branded, theme: "github_light" });
-    expect(themed.background).toBeNull();
+    expect(themed.background).toBe("Supabase");
     expect(draftBrand(themed)).toBeNull();
-    expect(backgroundSource(themed)).toBe("theme");
+    expect(backgroundSource(themed)).toBe("brand");
 
     const back = withDefaultBackground({ ...themed, theme: supabase.settings.theme });
     expect(back.background).toBe("Supabase");

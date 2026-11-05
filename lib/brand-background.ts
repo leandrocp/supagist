@@ -8,10 +8,11 @@ import {
 
 /**
  * A composer draft's look plus how its background was chosen. With no
- * override the background follows the Brand preset, or the Theme (no outer
- * canvas, so the card shows the Theme's own editor background) when the
- * Brand is Custom. A background picked in All options is an override and is
- * kept through Brand and Theme changes.
+ * override the background follows the Brand picked last, even after a Theme
+ * change turns the Brand to Custom; with no Brand ever picked it follows the
+ * Theme (no outer canvas, so the card shows the Theme's own editor
+ * background). A background picked in All options is an override and is kept
+ * through Brand and Theme changes.
  */
 export type BrandDraft = BrandAppearance & {
   /** The Brand preset picked last, so an overridden background still knows
@@ -24,21 +25,26 @@ export type BackgroundSource = "override" | "brand" | "theme";
 
 /** The Brand a draft is on, judging its background as that Brand's own. */
 export function draftBrand(draft: BrandDraft): BrandPreset | null {
-  const picked = draft.brandId ? getBrandPreset(draft.brandId) : null;
+  const picked = pickedBrand(draft);
   return findMatchingBrandPreset(
     picked ? { ...draft, background: picked.background.label } : draft,
   );
 }
 
+/** The Brand picked last, whose background a draft follows without an override. */
+function pickedBrand(draft: BrandDraft): BrandPreset | null {
+  return draft.brandId ? getBrandPreset(draft.brandId) : null;
+}
+
 export function backgroundSource(draft: BrandDraft): BackgroundSource {
   if (draft.backgroundOverride) return "override";
-  return draftBrand(draft) ? "brand" : "theme";
+  return pickedBrand(draft) ? "brand" : "theme";
 }
 
 /** Recompute the background from Brand or Theme, unless the user picked one. */
 export function withDefaultBackground<T extends BrandDraft>(draft: T): T {
   if (draft.backgroundOverride) return draft;
-  return { ...draft, background: draftBrand(draft)?.background.label ?? null };
+  return { ...draft, background: pickedBrand(draft)?.background.label ?? null };
 }
 
 /** Apply a Brand preset, keeping a background the user picked themselves. */

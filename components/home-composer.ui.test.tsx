@@ -241,8 +241,8 @@ describe("HomeComposer controls", () => {
 
     expect(screen.getByRole("button", { name: "Theme" }).textContent).toContain("github_dark");
     expect(screen.getByRole("button", { name: "Brand" }).textContent).toContain("Custom");
-    // With the Brand gone Custom the background follows the Theme: no canvas.
-    expect(screen.queryByTestId("snippet-canvas")).toBeNull();
+    // With the Brand gone Custom the canvas keeps the Brand's background.
+    expect(screen.getByTestId("snippet-canvas").getAttribute("data-background")).toBe("Tailwind");
     expect(screen.getByTestId("code-preview").getAttribute("data-window-decoration")).toBe(
       "macos-subtle",
     );
