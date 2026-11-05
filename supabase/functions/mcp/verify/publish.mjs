@@ -1,5 +1,5 @@
 // publish_snippet end to end against the disposable local stack: auth, the
-// unlisted + redacted contract, RLS visibility and USER_RATE_LIMITED.
+// private-by-default + redacted contract, RLS visibility and USER_RATE_LIMITED.
 import assert from "node:assert/strict";
 import { createClient } from "@supabase/supabase-js";
 import { localSession, rpc } from "./local.mjs";
@@ -46,13 +46,13 @@ assert.equal(published.response.status, 200);
 assert.ok(!published.data.result.isError, JSON.stringify(published.data));
 const result = JSON.parse(published.data.result.content[0].text);
 assert.match(result.url, /^https:\/\/supagist\.app\/deploy-config-[a-z0-9]{6}$/);
-assert.equal(result.visibility, "unlisted");
+assert.equal(result.visibility, "private");
 assert.deepEqual(result.redactions, { redacted: 2, kinds: { aws_access_key: 1, github_token: 1 } });
 assert.ok(
   !JSON.stringify(result).includes(awsKey) && !JSON.stringify(result).includes(githubToken),
 );
 
-// Stored row: owned by the caller, unlisted, redacted, line structure kept.
+// Stored row: owned by the caller, private, redacted, line structure kept.
 const shortId = result.url.slice(-6);
 const { data: own } = await client
   .from("snippets")
@@ -61,7 +61,7 @@ const { data: own } = await client
   .single();
 const { data: user } = await client.auth.getUser();
 assert.equal(own.author_id, user.user.id);
-assert.equal(own.visibility, "unlisted");
+assert.equal(own.visibility, "private");
 assert.equal(own.title, "Deploy config");
 assert.equal(own.line_count, 5);
 assert.ok(own.code.startsWith("export const config = {\n") && own.code.endsWith("};"));
@@ -92,7 +92,7 @@ const { data: linked } = await anon
   .rpc("get_snippet_by_link", { p_slug: slug, p_short_id: shortId })
   .select("visibility")
   .single();
-assert.equal(linked.visibility, "unlisted");
+assert.equal(linked.visibility, "private");
 
 // Two more fill the 3/minute publish quota; the next is USER_RATE_LIMITED.
 for (const i of [1, 2])
@@ -101,4 +101,4 @@ const limited = await call({ code: "const n = 3;" });
 assert.equal(limited.response.status, 429);
 assert.equal(limited.data.error.code, -32300);
 
-console.log("PASS: publish_snippet auth, unlisted, redaction, visibility and USER_RATE_LIMITED");
+console.log("PASS: publish_snippet auth, private, redaction, visibility and USER_RATE_LIMITED");

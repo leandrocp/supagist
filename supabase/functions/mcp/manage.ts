@@ -37,9 +37,11 @@ export const updateInput = z
       .optional()
       .describe("New page title. An empty string clears it, so the page shows the filename."),
     visibility: z
-      .enum(["public", "unlisted"])
+      .enum(["public", "private"])
       .optional()
-      .describe("public snippets can appear in listings; unlisted ones only open by link."),
+      .describe(
+        "public: anyone can see it. private: only the author lists it; anyone given the link can open it.",
+      ),
   })
   .refine(
     (input) => input.title !== undefined || input.visibility !== undefined,
@@ -50,11 +52,11 @@ export const deleteInput = z.strictObject({ snippet: snippetRef });
 
 export type UpdateResult = {
   url: string;
-  visibility: "public" | "unlisted";
+  visibility: "public" | "private";
   redactions: RedactionSummary;
 };
 
-type Snippet = { id: string; slug: string; short_id: string; visibility: "public" | "unlisted" };
+type Snippet = { id: string; slug: string; short_id: string; visibility: "public" | "private" };
 
 // Table reads see public rows plus the caller's own, so filtering by author
 // returns only a snippet the caller owns; RLS enforces the same on writes.

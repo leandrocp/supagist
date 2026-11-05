@@ -47,14 +47,15 @@ an alternate URL or asking the user to supply a deployment address.
 - `publish_snippet` saves a new snippet to the signed-in account and returns JSON
   with its link. Call it only when the user asks to publish, save or share a link,
   and confirm with them first.
-  It takes the same appearance fields plus an optional `title`. The snippet is
-  unlisted (anyone with the link can view it; it is never listed or indexed), and
-  common secrets are replaced with `[REDACTED:kind]` placeholders before storage.
+  It takes the same appearance fields plus an optional `title` and `visibility`.
+  Snippets are public or private, like GitHub gists; publish private (the
+  default: only the user lists it, anyone with the link can view it, never
+  indexed) unless the user asks for public. Common secrets are replaced with `[REDACTED:kind]` placeholders before storage.
   Tell the user the link and, when `redactions.redacted` is above 0, what was
   redacted. Each call creates another snippet; do not retry a success.
 - `update_snippet` edits a snippet the user owns, by its supagist.app link:
-  any of code, title, language, theme and visibility (`public` or `unlisted`).
-  Other fields and the link stay the same; new code is redacted like a publish.
+  its title and visibility (`public` or `private`). Published code is sealed;
+  the link stays the same and a new title is redacted like a publish.
   `delete_snippet` permanently deletes an owned snippet with its images,
   reactions and comments, and the link stops working. **Confirm with the user
   before editing or deleting**, naming the link, and never delete to "clean up"

@@ -67,6 +67,15 @@ import {
 import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { SNIPPET_VISIBILITIES, type SnippetVisibility } from "@/lib/snippet-visibility";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
@@ -220,6 +229,7 @@ export function HomeComposer({ full = false }: HomeComposerProps) {
   const [viewerLabel, setViewerLabel] = useState<string | null>(null);
   const [viewerAvatar, setViewerAvatar] = useState<string | null>(null);
   const [isPublishing, setIsPublishing] = useState(false);
+  const [visibility, setVisibility] = useState<SnippetVisibility>("public");
   const [isExporting, setIsExporting] = useState(false);
   const [copied, setCopied] = useState(false);
   const [backgroundQuery, setBackgroundQuery] = useState("");
@@ -450,6 +460,7 @@ export function HomeComposer({ full = false }: HomeComposerProps) {
       formData.set("card_image", images.card);
       formData.set("reactions", JSON.stringify(annotations.reactions));
       formData.set("comments", JSON.stringify({}));
+      formData.set("visibility", visibility);
 
       const result = await publishSnippet(formData);
       if (result.error) {
@@ -1504,18 +1515,51 @@ export function HomeComposer({ full = false }: HomeComposerProps) {
                 </div>
               </PopoverContent>
             </Popover>
-            <Button
-              disabled={busy || (Boolean(effectiveViewerLabel) && isOverLimit)}
-              onClick={handlePublish}
-              className="h-11 px-6"
-            >
-              {isPublishing ? (
-                <Spinner data-icon="inline-start" />
-              ) : (
-                <Upload data-icon="inline-start" />
-              )}
-              Publish
-            </Button>
+            {/* Publish, split like GitHub's "Create gist": the menu picks
+                public or private first. */}
+            <ButtonGroup className="w-full sm:w-auto">
+              <Button
+                disabled={busy || (Boolean(effectiveViewerLabel) && isOverLimit)}
+                onClick={handlePublish}
+                className="h-11 flex-1 pr-4 pl-6"
+              >
+                {isPublishing ? (
+                  <Spinner data-icon="inline-start" />
+                ) : visibility === "private" ? (
+                  <Lock data-icon="inline-start" />
+                ) : (
+                  <Upload data-icon="inline-start" />
+                )}
+                {visibility === "private" ? "Publish private" : "Publish"}
+              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    disabled={busy}
+                    aria-label="Choose who can see it"
+                    className="h-11 w-11 border-l border-primary-foreground/20"
+                  >
+                    <ChevronDown />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent side="top" align="end" className="w-72">
+                  <DropdownMenuLabel>Who can see it</DropdownMenuLabel>
+                  <DropdownMenuRadioGroup
+                    value={visibility}
+                    onValueChange={(value) => setVisibility(value as SnippetVisibility)}
+                  >
+                    {SNIPPET_VISIBILITIES.map(({ id, label, hint }) => (
+                      <DropdownMenuRadioItem key={id} value={id}>
+                        <span className="flex flex-col gap-0.5">
+                          <span className="font-medium">{label}</span>
+                          <span className="text-xs text-muted-foreground">{hint}</span>
+                        </span>
+                      </DropdownMenuRadioItem>
+                    ))}
+                  </DropdownMenuRadioGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </ButtonGroup>
           </ButtonGroup>
         </div>
       </div>

@@ -31,13 +31,13 @@ Examples
   supagist src/app.ts --aspect-ratio 16:9 --copy
                                                 16:9 image, ready to paste
   pbpaste | supagist --filename app.ts --out app.svg
-  supagist src/app.ts --publish                 unlisted link, copied
+  supagist src/app.ts --publish                 private link, copied
 
 Usage
   supagist <file[:a-b]> [options]   Render a file, or lines a to b of it
   supagist <github-file-link>       Render a GitHub file, with its #L12-L40 lines
   supagist [options] < file         Render piped code (or name stdin with -)
-  supagist <file|-> --publish       Publish an unlisted snippet and print its link
+  supagist <file|-> --publish       Publish a private snippet and print its link
   supagist options [--json]         List brands, themes, fonts, languages and more
   supagist auth login|logout|status Sign the CLI in to publish (opens a browser)
 
@@ -51,7 +51,8 @@ Output
       --open              Open the image (or the published snippet)
       --from-clipboard    Render the code on the clipboard
       --json              Machine-readable output and errors on stdout
-      --publish           Save an unlisted snippet to your account instead
+      --publish           Save a private snippet to your account instead
+      --public            Publish it public instead of private
       --title <text>      Page title of the published snippet
 
 Appearance (values come from \`supagist options\`; flags override the brand)
@@ -67,7 +68,9 @@ Appearance (values come from \`supagist options\`; flags override the brand)
 
 Privacy
   Rendering doesn't save your code anywhere.
-  --publish saves it as a snippet that only people with the link can see.
+  --publish saves it as a private snippet, like a secret GitHub gist: hidden
+  from others, but anyone you share the link with can see it. --public lets
+  anyone see it.
   API keys and other secrets are removed before it's saved.
 
 Exit codes
@@ -533,7 +536,7 @@ function cropLines(code, [start, end]) {
 
 /**
  * Publishes through the MCP publish_snippet tool as the signed-in CLI user:
- * the server redacts secrets, stores the snippet as unlisted and applies the
+ * the server redacts secrets, stores the snippet (private unless --public) and applies the
  * same storage policies, RLS and rate limits as any publish.
  * @param {string} host
  * @param {Record<string, unknown>} fields
@@ -542,7 +545,11 @@ function cropLines(code, [start, end]) {
  */
 async function publish(host, fields, flags, io) {
   const token = await accessToken(host, io);
-  const args = { ...fields, ...(typeof flags.title === "string" ? { title: flags.title } : {}) };
+  const args = {
+    ...fields,
+    ...(typeof flags.title === "string" ? { title: flags.title } : {}),
+    visibility: flags.public ? "public" : "private",
+  };
   let response;
   try {
     response = await request(host, "/mcp", io, {
@@ -605,7 +612,10 @@ async function publish(host, fields, flags, io) {
   }
   if (flags.open) io.openUrl?.(result.url);
   io.stderr.write(
-    `Published as ${result.visibility}: anyone with the link can view it.${copied ? " Link copied." : ""}\n` +
+    (result.visibility === "public"
+      ? "Published as public: anyone can view it."
+      : "Published as private: hidden from others, but anyone you share the link with can view it.") +
+      `${copied ? " Link copied." : ""}\n` +
       (redacted
         ? `Replaced ${redacted} secret${redacted === 1 ? "" : "s"} with [REDACTED:kind] (${kinds}).\n`
         : ""),

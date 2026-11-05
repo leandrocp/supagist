@@ -144,9 +144,19 @@ describe("GET /og/<param>.<hash>.jpg", () => {
     expect(res.headers.get("location")).toBe(`https://supagist.app/og/${current()}`);
   });
 
-  it("is not served for unlisted snippets, which keep their own share image", async () => {
-    db.snippet = row({ visibility: "unlisted" });
-    expect((await call(GET, current())).status).toBe(404);
+  it("serves a private snippet the same image as a public one, marked noindex", async () => {
+    const file = current();
+    const hash = ogImageHash(db.snippet as never);
+    db.stored.set(`https://storage.test/u1/snippets/s1/og-${hash}.jpg`, new Uint8Array([7, 8, 9]));
+    const pub = await call(GET, file);
+    expect(pub.headers.get("x-robots-tag")).toBeNull();
+
+    db.snippet = row({ visibility: "private" });
+    expect(current()).toBe(file);
+    const res = await call(GET, file);
+    expect(res.status).toBe(200);
+    expect(res.headers.get("x-robots-tag")).toBe("noindex");
+    expect(new Uint8Array(await res.arrayBuffer())).toEqual(new Uint8Array([7, 8, 9]));
   });
 
   it("404s a malformed name or unknown snippet", async () => {
@@ -187,13 +197,20 @@ describe("POST /og/<param>.jpg (generate on publish)", () => {
     expect(db.uploads).toEqual([]);
   });
 
-  it("needs the owner's token and stores nothing for unlisted snippets", async () => {
+  it("needs the owner's token", async () => {
     expect((await post()).status).toBe(401);
     db.claims = { sub: "someone-else" };
     expect((await post("token")).status).toBe(404);
-    db.claims = { sub: "u1" };
-    db.snippet = row({ visibility: "unlisted" });
-    expect(await (await post("token")).json()).toEqual({ stored: false, reason: "unlisted" });
     expect(db.uploads).toEqual([]);
+  });
+
+  it("stores the same image for private snippets", async () => {
+    db.claims = { sub: "u1" };
+    db.snippet = row({ visibility: "private" });
+    const hash = ogImageHash(db.snippet as never);
+    expect(await (await post("token")).json()).toMatchObject({ stored: true });
+    expect(db.uploads).toEqual([
+      { path: `u1/snippets/s1/og-${hash}.jpg`, type: "image/jpeg", bytes: expect.any(Number) },
+    ]);
   });
 });

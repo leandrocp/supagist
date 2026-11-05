@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { headers } from "next/headers";
 import Link from "next/link";
+import { Lock } from "lucide-react";
 import { cache } from "react";
 import { createHighlighter } from "@lumis-sh/lumis";
 import { bundledLanguages } from "@lumis-sh/lumis/bundles/full";
@@ -25,7 +26,6 @@ import { UserAvatar } from "@/components/user-avatar";
 import { Badge } from "@/components/ui/badge";
 import { recordVisit } from "@/app/actions/record-visit";
 import { buildAppUrl, getRequestOrigin } from "@/lib/utils";
-import { ogVersion } from "@/lib/og-image";
 import { ogImageHash, ogImagePath } from "@/lib/og-compose";
 import { parseSnippetAppearance } from "@/lib/snippet-appearance";
 
@@ -55,7 +55,7 @@ type SnippetRow = {
   og_image_path: string | null;
   title: string | null;
   created_at: string;
-  visibility: "public" | "unlisted";
+  visibility: "public" | "private";
   author: { id: string; username: string; avatar_url: string } | null;
 };
 
@@ -63,7 +63,7 @@ type SnippetRow = {
 const getSnippet = cache(async (slug: string, shortId: string) => {
   const supabase = await createClient();
   // The link is the capability: table reads never return other people's
-  // unlisted snippets, so look the snippet up by its exact slug + short_id.
+  // private snippets, so look the snippet up by its exact slug + short_id.
   const { data } = await supabase
     .rpc("get_snippet_by_link", { p_slug: slug, p_short_id: shortId })
     .select("*, author:author_id(id, username, avatar_url)")
@@ -93,7 +93,7 @@ export async function generateMetadata({ params }: Props) {
   const drawn = { ...snippet, code: snippet.raw_code };
 
   // Short, screen-reader-friendly description used as the social-card
-  // description (and the unlisted image's alt) — see buildSnippetSocialAlt.
+  // description — see buildSnippetSocialAlt.
   const author = snippet.author as { username: string } | null;
   const alt = buildSnippetSocialAlt({
     filename: snippet.filename,
@@ -104,27 +104,24 @@ export async function generateMetadata({ params }: Props) {
     charCount: snippet.code_char_count,
   });
 
-  // Public: the OG spec v2.1 JPEG at a URL versioned by everything drawn
-  // (app/og/[file]), stored at publish. Unlisted keeps its own share image
-  // (app/[snippet]/og.png), whose `?v=` also busts caches on a visibility
-  // change. A page's openGraph replaces the layout's, so name the image.
-  const images =
-    snippet.visibility === "public"
-      ? [
-          {
-            url: ogImagePath(param, ogImageHash(drawn)),
-            width: 1200,
-            height: 630,
-            type: "image/jpeg",
-            alt: `${snippet.filename} code snippet on Supagist`,
-          },
-        ]
-      : [{ url: `/${param}/og.png?v=${ogVersion(drawn)}`, width: 1200, height: 630, alt }];
+  // The OG spec v2.1 JPEG at a URL versioned by everything drawn
+  // (app/og/[file]), stored at publish. Private snippets get the same image:
+  // their authors choose who to share the link with. A page's openGraph
+  // replaces the layout's, so name the image.
+  const images = [
+    {
+      url: ogImagePath(param, ogImageHash(drawn)),
+      width: 1200,
+      height: 630,
+      type: "image/jpeg",
+      alt: `${snippet.filename} code snippet on Supagist`,
+    },
+  ];
   const title = `${snippet.title ?? snippet.filename} — Supagist`;
   return {
     title,
-    // Unlisted links are shareable, but search engines must not index them.
-    ...(snippet.visibility === "unlisted" ? { robots: { index: false, follow: false } } : {}),
+    // Private links are shareable, but search engines must not index them.
+    ...(snippet.visibility === "private" ? { robots: { index: false, follow: false } } : {}),
     description: alt,
     openGraph: {
       title,
@@ -248,13 +245,14 @@ export default async function SnippetPage({ params }: Props) {
                 <span>@{author.username}</span>
               </Link>
             ) : null}
-            {snippet.visibility === "unlisted" ? (
+            {snippet.visibility === "private" ? (
               <Badge
                 variant="secondary"
-                className="text-[13px] font-medium"
-                title="Only people with the link can see this snippet"
+                className="gap-1 text-[13px] font-medium [&_svg]:size-3.5"
+                title="Hidden from others: only people the author shares the link with can see it"
               >
-                Unlisted
+                <Lock aria-hidden="true" />
+                Private
               </Badge>
             ) : null}
             <span>{snippet.theme}</span>

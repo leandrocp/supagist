@@ -1,6 +1,6 @@
 /**
- * RLS for unlisted snippets, against the local Supabase stack (never mocked).
- * Unlisted rows must never come back from a table read (so no listing, feed or
+ * RLS for private snippets, against the local Supabase stack (never mocked).
+ * Private rows must never come back from a table read (so no listing, feed or
  * search can include them) except to their owner, yet stay reachable through
  * the exact slug + short_id link. Skips when local Supabase env is missing.
  */
@@ -46,17 +46,17 @@ describe.skipIf(skip)("snippet visibility RLS", () => {
   let alice: { id: string; client: SupabaseClient };
   let bob: { id: string; client: SupabaseClient };
   const tag = randomUUID().slice(0, 8);
-  const rows: Record<"public" | "unlisted", { id: string; slug: string; short_id: string }> =
+  const rows: Record<"public" | "private", { id: string; slug: string; short_id: string }> =
     {} as never;
 
   beforeAll(async () => {
     [alice, bob] = await Promise.all([createTestUser(), createTestUser()]);
-    for (const visibility of ["public", "unlisted"] as const) {
+    for (const visibility of ["public", "private"] as const) {
       const id = randomUUID();
       const row = { id, slug: `vis-${visibility}-${tag}`, short_id: id.slice(0, 8) };
       const { error } = await admin.from("snippets").insert({
         ...row,
-        ...(visibility === "unlisted" ? { visibility } : {}),
+        ...(visibility === "private" ? { visibility } : {}),
         author_id: alice.id,
         filename: "vis.ts",
         code: "x",
@@ -93,15 +93,26 @@ describe.skipIf(skip)("snippet visibility RLS", () => {
     expect(data?.visibility).toBe("public");
   });
 
-  it("rejects visibility values other than public and unlisted", async () => {
+  it("rejects visibility values other than public and private", async () => {
     const { error } = await admin
       .from("snippets")
-      .update({ visibility: "private" })
+      .update({ visibility: "secret" })
       .eq("id", rows.public.id);
     expect(error?.code).toBe("23514");
   });
 
-  it("never returns unlisted rows from table reads by anon or other users", async () => {
+  it("stores the old unlisted value as private, for clients still sending it", async () => {
+    const { data, error } = await alice.client
+      .from("snippets")
+      .update({ visibility: "unlisted" })
+      .eq("id", rows.private.id)
+      .select("visibility")
+      .single();
+    expect(error).toBeNull();
+    expect(data?.visibility).toBe("private");
+  });
+
+  it("never returns private rows from table reads by anon or other users", async () => {
     for (const client of [anon, bob.client]) {
       const { data: listing } = await client
         .from("snippets")
@@ -112,37 +123,37 @@ describe.skipIf(skip)("snippet visibility RLS", () => {
       const { data: direct } = await client
         .from("snippets")
         .select("id")
-        .eq("slug", rows.unlisted.slug)
-        .eq("short_id", rows.unlisted.short_id);
+        .eq("slug", rows.private.slug)
+        .eq("short_id", rows.private.short_id);
       expect(direct).toEqual([]);
     }
   });
 
-  it("shows owners their own unlisted snippets", async () => {
+  it("shows owners their own private snippets", async () => {
     const { data } = await alice.client
       .from("snippets")
       .select("id, visibility")
       .eq("author_id", alice.id)
       .order("visibility");
     expect(data).toEqual([
+      { id: rows.private.id, visibility: "private" },
       { id: rows.public.id, visibility: "public" },
-      { id: rows.unlisted.id, visibility: "unlisted" },
     ]);
   });
 
-  it("returns an unlisted snippet to anyone with the exact link", async () => {
+  it("returns an private snippet to anyone with the exact link", async () => {
     for (const client of [anon, bob.client]) {
       const { data, error } = await client
         .rpc("get_snippet_by_link", {
-          p_slug: rows.unlisted.slug,
-          p_short_id: rows.unlisted.short_id,
+          p_slug: rows.private.slug,
+          p_short_id: rows.private.short_id,
         })
         .select("id, visibility, author:author_id(id)")
         .maybeSingle();
       expect(error).toBeNull();
       expect(data).toEqual({
-        id: rows.unlisted.id,
-        visibility: "unlisted",
+        id: rows.private.id,
+        visibility: "private",
         author: { id: alice.id },
       });
     }
@@ -150,8 +161,8 @@ describe.skipIf(skip)("snippet visibility RLS", () => {
 
   it("returns nothing for a wrong or partial link", async () => {
     for (const args of [
-      { p_slug: rows.unlisted.slug, p_short_id: rows.public.short_id },
-      { p_slug: `vis-unlisted-${tag}`, p_short_id: "" },
+      { p_slug: rows.private.slug, p_short_id: rows.public.short_id },
+      { p_slug: `vis-private-${tag}`, p_short_id: "" },
       { p_slug: "%", p_short_id: "%" },
     ]) {
       const { data } = await anon.rpc("get_snippet_by_link", args).select("id");

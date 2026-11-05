@@ -68,12 +68,10 @@ const nextConfig: NextConfig = {
   // deployed saved view would fall back to plain text for every snippet.
   outputFileTracingIncludes: {
     "/\\[snippet\\]": ["./node_modules/@lumis-sh/wasm-*/**/*"],
-    // The share image reads its band font and seal at request time
-    // (lib/og-render.ts). It and the live thumbnail render snippets with the
-    // TTF faces and brand images (lib/snippet-render.ts).
-    "/\\[snippet\\]/og.png": ["./assets/og/**/*", ...SNIPPET_RENDER_FILES],
+    // The live thumbnail renders snippets with the TTF faces and brand images
+    // (lib/snippet-render.ts).
     "/\\[snippet\\]/image.png": SNIPPET_RENDER_FILES,
-    // The public share image (lib/og-compose-render.ts) reads the brand seal
+    // The share image (lib/og-compose-render.ts) reads the brand seal
     // and wordmark SVGs and Plex Mono at request time.
     "/og/\\[file\\]": [
       "./assets/brand/logo/mark/seal-flat-c*.svg",

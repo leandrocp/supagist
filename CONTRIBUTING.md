@@ -193,7 +193,7 @@ The scripted checks that CI runs against the local functions, each using disposa
 
 ```sh
 node supabase/functions/mcp/verify/appearance.mjs   # schema, catalog, skill examples
-node supabase/functions/mcp/verify/publish.mjs      # publish, redaction, unlisted, rate limit
+node supabase/functions/mcp/verify/publish.mjs      # publish, redaction, private, rate limit
 node supabase/functions/mcp/verify/tools.mjs        # search_themes, PNG, legacy inputs
 node supabase/functions/mcp/verify/manage.mjs       # owner-only update and delete
 ```

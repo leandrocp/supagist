@@ -8,7 +8,7 @@ import { SealMark } from "@/components/brand/seal-mark";
 import { play, prefersReducedMotion, takeJustPublished } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
-type Visibility = "public" | "unlisted";
+type Visibility = "public" | "private";
 
 /** How long the share-link pill stays before it slides away on its own. */
 const LINK_VISIBLE_MS = 12_000;
@@ -17,7 +17,7 @@ const LINK_VISIBLE_MS = 12_000;
  * The publish moment. When the composer has just published this snippet (see
  * markJustPublished), the brand seal is pressed onto the card's corner — the
  * R3 wax seal for public snippets, the flat one-colour wax seal (brand mono)
- * for unlisted ones — the card gives under the impact, and the share link slides
+ * for private ones — the card gives under the impact, and the share link slides
  * up. It plays once: a reload or any later visit renders nothing.
  *
  * Render it inside a `relative` box that wraps the snippet canvas. It is
@@ -74,7 +74,7 @@ export function PublishStamp({ visibility, url }: { visibility: Visibility; url:
 
   if (!state) return null;
 
-  const unlisted = visibility === "unlisted";
+  const isPrivate = visibility === "private";
 
   const copy = async () => {
     try {
@@ -101,16 +101,16 @@ export function PublishStamp({ visibility, url }: { visibility: Visibility; url:
           <span
             className={cn(
               "stamp-ink absolute inset-[6%] rounded-full",
-              unlisted
+              isPrivate
                 ? "bg-[radial-gradient(closest-side,hsl(var(--wax)/0.3),hsl(var(--wax)/0))]"
                 : "bg-[radial-gradient(closest-side,hsl(var(--wax)/0.5),hsl(var(--wax)/0))]",
             )}
           />
           <div
             className="stamp-press absolute inset-0"
-            style={{ "--stamp-rotate": unlisted ? "8deg" : "0deg" } as React.CSSProperties}
+            style={{ "--stamp-rotate": isPrivate ? "8deg" : "0deg" } as React.CSSProperties}
           >
-            {unlisted ? (
+            {isPrivate ? (
               // The brand's one-colour wax seal, pressed flat like a rubber
               // stamp. Wax reads on light and dark cards alike.
               <img

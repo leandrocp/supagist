@@ -38,7 +38,7 @@ Open [supagist.app](https://supagist.app), paste your code, and share the link. 
 
 ### MCP
 
-The Supagist MCP server renders code as SVG or PNG from your coding agent, and can publish it as an unlisted link. It speaks Streamable HTTP and signs you in with OAuth, so there is no API key to copy. Endpoint:
+The Supagist MCP server renders code as SVG or PNG from your coding agent, and can publish it as a private or public link. It speaks Streamable HTTP and signs you in with OAuth, so there is no API key to copy. Endpoint:
 
 ```text
 https://supagist.app/mcp
@@ -89,20 +89,20 @@ codex mcp login supagist
 
 Tools:
 
-| Tool              | What it does                                                                                                                                     |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `render_snippet`  | Renders code as an SVG, or as a PNG the model can see. Supports brand presets, themes, fonts, backgrounds, window chrome, line numbers and more. |
-| `search_themes`   | Searches the syntax themes by name, family (for example `catppuccin` or `nightfox`) and light or dark, a page at a time.                         |
-| `list_options`    | Lists every supported format, language, theme, brand, background, font and limit. Call it first if you are unsure which values are valid.        |
-| `publish_snippet` | Saves the code to your account as an unlisted Supagist link, with secrets redacted first. Your agent should ask you before it publishes.         |
-| `update_snippet`  | Edits the title or visibility of one of your snippets, by link; published code is sealed. Secrets are redacted first.                            |
-| `delete_snippet`  | Permanently deletes one of your snippets, by link, with its images, reactions and comments.                                                      |
+| Tool              | What it does                                                                                                                                       |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `render_snippet`  | Renders code as an SVG, or as a PNG the model can see. Supports brand presets, themes, fonts, backgrounds, window chrome, line numbers and more.   |
+| `search_themes`   | Searches the syntax themes by name, family (for example `catppuccin` or `nightfox`) and light or dark, a page at a time.                           |
+| `list_options`    | Lists every supported format, language, theme, brand, background, font and limit. Call it first if you are unsure which values are valid.          |
+| `publish_snippet` | Saves the code to your account as a private (or public) Supagist link, with secrets redacted first. Your agent should ask you before it publishes. |
+| `update_snippet`  | Edits the title or visibility of one of your snippets, by link; published code is sealed. Secrets are redacted first.                              |
+| `delete_snippet`  | Permanently deletes one of your snippets, by link, with its images, reactions and comments.                                                        |
 
 Rendering, searching and listing options save nothing. Every tool is rate limited per account.
 
 ### CLI
 
-The `supagist` CLI renders a file or stdin to an SVG or PNG image from the terminal, and publishes it as an unlisted snippet when you want a link. Node.js 22 or later, no runtime dependencies.
+The `supagist` CLI renders a file or stdin to an SVG or PNG image from the terminal, and publishes it as a private snippet (or public, with `--public`) when you want a link. Node.js 22 or later, no runtime dependencies.
 
 ```sh
 npx supagist src/lib/auth.ts --lines 12-40 --brand supabase --out auth.png
@@ -117,7 +117,7 @@ npx supagist auth login
 npx supagist src/app.ts --lines 1-20 --brand supabase --publish
 ```
 
-Published snippets are unlisted (anyone with the link can view them, nothing lists or indexes them), and common secrets are replaced with `[REDACTED:kind]` before anything is stored. See the [CLI README](./packages/cli/README.md) for every flag, JSON output and limits.
+Snippets are public or private, like GitHub gists. Published snippets are private unless you pass `--public` (only you see them in your list, anyone with the link can view them, nothing indexes them), and common secrets are replaced with `[REDACTED:kind]` before anything is stored. See the [CLI README](./packages/cli/README.md) for every flag, JSON output and limits.
 
 ### Agent skill
 

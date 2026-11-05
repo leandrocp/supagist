@@ -229,7 +229,7 @@ describe("versioned URL (spec §6.1)", () => {
     const hash = ogImageHash(snippet);
     expect(hash).toMatch(/^[0-9a-f]{16}$/);
     expect(
-      ogImageHash({ ...snippet, title: "Renamed", visibility: "unlisted" } as typeof snippet),
+      ogImageHash({ ...snippet, title: "Renamed", visibility: "private" } as typeof snippet),
     ).toBe(hash);
   });
 

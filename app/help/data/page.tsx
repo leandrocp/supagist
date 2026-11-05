@@ -24,7 +24,7 @@ export default function DataHelpPage() {
           <Link href="/snippets" className={link}>
             Your snippets
           </Link>{" "}
-          (/snippets). It lists your 20 most recent snippets, public and unlisted, with their
+          (/snippets). It lists your 20 most recent snippets, public and private, with their
           language, date and view count. For older snippets, or a full list, email us.
         </p>
       </Section>
@@ -35,7 +35,7 @@ export default function DataHelpPage() {
           <Link href="/snippets" className={link}>
             Your snippets
           </Link>
-          . You can change the title and visibility (public or unlisted); the link stays the same.
+          . You can change the title and visibility (public or private); the link stays the same.
           Once published, a snippet&apos;s code, language and theme are sealed. To change them,
           delete the snippet and publish it again.
         </p>
@@ -73,10 +73,11 @@ export default function DataHelpPage() {
       <Section title="AI assistants and MCP">
         <p>
           An assistant connected to Supagist&apos;s MCP server can render images and publish new
-          snippets as you. Published snippets are unlisted, and common secrets in the code are
-          replaced with placeholders before anything is stored. It can also edit or delete snippets
-          you own, and never anyone else&apos;s. To stop an assistant from using your account,
-          disconnect Supagist in that assistant. To revoke its access on our side as well, email us.
+          snippets as you. It publishes private snippets unless you ask for public, and common
+          secrets in the code are replaced with placeholders before anything is stored. It can also
+          edit or delete snippets you own, and never anyone else&apos;s. To stop an assistant from
+          using your account, disconnect Supagist in that assistant. To revoke its access on our
+          side as well, email us.
         </p>
       </Section>
 

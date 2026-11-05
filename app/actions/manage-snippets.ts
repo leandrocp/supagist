@@ -2,11 +2,12 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { storeShareImage } from "@/lib/og-publish";
+import type { SnippetVisibility } from "@/lib/snippet-visibility";
 
 /** What an owner can still change once a snippet is published (sealed). */
 export type SnippetEdit = {
   title: string;
-  visibility: "public" | "unlisted";
+  visibility: SnippetVisibility;
 };
 
 type Result = { ok: true; error?: never } | { ok?: never; error: string };
@@ -48,7 +49,7 @@ async function persistentUser() {
 export async function updateSnippet(snippetId: string, edit: SnippetEdit): Promise<Result> {
   const title = edit.title.trim();
   if (title.length > 120) return { error: "Title must be at most 120 characters." };
-  if (edit.visibility !== "public" && edit.visibility !== "unlisted") {
+  if (edit.visibility !== "public" && edit.visibility !== "private") {
     return { error: "Unknown visibility." };
   }
 

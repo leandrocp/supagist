@@ -26,7 +26,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ sni
   const { data: snippet } = await supabase
     .rpc("get_snippet_by_link", { p_slug: parsed.slug, p_short_id: parsed.shortId })
     .select("*, author:author_id(username, avatar_url)")
-    .maybeSingle<RenderableSnippet & { visibility: "public" | "unlisted" }>();
+    .maybeSingle<RenderableSnippet & { visibility: "public" | "private" }>();
   if (!snippet) return new Response("Not found", { status: 404 });
 
   const png = await renderSnippetPng(snippet);
@@ -34,7 +34,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ sni
     headers: {
       "Content-Type": "image/png",
       "Cache-Control": CACHE,
-      ...(snippet.visibility === "unlisted" ? { "X-Robots-Tag": "noindex" } : {}),
+      ...(snippet.visibility === "private" ? { "X-Robots-Tag": "noindex" } : {}),
     },
   });
 }

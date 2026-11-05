@@ -25,6 +25,12 @@ export const publishInput = z.strictObject({
     .max(120)
     .optional()
     .describe("Page title. Defaults to the filename; also forms the link slug."),
+  visibility: z
+    .enum(["public", "private"])
+    .default("private")
+    .describe(
+      "Who can see it, like a GitHub gist. private (the default): only the author lists it, anyone given the link can open it, never indexed. public: anyone can see it.",
+    ),
 });
 
 export type PublishInput = z.input<typeof publishInput>;
@@ -32,7 +38,7 @@ export type PublishInput = z.input<typeof publishInput>;
 export type PublishResult = {
   url: string;
   image_url: string;
-  visibility: "unlisted";
+  visibility: "public" | "private";
   redactions: RedactionSummary;
 };
 
@@ -87,7 +93,7 @@ export async function publishSnippet(
   if (!profile) throw new Error("Sign in to supagist.app once to create a profile, then retry.");
 
   const { renderSnippet } = await import("./render.ts");
-  const { title: _title, ...appearance } = input;
+  const { title: _title, visibility, ...appearance } = input;
   const rendered = await renderSnippet({
     ...appearance,
     code: code.code,
@@ -127,7 +133,7 @@ export async function publishSnippet(
     code_char_count: Array.from(code.code).length,
     line_count: code.code.split("\n").length,
     author_id: userId,
-    visibility: "unlisted",
+    visibility,
     // PNG assets come from the web composer's browser export; MCP stores SVG.
     canonical_image_path: null,
     og_image_path: null,
@@ -148,7 +154,7 @@ export async function publishSnippet(
   return {
     url: `${APP_ORIGIN}/${slug}-${short}`,
     image_url: bucket.getPublicUrl(svgPath).data.publicUrl,
-    visibility: "unlisted",
+    visibility,
     redactions,
   };
 }

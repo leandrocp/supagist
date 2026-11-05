@@ -1,5 +1,4 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { ogVersion } from "@/lib/og-image";
 
 // Supabase is external I/O; generateMetadata runs unmocked.
 const db = vi.hoisted(() => ({ snippet: null as Record<string, unknown> | null }));
@@ -64,11 +63,14 @@ describe("snippet page share metadata", () => {
     expect((await metadata()).openGraph.images[0].url).not.toBe(before);
   });
 
-  it("keeps the existing show-less share image for unlisted snippets", async () => {
-    db.snippet = row({ visibility: "unlisted" });
-    const url = `/snippet-tsx-zocdc9/og.png?v=${ogVersion(row({ visibility: "unlisted" }) as never)}`;
-    expect((await metadata()).openGraph.images).toEqual([
-      expect.objectContaining({ url, width: 1200, height: 630 }),
-    ]);
+  it("gives a private snippet the same share image as a public one, and noindex", async () => {
+    const pub = await metadata();
+    db.snippet = row({ visibility: "private" });
+    const priv = (await metadata()) as Awaited<ReturnType<typeof metadata>> & {
+      robots?: unknown;
+    };
+    expect(priv.openGraph.images).toEqual(pub.openGraph.images);
+    expect(priv.twitter.images).toEqual(pub.twitter.images);
+    expect(priv.robots).toEqual({ index: false, follow: false });
   });
 });

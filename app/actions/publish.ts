@@ -46,6 +46,9 @@ export async function publishSnippet(formData: FormData): Promise<PublishResult>
   // rest. Snapped to the composer's options; a missing field (an older
   // bundle mid-deploy) stores the defaults rather than failing the publish.
   const appearance = parseSnippetAppearance(parseDraftObject(formData.get("appearance")));
+  // Public or private (only the author lists it; the link opens it). Missing
+  // on an older bundle mid-deploy, which published public.
+  const visibility = formData.get("visibility") ?? "public";
 
   if (
     typeof code !== "string" ||
@@ -54,7 +57,8 @@ export async function publishSnippet(formData: FormData): Promise<PublishResult>
     typeof language !== "string" ||
     !(canonicalImage instanceof Blob) ||
     !(ogImage instanceof Blob) ||
-    !(svgBlob instanceof Blob)
+    !(svgBlob instanceof Blob) ||
+    (visibility !== "public" && visibility !== "private")
   ) {
     return { error: "Invalid publish data." };
   }
@@ -189,6 +193,7 @@ export async function publishSnippet(formData: FormData): Promise<PublishResult>
     og_image_path: ogPath,
     svg_path: svgPath,
     raw_path: rawPath,
+    visibility,
   });
 
   if (insertError) {

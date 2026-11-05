@@ -53,14 +53,14 @@ function makeSupabase({
   };
 }
 
-const edit = { title: "  Hello  ", visibility: "unlisted" as const };
+const edit = { title: "  Hello  ", visibility: "private" as const };
 
 describe("updateSnippet", () => {
   beforeEach(() => vi.clearAllMocks());
 
   it.each([
     [{ title: "t".repeat(121) }, /at most 120/],
-    [{ visibility: "private" }, /Unknown visibility/],
+    [{ visibility: "unlisted" }, /Unknown visibility/],
   ])("rejects %o before touching the database", async (change, message) => {
     const result = await updateSnippet(ID, { ...edit, ...change } as never);
     expect(result.error).toMatch(message);
@@ -73,11 +73,11 @@ describe("updateSnippet", () => {
     // Sealed fields smuggled in by a caller are never sent.
     const smuggled = { ...edit, code: "changed", theme: "dracula" } as never;
     expect(await updateSnippet(ID, smuggled)).toEqual({ ok: true });
-    expect(supabase.calls).toContainEqual(["update", { title: "Hello", visibility: "unlisted" }]);
+    expect(supabase.calls).toContainEqual(["update", { title: "Hello", visibility: "private" }]);
     expect(supabase.calls).toContainEqual(["eq", "author_id", "user-1"]);
   });
 
-  it("has the public share image stored when a snippet is made public, not when unlisted", async () => {
+  it("has the public share image stored when a snippet is made public, not when private", async () => {
     const supabase = makeSupabase({
       result: { data: [{ id: ID, slug: "posts-ts", short_id: "ab12cd" }], error: null },
     });

@@ -56,6 +56,7 @@ const RENDER_FLAGS = {
   open: { type: "boolean" },
   "from-clipboard": { type: "boolean" },
   title: { type: "string" },
+  public: { type: "boolean" },
 };
 const ALIASES = { o: "out", h: "help", v: "version" };
 const AUTH_ACTIONS = ["login", "logout", "status"];
@@ -139,8 +140,9 @@ export function parseArgs(argv) {
   if (flags.publish) {
     const conflict = NOT_PUBLISHED.find((name) => name in flags);
     if (conflict) throw new UsageError(`--${conflict} can't be used with --publish.`);
-  } else if ("title" in flags) {
-    throw new UsageError("--title only applies with --publish.");
+  } else {
+    const publishOnly = ["title", "public"].find((name) => name in flags);
+    if (publishOnly) throw new UsageError(`--${publishOnly} only applies with --publish.`);
   }
   return { command: "render", file: positionals[0], flags };
 }

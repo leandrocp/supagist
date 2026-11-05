@@ -43,8 +43,8 @@ describe("GET /[snippet]/image.png", () => {
     expect((await sharp(Buffer.from(await res.arrayBuffer())).metadata()).width).toBeGreaterThan(0);
   }, 30_000);
 
-  it("marks unlisted renders noindex and 404s for unknown links", async () => {
-    db.snippet = { ...db.snippet, visibility: "unlisted" };
+  it("marks private renders noindex and 404s for unknown links", async () => {
+    db.snippet = { ...db.snippet, visibility: "private" };
     expect((await get()).headers.get("x-robots-tag")).toBe("noindex");
     db.snippet = null;
     expect((await get()).status).toBe(404);

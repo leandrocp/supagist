@@ -190,7 +190,7 @@ jobs:
       # OAuth-protected HTTP, tool schema, catalog, skill examples, 16:9 and
       # ligatures, each render as a disposable local user.
       - run: node supabase/functions/mcp/verify/appearance.mjs
-      # Auth, unlisted + redacted storage, RLS visibility and -32300.
+      # Auth, private-by-default + redacted storage, RLS visibility and -32300.
       - run: node supabase/functions/mcp/verify/publish.mjs
       # search_themes, PNG through the web app, legacy inputs, close matches.
       - run: node supabase/functions/mcp/verify/tools.mjs

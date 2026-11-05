@@ -20,7 +20,7 @@ const BUCKET = "snippet-images";
 type Snippet = OgHashable & {
   id: string;
   author_id: string | null;
-  visibility: "public" | "unlisted";
+  visibility: "public" | "private";
   og_image_path: string | null;
 };
 
@@ -50,18 +50,17 @@ function logRender(snippet: Snippet, metrics: OgMetrics, trigger: "publish" | "r
 }
 
 /**
- * The public share image (OG spec v2.1) at its versioned URL. Publish stores
- * it beside the snippet's other files (POST below); a miss renders it here.
- * Unlisted snippets keep their own share image (app/[snippet]/og.png).
+ * The share image (OG spec v2.1) at its versioned URL, the same for public
+ * and private snippets. Publish stores it beside the snippet's other files
+ * (POST below); a miss renders it here. Like the page, a private snippet's
+ * image is never indexed.
  */
 export async function GET(request: Request, { params }: { params: Promise<{ file: string }> }) {
   const file = parseOgImageFile((await params).file);
   if (!file) return new Response("Not found", { status: 404 });
   const supabase = supabaseFor();
   const snippet = await loadSnippet(supabase, file.param);
-  if (!snippet || snippet.visibility !== "public") {
-    return new Response("Not found", { status: 404 });
-  }
+  if (!snippet) return new Response("Not found", { status: 404 });
 
   const hash = ogImageHash(snippet);
   if (hash !== file.hash) {
@@ -77,6 +76,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ file
     "Content-Type": "image/jpeg",
     "Cache-Control": IMMUTABLE,
     "CDN-Cache-Control": IMMUTABLE,
+    ...(snippet.visibility === "private" ? { "X-Robots-Tag": "noindex" } : {}),
   };
 
   if (snippet.author_id) {
@@ -114,7 +114,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ file
 /**
  * Generates and stores the share image at publish (spec §6.7), so the first
  * paste of the auto-copied link already has it. Called with the owner's
- * access token by the web publish and visibility change, and by the MCP
+ * access token by the web publish and edit, and by the MCP
  * `update_snippet` tool; the file goes into the owner's folder under the
  * Storage policies. Any `<param>.jpg` names the snippet; the hash is the
  * current one.
@@ -135,11 +135,6 @@ export async function POST(request: Request, { params }: { params: Promise<{ fil
   if (!snippet || snippet.author_id !== userId) {
     return Response.json({ error: "Snippet not found, or it isn't yours." }, { status: 404 });
   }
-  if (snippet.visibility !== "public") {
-    // Unlisted snippets use the existing share image; nothing to store.
-    return Response.json({ stored: false, reason: "unlisted" });
-  }
-
   const hash = ogImageHash(snippet);
   const path = ogStoragePath(userId, snippet.id, hash);
   const existing = await fetch(supabase.storage.from(BUCKET).getPublicUrl(path).data.publicUrl, {

@@ -15,7 +15,7 @@ function setReducedMotion(reduce: boolean) {
 }
 
 /** The page's canvas the seal is pressed onto, plus the stamp itself. */
-function renderStamp(visibility: "public" | "unlisted" = "public") {
+function renderStamp(visibility: "public" | "private" = "public") {
   return render(
     <>
       <div data-testid="snippet-canvas" />
@@ -68,12 +68,12 @@ describe("PublishStamp", () => {
     expect(screen.getByRole("button", { name: "Copied" })).toBeTruthy();
   });
 
-  it("uses the flat one-colour seal for unlisted snippets", () => {
+  it("uses the flat one-colour seal for private snippets", () => {
     markJustPublished(PATH, false);
-    renderStamp("unlisted");
+    renderStamp("private");
 
     const stamp = screen.getByTestId("publish-stamp");
-    expect(stamp.dataset.variant).toBe("unlisted");
+    expect(stamp.dataset.variant).toBe("private");
     expect(stamp.querySelector('img[src="/brand/seal-a-wax.svg"]')).not.toBeNull();
     expect(stamp.querySelector('img[src="/brand/seal-r3-240.png"]')).toBeNull();
     // The clipboard write failed, so the link offers to copy instead.

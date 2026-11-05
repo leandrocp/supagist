@@ -120,38 +120,35 @@ test("snippets never show trailing whitespace, published or already stored", asy
   await expect(page.getByText("3 lines", { exact: true }).first()).toBeVisible();
 });
 
-test("web publishes stay public; unlisted snippets show the indicator and noindex", async ({
+test("web publishes default to public; a private pick shows the badge, noindex and stays listed", async ({
   page,
 }) => {
+  const robots = page.locator('meta[name="robots"]');
   await page.goto("/");
-  await page.locator("textarea").fill("const unlisted = true;");
-  await page.getByLabel("Filename", { exact: true }).fill("unlisted.ts");
+  await page.locator("textarea").fill("const shared = true;");
+  await page.getByLabel("Filename", { exact: true }).fill("public.ts");
   await page.getByRole("button", { name: /^publish$/i }).click();
   await page.waitForURL(/\/[a-z0-9-]+-[a-z0-9]{6}$/);
-  const robots = page.locator('meta[name="robots"]');
-  await expect(page.getByRole("heading", { name: "unlisted.ts" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "public.ts" })).toBeVisible();
   await expect(robots).toHaveCount(0);
-  await expect(page.getByText("Unlisted", { exact: true })).toHaveCount(0);
+  await expect(page.getByText("Private", { exact: true })).toHaveCount(0);
 
-  // Visibility has no client write path yet; flip it as a trusted admin.
+  await page.goto("/");
+  await page.locator("textarea").fill("const secret = true;");
+  await page.getByLabel("Filename", { exact: true }).fill("private.ts");
+  await page.getByRole("button", { name: "Choose who can see it" }).click();
+  await page.getByRole("menuitemradio", { name: /Private/ }).click();
+  await page.getByRole("button", { name: "Publish private" }).click();
+  await page.waitForURL(/\/[a-z0-9-]+-[a-z0-9]{6}$/);
   const shortId = new URL(page.url()).pathname.split("-").pop()!;
-  const admin = createClient(process.env.E2E_SUPABASE_URL!, process.env.E2E_SUPABASE_SERVICE_KEY!, {
-    auth: { persistSession: false },
-  });
-  const { error } = await admin
-    .from("snippets")
-    .update({ visibility: "unlisted" })
-    .eq("short_id", shortId);
-  expect(error).toBeNull();
-
-  await page.reload();
-  await expect(page.getByText("Unlisted", { exact: true })).toBeVisible();
+  await expect(page.getByText("Private", { exact: true })).toBeVisible();
   await expect(robots).toHaveAttribute("content", "noindex, nofollow");
-  await expect(page.getByText("const unlisted")).toBeVisible();
+  await expect(page.getByText("const secret")).toBeVisible();
 
-  // The owner still finds it under /snippets.
+  // The owner still finds it under /snippets, marked private.
   await page.goto("/snippets");
-  await expect(page.locator(`a[href$="-${shortId}"]`).first()).toBeVisible();
+  const card = page.locator("li", { has: page.locator(`a[href$="-${shortId}"]`) });
+  await expect(card.getByText("Private", { exact: true })).toBeVisible();
 });
 
 test("authenticated user can add a reaction to a line", async ({ page }) => {

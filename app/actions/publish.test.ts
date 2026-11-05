@@ -388,6 +388,23 @@ describe("publishSnippet — happy path", () => {
     const row = supabase._.mockInsert.mock.calls[0]![0] as { appearance: SnippetAppearance };
     expect(row.appearance).toEqual(DEFAULT_SNIPPET_APPEARANCE);
   });
+
+  it("stores the visibility the author picked, public when a client sends none", async () => {
+    const supabase = makeMockSupabase();
+    mockCreateClient.mockResolvedValue(supabase);
+    await publishSnippet(makeFormData({ visibility: "private" }));
+    await publishSnippet(makeFormData());
+    const rows = supabase._.mockInsert.mock.calls.map(([row]) => row as { visibility: string });
+    expect(rows.map((row) => row.visibility)).toEqual(["private", "public"]);
+  });
+
+  it("rejects an unknown visibility before touching storage", async () => {
+    const supabase = makeMockSupabase();
+    mockCreateClient.mockResolvedValue(supabase);
+    const result = await publishSnippet(makeFormData({ visibility: "unlisted" }));
+    expect(result.error).toBe("Invalid publish data.");
+    expect(supabase._.mockUpload).not.toHaveBeenCalled();
+  });
 });
 
 // ── Error handling ────────────────────────────────────────────────────────────

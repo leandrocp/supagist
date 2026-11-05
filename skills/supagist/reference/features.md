@@ -12,7 +12,7 @@ see [cli.md](cli.md).
 | PNG straight from a shell                                        | CLI `npx supagist file --out image.png` (see cli.md)                |
 | PNG file over MCP, including the web app's 2×/4×/6× scale        | Convert the saved SVG locally; default 2000px wide unless specified |
 | Copy/download raw source                                         | Save the user's original code locally; an SVG is not a source file  |
-| Shareable unlisted link                                          | CLI `--publish` or MCP `publish_snippet`, after the user confirms   |
+| Shareable private or public link                                 | CLI `--publish` or MCP `publish_snippet`, after the user confirms   |
 | Edit interactively and preview                                   | Web composer at https://supagist.app                                |
 | Saved snippets, live comments/reactions, presence, notifications | Web app; not MCP tools                                              |
 
@@ -188,10 +188,13 @@ For an explicitly annotated custom image:
   include Supagist source attribution. Desktop export is a dialog, mobile a drawer.
 - **Publish:** requires sign-in and at most 8000 code points; creates saved source,
   image assets and a shareable snippet URL, clears the draft and best-effort copies
-  the link. Publishing is an external write requiring user authorization. From an
-  agent, CLI `--publish` and MCP `publish_snippet` create unlisted snippets with
-  secrets redacted.
-- **Saved snippet:** public read-only code and metadata, copy code, copy share link,
+  the link. The author picks public or private, like a GitHub gist (the composer
+  starts on public). Private snippets are listed only for their author, open for
+  anyone with the link and are never indexed; both share the same social image.
+  Publishing is an external write requiring user authorization. From an agent,
+  CLI `--publish` and MCP `publish_snippet` create private snippets unless the
+  user asks for public (`--public`, `visibility: "public"`), with secrets redacted.
+- **Saved snippet:** read-only code and metadata, copy code, copy share link,
   exports and social-link preview. Signed-in users add/remove their own reactions
   or add per-line comments (up to 2000 characters). Reactions and threaded comments
   update live with reader presence; authors receive notification toasts. Export

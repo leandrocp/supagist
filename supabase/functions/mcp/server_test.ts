@@ -74,8 +74,11 @@ Deno.test("publish_snippet writes, never destroys, and takes appearance but not 
   assert.ok(fields.includes("title") && fields.includes("brand") && fields.includes("code"));
   for (const renderOnly of ["reactions", "comments", "author", "fixture", "pixelRatio"])
     assert.ok(!fields.includes(renderOnly), renderOnly);
-  for (const promise of ["unlisted", "redacted", "noindex"])
+  for (const promise of ["private", "redacted", "noindex"])
     assert.ok(publish.description.includes(promise), promise);
+  // Public or private, like the web composer; agents publish private unless asked.
+  assert.deepEqual(publish.inputSchema.properties.visibility.enum, ["public", "private"]);
+  assert.equal(publish.inputSchema.properties.visibility.default, "private");
 });
 
 Deno.test("search_themes returns a JSON page of matching themes", async () => {

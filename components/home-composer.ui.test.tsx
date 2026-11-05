@@ -89,6 +89,19 @@ vi.mock("@/components/theme-picker", () => ({
   ),
 }));
 
+const publishSnippet = vi.hoisted(() => vi.fn(async (_form: FormData) => ({ error: "stop" })));
+vi.mock("@/app/actions/publish", () => ({ publishSnippet }));
+vi.mock("@/lib/snippet-images", () => ({
+  createDraftPng: vi.fn(),
+  createDraftSvg: vi.fn(),
+  createSnippetImages: vi.fn(async () => ({
+    canonical: new Blob(["png"]),
+    og: new Blob(["png"]),
+    svg: new Blob(["<svg/>"]),
+    card: new Blob(["png"]),
+  })),
+}));
+
 vi.mock("@/components/home-presence", () => ({ HomePresence: () => null }));
 vi.mock("@/components/user-avatar", () => ({ UserAvatar: () => null }));
 
@@ -107,6 +120,22 @@ afterEach(() => {
 });
 
 describe("HomeComposer controls", () => {
+  it("publishes public by default, or private when the author picks it", async () => {
+    render(<HomeComposer />);
+    fireEvent.click(screen.getByRole("button", { name: "Publish" }));
+    await vi.waitFor(() => expect(publishSnippet).toHaveBeenCalledTimes(1));
+    expect(publishSnippet.mock.calls[0]![0].get("visibility")).toBe("public");
+
+    // Radix opens menus on pointerdown; the keyboard path works under happy-dom.
+    fireEvent.keyDown(screen.getByRole("button", { name: "Choose who can see it" }), {
+      key: "Enter",
+    });
+    fireEvent.click(await screen.findByRole("menuitemradio", { name: /Private/ }));
+    fireEvent.click(screen.getByRole("button", { name: "Publish private" }));
+    await vi.waitFor(() => expect(publishSnippet).toHaveBeenCalledTimes(2));
+    expect(publishSnippet.mock.calls[1]![0].get("visibility")).toBe("private");
+  });
+
   it("uses the wax primary for Publish and keeps the preview gutter", () => {
     render(<HomeComposer />);
 

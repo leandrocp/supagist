@@ -15,6 +15,7 @@ const snippet = {
   language: "typescript",
   created_at: "2026-07-14T12:00:00.000Z",
   view_count: 42,
+  visibility: "public" as const,
   thumbnail_url: "https://cdn.test/snippet-images/u/snippets/s/canonical.png",
 };
 
@@ -34,6 +35,27 @@ describe("SnippetList", () => {
     expect(screen.getByText("TypeScript")).toBeTruthy();
     expect(screen.getByText(/Jul 14/)).toBeTruthy();
     expect(screen.getByText(/42 views/)).toBeTruthy();
+  });
+
+  it("marks only private snippets, so the author can tell them apart", () => {
+    render(
+      <SnippetList
+        snippets={[
+          snippet,
+          {
+            ...snippet,
+            id: "s2",
+            short_id: "def456",
+            filename: "secret.ts",
+            visibility: "private",
+          },
+        ]}
+      />,
+    );
+
+    const [pub, priv] = screen.getAllByRole("listitem");
+    expect(pub!.textContent).not.toContain("Private");
+    expect(priv!.textContent).toContain("Private");
   });
 
   it("omits the view count when nothing has viewed the snippet yet", () => {

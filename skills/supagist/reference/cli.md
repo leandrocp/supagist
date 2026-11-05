@@ -7,24 +7,25 @@ with `node packages/cli` in place of `npx supagist`, or use the
 
 ```sh
 npx supagist <file|-> [flags]        # render to a file (or stdout)
-npx supagist <file|-> --publish      # unlisted snippet, prints its link
+npx supagist <file|-> --publish      # private snippet, prints its link
 npx supagist options [--json]        # brands, themes, fonts, languages, limits
 npx supagist auth login|logout|status
 ```
 
 ## Output and input
 
-| Flag                | Values                                                                                                |
-| ------------------- | ----------------------------------------------------------------------------------------------------- |
-| `--out <file>`      | `.png` or `.svg`; the extension picks the format. Also `-o`. Without it, writes to stdout             |
-| `--format svg\|png` | Only when the file name has another extension, or for stdout                                          |
-| `--lines <a-b>`     | 1-based, inclusive, e.g. `12-40`, or one line `7`. A range past the end stops at the end              |
-| `--filename <name>` | Name in the header and for language detection, needed with `-` (stdin)                                |
-| `--language <id>`   | Exact language id; by default the server detects it from the filename and code                        |
-| `--pixel-ratio <n>` | PNG `1`, `2` (default), `4`, `6`; SVG `1` or `2`                                                      |
-| `--json`            | One JSON line on stdout, for results and errors                                                       |
-| `--publish`         | Save an unlisted snippet instead of a file. Not with `--out`, `--format`, `--pixel-ratio`, `--author` |
-| `--title <text>`    | Page title of a published snippet; also forms the link slug                                           |
+| Flag                | Values                                                                                              |
+| ------------------- | --------------------------------------------------------------------------------------------------- |
+| `--out <file>`      | `.png` or `.svg`; the extension picks the format. Also `-o`. Without it, writes to stdout           |
+| `--format svg\|png` | Only when the file name has another extension, or for stdout                                        |
+| `--lines <a-b>`     | 1-based, inclusive, e.g. `12-40`, or one line `7`. A range past the end stops at the end            |
+| `--filename <name>` | Name in the header and for language detection, needed with `-` (stdin)                              |
+| `--language <id>`   | Exact language id; by default the server detects it from the filename and code                      |
+| `--pixel-ratio <n>` | PNG `1`, `2` (default), `4`, `6`; SVG `1` or `2`                                                    |
+| `--json`            | One JSON line on stdout, for results and errors                                                     |
+| `--publish`         | Save a private snippet instead of a file. Not with `--out`, `--format`, `--pixel-ratio`, `--author` |
+| `--public`          | With `--publish`: make the snippet public instead of private                                        |
+| `--title <text>`    | Page title of a published snippet; also forms the link slug                                         |
 
 ## Appearance
 
@@ -57,7 +58,7 @@ the brand, then your flags.
 
 ```json
 { "ok": true, "path": "auth.png", "format": "png", "width": 1472, "height": 992, "bytes": 184321 }
-{ "ok": true, "url": "https://supagist.app/auth-flow-x7k2q9", "image": "https://…/canonical.svg", "visibility": "unlisted", "redactions": { "redacted": 1, "kinds": { "aws_access_key": 1 } } }
+{ "ok": true, "url": "https://supagist.app/auth-flow-x7k2q9", "image": "https://…/canonical.svg", "visibility": "private", "redactions": { "redacted": 1, "kinds": { "aws_access_key": 1 } } }
 { "ok": false, "error": { "code": "RATE_LIMITED", "message": "Rate limit reached. …", "status": 429, "retryAfter": 60 } }
 ```
 

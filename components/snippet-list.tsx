@@ -1,8 +1,10 @@
 import type { CSSProperties } from "react";
 import Link from "next/link";
+import { Lock } from "lucide-react";
 import { SnippetOwnerActions } from "@/components/snippet-owner-actions";
 import type { SnippetSummary } from "@/app/actions/get-my-snippets";
 import { languageDisplayName } from "@/lib/snippet-utils";
+import { Badge } from "@/components/ui/badge";
 
 function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric" });
@@ -50,9 +52,17 @@ export function SnippetList({ snippets }: { snippets: SnippetSummary[] }) {
                 </span>
               ) : null}
             </span>
-            <span className="-mt-2 px-0.5 text-sm tabular-nums text-muted-foreground">
-              {formatDate(s.created_at)}
-              {s.view_count > 0 ? ` · ${s.view_count.toLocaleString()} views` : null}
+            <span className="-mt-2 flex items-center gap-2 px-0.5 text-sm tabular-nums text-muted-foreground">
+              <span>
+                {formatDate(s.created_at)}
+                {s.view_count > 0 ? ` · ${s.view_count.toLocaleString()} views` : null}
+              </span>
+              {s.visibility === "private" ? (
+                <Badge variant="secondary" className="gap-1 font-medium [&_svg]:size-3">
+                  <Lock aria-hidden="true" />
+                  Private
+                </Badge>
+              ) : null}
             </span>
           </Link>
           {/* Outside the link so opening the menu never navigates. */}

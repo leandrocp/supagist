@@ -7,7 +7,7 @@ A remote MCP server, `supagist`, on a Supabase Edge Function. Tools:
 | `render_snippet`  | code plus appearance; `format` `svg` (default) or `png`         | SVG document as text, or a PNG as MCP image content plus size    | no     |
 | `search_themes`   | `query`, `family`, `appearance` (dark/light), `limit`, `offset` | a JSON page of `{id, appearance, family, kind}` and `nextOffset` | no     |
 | `list_options`    | none                                                            | formats, languages, themes, brands, backgrounds, fonts, limits   | no     |
-| `publish_snippet` | code plus appearance and an optional title                      | unlisted link, stored SVG URL, redaction counts                  | yes    |
+| `publish_snippet` | code plus appearance, optional `title` and `visibility`         | link (private by default), stored SVG URL, redaction counts      | yes    |
 | `update_snippet`  | `snippet` link plus `title`, `visibility`                       | link, visibility, redaction counts                               | yes    |
 | `delete_snippet`  | `snippet` link                                                  | the deleted link                                                 | yes    |
 
@@ -100,7 +100,7 @@ publishing is refused with -32300 before the trigger fires). Constants live in
 quota. `publish_snippet` (2026-11-01) redacts secrets (`redact.ts`), renders the SVG,
 then uploads it and inserts the snippet with the caller-scoped client, so RLS,
 Storage policies and the publish trigger apply as the signed-in user. Snippets
-are `unlisted` and store no PNGs. `verify/publish.mjs` checks the contract
+are `private` unless `visibility: "public"` is passed, and store no PNGs. `verify/publish.mjs` checks the contract
 against local Supabase in CI.
 
 `update_snippet` and `delete_snippet` (2026-11-01, `manage.ts`) take a snippet

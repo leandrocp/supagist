@@ -47,9 +47,10 @@ describe("parseArgs", () => {
       action: "status",
       flags: { json: true },
     });
-    expect(parseArgs(["a.ts", "--publish", "--title", "Hi"]).flags).toEqual({
+    expect(parseArgs(["a.ts", "--publish", "--title", "Hi", "--public"]).flags).toEqual({
       publish: true,
       title: "Hi",
+      public: true,
     });
   });
 
@@ -73,6 +74,7 @@ describe("parseArgs", () => {
     [["a.ts", "--publish", "--pixel-ratio", "2"], "--pixel-ratio can't be used with --publish"],
     [["a.ts", "--publish", "--author", "me"], "--author can't be used with --publish"],
     [["a.ts", "--title", "Hi"], "--title only applies with --publish"],
+    [["a.ts", "--public"], "--public only applies with --publish"],
   ])("rejects %j as a usage error", (argv, message) => {
     expect(() => parseArgs(argv)).toThrow(UsageError);
     expect(() => parseArgs(argv)).toThrow(message);
@@ -489,7 +491,7 @@ describe("run", () => {
     const published = {
       url: "https://supagist.app/deploy-config-abc123",
       image_url: "https://storage.example/canonical.svg",
-      visibility: "unlisted",
+      visibility: "private",
       redactions: { redacted: 1, kinds: { aws_access_key: 1 } },
     };
     const sse = (message: object) =>
@@ -606,7 +608,7 @@ describe("run", () => {
         ),
       ).toBe(0);
       expect(stdout.join("")).toBe(`${published.url}\n`);
-      expect(stderr.join("")).toContain("Published as unlisted");
+      expect(stderr.join("")).toContain("Published as private: hidden from others");
       expect(stderr.join("")).toContain(
         "Replaced 1 secret with [REDACTED:kind] (1 aws_access_key)",
       );
@@ -630,6 +632,7 @@ describe("run", () => {
         filename: "auth.ts",
         brand: "supabase",
         title: "Deploy config",
+        visibility: "private",
       });
       // The rotated refresh token replaces the used one.
       expect(JSON.parse(await readFile(credentialsFile(), "utf8"))).toMatchObject({
@@ -658,6 +661,24 @@ describe("run", () => {
       expect(stdout.join("")).toBe(`${published.url}\n`);
     });
 
+    it("publishes public with --public", async () => {
+      await saveCredentials(NOW + 3_600_000);
+      fetchMock.mockResolvedValue(
+        Response.json({
+          jsonrpc: "2.0",
+          id: 1,
+          result: {
+            content: [
+              { type: "text", text: JSON.stringify({ ...published, visibility: "public" }) },
+            ],
+          },
+        }),
+      );
+      expect(await cli(join(dir, "auth.ts"), "--publish", "--public")).toBe(0);
+      expect(sent(0).body.params.arguments.visibility).toBe("public");
+      expect(stderr.join("")).toContain("Published as public: anyone can view it.");
+    });
+
     it("reports a publish as JSON and tool errors as failures", async () => {
       await saveCredentials(NOW + 3_600_000);
       fetchMock.mockResolvedValueOnce(
@@ -672,7 +693,7 @@ describe("run", () => {
         ok: true,
         url: published.url,
         image: published.image_url,
-        visibility: "unlisted",
+        visibility: "private",
         redactions: published.redactions,
       });
 

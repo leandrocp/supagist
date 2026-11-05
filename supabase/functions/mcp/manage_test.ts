@@ -21,7 +21,8 @@ Deno.test("an update needs at least one change and cannot touch sealed fields", 
   assert.equal(updateInput.safeParse({ snippet }).success, false);
   assert.equal(updateInput.safeParse({ snippet, title: "" }).success, true);
   assert.equal(updateInput.safeParse({ snippet, visibility: "public" }).success, true);
-  assert.equal(updateInput.safeParse({ snippet, visibility: "private" }).success, false);
+  assert.equal(updateInput.safeParse({ snippet, visibility: "private" }).success, true);
+  assert.equal(updateInput.safeParse({ snippet, visibility: "unlisted" }).success, false);
   // A published snippet is sealed: code, language and theme are refused.
   for (const sealed of [{ code: "x" }, { language: "rust" }, { theme: "dracula" }])
     assert.equal(
@@ -40,7 +41,7 @@ Deno.test("making a snippet public has its share image stored, as the caller", a
     return chain;
   };
   const rows = [
-    { data: { id: "s1", slug: "posts-ts", short_id: "ab12cd", visibility: "unlisted" } },
+    { data: { id: "s1", slug: "posts-ts", short_id: "ab12cd", visibility: "private" } },
     { data: { visibility: "public" } },
   ];
   const supabase = { from: () => query(rows.shift()) } as unknown as SupabaseClient;

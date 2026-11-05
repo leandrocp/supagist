@@ -137,16 +137,18 @@ The CLI is a thin client for two endpoints, which you can also call directly:
 ```sh
 supagist auth login                                    # once per machine
 supagist src/lib/auth.ts --lines 12-40 --brand supabase --publish --title "Auth flow"
-supagist src/app.ts --publish --json
+supagist src/app.ts --publish --public --json
 ```
 
 `--publish` saves a snippet to your Supagist account and prints its link on
 stdout. It takes the same appearance flags as a render, plus `--title` for the
-page heading and link slug. `--out`, `--format`, `--pixel-ratio` and `--author`
+page heading and link slug and `--public` to make it public. `--out`, `--format`, `--pixel-ratio` and `--author`
 don't apply: the snippet is stored as SVG and credited to your account.
 
-- **Unlisted.** Anyone with the link can view the snippet. It is never listed
-  or indexed.
+- **Private by default**, like a secret GitHub gist. Only you see it in your
+  snippets, and anyone you share the link with can view it. It is never listed
+  or indexed. `--public` lets anyone see it; you can switch it later on
+  supagist.app.
 - **Secrets are redacted.** Before anything is stored, the server replaces
   common secrets (API keys, tokens, private keys) in the code and title with
   `[REDACTED:kind]`. The output says how many were replaced, never their values.
@@ -160,7 +162,7 @@ don't apply: the snippet is stored as SVG and credited to your account.
   "ok": true,
   "url": "https://supagist.app/auth-flow-x7k2q9",
   "image": "https://….supabase.co/storage/v1/object/public/snippet-images/…/canonical.svg",
-  "visibility": "unlisted",
+  "visibility": "public",
   "redactions": { "redacted": 1, "kinds": { "aws_access_key": 1 } }
 }
 ```

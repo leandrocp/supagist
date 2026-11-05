@@ -25,6 +25,7 @@ import {
 import { Spinner } from "@/components/ui/spinner";
 import { createClient } from "@/lib/supabase/client";
 import { play } from "@/lib/motion";
+import { SNIPPET_VISIBILITIES } from "@/lib/snippet-visibility";
 
 /** The snippet on screen: its card in a list, or the canvas on its own page. */
 function snippetSurface(snippetId: string): Element | null {
@@ -178,11 +179,6 @@ function DeleteSnippetModal({
   );
 }
 
-const visibilities = [
-  { id: "public", label: "Public", hint: "Anyone can find it." },
-  { id: "unlisted", label: "Unlisted", hint: "Only people with the link can open it." },
-] as const;
-
 function EditSnippetModal({ snippetId, onClose }: { snippetId: string; onClose: () => void }) {
   const router = useRouter();
   const [draft, setDraft] = useState<SnippetEdit & { filename: string }>();
@@ -266,7 +262,7 @@ function EditSnippetModal({ snippetId, onClose }: { snippetId: string; onClose: 
             />
           </div>
           <div className="flex flex-col gap-2">
-            <Label id="edit-visibility">Visibility</Label>
+            <Label id="edit-visibility">Who can see it</Label>
             <Select
               value={draft.visibility}
               onValueChange={(visibility) =>
@@ -277,7 +273,7 @@ function EditSnippetModal({ snippetId, onClose }: { snippetId: string; onClose: 
                 <SelectValue />
               </SelectTrigger>
               <SelectContent position="popper">
-                {visibilities.map(({ id, label, hint }) => (
+                {SNIPPET_VISIBILITIES.map(({ id, label, hint }) => (
                   <SelectItem key={id} value={id}>
                     {label} <span className="text-muted-foreground">· {hint}</span>
                   </SelectItem>

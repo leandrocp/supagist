@@ -140,14 +140,14 @@ describe.skipIf(skip)("owner edit/delete RLS and account deletion", () => {
 
     const { data, error } = await alice.client
       .from("snippets")
-      .update({ title: "Edited", visibility: "unlisted" })
+      .update({ title: "Edited", visibility: "private" })
       .eq("id", id)
       .select("title, visibility, code, line_count, svg_path, raw_path")
       .single();
     expect(error).toBeNull();
     expect(data).toEqual({
       title: "Edited",
-      visibility: "unlisted",
+      visibility: "private",
       code: "one\ntwo\nthree",
       line_count: 3,
       svg_path: `${prefix}/canonical.svg`,

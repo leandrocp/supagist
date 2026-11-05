@@ -39,7 +39,7 @@ export default function PrivacyPage() {
           </li>
           <li>
             <span className="text-foreground">Snippets you publish.</span> The code, filename, an
-            optional title, whether it is public or unlisted, language, theme and font, line and
+            optional title, whether it is public or private, language, theme and font, line and
             character counts, when it was created and last viewed, and its view count. We also store
             images of the snippet (PNG and SVG when published from the website, SVG when published
             through the MCP server) and the raw code as a text file.
@@ -80,19 +80,22 @@ export default function PrivacyPage() {
 
       <Section title="What is public">
         <p>
-          Snippets published from the website are public: anyone with the link can view them, and
-          anyone can read them (including their code) through Supagist&apos;s public API.
+          When you publish a snippet you choose whether it is public or private, like a GitHub gist,
+          and you can change it later. The website starts on public; the CLI and the MCP server
+          publish private unless you ask for public. Public snippets can be viewed by anyone with
+          the link, and anyone can read them (including their code) through Supagist&apos;s public
+          API.
         </p>
         <p>
-          Snippets published through the MCP server are unlisted. Anyone with the link can view one,
-          including its code, and share the link further, so unlisted does not mean private.
-          Unlisted snippets are not returned by Supagist&apos;s public API listings, are not shown
-          in anyone else&apos;s snippet list, and their pages ask search engines not to index them.
-          You still see your own unlisted snippets in your list.
+          Private snippets are hidden, not secret. Anyone you give the link to can view one,
+          including its code and its share image, and share the link further. Private snippets are
+          not returned by Supagist&apos;s public API listings, are not shown in anyone else&apos;s
+          snippet list, and their pages ask search engines not to index them. You still see your own
+          private snippets in your list.
         </p>
         <p>
           Comments, reactions and profiles (username, avatar and GitHub user ID) can be read by
-          anyone through the public API, including comments and reactions on unlisted snippets. The
+          anyone through the public API, including comments and reactions on private snippets. The
           snippet images and raw code file are served from public URLs that are hard to guess. Never
           publish secrets or personal data.
         </p>
@@ -108,15 +111,15 @@ export default function PrivacyPage() {
           in and approve access on a Supagist consent screen. The approval is recorded by our
           authentication provider, and the assistant receives tokens that let it use these tools as
           you. The MCP tools render code into SVG images, list the available options, and publish
-          snippets. Code sent only to be rendered is not stored. Publishing saves a new unlisted
-          snippet under your account, as described above. The tools can also edit or delete snippets
-          you own, and never anyone else&apos;s. Before a published snippet is stored, the server
-          replaces common secrets (such as API keys and tokens, private keys, passwords in
-          connection strings and password or secret assignments) with visible placeholders, and
-          Supagist does not store or log the original values. Detection covers common formats only,
-          so check code before you publish it. We log technical details such as the language, image
-          size and render time, not the code. MCP requests count toward the rate-limit counters
-          described above.
+          snippets. Code sent only to be rendered is not stored. Publishing saves a new private
+          snippet (or a public one, if you ask) under your account, as described above. The tools
+          can also edit or delete snippets you own, and never anyone else&apos;s. Before a published
+          snippet is stored, the server replaces common secrets (such as API keys and tokens,
+          private keys, passwords in connection strings and password or secret assignments) with
+          visible placeholders, and Supagist does not store or log the original values. Detection
+          covers common formats only, so check code before you publish it. We log technical details
+          such as the language, image size and render time, not the code. MCP requests count toward
+          the rate-limit counters described above.
         </p>
       </Section>
 

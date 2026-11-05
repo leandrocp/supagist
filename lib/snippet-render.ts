@@ -16,8 +16,8 @@ import parsers from "@/supabase/functions/mcp/spike/generated/parser-packages.js
 /**
  * Renders a saved snippet from its live row on the server, with the same
  * export renderer and stored appearance the composer used at publish. The
- * share image (lib/og-render.ts) and, for snippets with no stored PNG (MCP
- * publishes), the list thumbnail come from here.
+ * share image (lib/og-compose-render.ts) and, for snippets with no stored PNG
+ * (MCP publishes), the list thumbnail come from here.
  */
 export type RenderableSnippet = {
   code: string;

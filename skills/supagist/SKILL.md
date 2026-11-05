@@ -63,10 +63,12 @@ git diff -- src/parse.ts | npx supagist - --filename parse.diff --language diff 
 - **Render (default).** Writes a file and stores nothing. Code still goes to
   the Supagist render API, so don't render secrets.
 - **Publish only when the user wants a link.** Confirm first: "This creates
-  an unlisted Supagist snippet; anyone with the link can view it. Publish?"
-  Then `npx supagist <file> --lines … --brand … --publish --title "…"`.
-  - Published snippets are **unlisted**: viewable by link, never listed or
-    indexed.
+  a private Supagist snippet; anyone you share the link with can view it.
+  Publish?" Then `npx supagist <file> --lines … --brand … --publish --title "…"`.
+  - Snippets are **public or private**, like GitHub gists. Published snippets
+    are **private** by default: only the user sees them in their list, anyone
+    with the link can view them, and they are never indexed. Add `--public`
+    only when the user asks for a public snippet.
   - The server replaces common secrets with `[REDACTED:kind]` before storing.
     When `redactions.redacted` is above 0, tell the user what was redacted
     (kinds and counts). Redaction is a safety net, so still don't publish
