@@ -3,8 +3,7 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import {
   createExportSceneSvg,
-  createHighlightedSvg,
-  EXPORT_WIDTH,
+  renderExport,
   type ExportAspectRatio,
   type ExportLayout,
   type ExportRuntime,
@@ -86,6 +85,7 @@ const runtime: ExportRuntime = {
     if (!name) throw new Error(`No TTF for ${file}`);
     return (await readFile(join(FONT_DIR, name))).toString("base64");
   },
+  fontFormat: "truetype",
   async loadImageDataUrl(url) {
     try {
       if (url.startsWith("/")) {
@@ -103,16 +103,13 @@ const runtime: ExportRuntime = {
   },
 };
 
-/** resvg reads TTF, not woff2, and needs the emoji face embedded. */
+/** resvg needs the emoji face embedded. */
 async function forResvg(svg: string): Promise<string> {
   emojiFace ??= readFile(EMOJI_FONT).then(
     (bytes) =>
       `@font-face{font-family:'Noto Emoji';src:url('data:font/ttf;base64,${bytes.toString("base64")}') format('truetype')}`,
   );
-  return svg
-    .replace("data:font/woff2;base64,", "data:font/ttf;base64,")
-    .replace("format('woff2')", "format('truetype')")
-    .replace("</style>", `${await emojiFace}</style>`);
+  return svg.replace("</style>", `${await emojiFace}</style>`);
 }
 
 /**
@@ -138,41 +135,32 @@ export async function renderSnippetSvg(
 ): Promise<{ svg: string; layout: ExportLayout }> {
   const appearance = parseSnippetAppearance(snippet.appearance);
   const background = findExportBackground(appearance.background);
-  let layout: ExportLayout | null = null;
-  const svg = await createHighlightedSvg(
-    snippet.code,
-    snippet.filename,
-    snippet.theme,
-    EXPORT_WIDTH,
-    undefined,
-    background,
-    background ? appearance.outerPadding : 0,
-    appearance.lineNumbers,
-    // `system` names no file to embed, and resvg loads no system fonts; draw
-    // it in JetBrains Mono, as the MCP renderer does.
-    snippet.font_id === "system" ? "jetbrains" : snippet.font_id,
-    snippet.language,
-    null,
-    false,
-    appearance.header.enabled && appearance.header.showFilename,
-    appearance.footer.enabled,
-    snippet.author?.username ?? null,
-    snippet.author?.avatar_url ?? null,
-    undefined,
-    false,
-    undefined,
-    appearance.windowDecoration,
-    appearance.cornerRadius,
-    appearance.innerPadding,
-    appearance.header,
-    appearance.footer,
-    appearance.fontSize,
-    false,
-    options.aspectRatio === undefined ? appearance.aspectRatio : options.aspectRatio,
-    appearance.ligatures,
-    { ...runtime, onLayout: (value) => (layout = value) },
+  const { svg, layout } = await renderExport(
+    {
+      code: snippet.code,
+      filename: snippet.filename,
+      theme: snippet.theme,
+      background,
+      outerPadding: appearance.outerPadding,
+      lineNumbers: appearance.lineNumbers,
+      // `system` names no file to embed, and resvg loads no system fonts; draw
+      // it in JetBrains Mono, as the MCP renderer does.
+      fontId: snippet.font_id === "system" ? "jetbrains" : snippet.font_id,
+      language: snippet.language,
+      footerAuthorUsername: snippet.author?.username ?? null,
+      footerAuthorAvatarUrl: snippet.author?.avatar_url ?? null,
+      windowDecoration: appearance.windowDecoration,
+      cornerRadius: appearance.cornerRadius,
+      innerPadding: appearance.innerPadding,
+      header: appearance.header,
+      footer: appearance.footer,
+      fontSize: appearance.fontSize,
+      aspectRatio: options.aspectRatio === undefined ? appearance.aspectRatio : options.aspectRatio,
+      ligatures: appearance.ligatures,
+    },
+    runtime,
   );
-  return { svg: await forResvg(svg), layout: layout! };
+  return { svg: await forResvg(svg), layout };
 }
 
 /**

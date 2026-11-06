@@ -1,9 +1,9 @@
 import {
-  EXPORT_WIDTH,
   createHighlightedSvg,
   renderToFile,
   toPngFilename,
   type ExportBackground,
+  type ExportOptions,
 } from "@/lib/export-utils";
 import type { SnippetAppearance } from "@/lib/snippet-appearance";
 import type { ExportReactionChip } from "@/lib/snippet-utils";
@@ -23,6 +23,38 @@ export type SnippetImageDraft = SnippetAppearance & {
 
 export type DraftReactions = Record<number, ExportReactionChip[]>;
 
+/** The draft's export, as Save as PNG / SVG and a publish draw it. */
+function draftExport(
+  draft: SnippetImageDraft,
+  background: ExportBackground | null,
+  reactions: DraftReactions | null,
+  authorUsername: string | null,
+  authorAvatarUrl: string | null,
+): ExportOptions {
+  return {
+    code: draft.code,
+    filename: draft.filename,
+    theme: draft.theme,
+    background,
+    outerPadding: draft.outerPadding,
+    lineNumbers: draft.lineNumbers,
+    fontId: draft.fontId,
+    language: draft.languageOverride,
+    reactions,
+    showReactions: draft.showReactions,
+    footerAuthorUsername: authorUsername,
+    footerAuthorAvatarUrl: authorAvatarUrl,
+    windowDecoration: draft.windowDecoration,
+    cornerRadius: draft.cornerRadius,
+    innerPadding: draft.innerPadding,
+    header: draft.header,
+    footer: draft.footer,
+    fontSize: draft.fontSize,
+    aspectRatio: draft.aspectRatio,
+    ligatures: draft.ligatures,
+  };
+}
+
 /** Save as PNG, and the published canonical.png. */
 export async function createDraftPng(
   draft: SnippetImageDraft,
@@ -31,37 +63,11 @@ export async function createDraftPng(
   authorUsername: string | null,
   authorAvatarUrl: string | null,
 ): Promise<File> {
-  return renderToFile(
-    draft.code,
-    draft.filename,
-    draft.theme,
-    EXPORT_WIDTH,
-    undefined,
-    toPngFilename(draft.filename),
-    draft.pixelRatio,
-    background,
-    background ? draft.outerPadding : 0,
-    draft.lineNumbers,
-    draft.fontId,
-    draft.languageOverride,
-    reactions,
-    draft.showReactions,
-    draft.header.enabled && draft.header.showFilename,
-    draft.footer.enabled,
-    authorUsername,
-    authorAvatarUrl,
-    undefined,
-    false,
-    undefined,
-    draft.windowDecoration,
-    draft.cornerRadius,
-    draft.innerPadding,
-    draft.header,
-    draft.footer,
-    draft.fontSize,
-    draft.aspectRatio,
-    draft.ligatures,
-  );
+  return renderToFile({
+    ...draftExport(draft, background, reactions, authorUsername, authorAvatarUrl),
+    outFilename: toPngFilename(draft.filename),
+    pixelRatio: draft.pixelRatio,
+  });
 }
 
 /** Save as SVG, and the published canonical.svg. */
@@ -73,34 +79,7 @@ export async function createDraftSvg(
   authorAvatarUrl: string | null,
 ): Promise<string> {
   return createHighlightedSvg(
-    draft.code,
-    draft.filename,
-    draft.theme,
-    EXPORT_WIDTH,
-    undefined,
-    background,
-    background ? draft.outerPadding : 0,
-    draft.lineNumbers,
-    draft.fontId,
-    draft.languageOverride,
-    reactions,
-    draft.showReactions,
-    draft.header.enabled && draft.header.showFilename,
-    draft.footer.enabled,
-    authorUsername,
-    authorAvatarUrl,
-    undefined,
-    false,
-    undefined,
-    draft.windowDecoration,
-    draft.cornerRadius,
-    draft.innerPadding,
-    draft.header,
-    draft.footer,
-    draft.fontSize,
-    false,
-    draft.aspectRatio,
-    draft.ligatures,
+    draftExport(draft, background, reactions, authorUsername, authorAvatarUrl),
   );
 }
 
@@ -129,37 +108,17 @@ async function createOgImage(
   authorAvatarUrl: string | null,
 ): Promise<File> {
   // OG images must be exactly 1200×630 — no retina scaling or platforms reject them.
-  // Metadata selections mirror the canonical export so shared previews stay
-  // faithful to the composition the author configured.
-  return renderToFile(
-    draft.code,
-    draft.filename,
-    draft.theme,
-    1200,
-    630,
-    toPngFilename(draft.filename, "-og"),
-    1,
-    null, // no background
-    undefined, // outer padding default
-    true, // lineNumbers
-    draft.fontId,
-    draft.languageOverride,
-    null, // no reactions in OG
-    false, // showReactions
-    draft.header.enabled && draft.header.showFilename,
-    draft.footer.enabled,
-    authorUsername,
-    authorAvatarUrl,
-    undefined,
-    false,
-    undefined,
-    draft.windowDecoration,
-    draft.cornerRadius,
-    draft.innerPadding,
-    draft.header,
-    draft.footer,
-    draft.fontSize,
-  );
+  return renderToFile({
+    ...draftExport(draft, null, null, authorUsername, authorAvatarUrl),
+    showReactions: false,
+    lineNumbers: true,
+    width: 1200,
+    height: 630,
+    aspectRatio: null,
+    ligatures: true,
+    outFilename: toPngFilename(draft.filename, "-og"),
+    pixelRatio: 1,
+  });
 }
 
 /** Everything a publish uploads: canonical PNG and SVG, the OG image and the card. */

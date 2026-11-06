@@ -34,10 +34,11 @@ and the repository formatter. It refuses any installed Lumis version other than
 with source SHA-256 records and a Vitest source-drift guard. No app source changes,
 extraction, new root dependency, hand-written approximation of the card, or native
 Lumis entrypoint is involved. The generated code retains unused browser export
-helpers, but the only public execution path is `createHighlightedSvg`.
+helpers, but the only public execution path is `renderExport`.
 
-Generation changes only imports, the two browser asset loaders, WOFF2 font MIME
-and format to TTF, and the app's load-or-plaintext helper to strict loading. The
+Generation changes only imports and the app's load-or-plaintext helper to strict
+loading. `../render.ts` passes the renderer an Edge runtime: the bundled TTF fonts
+and images from `assets.ts` and the strict highlighter. The
 actual Vercel background, scene, registration guides, frame, and Gaussian
 `feDropShadow` come directly from the copied app presets/rendering. Geist, Fira,
 Hack and JetBrains TTFs plus the two app pattern PNGs are bundled (see the assets

@@ -66,7 +66,6 @@ vi.mock("@lumis-sh/themes/github_light", () => ({
 import {
   toPngFilename,
   escapeXml,
-  inferLanguage,
   wrapTokenLine,
   triggerDownload,
   createHighlightedSvg,
@@ -91,9 +90,9 @@ import {
   EXPORT_LINE_HEIGHT,
   EXPORT_CHAR_WIDTH,
 } from "./export-utils";
-import type { SvgToken } from "./export-utils";
+import type { ExportOptions, SvgToken } from "./export-utils";
 import { getBrandPreset } from "./brand-presets";
-import { languageDisplayName } from "./snippet-utils";
+import { inferLanguage, languageDisplayName } from "./snippet-utils";
 
 // Re-apply highlighter implementations before each test so mock call counts
 // are fresh and implementations are always set even after vi.clearAllMocks().
@@ -698,20 +697,27 @@ describe("export inner padding values", () => {
 
 describe("createHighlightedSvg", () => {
   it("returns a valid SVG string", async () => {
-    const svg = await createHighlightedSvg(
-      "const x = 1;",
-      "test.ts",
-      "github_light",
-      1200,
-      undefined,
-    );
+    const svg = await createHighlightedSvg({
+      code: "const x = 1;",
+      filename: "test.ts",
+      theme: "github_light",
+      width: 1200,
+    });
     expect(svg).toMatch(/^<svg /);
     expect(svg).toMatch(/<\/svg>$/);
   });
 
   it("draws the same image whether or not the code ends in trailing whitespace", async () => {
     const render = (code: string) =>
-      createHighlightedSvg(code, "test.ts", "github_light", 1200, undefined, null, 0, true);
+      createHighlightedSvg({
+        code,
+        filename: "test.ts",
+        theme: "github_light",
+        width: 1200,
+        background: null,
+        outerPadding: 0,
+        lineNumbers: true,
+      });
     const trimmed = await render("const x = 1;\nconst y = 2;");
     expect(await render("const x = 1;  \r\nconst y = 2;\t\r\n\n  \n")).toBe(trimmed);
     expect(trimmed).not.toContain(">3<");
@@ -727,7 +733,12 @@ describe("createHighlightedSvg", () => {
       },
     );
 
-    const svg = await createHighlightedSvg("import x", "test.ts", "github_light", 1200, undefined);
+    const svg = await createHighlightedSvg({
+      code: "import x",
+      filename: "test.ts",
+      theme: "github_light",
+      width: 1200,
+    });
 
     expect(svg).toContain('<tspan fill="#d699b6" font-style="italic">import</tspan>');
     expect(svg).toContain('<tspan fill="#333333"> x</tspan>');
@@ -739,18 +750,16 @@ describe("createHighlightedSvg", () => {
       new Error("Invalid WASM size for tree-sitter-cmake@0.26.4: expected 79607, got 79574"),
     );
 
-    const svg = await createHighlightedSvg(
-      "project(x)",
-      "CMakeLists.txt",
-      "github_light",
-      1200,
-      undefined,
-      null,
-      undefined,
-      false,
-      "system",
-      "cmake",
-    );
+    const svg = await createHighlightedSvg({
+      code: "project(x)",
+      filename: "CMakeLists.txt",
+      theme: "github_light",
+      width: 1200,
+      background: null,
+      lineNumbers: false,
+      fontId: "system",
+      language: "cmake",
+    });
 
     expect(svg).toMatch(/^<svg /);
     expect(mockHighlighter.highlightIter).toHaveBeenCalledWith(
@@ -774,13 +783,12 @@ describe("createHighlightedSvg", () => {
       },
     );
 
-    const svg = await createHighlightedSvg(
-      "a\r\nb\r\nc",
-      "test.txt",
-      "github_light",
-      1200,
-      undefined,
-    );
+    const svg = await createHighlightedSvg({
+      code: "a\r\nb\r\nc",
+      filename: "test.txt",
+      theme: "github_light",
+      width: 1200,
+    });
 
     expect(svg).not.toContain("\r");
     expect(svg).toContain(">a</tspan>");
@@ -789,29 +797,27 @@ describe("createHighlightedSvg", () => {
   });
 
   it("renders an explicit square editor card", async () => {
-    const svg = await createHighlightedSvg(
-      "x",
-      "test.ts",
-      "github_light",
-      1200,
-      undefined,
-      { label: "Test", from: "#000000", to: "#111111" },
-      undefined,
-      false,
-      "system",
-      null,
-      null,
-      false,
-      true,
-      false,
-      null,
-      null,
-      null,
-      false,
-      null,
-      "macos",
-      0,
-    );
+    const svg = await createHighlightedSvg({
+      code: "x",
+      filename: "test.ts",
+      theme: "github_light",
+      width: 1200,
+      background: { label: "Test", from: "#000000", to: "#111111" },
+      lineNumbers: false,
+      fontId: "system",
+      language: null,
+      reactions: null,
+      showReactions: false,
+      footerAuthorUsername: null,
+      footerAuthorAvatarUrl: null,
+      comments: null,
+      showComments: false,
+      sourceUrl: null,
+      windowDecoration: "macos",
+      cornerRadius: 0,
+      header: { showFilename: true },
+      footer: { enabled: false },
+    });
 
     expect(svg).toContain('rx="0" ry="0"');
   });
@@ -820,133 +826,112 @@ describe("createHighlightedSvg", () => {
     // Regression: the no-background branch used to paint a plain full-bleed
     // rect and skip the card rect entirely, so the corner-radius setting was
     // silently dropped on export while the live preview still rounded.
-    const svg = await createHighlightedSvg(
-      "x",
-      "test.ts",
-      "github_light",
-      1200,
-      undefined,
-      null, // no background
-      undefined,
-      false,
-      "system",
-      null,
-      null,
-      false,
-      true,
-      false,
-      null,
-      null,
-      null,
-      false,
-      null,
-      "macos",
-      16,
-    );
+    const svg = await createHighlightedSvg({
+      code: "x",
+      filename: "test.ts",
+      theme: "github_light",
+      width: 1200,
+      background: null,
+      lineNumbers: false,
+      fontId: "system",
+      language: null,
+      reactions: null,
+      showReactions: false,
+      footerAuthorUsername: null,
+      footerAuthorAvatarUrl: null,
+      comments: null,
+      showComments: false,
+      sourceUrl: null,
+      windowDecoration: "macos",
+      cornerRadius: 16,
+      header: { showFilename: true },
+      footer: { enabled: false },
+    });
 
     expect(svg).toContain('rx="16" ry="16"');
   });
 
   it("keeps square corners on a no-background export when the radius is zero", async () => {
-    const svg = await createHighlightedSvg(
-      "x",
-      "test.ts",
-      "github_light",
-      1200,
-      undefined,
-      null,
-      undefined,
-      false,
-      "system",
-      null,
-      null,
-      false,
-      true,
-      false,
-      null,
-      null,
-      null,
-      false,
-      null,
-      "macos",
-      0,
-    );
+    const svg = await createHighlightedSvg({
+      code: "x",
+      filename: "test.ts",
+      theme: "github_light",
+      width: 1200,
+      background: null,
+      lineNumbers: false,
+      fontId: "system",
+      language: null,
+      reactions: null,
+      showReactions: false,
+      footerAuthorUsername: null,
+      footerAuthorAvatarUrl: null,
+      comments: null,
+      showComments: false,
+      sourceUrl: null,
+      windowDecoration: "macos",
+      cornerRadius: 0,
+      header: { showFilename: true },
+      footer: { enabled: false },
+    });
 
     expect(svg).toContain('rx="0" ry="0"');
   });
 
   it("applies every corner radius the UI offers to a no-background export", async () => {
     for (const radius of [0, 4, 8, 12, 16]) {
-      const svg = await createHighlightedSvg(
-        "x",
-        "test.ts",
-        "github_light",
-        1200,
-        undefined,
-        null,
-        undefined,
-        false,
-        "system",
-        null,
-        null,
-        false,
-        true,
-        false,
-        null,
-        null,
-        null,
-        false,
-        null,
-        "macos",
-        radius,
-      );
+      const svg = await createHighlightedSvg({
+        code: "x",
+        filename: "test.ts",
+        theme: "github_light",
+        width: 1200,
+        background: null,
+        lineNumbers: false,
+        fontId: "system",
+        language: null,
+        reactions: null,
+        showReactions: false,
+        footerAuthorUsername: null,
+        footerAuthorAvatarUrl: null,
+        comments: null,
+        showComments: false,
+        sourceUrl: null,
+        windowDecoration: "macos",
+        cornerRadius: radius,
+        header: { showFilename: true },
+        footer: { enabled: false },
+      });
 
       expect(svg).toContain(`rx="${radius}" ry="${radius}"`);
     }
   });
 
   it("renders code at the default font size when none is given", async () => {
-    const svg = await createHighlightedSvg(
-      "const x = 1;",
-      "test.ts",
-      "github_light",
-      1200,
-      undefined,
-    );
+    const svg = await createHighlightedSvg({
+      code: "const x = 1;",
+      filename: "test.ts",
+      theme: "github_light",
+      width: 1200,
+    });
 
     expect(svg).toContain(`font-size="${EXPORT_FONT_SIZE}" font-family=`);
   });
 
   it("renders code at the requested font size and taller lines", async () => {
-    const args = [
-      "const x = 1;\nconst y = 2;",
-      "test.ts",
-      "github_light",
-      1200,
-      undefined,
-      null,
-      undefined,
-      false,
-      "system",
-      null,
-      null,
-      false,
-      true,
-      false,
-      null,
-      null,
-      null,
-      false,
-      null,
-      "none",
-      0,
-      8,
-      undefined,
-      undefined,
-    ] as const;
+    const options = {
+      code: "const x = 1;\nconst y = 2;",
+      filename: "test.ts",
+      theme: "github_light",
+      background: null,
+      lineNumbers: false,
+      fontId: "system",
+      header: { showFilename: true },
+      windowDecoration: "none",
+      cornerRadius: 0,
+      innerPadding: 8,
+    } as const;
 
-    const small = await createHighlightedSvg(...args, 12);
-    const large = await createHighlightedSvg(...args, 20);
+    const small = await createHighlightedSvg({ ...options, fontSize: 12 });
+    const large = await createHighlightedSvg({ ...options, fontSize: 20 });
 
     expect(small).toContain('font-size="12" font-family=');
     expect(large).toContain('font-size="20" font-family=');
@@ -957,45 +942,40 @@ describe("createHighlightedSvg", () => {
   });
 
   it("snaps an unsupported font size to the nearest supported one", async () => {
-    const svg = await createHighlightedSvg(
-      "const x = 1;",
-      "test.ts",
-      "github_light",
-      1200,
-      undefined,
-      null,
-      undefined,
-      false,
-      "system",
-      null,
-      null,
-      false,
-      true,
-      false,
-      null,
-      null,
-      null,
-      false,
-      null,
-      "none",
-      0,
-      8,
-      undefined,
-      undefined,
-      15,
-    );
+    const svg = await createHighlightedSvg({
+      code: "const x = 1;",
+      filename: "test.ts",
+      theme: "github_light",
+      width: 1200,
+      background: null,
+      lineNumbers: false,
+      fontId: "system",
+      language: null,
+      reactions: null,
+      showReactions: false,
+      footerAuthorUsername: null,
+      footerAuthorAvatarUrl: null,
+      comments: null,
+      showComments: false,
+      sourceUrl: null,
+      windowDecoration: "none",
+      cornerRadius: 0,
+      innerPadding: 8,
+      fontSize: 15,
+      header: { showFilename: true },
+      footer: { enabled: false },
+    });
 
     expect(svg).toContain('font-size="16" font-family=');
   });
 
   it("embeds Supagist source metadata", async () => {
-    const svg = await createHighlightedSvg(
-      "const x = 1;",
-      "test.ts",
-      "github_light",
-      1200,
-      undefined,
-    );
+    const svg = await createHighlightedSvg({
+      code: "const x = 1;",
+      filename: "test.ts",
+      theme: "github_light",
+      width: 1200,
+    });
 
     expect(svg).toContain("<metadata>");
     expect(svg).toContain(`<dc:source>${EXPORT_METADATA_URL}</dc:source>`);
@@ -1003,101 +983,83 @@ describe("createHighlightedSvg", () => {
 
   it("embeds a provided share URL as source metadata", async () => {
     const sourceUrl = "https://supagist.app/example-abc123";
-    const svg = await createHighlightedSvg(
-      "const x = 1;",
-      "test.ts",
-      "github_light",
-      1200,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
+    const svg = await createHighlightedSvg({
+      code: "const x = 1;",
+      filename: "test.ts",
+      theme: "github_light",
+      width: 1200,
       sourceUrl,
-    );
+    });
 
     expect(svg).toContain(`<dc:source>${sourceUrl}</dc:source>`);
     expect(svg).toContain(`rdf:about="${sourceUrl}"`);
   });
 
   it("embeds the code text", async () => {
-    const svg = await createHighlightedSvg(
-      "hello world",
-      "test.ts",
-      "github_light",
-      1200,
-      undefined,
-    );
+    const svg = await createHighlightedSvg({
+      code: "hello world",
+      filename: "test.ts",
+      theme: "github_light",
+      width: 1200,
+    });
     expect(svg).toContain("hello world");
   });
 
   it("includes the three traffic-light circles", async () => {
-    const svg = await createHighlightedSvg("x", "test.ts", "github_light", 1200, undefined);
+    const svg = await createHighlightedSvg({
+      code: "x",
+      filename: "test.ts",
+      theme: "github_light",
+      width: 1200,
+    });
     expect(svg).toContain("#ff5f57");
     expect(svg).toContain("#febc2e");
     expect(svg).toContain("#28c840");
   });
 
   it("renders neutral dots for the macOS Subtle window decoration", async () => {
-    const svg = await createHighlightedSvg(
-      "x",
-      "test.ts",
-      "github_light",
-      1200,
-      undefined,
-      null,
-      undefined,
-      false,
-      "system",
-      null,
-      null,
-      false,
-      true,
-      false,
-      null,
-      null,
-      undefined,
-      false,
-      undefined,
-      "macos-subtle",
-    );
+    const svg = await createHighlightedSvg({
+      code: "x",
+      filename: "test.ts",
+      theme: "github_light",
+      width: 1200,
+      background: null,
+      lineNumbers: false,
+      fontId: "system",
+      language: null,
+      reactions: null,
+      showReactions: false,
+      footerAuthorUsername: null,
+      footerAuthorAvatarUrl: null,
+      showComments: false,
+      windowDecoration: "macos-subtle",
+      header: { showFilename: true },
+      footer: { enabled: false },
+    });
 
     expect(svg).not.toContain("#ff5f57");
     expect(svg).toContain('fill-opacity="0.22"');
   });
 
   it("renders only the centered filename for the Minimal window decoration", async () => {
-    const svg = await createHighlightedSvg(
-      "x",
-      "test.ts",
-      "github_light",
-      1200,
-      undefined,
-      null,
-      undefined,
-      false,
-      "system",
-      null,
-      null,
-      false,
-      true,
-      false,
-      null,
-      null,
-      undefined,
-      false,
-      undefined,
-      "minimal",
-    );
+    const svg = await createHighlightedSvg({
+      code: "x",
+      filename: "test.ts",
+      theme: "github_light",
+      width: 1200,
+      background: null,
+      lineNumbers: false,
+      fontId: "system",
+      language: null,
+      reactions: null,
+      showReactions: false,
+      footerAuthorUsername: null,
+      footerAuthorAvatarUrl: null,
+      showComments: false,
+      windowDecoration: "minimal",
+      header: { showFilename: true },
+      footer: { enabled: false },
+    });
 
     expect(svg).not.toContain("#ff5f57");
     expect(svg).not.toContain('fill-opacity="0.22"');
@@ -1106,28 +1068,24 @@ describe("createHighlightedSvg", () => {
   });
 
   it("renders right-aligned controls for the Windows window decoration", async () => {
-    const svg = await createHighlightedSvg(
-      "x",
-      "test.ts",
-      "github_light",
-      1200,
-      undefined,
-      null,
-      undefined,
-      false,
-      "system",
-      null,
-      null,
-      false,
-      true,
-      false,
-      null,
-      null,
-      undefined,
-      false,
-      undefined,
-      "windows",
-    );
+    const svg = await createHighlightedSvg({
+      code: "x",
+      filename: "test.ts",
+      theme: "github_light",
+      width: 1200,
+      background: null,
+      lineNumbers: false,
+      fontId: "system",
+      language: null,
+      reactions: null,
+      showReactions: false,
+      footerAuthorUsername: null,
+      footerAuthorAvatarUrl: null,
+      showComments: false,
+      windowDecoration: "windows",
+      header: { showFilename: true },
+      footer: { enabled: false },
+    });
 
     expect(svg).not.toContain("#ff5f57");
     expect(svg).toContain(">×</text>");
@@ -1136,37 +1094,31 @@ describe("createHighlightedSvg", () => {
 
   it("reserves metadata inset only on the window-control side", async () => {
     const render = (windowDecoration: "macos" | "windows") =>
-      createHighlightedSvg(
-        "x",
-        "test.ts",
-        "github_light",
-        1200,
-        undefined,
-        null,
-        undefined,
-        false,
-        "system",
-        null,
-        null,
-        false,
-        true,
-        false,
-        null,
-        null,
-        undefined,
-        false,
-        undefined,
+      createHighlightedSvg({
+        code: "x",
+        filename: "test.ts",
+        theme: "github_light",
+        width: 1200,
+        background: null,
+        lineNumbers: false,
+        fontId: "system",
+        language: null,
+        reactions: null,
+        showReactions: false,
+        footerAuthorUsername: null,
+        footerAuthorAvatarUrl: null,
+        showComments: false,
         windowDecoration,
-        undefined,
-        16,
-        {
+        innerPadding: 16,
+        header: {
           enabled: true,
           showFilename: true,
           showLanguage: false,
           filenamePosition: "left",
           languagePosition: "right",
         },
-      );
+        footer: { enabled: false },
+      });
 
     const macos = await render("macos");
     const windows = await render("windows");
@@ -1178,28 +1130,24 @@ describe("createHighlightedSvg", () => {
   });
 
   it("omits window chrome when decoration is none", async () => {
-    const svg = await createHighlightedSvg(
-      "x",
-      "test.ts",
-      "github_light",
-      1200,
-      undefined,
-      null,
-      undefined,
-      false,
-      "system",
-      null,
-      null,
-      false,
-      true,
-      false,
-      null,
-      null,
-      undefined,
-      false,
-      undefined,
-      "none",
-    );
+    const svg = await createHighlightedSvg({
+      code: "x",
+      filename: "test.ts",
+      theme: "github_light",
+      width: 1200,
+      background: null,
+      lineNumbers: false,
+      fontId: "system",
+      language: null,
+      reactions: null,
+      showReactions: false,
+      footerAuthorUsername: null,
+      footerAuthorAvatarUrl: null,
+      showComments: false,
+      windowDecoration: "none",
+      header: { showFilename: true },
+      footer: { enabled: false },
+    });
 
     expect(svg).not.toContain("#ff5f57");
     expect(svg).not.toContain("test.ts");
@@ -1207,23 +1155,21 @@ describe("createHighlightedSvg", () => {
   });
 
   it("aligns the first traffic-light dot's left edge with the footer text", async () => {
-    const svg = await createHighlightedSvg(
-      "x",
-      "test.ts",
-      "github_light",
-      1200,
-      undefined,
-      null,
-      undefined,
-      false,
-      "system",
-      null,
-      null,
-      false,
-      false,
-      true, // showFooter
-      "leandrocp",
-    );
+    const svg = await createHighlightedSvg({
+      code: "x",
+      filename: "test.ts",
+      theme: "github_light",
+      width: 1200,
+      background: null,
+      lineNumbers: false,
+      fontId: "system",
+      language: null,
+      reactions: null,
+      showReactions: false,
+      footerAuthorUsername: "leandrocp",
+      header: { showFilename: false },
+      footer: { enabled: true },
+    });
     // Pull the first traffic-light cx (red dot is the first ff5f57 circle)
     // and the footer text's first x (the first 12px <text> after the
     // line-marker text — i.e. the first segment of the status bar). Dot's
@@ -1244,15 +1190,26 @@ describe("createHighlightedSvg", () => {
   });
 
   it("uses the theme background color", async () => {
-    const svg = await createHighlightedSvg("x", "test.ts", "github_light", 1200, undefined);
+    const svg = await createHighlightedSvg({
+      code: "x",
+      filename: "test.ts",
+      theme: "github_light",
+      width: 1200,
+    });
     expect(svg).toContain("#ffffff");
   });
 
   it("adds a gradient when a background is provided", async () => {
-    const svg = await createHighlightedSvg("x", "test.ts", "github_light", 1200, undefined, {
-      label: "Candy",
-      from: "#A58EFB",
-      to: "#E9BFF8",
+    const svg = await createHighlightedSvg({
+      code: "x",
+      filename: "test.ts",
+      theme: "github_light",
+      width: 1200,
+      background: {
+        label: "Candy",
+        from: "#A58EFB",
+        to: "#E9BFF8",
+      },
     });
     expect(svg).toContain("linearGradient");
     expect(svg).toContain("#A58EFB");
@@ -1260,63 +1217,61 @@ describe("createHighlightedSvg", () => {
   });
 
   it("omits the gradient when no background is given", async () => {
-    const svg = await createHighlightedSvg("x", "test.ts", "github_light", 1200, undefined, null);
+    const svg = await createHighlightedSvg({
+      code: "x",
+      filename: "test.ts",
+      theme: "github_light",
+      width: 1200,
+      background: null,
+    });
     expect(svg).not.toContain("linearGradient");
   });
 
   it("includes line numbers when lineNumbers is true", async () => {
-    const svg = await createHighlightedSvg(
-      "line1\nline2",
-      "test.ts",
-      "github_light",
-      1200,
-      undefined,
-      null,
-      undefined,
-      true,
-    );
+    const svg = await createHighlightedSvg({
+      code: "line1\nline2",
+      filename: "test.ts",
+      theme: "github_light",
+      width: 1200,
+      background: null,
+      lineNumbers: true,
+    });
     expect(svg).toContain(">1<");
     expect(svg).toContain(">2<");
   });
 
   it("right-aligns exported single- and multi-digit line numbers", async () => {
     const code = Array.from({ length: 10 }, (_value, index) => `line ${index + 1}`).join("\n");
-    const svg = await createHighlightedSvg(
+    const svg = await createHighlightedSvg({
       code,
-      "test.ts",
-      "github_light",
-      1200,
-      undefined,
-      null,
-      undefined,
-      true,
-    );
+      filename: "test.ts",
+      theme: "github_light",
+      width: 1200,
+      background: null,
+      lineNumbers: true,
+    });
 
     expect(svg).toContain('text-anchor="end" fill="#333333" fill-opacity="0.4">9</text>');
     expect(svg).toContain('text-anchor="end" fill="#333333" fill-opacity="0.4">10</text>');
   });
 
   it("renders the line-number gutter divider only when line numbers are enabled", async () => {
-    const withLineNumbers = await createHighlightedSvg(
-      "line1\nline2",
-      "test.ts",
-      "github_light",
-      1200,
-      undefined,
-      null,
-      undefined,
-      true,
-    );
-    const withoutLineNumbers = await createHighlightedSvg(
-      "line1\nline2",
-      "test.ts",
-      "github_light",
-      1200,
-      undefined,
-      null,
-      undefined,
-      false,
-    );
+    const withLineNumbers = await createHighlightedSvg({
+      code: "line1\nline2",
+      filename: "test.ts",
+      theme: "github_light",
+      width: 1200,
+      background: null,
+      lineNumbers: true,
+    });
+    const withoutLineNumbers = await createHighlightedSvg({
+      code: "line1\nline2",
+      filename: "test.ts",
+      theme: "github_light",
+      width: 1200,
+      background: null,
+      lineNumbers: false,
+    });
 
     expect(withLineNumbers).toContain('data-export-gutter-divider="true"');
     expect(withLineNumbers).toContain('<line data-export-gutter-divider="true" x1="54"');
@@ -1324,13 +1279,12 @@ describe("createHighlightedSvg", () => {
   });
 
   it("renders a divider between window chrome and the code body", async () => {
-    const svg = await createHighlightedSvg(
-      "line1\nline2",
-      "test.ts",
-      "github_light",
-      1200,
-      undefined,
-    );
+    const svg = await createHighlightedSvg({
+      code: "line1\nline2",
+      filename: "test.ts",
+      theme: "github_light",
+      width: 1200,
+    });
 
     expect(svg).toContain('data-export-window-divider="true"');
     expect(svg).toContain('<line data-export-window-divider="true" x1="0" y1="40"');
@@ -1338,30 +1292,27 @@ describe("createHighlightedSvg", () => {
 
   it("keeps the SVG gutter fixed while moving code with inner padding", async () => {
     const renderWithInnerPadding = (innerPadding: number) =>
-      createHighlightedSvg(
-        "line1",
-        "test.ts",
-        "github_light",
-        1200,
-        undefined,
-        null,
-        undefined,
-        true,
-        "system",
-        null,
-        null,
-        false,
-        true,
-        false,
-        null,
-        null,
-        null,
-        false,
-        null,
-        "none",
-        undefined,
+      createHighlightedSvg({
+        code: "line1",
+        filename: "test.ts",
+        theme: "github_light",
+        width: 1200,
+        background: null,
+        lineNumbers: true,
+        fontId: "system",
+        language: null,
+        reactions: null,
+        showReactions: false,
+        footerAuthorUsername: null,
+        footerAuthorAvatarUrl: null,
+        comments: null,
+        showComments: false,
+        sourceUrl: null,
+        windowDecoration: "none",
         innerPadding,
-      );
+        header: { showFilename: true },
+        footer: { enabled: false },
+      });
 
     const compact = await renderWithInnerPadding(8);
     const spacious = await renderWithInnerPadding(48);
@@ -1373,52 +1324,46 @@ describe("createHighlightedSvg", () => {
   });
 
   it("omits line numbers when lineNumbers is false", async () => {
-    const svg = await createHighlightedSvg(
-      "line1\nline2",
-      "test.ts",
-      "github_light",
-      1200,
-      undefined,
-      null,
-      undefined,
-      false,
-    );
+    const svg = await createHighlightedSvg({
+      code: "line1\nline2",
+      filename: "test.ts",
+      theme: "github_light",
+      width: 1200,
+      background: null,
+      lineNumbers: false,
+    });
     expect(svg).not.toContain(">1<");
   });
 
   it("renders a reaction emoji when showReactions is true", async () => {
-    const svg = await createHighlightedSvg(
-      "const x = 1;",
-      "test.ts",
-      "github_light",
-      1200,
-      undefined,
-      null,
-      undefined,
-      false,
-      "system",
-      null,
-      { 1: [{ emoji: "🔥", reactors: [{ username: "alice" }] }] },
-      true,
-    );
+    const svg = await createHighlightedSvg({
+      code: "const x = 1;",
+      filename: "test.ts",
+      theme: "github_light",
+      width: 1200,
+      background: null,
+      lineNumbers: false,
+      fontId: "system",
+      language: null,
+      reactions: { 1: [{ emoji: "🔥", reactors: [{ username: "alice" }] }] },
+      showReactions: true,
+    });
     expect(svg).toContain("🔥");
   });
 
   it("renders supplied reaction labels as readable text, never SVG markup", async () => {
-    const svg = await createHighlightedSvg(
-      "const x = 1;",
-      "test.js",
-      "github_light",
-      1200,
-      undefined,
-      null,
-      undefined,
-      false,
-      "system",
-      "javascript",
-      { 1: [{ emoji: "<g>&", reactors: [{ username: "Ada" }] }] },
-      true,
-    );
+    const svg = await createHighlightedSvg({
+      code: "const x = 1;",
+      filename: "test.js",
+      theme: "github_light",
+      width: 1200,
+      background: null,
+      lineNumbers: false,
+      fontId: "system",
+      language: "javascript",
+      reactions: { 1: [{ emoji: "<g>&", reactors: [{ username: "Ada" }] }] },
+      showReactions: true,
+    });
     const document = new DOMParser().parseFromString(svg, "image/svg+xml");
     const label = [...document.querySelectorAll("text")].find(
       (node) => node.textContent === "<g>&",
@@ -1429,26 +1374,23 @@ describe("createHighlightedSvg", () => {
   });
 
   it("renders a comment under the line it annotates", async () => {
-    const svg = await createHighlightedSvg(
-      "const x = 1;",
-      "test.ts",
-      "github_light",
-      1200,
-      undefined,
-      null,
-      undefined,
-      false,
-      undefined,
-      null,
-      null,
-      false,
-      true,
-      false,
-      null,
-      null,
-      { 1: { author: "dev", body: "check this branch" } },
-      true,
-    );
+    const svg = await createHighlightedSvg({
+      code: "const x = 1;",
+      filename: "test.ts",
+      theme: "github_light",
+      width: 1200,
+      background: null,
+      lineNumbers: false,
+      language: null,
+      reactions: null,
+      showReactions: false,
+      footerAuthorUsername: null,
+      footerAuthorAvatarUrl: null,
+      comments: { 1: { author: "dev", body: "check this branch" } },
+      showComments: true,
+      header: { showFilename: true },
+      footer: { enabled: false },
+    });
 
     expect(svg).toContain("\u21b3 check this branch");
   });
@@ -1456,26 +1398,23 @@ describe("createHighlightedSvg", () => {
   it("renders a comment left on a blank line", async () => {
     // A blank line has no text to annotate, and review views comment on them
     // all the same. Lumis composes the empty range as a point.
-    const svg = await createHighlightedSvg(
-      "const x = 1;\n\nconst y = 2;",
-      "test.ts",
-      "github_light",
-      1200,
-      undefined,
-      null,
-      undefined,
-      false,
-      undefined,
-      null,
-      null,
-      false,
-      true,
-      false,
-      null,
-      null,
-      { 2: { author: "dev", body: "why the gap?" } },
-      true,
-    );
+    const svg = await createHighlightedSvg({
+      code: "const x = 1;\n\nconst y = 2;",
+      filename: "test.ts",
+      theme: "github_light",
+      width: 1200,
+      background: null,
+      lineNumbers: false,
+      language: null,
+      reactions: null,
+      showReactions: false,
+      footerAuthorUsername: null,
+      footerAuthorAvatarUrl: null,
+      comments: { 2: { author: "dev", body: "why the gap?" } },
+      showComments: true,
+      header: { showFilename: true },
+      footer: { enabled: false },
+    });
 
     expect(svg).toContain("\u21b3 why the gap?");
 
@@ -1491,52 +1430,40 @@ describe("createHighlightedSvg", () => {
     // EXPORT_MAX_CHARS_PER_LINE wraps at 110; taking only the first wrapped row
     // silently truncated the rest of the comment.
     const body = `${"alpha ".repeat(30)}omega`;
-    const svg = await createHighlightedSvg(
-      "const x = 1;",
-      "test.ts",
-      "github_light",
-      1200,
-      undefined,
-      null,
-      undefined,
-      false,
-      undefined,
-      null,
-      null,
-      false,
-      true,
-      false,
-      null,
-      null,
-      { 1: { author: "dev", body } },
-      true,
-    );
+    const svg = await createHighlightedSvg({
+      code: "const x = 1;",
+      filename: "test.ts",
+      theme: "github_light",
+      width: 1200,
+      background: null,
+      lineNumbers: false,
+      language: null,
+      reactions: null,
+      showReactions: false,
+      footerAuthorUsername: null,
+      footerAuthorAvatarUrl: null,
+      comments: { 1: { author: "dev", body } },
+      showComments: true,
+      header: { showFilename: true },
+      footer: { enabled: false },
+    });
 
     expect(svg).toContain("omega");
   });
 
   it("counts every wrapped comment row when sizing the card", async () => {
-    const args = [
-      "const x = 1;",
-      "test.ts",
-      "github_light",
-      1200,
-      undefined,
-      null,
-      undefined,
-      false,
-      undefined,
-      "typescript",
-      null,
-      false,
-      false,
-      false,
-      null,
-      null,
-    ] as const;
+    const options = {
+      code: "const x = 1;",
+      filename: "test.ts",
+      theme: "github_light",
+      background: null,
+      lineNumbers: false,
+      language: "typescript",
+      header: { showFilename: false },
+    } as const;
     const comments = { 1: { author: "dev", body: `${"alpha ".repeat(30)}omega` } };
 
-    const svg = await createHighlightedSvg(...args, comments, true);
+    const svg = await createHighlightedSvg({ ...options, comments, showComments: true });
     const estimate = estimateExportDimensions({
       code: "const x = 1;",
       filename: "test.ts",
@@ -1550,26 +1477,23 @@ describe("createHighlightedSvg", () => {
   });
 
   it("leaves the comment out when showComments is off", async () => {
-    const svg = await createHighlightedSvg(
-      "const x = 1;",
-      "test.ts",
-      "github_light",
-      1200,
-      undefined,
-      null,
-      undefined,
-      false,
-      undefined,
-      null,
-      null,
-      false,
-      true,
-      false,
-      null,
-      null,
-      { 1: { author: "dev", body: "check this branch" } },
-      false,
-    );
+    const svg = await createHighlightedSvg({
+      code: "const x = 1;",
+      filename: "test.ts",
+      theme: "github_light",
+      width: 1200,
+      background: null,
+      lineNumbers: false,
+      language: null,
+      reactions: null,
+      showReactions: false,
+      footerAuthorUsername: null,
+      footerAuthorAvatarUrl: null,
+      comments: { 1: { author: "dev", body: "check this branch" } },
+      showComments: false,
+      header: { showFilename: true },
+      footer: { enabled: false },
+    });
 
     expect(svg).not.toContain("check this branch");
     expect(svg).not.toContain("\u21b3");
@@ -1578,26 +1502,23 @@ describe("createHighlightedSvg", () => {
   it("puts the comment after the whole of a wrapped line, not inside it", async () => {
     // EXPORT_MAX_CHARS_PER_LINE wraps at 110, so this is two visual rows and
     // the comment has to follow both.
-    const svg = await createHighlightedSvg(
-      "x".repeat(180),
-      "test.ts",
-      "github_light",
-      1200,
-      undefined,
-      null,
-      undefined,
-      false,
-      undefined,
-      null,
-      null,
-      false,
-      true,
-      false,
-      null,
-      null,
-      { 1: { author: "dev", body: "wrapped note" } },
-      true,
-    );
+    const svg = await createHighlightedSvg({
+      code: "x".repeat(180),
+      filename: "test.ts",
+      theme: "github_light",
+      width: 1200,
+      background: null,
+      lineNumbers: false,
+      language: null,
+      reactions: null,
+      showReactions: false,
+      footerAuthorUsername: null,
+      footerAuthorAvatarUrl: null,
+      comments: { 1: { author: "dev", body: "wrapped note" } },
+      showComments: true,
+      header: { showFilename: true },
+      footer: { enabled: false },
+    });
 
     const rows = [...svg.matchAll(/<text x="\d+" y="(\d+)"[^>]*>([\s\S]*?)<\/text>/g)];
     const commentY = rows.find((row) => row[2]!.includes("wrapped note"))?.[1];
@@ -1621,53 +1542,40 @@ describe("createHighlightedSvg", () => {
       comments,
       showComments: true,
     });
-    const svg = await createHighlightedSvg(
+    const svg = await createHighlightedSvg({
       code,
-      "test.ts",
-      "github_light",
-      1200,
-      undefined,
-      null,
-      undefined,
-      false,
-      undefined,
-      "typescript",
-      null,
-      false,
-      false,
-      false,
-      null,
-      null,
+      filename: "test.ts",
+      theme: "github_light",
+      width: 1200,
+      background: null,
+      lineNumbers: false,
+      language: "typescript",
+      reactions: null,
+      showReactions: false,
+      footerAuthorUsername: null,
+      footerAuthorAvatarUrl: null,
       comments,
-      true,
-    );
+      showComments: true,
+      header: { showFilename: false },
+      footer: { enabled: false },
+    });
 
     expect(estimate.height).toBe(Number(/height="(\d+)"/.exec(svg)![1]));
   });
 
   it("counts the comment row when sizing the card", async () => {
-    const args = [
-      "const x = 1;",
-      "test.ts",
-      "github_light",
-      1200,
-      undefined,
-      null,
-      undefined,
-      false,
-      undefined,
-      null,
-      null,
-      false,
-      true,
-      false,
-      null,
-      null,
-      { 1: { author: "dev", body: "note" } },
-    ] as const;
+    const options = {
+      code: "const x = 1;",
+      filename: "test.ts",
+      theme: "github_light",
+      background: null,
+      lineNumbers: false,
+      header: { showFilename: true },
+      comments: { 1: { author: "dev", body: "note" } },
+    } as const;
 
-    const withComment = await createHighlightedSvg(...args, true);
-    const withoutComment = await createHighlightedSvg(...args, false);
+    const withComment = await createHighlightedSvg({ ...options, showComments: true });
+    const withoutComment = await createHighlightedSvg({ ...options, showComments: false });
 
     const heightOf = (svg: string) => Number(/height="(\d+)"/.exec(svg)![1]);
     expect(heightOf(withComment)).toBeGreaterThan(heightOf(withoutComment));
@@ -1679,20 +1587,18 @@ describe("createHighlightedSvg", () => {
     // word of the wrapped paragraph instead.
     // EXPORT_MAX_CHARS_PER_LINE wraps at 110 chars; this is two visual rows.
     const longLine = "x".repeat(180); // wraps to 2 visual rows
-    const svg = await createHighlightedSvg(
-      longLine,
-      "test.ts",
-      "github_light",
-      1200,
-      undefined,
-      null,
-      undefined,
-      false,
-      "system",
-      null,
-      { 1: [{ emoji: "🔥", reactors: [{ username: "alice" }] }] },
-      true,
-    );
+    const svg = await createHighlightedSvg({
+      code: longLine,
+      filename: "test.ts",
+      theme: "github_light",
+      width: 1200,
+      background: null,
+      lineNumbers: false,
+      fontId: "system",
+      language: null,
+      reactions: { 1: [{ emoji: "🔥", reactors: [{ username: "alice" }] }] },
+      showReactions: true,
+    });
     // Pull every <text> y attribute used for code (font-size 14). The first
     // such y is row 0, the second is row 1, etc. The chip's <text> for the
     // emoji uses font-size="13"; its y attribute should match the LAST code
@@ -1713,26 +1619,24 @@ describe("createHighlightedSvg", () => {
   });
 
   it("renders every unique emoji on a line, not just the first", async () => {
-    const svg = await createHighlightedSvg(
-      "const x = 1;",
-      "test.ts",
-      "github_light",
-      1200,
-      undefined,
-      null,
-      undefined,
-      false,
-      "system",
-      null,
-      {
+    const svg = await createHighlightedSvg({
+      code: "const x = 1;",
+      filename: "test.ts",
+      theme: "github_light",
+      width: 1200,
+      background: null,
+      lineNumbers: false,
+      fontId: "system",
+      language: null,
+      reactions: {
         1: [
           { emoji: "🔥", reactors: [{ username: "alice" }] },
           { emoji: "💡", reactors: [{ username: "bob" }] },
           { emoji: "👀", reactors: [{ username: "carol" }] },
         ],
       },
-      true,
-    );
+      showReactions: true,
+    });
     expect(svg).toContain("🔥");
     expect(svg).toContain("💡");
     expect(svg).toContain("👀");
@@ -1752,18 +1656,16 @@ describe("createHighlightedSvg", () => {
         }),
     );
     try {
-      const svg = await createHighlightedSvg(
-        "const x = 1;",
-        "test.ts",
-        "github_light",
-        1200,
-        undefined,
-        null,
-        undefined,
-        false,
-        "system",
-        null,
-        {
+      const svg = await createHighlightedSvg({
+        code: "const x = 1;",
+        filename: "test.ts",
+        theme: "github_light",
+        width: 1200,
+        background: null,
+        lineNumbers: false,
+        fontId: "system",
+        language: null,
+        reactions: {
           1: [
             {
               emoji: "🚀",
@@ -1776,8 +1678,8 @@ describe("createHighlightedSvg", () => {
             },
           ],
         },
-        true,
-      );
+        showReactions: true,
+      });
       // Three distinct <pattern> defs — one per visible reactor avatar.
       expect(svg).toMatch(/<pattern id="avatar-1"/);
       expect(svg).toMatch(/<pattern id="avatar-2"/);
@@ -1805,18 +1707,16 @@ describe("createHighlightedSvg", () => {
       }),
     );
     try {
-      const svg = await createHighlightedSvg(
-        "const x = 1;",
-        "test.ts",
-        "github_light",
-        1200,
-        undefined,
-        null,
-        undefined,
-        false,
-        "system",
-        null,
-        {
+      const svg = await createHighlightedSvg({
+        code: "const x = 1;",
+        filename: "test.ts",
+        theme: "github_light",
+        width: 1200,
+        background: null,
+        lineNumbers: false,
+        fontId: "system",
+        language: null,
+        reactions: {
           1: [
             {
               emoji: "🔥",
@@ -1824,8 +1724,8 @@ describe("createHighlightedSvg", () => {
             },
           ],
         },
-        true,
-      );
+        showReactions: true,
+      });
       // A <pattern> def + a circle that fills from it = the avatar pic is in
       // the SVG, not just the initial-letter fallback. patternContentUnits
       // must be objectBoundingBox or the inner <image width=1 height=1>
@@ -1846,18 +1746,16 @@ describe("createHighlightedSvg", () => {
       .spyOn(globalThis, "fetch")
       .mockResolvedValue(new Response(null, { status: 404 }));
     try {
-      const svg = await createHighlightedSvg(
-        "const x = 1;",
-        "test.ts",
-        "github_light",
-        1200,
-        undefined,
-        null,
-        undefined,
-        false,
-        "system",
-        null,
-        {
+      const svg = await createHighlightedSvg({
+        code: "const x = 1;",
+        filename: "test.ts",
+        theme: "github_light",
+        width: 1200,
+        background: null,
+        lineNumbers: false,
+        fontId: "system",
+        language: null,
+        reactions: {
           1: [
             {
               emoji: "🔥",
@@ -1865,8 +1763,8 @@ describe("createHighlightedSvg", () => {
             },
           ],
         },
-        true,
-      );
+        showReactions: true,
+      });
       expect(svg).not.toContain('fill="url(#avatar-');
       // The initial of the username falls back as the avatar text.
       expect(svg).toContain(">A<");
@@ -1876,39 +1774,35 @@ describe("createHighlightedSvg", () => {
   });
 
   it("omits reaction emoji when showReactions is false", async () => {
-    const svg = await createHighlightedSvg(
-      "const x = 1;",
-      "test.ts",
-      "github_light",
-      1200,
-      undefined,
-      null,
-      undefined,
-      false,
-      "system",
-      null,
-      { 1: [{ emoji: "🔥", reactors: [{ username: "alice" }] }] },
-      false,
-    );
+    const svg = await createHighlightedSvg({
+      code: "const x = 1;",
+      filename: "test.ts",
+      theme: "github_light",
+      width: 1200,
+      background: null,
+      lineNumbers: false,
+      fontId: "system",
+      language: null,
+      reactions: { 1: [{ emoji: "🔥", reactors: [{ username: "alice" }] }] },
+      showReactions: false,
+    });
     expect(svg).not.toContain("🔥");
   });
 
   it("shows the filename when showFilename is true", async () => {
-    const svg = await createHighlightedSvg(
-      "x",
-      "my-file.ts",
-      "github_light",
-      1200,
-      undefined,
-      null,
-      undefined,
-      false,
-      "system",
-      null,
-      null,
-      false,
-      true,
-    );
+    const svg = await createHighlightedSvg({
+      code: "x",
+      filename: "my-file.ts",
+      theme: "github_light",
+      width: 1200,
+      background: null,
+      lineNumbers: false,
+      fontId: "system",
+      language: null,
+      reactions: null,
+      showReactions: false,
+      header: { showFilename: true },
+    });
     expect(svg).toContain(">my-file.ts<");
     const filenameX = Number(/<text x="([\d.]+)"[^>]*>my-file\.ts<\/text>/.exec(svg)?.[1]);
     const languageX = Number(
@@ -1918,56 +1812,48 @@ describe("createHighlightedSvg", () => {
   });
 
   it("omits the filename when showFilename is false", async () => {
-    const svg = await createHighlightedSvg(
-      "x",
-      "my-file.ts",
-      "github_light",
-      1200,
-      undefined,
-      null,
-      undefined,
-      false,
-      "system",
-      null,
-      null,
-      false,
-      false,
-    );
+    const svg = await createHighlightedSvg({
+      code: "x",
+      filename: "my-file.ts",
+      theme: "github_light",
+      width: 1200,
+      background: null,
+      lineNumbers: false,
+      fontId: "system",
+      language: null,
+      reactions: null,
+      showReactions: false,
+      header: { showFilename: false },
+    });
     expect(svg).not.toContain(">my-file.ts<");
   });
 
   it("renders granular header and footer metadata selections", async () => {
-    const svg = await createHighlightedSvg(
-      "const x = 1;\nconst y = 2;",
-      "private-name.ts",
-      "github_light",
-      1200,
-      undefined,
-      null,
-      undefined,
-      false,
-      "system",
-      "typescript",
-      null,
-      false,
-      true,
-      true,
-      "alice",
-      null,
-      undefined,
-      false,
-      undefined,
-      "minimal",
-      12,
-      16,
-      {
+    const svg = await createHighlightedSvg({
+      code: "const x = 1;\nconst y = 2;",
+      filename: "private-name.ts",
+      theme: "github_light",
+      width: 1200,
+      background: null,
+      lineNumbers: false,
+      fontId: "system",
+      language: "typescript",
+      reactions: null,
+      showReactions: false,
+      footerAuthorUsername: "alice",
+      footerAuthorAvatarUrl: null,
+      showComments: false,
+      windowDecoration: "minimal",
+      cornerRadius: 12,
+      innerPadding: 16,
+      header: {
         enabled: true,
         showFilename: false,
         showLanguage: true,
         filenamePosition: "center",
         languagePosition: "right",
       },
-      {
+      footer: {
         enabled: true,
         showLanguage: false,
         showTheme: true,
@@ -1976,7 +1862,7 @@ describe("createHighlightedSvg", () => {
         showAuthor: false,
         alignment: "center",
       },
-    );
+    });
 
     expect(svg).not.toContain(">private-name.ts<");
     expect(svg).toContain(">typescript<");
@@ -1987,37 +1873,31 @@ describe("createHighlightedSvg", () => {
   });
 
   it("collapses header and footer height when their categories are disabled", async () => {
-    const visible = await createHighlightedSvg(
-      "x",
-      "test.ts",
-      "github_light",
-      1200,
-      undefined,
-      null,
-      undefined,
-      false,
-      "system",
-      null,
-      null,
-      false,
-      true,
-      true,
-      null,
-      null,
-      undefined,
-      false,
-      undefined,
-      "minimal",
-      12,
-      16,
-      {
+    const visible = await createHighlightedSvg({
+      code: "x",
+      filename: "test.ts",
+      theme: "github_light",
+      width: 1200,
+      background: null,
+      lineNumbers: false,
+      fontId: "system",
+      language: null,
+      reactions: null,
+      showReactions: false,
+      footerAuthorUsername: null,
+      footerAuthorAvatarUrl: null,
+      showComments: false,
+      windowDecoration: "minimal",
+      cornerRadius: 12,
+      innerPadding: 16,
+      header: {
         enabled: true,
         showFilename: true,
         showLanguage: true,
         filenamePosition: "center",
         languagePosition: "right",
       },
-      {
+      footer: {
         enabled: true,
         showLanguage: false,
         showTheme: true,
@@ -2026,38 +1906,32 @@ describe("createHighlightedSvg", () => {
         showAuthor: false,
         alignment: "left",
       },
-    );
-    const hidden = await createHighlightedSvg(
-      "x",
-      "test.ts",
-      "github_light",
-      1200,
-      undefined,
-      null,
-      undefined,
-      false,
-      "system",
-      null,
-      null,
-      false,
-      true,
-      true,
-      null,
-      null,
-      undefined,
-      false,
-      undefined,
-      "minimal",
-      12,
-      16,
-      {
+    });
+    const hidden = await createHighlightedSvg({
+      code: "x",
+      filename: "test.ts",
+      theme: "github_light",
+      width: 1200,
+      background: null,
+      lineNumbers: false,
+      fontId: "system",
+      language: null,
+      reactions: null,
+      showReactions: false,
+      footerAuthorUsername: null,
+      footerAuthorAvatarUrl: null,
+      showComments: false,
+      windowDecoration: "minimal",
+      cornerRadius: 12,
+      innerPadding: 16,
+      header: {
         enabled: false,
         showFilename: true,
         showLanguage: true,
         filenamePosition: "center",
         languagePosition: "right",
       },
-      {
+      footer: {
         enabled: false,
         showLanguage: true,
         showTheme: true,
@@ -2066,7 +1940,7 @@ describe("createHighlightedSvg", () => {
         showAuthor: true,
         alignment: "left",
       },
-    );
+    });
 
     const visibleHeight = Number(/height="(\d+)"/.exec(visible)?.[1]);
     const hiddenHeight = Number(/height="(\d+)"/.exec(hidden)?.[1]);
@@ -2075,34 +1949,37 @@ describe("createHighlightedSvg", () => {
   });
 
   it("clips to the provided height", async () => {
-    const svg = await createHighlightedSvg("x", "test.ts", "github_light", 1200, 630);
+    const svg = await createHighlightedSvg({
+      code: "x",
+      filename: "test.ts",
+      theme: "github_light",
+      width: 1200,
+      height: 630,
+    });
     expect(svg).toContain('height="630"');
   });
 
   it("uses languageOverride when provided", async () => {
-    await createHighlightedSvg(
-      "x",
-      "test.ts",
-      "github_light",
-      1200,
-      undefined,
-      null,
-      undefined,
-      false,
-      "system",
-      "rust",
-    );
+    await createHighlightedSvg({
+      code: "x",
+      filename: "test.ts",
+      theme: "github_light",
+      width: 1200,
+      background: null,
+      lineNumbers: false,
+      fontId: "system",
+      language: "rust",
+    });
     expect(mockHighlighter.loadLanguage).toHaveBeenCalledWith("rust");
   });
 
   it("handles multi-line code", async () => {
-    const svg = await createHighlightedSvg(
-      "line1\nline2\nline3",
-      "test.ts",
-      "github_light",
-      1200,
-      undefined,
-    );
+    const svg = await createHighlightedSvg({
+      code: "line1\nline2\nline3",
+      filename: "test.ts",
+      theme: "github_light",
+      width: 1200,
+    });
     expect(svg).toContain("line1");
     expect(svg).toContain("line2");
     expect(svg).toContain("line3");
@@ -2117,14 +1994,13 @@ describe("EXPORT_BRAND_BACKGROUNDS — premium scenes", () => {
 
     // Layered brands (Lumis, MDEx) replace the ambient scene; covered below.
     for (const background of EXPORT_BRAND_BACKGROUNDS.filter((bg) => !bg.decoration)) {
-      const svg = await createHighlightedSvg(
-        "const polished = true",
-        "scene.ts",
-        "github_light",
-        1200,
-        undefined,
+      const svg = await createHighlightedSvg({
+        code: "const polished = true",
+        filename: "scene.ts",
+        theme: "github_light",
+        width: 1200,
         background,
-      );
+      });
       expect(svg, background.label).toContain('data-scene-layer="glow-0"');
       expect(svg, background.label).toContain('data-scene-layer="canvas-rim"');
       expect(svg, background.label).toContain('data-scene-layer="frame-rim"');
@@ -2143,14 +2019,13 @@ describe("EXPORT_BRAND_BACKGROUNDS — premium scenes", () => {
     const background = EXPORT_BRAND_BACKGROUNDS.find((candidate) => candidate.label === label);
     if (!background) throw new Error(`${label} background is missing`);
 
-    const svg = await createHighlightedSvg(
-      "const polished = true",
-      "scene.ts",
-      "github_light",
-      1200,
-      undefined,
+    const svg = await createHighlightedSvg({
+      code: "const polished = true",
+      filename: "scene.ts",
+      theme: "github_light",
+      width: 1200,
       background,
-    );
+    });
     expect(svg).toContain(`data-scene-node="${marker}"`);
   });
 });
@@ -2162,19 +2037,19 @@ describe("EXPORT_BRAND_BACKGROUNDS — frame chrome", () => {
     const { EXPORT_BRAND_BACKGROUNDS, createHighlightedSvg } = await import("./export-utils");
     const vercel = EXPORT_BRAND_BACKGROUNDS.find((b) => b.label === "Vercel")!;
     const svg = await createHighlightedSvg(
-      "x",
-      "snippet.tsx",
-      "github_light",
-      1200,
-      undefined,
-      vercel,
-      undefined,
-      false,
-      "system",
-      null,
-      null,
-      false,
-      true, // showFilename
+      {
+        code: "x",
+        filename: "snippet.tsx",
+        theme: "github_light",
+        width: 1200,
+        background: vercel,
+        lineNumbers: false,
+        fontId: "system",
+        language: null,
+        reactions: null,
+        showReactions: false,
+        header: { showFilename: true },
+      }, // showFilename
     );
     expect(svg).toContain("#ff5f57");
     // Centred filename renders for branded themes that don't ship a
@@ -2186,19 +2061,19 @@ describe("EXPORT_BRAND_BACKGROUNDS — frame chrome", () => {
     const { EXPORT_BRAND_BACKGROUNDS, createHighlightedSvg } = await import("./export-utils");
     const vercel = EXPORT_BRAND_BACKGROUNDS.find((b) => b.label === "Vercel")!;
     const svg = await createHighlightedSvg(
-      "x",
-      "snippet.tsx",
-      "github_light",
-      1200,
-      undefined,
-      vercel,
-      undefined,
-      false,
-      "system",
-      null,
-      null,
-      false,
-      false, // showFilename
+      {
+        code: "x",
+        filename: "snippet.tsx",
+        theme: "github_light",
+        width: 1200,
+        background: vercel,
+        lineNumbers: false,
+        fontId: "system",
+        language: null,
+        reactions: null,
+        showReactions: false,
+        header: { showFilename: false },
+      }, // showFilename
     );
     expect(svg).not.toContain(">snippet.tsx<");
   });
@@ -2210,19 +2085,19 @@ describe("EXPORT_BRAND_BACKGROUNDS — frame chrome", () => {
     const { EXPORT_BRAND_BACKGROUNDS, createHighlightedSvg } = await import("./export-utils");
     const vercel = EXPORT_BRAND_BACKGROUNDS.find((b) => b.label === "Vercel")!;
     const svg = await createHighlightedSvg(
-      "x",
-      "snippet.tsx",
-      "github_light",
-      1200,
-      undefined,
-      vercel,
-      undefined,
-      false,
-      "system",
-      null,
-      null,
-      false,
-      true, // showFilename
+      {
+        code: "x",
+        filename: "snippet.tsx",
+        theme: "github_light",
+        width: 1200,
+        background: vercel,
+        lineNumbers: false,
+        fontId: "system",
+        language: null,
+        reactions: null,
+        showReactions: false,
+        header: { showFilename: true },
+      }, // showFilename
     );
     expect(svg).toMatch(/<text[^>]*fill="#ffffff"[^>]*>snippet.tsx<\/text>/);
   });
@@ -2230,7 +2105,13 @@ describe("EXPORT_BRAND_BACKGROUNDS — frame chrome", () => {
   it("Vercel renders sharp-cornered card (radius 0)", async () => {
     const { EXPORT_BRAND_BACKGROUNDS, createHighlightedSvg } = await import("./export-utils");
     const vercel = EXPORT_BRAND_BACKGROUNDS.find((b) => b.label === "Vercel")!;
-    const svg = await createHighlightedSvg("x", "f.ts", "github_light", 1200, undefined, vercel);
+    const svg = await createHighlightedSvg({
+      code: "x",
+      filename: "f.ts",
+      theme: "github_light",
+      width: 1200,
+      background: vercel,
+    });
     // Card rect uses rx="0" ry="0" for the brand's borderless geometric look.
     expect(svg).toMatch(/<rect[^>]*rx="0" ry="0"[^>]*fill="#000000"/);
   });
@@ -2238,7 +2119,13 @@ describe("EXPORT_BRAND_BACKGROUNDS — frame chrome", () => {
   it("Stripe honors macOS dots and uses a rounded gradient frame rim", async () => {
     const { EXPORT_BRAND_BACKGROUNDS, createHighlightedSvg } = await import("./export-utils");
     const stripe = EXPORT_BRAND_BACKGROUNDS.find((b) => b.label === "Stripe")!;
-    const svg = await createHighlightedSvg("x", "f.ts", "github_light", 1200, undefined, stripe);
+    const svg = await createHighlightedSvg({
+      code: "x",
+      filename: "f.ts",
+      theme: "github_light",
+      width: 1200,
+      background: stripe,
+    });
     expect(svg).toContain("#ff5f57");
     expect(svg).toContain('data-scene-layer="frame-rim"');
     expect(svg).toContain('stroke="url(#brand-frame-rim)"');
@@ -2248,19 +2135,19 @@ describe("EXPORT_BRAND_BACKGROUNDS — frame chrome", () => {
     const { EXPORT_BRAND_BACKGROUNDS, createHighlightedSvg } = await import("./export-utils");
     const resend = EXPORT_BRAND_BACKGROUNDS.find((b) => b.label === "Resend")!;
     const svg = await createHighlightedSvg(
-      "x",
-      "notes.md",
-      "github_light",
-      1200,
-      undefined,
-      resend,
-      undefined,
-      false,
-      "system",
-      "markdown",
-      null,
-      false,
-      true, // showFilename
+      {
+        code: "x",
+        filename: "notes.md",
+        theme: "github_light",
+        width: 1200,
+        background: resend,
+        lineNumbers: false,
+        fontId: "system",
+        language: "markdown",
+        reactions: null,
+        showReactions: false,
+        header: { showFilename: true },
+      }, // showFilename
     );
     expect(svg).toContain("#ff5f57");
     // Filename + language sit in their own header strip, with
@@ -2274,7 +2161,13 @@ describe("EXPORT_BRAND_BACKGROUNDS — frame chrome", () => {
   it("Tailwind keeps the macOS dots and layers beams over its gradient", async () => {
     const { EXPORT_BRAND_BACKGROUNDS, createHighlightedSvg } = await import("./export-utils");
     const tailwind = EXPORT_BRAND_BACKGROUNDS.find((b) => b.label === "Tailwind")!;
-    const svg = await createHighlightedSvg("x", "f.ts", "github_light", 1200, undefined, tailwind);
+    const svg = await createHighlightedSvg({
+      code: "x",
+      filename: "f.ts",
+      theme: "github_light",
+      width: 1200,
+      background: tailwind,
+    });
     expect(svg).toContain("#ff5f57");
     expect(svg).toContain("#febc2e");
     expect(svg).toContain("#28c840");
@@ -2290,19 +2183,19 @@ describe("EXPORT_BRAND_BACKGROUNDS — frame chrome", () => {
     const { EXPORT_BRAND_BACKGROUNDS, createHighlightedSvg } = await import("./export-utils");
     const supabase = EXPORT_BRAND_BACKGROUNDS.find((b) => b.label === "Supabase")!;
     const svg = await createHighlightedSvg(
-      "x",
-      "snippet.tsx",
-      "github_light",
-      1200,
-      undefined,
-      supabase,
-      undefined,
-      false,
-      "system",
-      "typescript",
-      null,
-      false,
-      true, // showFilename
+      {
+        code: "x",
+        filename: "snippet.tsx",
+        theme: "github_light",
+        width: 1200,
+        background: supabase,
+        lineNumbers: false,
+        fontId: "system",
+        language: "typescript",
+        reactions: null,
+        showReactions: false,
+        header: { showFilename: true },
+      }, // showFilename
     );
     expect(svg).toContain("#ff5f57");
     expect(svg).toMatch(/<text[^>]*>snippet.tsx<\/text>/);
@@ -2320,19 +2213,19 @@ describe("EXPORT_BRAND_BACKGROUNDS — frame chrome", () => {
     for (const label of ["Supabase", "Resend"] as const) {
       const bg = EXPORT_BRAND_BACKGROUNDS.find((b) => b.label === label)!;
       const svg = await createHighlightedSvg(
-        "x",
-        "secret.tsx",
-        "github_light",
-        1200,
-        undefined,
-        bg,
-        undefined,
-        false,
-        "system",
-        "typescript",
-        null,
-        false,
-        false, // showFilename = false
+        {
+          code: "x",
+          filename: "secret.tsx",
+          theme: "github_light",
+          width: 1200,
+          background: bg,
+          lineNumbers: false,
+          fontId: "system",
+          language: "typescript",
+          reactions: null,
+          showReactions: false,
+          header: { showFilename: false },
+        }, // showFilename = false
       );
       expect(svg, `${label} should hide filename when showFilename=false`).not.toMatch(
         /<text[^>]*>secret.tsx<\/text>/,
@@ -2351,58 +2244,40 @@ describe("EXPORT_BRAND_BACKGROUNDS — frame chrome", () => {
 describe("createHighlightedSvg — every export option reaches the output", () => {
   const BG = { label: "Test", from: "#000000", to: "#111111" };
 
-  // Positional tail after (code, filename, theme, width, height).
-  const BASE: unknown[] = [
-    null, // 0  background
-    undefined, // 1  outerPadding
-    false, // 2  lineNumbers
-    "system", // 3  fontId
-    null, // 4  languageOverride
-    null, // 5  reactions
-    false, // 6  showReactions
-    true, // 7  showFilename
-    false, // 8  showFooter
-    null, // 9  footerAuthorUsername
-    null, // 10 footerAuthorAvatarUrl
-    null, // 11 comments
-    false, // 12 showComments
-    null, // 13 sourceUrl
-    "macos", // 14 windowDecoration
-    8, // 15 cornerRadius
-    16, // 16 innerPadding
-    undefined, // 17 headerSettings
-    undefined, // 18 footerSettings
-    14, // 19 fontSize
-  ];
+  const BASE = {
+    code: "const value = 1;\nconst other = 2;",
+    filename: "test.ts",
+    theme: "github_light",
+    background: null,
+    lineNumbers: false,
+    fontId: "system",
+    windowDecoration: "macos",
+    cornerRadius: 8,
+    innerPadding: 16,
+    fontSize: 14,
+  } as const;
 
-  function render(overrides: Record<number, unknown> = {}) {
-    const args = BASE.slice();
-    for (const key of Object.keys(overrides)) args[Number(key)] = overrides[Number(key)];
-    const call = createHighlightedSvg as unknown as (...a: unknown[]) => Promise<string>;
-    return call(
-      "const value = 1;\nconst other = 2;",
-      "test.ts",
-      "github_light",
-      1200,
-      undefined,
-      ...args,
-    );
+  function render(overrides: Partial<ExportOptions> = {}) {
+    return createHighlightedSvg({ ...BASE, ...overrides });
   }
 
-  const cases: Array<[string, Record<number, unknown>]> = [
-    ["background", { 0: BG }],
-    ["outerPadding", { 0: BG, 1: 128 }],
-    ["lineNumbers", { 2: true }],
-    ["fontId", { 3: "jetbrains" }],
-    ["languageOverride", { 4: "python" }],
-    ["showReactions", { 5: { 1: [{ emoji: "\u{1F525}", reactors: [] }] }, 6: true }],
-    ["showFilename", { 7: false }],
-    ["showFooter", { 8: true }],
-    ["sourceUrl", { 13: "https://example.com/abc" }],
-    ["windowDecoration", { 14: "windows" }],
-    ["cornerRadius", { 15: 16 }],
-    ["innerPadding", { 16: 48 }],
-    ["fontSize", { 19: 20 }],
+  const cases: Array<[string, Partial<ExportOptions>]> = [
+    ["background", { background: BG }],
+    ["outerPadding", { background: BG, outerPadding: 128 }],
+    ["lineNumbers", { lineNumbers: true }],
+    ["fontId", { fontId: "jetbrains" }],
+    ["language", { language: "python" }],
+    [
+      "showReactions",
+      { reactions: { 1: [{ emoji: "\u{1F525}", reactors: [] }] }, showReactions: true },
+    ],
+    ["header", { header: { showFilename: false } }],
+    ["footer", { footer: { enabled: true } }],
+    ["sourceUrl", { sourceUrl: "https://example.com/abc" }],
+    ["windowDecoration", { windowDecoration: "windows" }],
+    ["cornerRadius", { cornerRadius: 16 }],
+    ["innerPadding", { innerPadding: 48 }],
+    ["fontSize", { fontSize: 20 }],
   ];
 
   it.each(cases)("%s changes the rendered SVG", async (_name, overrides) => {
@@ -2445,15 +2320,14 @@ describe("renderToFile", () => {
   });
 
   it("returns a File with the correct name and PNG type", async () => {
-    const file = await renderToFile(
-      "const x = 1;",
-      "test.ts",
-      "github_light",
-      1200,
-      undefined,
-      "output.png",
-      2,
-    );
+    const file = await renderToFile({
+      code: "const x = 1;",
+      filename: "test.ts",
+      theme: "github_light",
+      width: 1200,
+      outFilename: "output.png",
+      pixelRatio: 2,
+    });
     expect(file).toBeInstanceOf(File);
     expect(file.name).toBe("output.png");
     expect(file.type).toBe("image/png");
@@ -2461,7 +2335,14 @@ describe("renderToFile", () => {
 
   it("revokes the object URL after rendering", async () => {
     const revokeSpy = vi.spyOn(URL, "revokeObjectURL").mockReturnValue(undefined);
-    await renderToFile("x", "test.ts", "github_light", 1200, undefined, "out.png", 1);
+    await renderToFile({
+      code: "x",
+      filename: "test.ts",
+      theme: "github_light",
+      width: 1200,
+      outFilename: "out.png",
+      pixelRatio: 1,
+    });
     expect(revokeSpy).toHaveBeenCalledWith("blob:mock-svg");
   });
 });
@@ -2477,36 +2358,28 @@ describe("createHighlightedSvg 16:9 canvas and ligatures", () => {
       ligatures = true,
     } = {},
   ) =>
-    createHighlightedSvg(
+    createHighlightedSvg({
       code,
-      "demo.ex",
-      "github_light",
-      1200,
-      undefined,
+      filename: "demo.ex",
+      theme: "github_light",
+      width: 1200,
       background,
-      undefined,
-      true,
+      lineNumbers: true,
       fontId,
-      "plaintext",
-      undefined,
-      false,
-      true,
-      false,
-      null,
-      null,
-      undefined,
-      false,
-      null,
-      "macos",
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      18,
-      false,
+      language: "plaintext",
+      showReactions: false,
+      footerAuthorUsername: null,
+      footerAuthorAvatarUrl: null,
+      showComments: false,
+      sourceUrl: null,
+      windowDecoration: "macos",
+      fontSize: 18,
+      wordDiff: false,
       aspectRatio,
       ligatures,
-    );
+      header: { showFilename: true },
+      footer: { enabled: false },
+    });
   const numbers = (text: string) => text.split(" ").map(Number);
   const svgTag = (svg: string) => /<svg\b[^>]*>/.exec(svg)![0];
   const card = (svg: string) =>
@@ -2600,36 +2473,33 @@ describe("Lumis and MDEx brand presets", () => {
     const preset = getBrandPreset(id)!;
     const background = EXPORT_BRAND_BACKGROUNDS.find((bg) => bg.brandId === id)!;
     const s = preset.settings;
-    const markup = await createHighlightedSvg(
-      CODE,
+    const markup = await createHighlightedSvg({
+      code: CODE,
       filename,
-      s.theme,
-      1200,
-      undefined,
+      theme: s.theme,
+      width: 1200,
       background,
-      s.outerPadding,
-      s.lineNumbers,
-      s.fontId,
+      outerPadding: s.outerPadding,
+      lineNumbers: s.lineNumbers,
+      fontId: s.fontId,
       language,
-      null,
-      false,
-      true,
-      false,
-      null,
-      null,
-      null,
-      false,
-      null,
-      s.windowDecoration,
-      s.cornerRadius,
-      s.innerPadding,
-      s.header,
-      s.footer,
-      EXPORT_FONT_SIZE,
-      false,
-      s.aspectRatio,
-      s.ligatures,
-    );
+      reactions: null,
+      showReactions: false,
+      footerAuthorUsername: null,
+      footerAuthorAvatarUrl: null,
+      comments: null,
+      showComments: false,
+      sourceUrl: null,
+      windowDecoration: s.windowDecoration,
+      cornerRadius: s.cornerRadius,
+      innerPadding: s.innerPadding,
+      header: s.header,
+      footer: s.footer,
+      fontSize: EXPORT_FONT_SIZE,
+      wordDiff: false,
+      aspectRatio: s.aspectRatio,
+      ligatures: s.ligatures,
+    });
     const svg = new DOMParser().parseFromString(markup, "image/svg+xml").documentElement;
     const frame = background.frame!;
     const card = [...svg.querySelectorAll("rect")].find(

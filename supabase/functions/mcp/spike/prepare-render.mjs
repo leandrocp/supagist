@@ -34,11 +34,6 @@ for (const [pkg, version] of [
   if (installed.version !== version) throw new Error(`M0 requires ${pkg}@${version}`);
 }
 
-function replaceOnce(source, before, after) {
-  if (source.split(before).length !== 2) throw new Error(`App seam drifted: ${before}`);
-  return source.replace(before, after);
-}
-
 const sources = {};
 for (const name of [
   "export-utils",
@@ -52,17 +47,6 @@ for (const name of [
 ]) {
   let source = await readFile(new URL(`lib/${name}.ts`, root), "utf8");
   sources[`lib/${name}.ts`] = digest(source);
-  if (name === "export-utils") {
-    const start = source.indexOf("const fontBase64Cache =");
-    const end = source.indexOf("// Pick a readable text colour", start);
-    if (start < 0 || end < 0) throw new Error("Asset seams drifted");
-    source =
-      source.slice(0, start) +
-      'import { loadFontBase64, loadImageDataUrl } from "../assets.ts";\n\n' +
-      source.slice(end);
-    source = replaceOnce(source, "data:font/woff2;base64,", "data:font/ttf;base64,");
-    source = replaceOnce(source, "format('woff2')", "format('truetype')");
-  }
   if (name === "lumis-lines") {
     const start = source.indexOf("  try {\n    await highlighter.loadLanguage(language);");
     const end = source.indexOf("\n}\n", start);

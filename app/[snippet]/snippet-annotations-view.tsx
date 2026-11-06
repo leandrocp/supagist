@@ -1500,7 +1500,6 @@ export function SnippetAnnotationsView({
     background,
     outerPadding: appearance.outerPadding,
     lineNumbers: appearance.lineNumbers,
-    showFooter: appearance.footer.enabled,
     header,
     footer: appearance.footer,
     footerAuthorUsername: author?.username,

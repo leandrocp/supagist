@@ -1,21 +1,27 @@
 import {
-  createHighlightedSvg,
-  inferLanguage,
+  renderExport,
   EXPORT_FONTS,
+  EXPORT_FONT_SIZE,
   EXPORT_FONT_SIZE_VALUES,
+  EXPORT_INNER_PADDING,
   EXPORT_OUTER_PADDING_VALUES,
   EXPORT_INNER_PADDING_VALUES,
   EXPORT_CORNER_RADIUS_VALUES,
+  EXPORT_MAX_CHARS_PER_LINE,
+  EXPORT_MAX_LINES,
+  EXPORT_WIDTH,
+  EXPORT_WINDOW_DECORATIONS,
   wrapTokenLine,
   wrapCommentText,
 } from "./spike/generated/export-utils.js";
+import { inferLanguage } from "./spike/generated/snippet-utils.js";
 import {
   BRAND_PRESETS,
   DEFAULT_HEADER_SETTINGS,
   DEFAULT_FOOTER_SETTINGS,
 } from "./spike/generated/brand-presets.js";
 import { renderInput, backgrounds, type RenderInput } from "./input.ts";
-import { loadFontBase64 } from "./spike/assets.ts";
+import { loadFontBase64, loadImageDataUrl } from "./spike/assets.ts";
 export type { RenderInput } from "./input.ts";
 import {
   clientHighlighterPromise,
@@ -51,7 +57,7 @@ export const appearanceOptions = {
   outerPadding: EXPORT_OUTER_PADDING_VALUES,
   innerPadding: EXPORT_INNER_PADDING_VALUES,
   cornerRadius: EXPORT_CORNER_RADIUS_VALUES,
-  windowDecorations: ["macos", "macos-subtle", "windows", "minimal", "none", "lumis", "markdown"],
+  windowDecorations: EXPORT_WINDOW_DECORATIONS,
   header: DEFAULT_HEADER_SETTINGS,
   footer: DEFAULT_FOOTER_SETTINGS,
   alignments: ["left", "center", "right"],
@@ -63,7 +69,11 @@ export const appearanceOptions = {
   },
   aspectRatios: ["16:9"],
   ligatures: [true, false],
-  limits: { codePoints: 8000, visualRows: 30, wrapColumns: 110 },
+  limits: {
+    codePoints: 8000,
+    visualRows: EXPORT_MAX_LINES,
+    wrapColumns: EXPORT_MAX_CHARS_PER_LINE,
+  },
   notes:
     "brand selects a complete preset; explicit fields override it. background is only a canvas. system font uses portable JetBrains Mono. Reactions/comments are supplied render data, not published collaboration. aspectRatio 16:9 outputs a 1600x900 canvas with the card centered; outerPadding is the minimum margin. ligatures false splits operator ligatures such as |> into separate characters.",
 };
@@ -136,13 +146,13 @@ export async function renderSnippet(rawInput: RenderInput): Promise<RenderResult
     .reduce(
       (count, text, index) =>
         count +
-        wrapTokenLine([{ text }], 110).length +
+        wrapTokenLine([{ text }], EXPORT_MAX_CHARS_PER_LINE).length +
         (showComments && input.comments?.[index + 1]
           ? wrapCommentText(input.comments[index + 1].body).length
           : 0),
       0,
     );
-  if (visualRows > 30)
+  if (visualRows > EXPORT_MAX_LINES)
     throw new RenderInputError(
       "Export exceeds 30 visual rows after wrapping/comments; choose a shorter excerpt or split the image",
     );
@@ -169,67 +179,59 @@ export async function renderSnippet(rawInput: RenderInput): Promise<RenderResult
   const appearance: RenderResult["appearance"] = {
     background: background?.label ?? null,
     outerPadding: input.outerPadding ?? settings?.outerPadding,
-    innerPadding: input.innerPadding ?? settings?.innerPadding ?? 16,
+    innerPadding: input.innerPadding ?? settings?.innerPadding ?? EXPORT_INNER_PADDING,
     cornerRadius: input.cornerRadius ?? settings?.cornerRadius,
     lineNumbers: input.lineNumbers ?? settings?.lineNumbers ?? true,
     showReactions: false,
     header,
     footer,
     windowDecoration: input.windowDecoration ?? settings?.windowDecoration ?? "macos",
-    fontSize: input.fontSize ?? 14,
+    fontSize: input.fontSize ?? EXPORT_FONT_SIZE,
     aspectRatio: input.aspectRatio ?? presetAspectRatio,
     ligatures: input.ligatures ?? presetLigatures,
   };
-  let svg = await createHighlightedSvg(
-    input.code,
-    input.filename,
-    theme,
-    1200,
-    undefined,
-    background,
-    appearance.outerPadding,
-    appearance.lineNumbers,
-    fontId === "system" ? "jetbrains" : fontId,
-    language,
-    input.reactions,
-    input.showReactions ?? Boolean(input.reactions),
-    true,
-    false,
-    input.author,
-    undefined,
-    input.comments,
-    showComments,
-    undefined,
-    input.windowDecoration ?? settings?.windowDecoration ?? "macos",
-    appearance.cornerRadius,
-    appearance.innerPadding,
-    header,
-    footer,
-    appearance.fontSize,
-    input.wordDiff ?? false,
-    appearance.aspectRatio,
-    appearance.ligatures,
+  // `system` draws in JetBrains Mono: Edge has no system fonts to fall back on.
+  const renderFontId = fontId === "system" ? "jetbrains" : fontId;
+  const rendered = await renderExport(
+    {
+      code: input.code,
+      filename: input.filename,
+      theme,
+      width: EXPORT_WIDTH,
+      background,
+      outerPadding: appearance.outerPadding,
+      lineNumbers: appearance.lineNumbers,
+      fontId: renderFontId,
+      // App font subsets rely on browser fallback for the comment arrow; embed
+      // Hack too, so native conversion never turns it into a missing glyph.
+      fallbackFontId:
+        showComments && input.comments && renderFontId !== "hack" ? "hack" : undefined,
+      language,
+      reactions: input.reactions,
+      showReactions: input.showReactions ?? Boolean(input.reactions),
+      footerAuthorUsername: input.author,
+      comments: input.comments,
+      showComments,
+      windowDecoration: appearance.windowDecoration,
+      cornerRadius: appearance.cornerRadius,
+      innerPadding: appearance.innerPadding,
+      header,
+      footer,
+      fontSize: appearance.fontSize,
+      wordDiff: input.wordDiff ?? false,
+      aspectRatio: appearance.aspectRatio,
+      ligatures: appearance.ligatures,
+    },
+    {
+      highlighter: clientHighlighterPromise,
+      loadFontBase64,
+      loadImageDataUrl,
+      fontFormat: "truetype",
+    },
   );
-  // App font subsets rely on browser fallback for the comment arrow. Supply a
-  // portable fallback too, so native conversion never turns it into a missing glyph.
-  if (showComments && input.comments && fontId !== "hack") {
-    const fallback = await loadFontBase64("/fonts/hack.woff2");
-    svg = svg.replace(
-      "</style>",
-      `@font-face{font-family:'Hack';font-style:normal;font-weight:400;src:url('data:font/ttf;base64,${fallback}') format('truetype')}</style>`,
-    );
-    const family = EXPORT_FONTS.find(
-      (font) => font.id === (fontId === "system" ? "jetbrains" : fontId),
-    )!.family;
-    svg = svg.replaceAll(
-      `font-family="&quot;${family}&quot;,ui-monospace`,
-      `font-family="&quot;${family}&quot;,&quot;Hack&quot;,ui-monospace`,
-    );
-  }
-  const dimensions = /<svg\b[^>]* width="([\d.]+)" height="([\d.]+)"/.exec(svg);
-  if (!dimensions) throw new Error("App renderer did not emit SVG dimensions");
-  const logicalWidth = Number(dimensions[1]);
-  const logicalHeight = Number(dimensions[2]);
+  let svg = rendered.svg;
+  const logicalWidth = rendered.layout.width;
+  const logicalHeight = rendered.layout.height;
   // PNG is rasterized elsewhere from a 1x SVG; here pixelRatio only sizes the SVG.
   const pixelRatio = input.format === "svg" ? (input.pixelRatio ?? 1) : 1;
   const width = Math.round(logicalWidth * pixelRatio);

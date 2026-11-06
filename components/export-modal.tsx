@@ -10,17 +10,14 @@ import {
 } from "@/components/ui/dialog";
 import { Check, ClipboardType, FileImage, FileText, ImageIcon } from "lucide-react";
 import {
-  EXPORT_WIDTH,
   EXPORT_INNER_PADDING,
-  EXPORT_BACKGROUNDS,
-  EXPORT_BRAND_BACKGROUNDS,
   EXPORT_FONT_SIZE,
   normalizeExportFontSize,
   normalizeExportCornerRadius,
   normalizeExportInnerPadding,
   normalizeExportOuterPadding,
-  type ExportBackground,
   type ExportAspectRatio,
+  type ExportOptions,
   type WindowDecoration,
   createHighlightedSvg,
   renderToFile,
@@ -31,6 +28,7 @@ import {
 import { toast } from "sonner";
 import { copyRichText, createRichTextClipboard } from "@/lib/rich-text-export";
 import { cn } from "@/lib/utils";
+import { findExportBackground } from "@/lib/snippet-appearance";
 import type { ExportReactionChip } from "@/lib/snippet-utils";
 import { Spinner } from "@/components/ui/spinner";
 import {
@@ -118,53 +116,39 @@ export function ExportModal({
   };
   const prevPreviewUrl = useRef<string | null>(null);
 
-  const bg: ExportBackground | null =
-    EXPORT_BACKGROUNDS.find((b) => b.label === settings.background) ??
-    EXPORT_BRAND_BACKGROUNDS.find((b) => b.label === settings.background) ??
-    null;
-  const normalizedOuterPadding = normalizeExportOuterPadding(settings.outerPadding);
-  const normalizedInnerPadding = normalizeExportInnerPadding(
-    settings.innerPadding ?? EXPORT_INNER_PADDING,
-  );
-  const normalizedCornerRadius = normalizeExportCornerRadius(settings.cornerRadius);
   const normalizedFontSize = normalizeExportFontSize(settings.fontSize ?? EXPORT_FONT_SIZE);
-  const outerPadding = settings.background ? normalizedOuterPadding : 0;
+  const exportOptions: ExportOptions = {
+    code,
+    filename,
+    theme,
+    background: findExportBackground(settings.background),
+    outerPadding: normalizeExportOuterPadding(settings.outerPadding),
+    lineNumbers: settings.lineNumbers,
+    fontId: settings.fontId,
+    language: settings.language,
+    reactions,
+    showReactions: settings.showReactions,
+    footerAuthorUsername: authorUsername,
+    footerAuthorAvatarUrl: authorAvatarUrl,
+    comments,
+    showComments: settings.showComments,
+    sourceUrl,
+    windowDecoration: settings.windowDecoration,
+    cornerRadius: normalizeExportCornerRadius(settings.cornerRadius),
+    innerPadding: normalizeExportInnerPadding(settings.innerPadding ?? EXPORT_INNER_PADDING),
+    header: settings.header,
+    footer: settings.footer,
+    fontSize: normalizedFontSize,
+    aspectRatio: settings.aspectRatio,
+    ligatures: settings.ligatures,
+  };
 
   useEffect(() => {
     if (!open) return;
     let cancelled = false;
     setPreviewLoading(true);
 
-    void createHighlightedSvg(
-      code,
-      filename,
-      theme,
-      EXPORT_WIDTH,
-      undefined,
-      bg,
-      outerPadding,
-      settings.lineNumbers,
-      settings.fontId,
-      settings.language,
-      reactions,
-      settings.showReactions,
-      settings.header.enabled && settings.header.showFilename,
-      settings.footer.enabled,
-      authorUsername ?? null,
-      authorAvatarUrl ?? null,
-      comments,
-      settings.showComments,
-      sourceUrl ?? null,
-      settings.windowDecoration,
-      normalizedCornerRadius,
-      normalizedInnerPadding,
-      settings.header,
-      settings.footer,
-      normalizedFontSize,
-      false,
-      settings.aspectRatio,
-      settings.ligatures,
-    ).then((svg) => {
+    void createHighlightedSvg(exportOptions).then((svg) => {
       if (cancelled) return;
       const blob = new Blob([svg], { type: "image/svg+xml" });
       const url = URL.createObjectURL(blob);
@@ -214,37 +198,11 @@ export function ExportModal({
   const handlePng = async () => {
     setExporting(true);
     try {
-      const file = await renderToFile(
-        code,
-        filename,
-        theme,
-        EXPORT_WIDTH,
-        undefined,
-        toPngFilename(filename),
-        settings.pixelRatio,
-        bg,
-        outerPadding,
-        settings.lineNumbers,
-        settings.fontId,
-        settings.language,
-        reactions,
-        settings.showReactions,
-        settings.header.enabled && settings.header.showFilename,
-        settings.footer.enabled,
-        authorUsername ?? null,
-        authorAvatarUrl ?? null,
-        comments,
-        settings.showComments,
-        sourceUrl ?? null,
-        settings.windowDecoration,
-        normalizedCornerRadius,
-        normalizedInnerPadding,
-        settings.header,
-        settings.footer,
-        normalizedFontSize,
-        settings.aspectRatio,
-        settings.ligatures,
-      );
+      const file = await renderToFile({
+        ...exportOptions,
+        outFilename: toPngFilename(filename),
+        pixelRatio: settings.pixelRatio,
+      });
       triggerDownload(URL.createObjectURL(file), file.name, true);
       flashDone("png");
     } finally {
@@ -255,36 +213,7 @@ export function ExportModal({
   const handleSvg = async () => {
     setExporting(true);
     try {
-      const svg = await createHighlightedSvg(
-        code,
-        filename,
-        theme,
-        EXPORT_WIDTH,
-        undefined,
-        bg,
-        outerPadding,
-        settings.lineNumbers,
-        settings.fontId,
-        settings.language,
-        reactions,
-        settings.showReactions,
-        settings.header.enabled && settings.header.showFilename,
-        settings.footer.enabled,
-        authorUsername ?? null,
-        authorAvatarUrl ?? null,
-        comments,
-        settings.showComments,
-        sourceUrl ?? null,
-        settings.windowDecoration,
-        normalizedCornerRadius,
-        normalizedInnerPadding,
-        settings.header,
-        settings.footer,
-        normalizedFontSize,
-        false,
-        settings.aspectRatio,
-        settings.ligatures,
-      );
+      const svg = await createHighlightedSvg(exportOptions);
       const blob = new Blob([svg], { type: "image/svg+xml;charset=utf-8" });
       triggerDownload(
         URL.createObjectURL(blob),
