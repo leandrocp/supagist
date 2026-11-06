@@ -1040,7 +1040,6 @@ function cardWidth(
             insets.right,
             genericHeaderShowsFilename(m.frame),
           );
-  // The line-number gutter is fixed; inner padding goes on both sides of the code.
   const naturalWidth = Math.max(
     longestLinePx + (o.lineNumbers ? EXPORT_GUTTER_WIDTH : 0) + 2 * m.innerPadding,
     footerWidthPx + 2 * EXPORT_CHROME_PAD_X,
@@ -1153,7 +1152,7 @@ const DIFF_WORD_FALLBACK: Record<string, { fill: string; opacity: number } | und
 
 /** The lines a comment occupies under the code, prefix included and wrapped.
  *
- *  `createHighlightedSvg` renders these and `estimateExportDimensions` counts
+ *  `renderExport` draws these and `estimateExportDimensions` counts
  *  them, so a long comment cannot render taller than the card sized for it. */
 export function wrapCommentText(body: string): string[] {
   const text = `${EXPORT_COMMENT_PREFIX} ${body}`;
@@ -1445,7 +1444,6 @@ export async function renderExport(
     ? renderedWindowDecoration
     : null;
 
-  // Let Lumis resolve comment annotations, preserving comments on blank lines.
   const renderComments = Boolean(showComments) && Boolean(comments);
   const annotations = renderComments ? lineAnnotations(code, comments ?? {}) : [];
   // This pass only needs annotation positions. Plaintext avoids parsing the
@@ -1453,7 +1451,6 @@ export async function renderExport(
   const lineFmt = lineFormatter<ExportComment>("plaintext", themeData);
   if (annotations.length) highlighter.highlight(code, lineFmt, { annotations });
 
-  // Collect tokens per source line
   const tokenLines: SvgToken[][] = highlightTokenLines(
     highlighter,
     code,
@@ -1476,7 +1473,6 @@ export async function renderExport(
       }),
     );
 
-  // Wrap each source line and track source row metadata for reaction placement.
   const allVisualRows: ExportVisualRow[] = [];
   tokenLines.forEach((line, srcIdx) => {
     const srcLine = srcIdx + 1;
@@ -1509,11 +1505,6 @@ export async function renderExport(
     });
   }
 
-  // For each source line, find the index of its LAST visual row — chips need
-  // to render after the actual end of the wrapped text, not at the (full)
-  // first wrap row. `displayLineNums[i]` is the source line number on a row
-  // that starts a source line and `null` on continuation rows; we walk the
-  // array, tracking the active source, and remember its largest visual idx.
   const lastVisualIdxBySrcLine = new Map<number, number>();
   displayRows.forEach((row, i) => {
     if (row.sourceLine !== null && !row.comment) lastVisualIdxBySrcLine.set(row.sourceLine, i);
@@ -1553,8 +1544,6 @@ export async function renderExport(
   const dotsY = outerPaddingPx + Math.round(EXPORT_WINDOW_CHROME_HEIGHT / 2);
   const firstLineY =
     outerPaddingPx + topPad + Math.round((codeLineHeight - codeFontSize) / 2 + codeFontSize * 0.8);
-  // The line-number gutter is fixed chrome and never expands with inner
-  // padding. The code body receives inner padding on all four sides after it.
   const lineNumX = outerPaddingPx + EXPORT_CHROME_PAD_X + EXPORT_LINE_NUM_WIDTH;
   const codeX =
     outerPaddingPx + (lineNumbers ? EXPORT_GUTTER_WIDTH + innerPaddingPx : innerPaddingPx);
@@ -1639,11 +1628,6 @@ export async function renderExport(
         column += text.length;
       }
 
-      // Reactions sit AFTER the code as chip-style pills — rounded rect
-      // background, emoji, and one avatar initial circle per chip — matching
-      // the editor's inline reaction layout. Emitted on the LAST visual row
-      // of each source line so a wrapped paragraph's chips end up after the
-      // last word, not floating at the end of the (full) first wrap row.
       let reactionMarkup = "";
       const chipSrcLine = (() => {
         for (const [src, lastIdx] of lastVisualIdxBySrcLine) {
@@ -1656,9 +1640,7 @@ export async function renderExport(
         let chipX = codeX + Math.ceil(lineChars * codeCharWidth) + CHIP_FIRST_GAP;
 
         const chipH = 18;
-        // Align the chip's vertical CENTRE with the code line's optical centre.
-        // SVG `<text y>` is the baseline; the optical centre of a
-        // line of text sits roughly fontSize*0.35 above the baseline.
+        // A line's optical centre sits about 0.35em above its baseline.
         const lineCenterY = y - codeFontSize * 0.35;
         const chipY = lineCenterY - chipH / 2;
         const cy = chipY + chipH / 2;
@@ -1673,10 +1655,8 @@ export async function renderExport(
             const emojiX = x + CHIP_PAD + CHIP_EMOJI_W / 2;
             const firstAvatarLeft = x + CHIP_PAD + CHIP_EMOJI_W + CHIP_INNER_GAP;
 
-            // Slack-style stack: each subsequent avatar overlaps the previous
-            // by CHIP_AVATAR_OVERLAP, with a thin ring stroke for separation
-            // (the live UI uses a box-shadow ring; SVG can't do that, so we
-            // approximate with a stroke matched to the chip background).
+            // The live UI rings avatars with a box-shadow, which SVG lacks; a
+            // stroke in the chip colour stands in for it.
             const avatarsMarkup = visibleReactors
               .map((reactor, i) => {
                 const cxAvatar =
@@ -1734,12 +1714,6 @@ export async function renderExport(
     })
     .join("");
 
-  // When a brand background ships a pattern PNG (Tailwind beams, Resend
-  // folded-paper), embed it as a data URL so the canvas rasteriser doesn't
-  // taint the canvas. The pattern paints the whole outer canvas. Brand bgs
-  // can ALSO ship a `brandId` that drives extra inline SVG decoration
-  // (Vercel registration brackets, Stripe diagonal stripes, etc.) — the
-  // equivalent of ray.so's per-brand Frame components.
   const patternDataUrl = background?.patternUrl ? await loadImage(background.patternUrl) : null;
 
   const scene = background?.scene;
@@ -1756,8 +1730,6 @@ export async function renderExport(
         })
       : "";
 
-  // Frame config: per-brand chrome customisation. Defaults reproduce the
-  // generic macOS-style window we render on non-brand exports.
   const frame = background?.frame;
   const cardRadius = Math.max(
     0,
@@ -1815,10 +1787,6 @@ export async function renderExport(
     bgSection = cardRect;
   }
 
-  // Pick a chrome text colour from the card fill, not from `editorFg`. Brand
-  // frames override cardFill independently of the syntax theme, so a
-  // light-themed snippet on, say, the Stripe card (#0c2e4e) needs *light*
-  // chrome text — dark `editorFg` would render invisible.
   const chromeColor = readableOnFill(cardFill);
 
   const headerItems = [
@@ -1905,8 +1873,6 @@ export async function renderExport(
       ? `<line data-export-window-divider="true" x1="${outerPaddingPx}" y1="${windowDividerY}" x2="${outerPaddingPx + actualWidth}" y2="${windowDividerY}" stroke="${chromeColor}" stroke-opacity="0.12" stroke-width="1"/>`
       : "";
 
-  // Footer items are individually selectable and share one alignment. Width
-  // estimation and rendering use the same ordered item list for parity.
   let footerMarkup = "";
   if (renderFooter) {
     const footerY = outerPaddingPx + actualHeight - FOOTER.height;
@@ -1961,7 +1927,6 @@ export async function renderExport(
       items.join("");
   }
 
-  // One <pattern> per unique avatar URL — circles reference these by id.
   // Both patternUnits AND patternContentUnits must be objectBoundingBox so the
   // image's width=1/height=1 means "full pattern tile" rather than 1×1 user-
   // space pixel (the default patternContentUnits is userSpaceOnUse, which
@@ -1985,8 +1950,6 @@ export async function renderExport(
     avatarPatternsBlock = `<defs>${patterns}</defs>`;
   }
 
-  // Traffic-light dots use the fixed chrome inset. SVG <circle> is anchored
-  // by its center, so we shift cx by the dot radius.
   const DOT_R = 7;
   const firstDotCx = outerPaddingPx + EXPORT_CHROME_PAD_X + DOT_R;
   const showDots =
@@ -2095,11 +2058,7 @@ export async function renderToFile(
 }
 
 // ── Brand decorations ────────────────────────────────────────────────────────
-//
-// SVG equivalents of ray.so's per-brand Frame components for the brands that
-// don't ship a raster pattern. Each function returns markup that paints
-// alongside the gradient/pattern fill but BEHIND the editor card rect, so
-// the card cleanly sits on top.
+// SVG equivalents of ray.so's per-brand Frame components.
 
 function renderBrandSceneDefs(scene: BrandScenePreset): string {
   const glowDefs = scene.glows
@@ -2265,13 +2224,9 @@ function renderBrandHeader({
 type BrandDecorationArgs = {
   brandId: NonNullable<ExportBackground["brandId"]>;
   scene: BrandScenePreset;
-  /** Outer padding between the canvas edge and the editor card. */
   outerPadding: number;
-  /** Editor card width. */
   actualWidth: number;
-  /** Editor card height. */
   actualHeight: number;
-  /** Outer canvas size (after outer padding). */
   totalWidth: number;
   totalHeight: number;
 };
@@ -2345,8 +2300,6 @@ function renderVercelDecoration({
   totalHeight,
   scene,
 }: BrandDecorationArgs): string {
-  // Thin gridlines extending beyond the editor card on all four sides, plus
-  // L-shaped registration brackets at the top-left and bottom-right corners.
   // Mirrors VercelFrame.module.css's .gridlinesHorizontal / .gridlinesVertical
   // / .bracketLeft / .bracketRight.
   const lineColor = escapeXml(scene.guideColor);
@@ -2357,18 +2310,12 @@ function renderVercelDecoration({
   const right = outerPaddingPx + actualWidth;
   const bottom = outerPaddingPx + actualHeight;
   return (
-    // Top horizontal gridline (extends left + right of card)
     `<line x1="0" y1="${top}" x2="${totalWidth}" y2="${top}" stroke="${lineColor}" stroke-width="1"/>` +
-    // Bottom horizontal
     `<line x1="0" y1="${bottom}" x2="${totalWidth}" y2="${bottom}" stroke="${lineColor}" stroke-width="1"/>` +
-    // Left vertical
     `<line x1="${left}" y1="0" x2="${left}" y2="${totalHeight}" stroke="${lineColor}" stroke-width="1"/>` +
-    // Right vertical
     `<line x1="${right}" y1="0" x2="${right}" y2="${totalHeight}" stroke="${lineColor}" stroke-width="1"/>` +
-    // Top-left bracket
     `<line x1="${left - 12}" y1="${top}" x2="${left - 12 + bracketLen}" y2="${top}" stroke="${bracketColor}" stroke-width="1"/>` +
     `<line x1="${left}" y1="${top - 12}" x2="${left}" y2="${top - 12 + bracketLen}" stroke="${bracketColor}" stroke-width="1"/>` +
-    // Bottom-right bracket
     `<line x1="${right - bracketLen + 12}" y1="${bottom}" x2="${right + 12}" y2="${bottom}" stroke="${bracketColor}" stroke-width="1"/>` +
     `<line x1="${right}" y1="${bottom - bracketLen + 12}" x2="${right}" y2="${bottom + 12}" stroke="${bracketColor}" stroke-width="1"/>`
   );
@@ -2380,18 +2327,14 @@ function renderTailwindDecoration({
   actualHeight,
   scene,
 }: BrandDecorationArgs): string {
-  // Thin white gridlines flanking the editor card. Roughly mirrors
-  // TailwindFrame's gridlinesHorizontal/Vertical, faded near the ends so
-  // the lines feel like guides rather than hard borders. We approximate the
-  // mask by drawing 4 short segments that don't reach the card edges.
+  // TailwindFrame's gridlines fade out under a mask; short segments that stop
+  // before the card edges stand in for it.
   const lineColor = escapeXml(scene.guideColor);
   const offsetX = Math.min(64, Math.max(0, outerPaddingPx - 12));
   const offsetY = Math.min(24, Math.max(0, outerPaddingPx - 8));
   return (
-    // Horizontal lines above + below the card
     `<line data-scene-node="crosshair-top" x1="${outerPaddingPx - offsetX}" y1="${outerPaddingPx - offsetY}" x2="${outerPaddingPx + actualWidth + offsetX}" y2="${outerPaddingPx - offsetY}" stroke="${lineColor}" stroke-width="1"/>` +
     `<line data-scene-node="crosshair-bottom" x1="${outerPaddingPx - offsetX}" y1="${outerPaddingPx + actualHeight + offsetY}" x2="${outerPaddingPx + actualWidth + offsetX}" y2="${outerPaddingPx + actualHeight + offsetY}" stroke="${lineColor}" stroke-width="1"/>` +
-    // Vertical lines left + right of the card
     `<line data-scene-node="crosshair-left" x1="${outerPaddingPx - offsetX}" y1="${outerPaddingPx - offsetY}" x2="${outerPaddingPx - offsetX}" y2="${outerPaddingPx + actualHeight + offsetY}" stroke="${lineColor}" stroke-width="1"/>` +
     `<line data-scene-node="crosshair-right" x1="${outerPaddingPx + actualWidth + offsetX}" y1="${outerPaddingPx - offsetY}" x2="${outerPaddingPx + actualWidth + offsetX}" y2="${outerPaddingPx + actualHeight + offsetY}" stroke="${lineColor}" stroke-width="1"/>`
   );
@@ -2404,23 +2347,18 @@ function renderStripeDecoration({
   totalWidth,
   totalHeight,
 }: BrandDecorationArgs): string {
-  // Skewed white wash starting at 60% canvas height, 6deg negative rotation
-  // pivot at the right edge. On top, a 3-rectangle "set" of cyan / blue /
-  // purple offset slightly to read as overlapping bars at the bottom-right.
-  // Same colours and proportions as StripeFrame.module.css, scaled to our
-  // canvas instead of relative to the editor card.
+  // StripeFrame.module.css's colours and proportions, scaled to the canvas
+  // rather than to the card.
   const stripeY = totalHeight * 0.6;
   const stripeColor = "hsla(213.69, 52%, 97.828%, 1)";
   const dashColor = "rgba(66, 71, 112, 0.18)";
 
-  // Top-of-stripe gridlines (5 vertical dashes spanning the card width)
   const lineCount = 5;
   const lines = Array.from({ length: lineCount }, (_, i) => {
     const x = outerPaddingPx + (actualWidth * i) / (lineCount - 1);
     return `<line x1="${x}" y1="${stripeY}" x2="${x}" y2="${totalHeight}" stroke="${dashColor}" stroke-dasharray="4,4" stroke-width="1"/>`;
   }).join("");
 
-  // 3-layer set near bottom-right inside the white stripe
   const setW = Math.min(500, actualWidth * 0.55);
   const setX = outerPaddingPx + actualWidth - setW + 50;
   const setY = totalHeight - 150;
@@ -2429,7 +2367,6 @@ function renderStripeDecoration({
   const intersection = `<rect x="${setX + 50}" y="${setY + 32}" width="${setW}" height="18" fill="hsla(221.1, 99.822%, 44.876%, 1)"/>`;
 
   return (
-    // White stripe (skewed band across the lower portion)
     `<g transform="translate(${totalWidth} ${stripeY}) rotate(-6) translate(-${totalWidth} 0)">` +
     `<rect x="0" y="0" width="${totalWidth}" height="${totalHeight - stripeY + 200}" fill="${stripeColor}"/>` +
     lines +
