@@ -34,32 +34,29 @@ try {
           30: [{ emoji: "+1", reactors: [{ username: "Ada", avatarUrl: avatar1 }] }],
         }
       : undefined;
-    const prefix = [fixture.code, "snippet", "github_dark", 1200, undefined] as const;
-    const options = [
+    const options = {
+      code: fixture.code,
+      filename: "snippet",
+      theme: "github_dark",
       background,
-      settings?.outerPadding,
-      true,
-      "jetbrains",
-      "javascript",
+      outerPadding: settings?.outerPadding,
+      lineNumbers: true,
+      fontId: "jetbrains",
+      language: "javascript",
       reactions,
-      avatars,
-      true,
-      avatars,
-      "Ada",
-      avatars ? avatar1 : undefined,
-      undefined,
-      false,
-      undefined,
-      settings?.windowDecoration ?? "macos",
-      settings?.cornerRadius,
-      settings?.innerPadding ?? 16,
-      settings?.header,
-      avatars ? undefined : settings?.footer,
-      14,
-    ] as const;
+      showReactions: avatars,
+      footerAuthorUsername: "Ada",
+      footerAuthorAvatarUrl: avatars ? avatar1 : undefined,
+      windowDecoration: settings?.windowDecoration ?? "macos",
+      cornerRadius: settings?.cornerRadius,
+      innerPadding: settings?.innerPadding ?? 16,
+      header: settings?.header,
+      footer: avatars ? { enabled: true } : settings?.footer,
+      fontSize: 14,
+    } as const;
     for (const ratio of [1, 2]) {
-      const file = await renderToFile(...prefix, "m0.png", ratio, ...options);
-      const svg = await createHighlightedSvg(...prefix, ...options);
+      const file = await renderToFile({ ...options, outFilename: "m0.png", pixelRatio: ratio });
+      const svg = await createHighlightedSvg(options);
       for (const [format, body] of [
         ["png", file],
         ["svg", svg],

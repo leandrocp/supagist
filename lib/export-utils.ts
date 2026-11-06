@@ -54,15 +54,16 @@ export const EXPORT_GUTTER_WIDTH =
   EXPORT_CHROME_PAD_X + EXPORT_LINE_NUM_WIDTH + EXPORT_LINE_NUM_GAP;
 export const EXPORT_METADATA_URL = "https://supagist.app";
 export const EXPORT_COMMENT_PREFIX = "↳";
-export const EXPORT_WINDOW_DECORATIONS = [
-  "macos",
-  "macos-subtle",
-  "windows",
-  "minimal",
-  "none",
-  "lumis",
-  "markdown",
-] as const satisfies readonly BrandWindowDecoration[];
+/** Every window decoration; the Record makes a new decoration fail to compile until listed. */
+export const EXPORT_WINDOW_DECORATIONS = Object.keys({
+  macos: true,
+  "macos-subtle": true,
+  windows: true,
+  minimal: true,
+  none: true,
+  lumis: true,
+  markdown: true,
+} satisfies Record<BrandWindowDecoration, true>) as BrandWindowDecoration[];
 /** The status-bar strip under the code, and the spacing of its items. */
 const FOOTER = { height: 36, gap: 18, charWidth: 7, avatar: 14, avatarGap: 6 } as const;
 /** Space between two labels in the same slot of a generic window bar. */
@@ -1210,6 +1211,10 @@ export type ExportRuntime = {
   loadImageDataUrl(url: string): Promise<string | null>;
   /** The format of the faces `loadFontBase64` returns. */
   fontFormat: "woff2" | "truetype";
+  /** Whether the rasterizer draws system fonts; without them `system` draws in JetBrains Mono. */
+  systemFonts: boolean;
+  /** More `@font-face` rules to embed, for glyphs no export font has. */
+  extraFontFaces?(): Promise<string>;
 };
 
 const browserRuntime: ExportRuntime = {
@@ -1219,6 +1224,7 @@ const browserRuntime: ExportRuntime = {
   loadFontBase64,
   loadImageDataUrl,
   fontFormat: "woff2",
+  systemFonts: true,
 };
 
 /** Where an export put its card, in the SVG's output pixels (its width/height). */
@@ -1233,9 +1239,11 @@ export type ExportLayout = {
 async function exportFontFace(
   fontId: string | undefined,
   fallbackFontId: string | undefined,
-  runtime: Pick<ExportRuntime, "loadFontBase64" | "fontFormat">,
+  runtime: Omit<ExportRuntime, "highlighter" | "loadImageDataUrl">,
 ) {
-  const exportFont = EXPORT_FONTS.find((f) => f.id === fontId) ?? EXPORT_FONTS[0]!;
+  const listed = EXPORT_FONTS.find((f) => f.id === fontId) ?? EXPORT_FONTS[0]!;
+  const exportFont =
+    listed.file || runtime.systemFonts ? listed : EXPORT_FONTS.find((f) => f.id === "jetbrains")!;
   const faces = [exportFont, EXPORT_FONTS.find((f) => f.id === fallbackFontId)].filter(
     (font): font is ExportFont => Boolean(font?.file),
   );
@@ -1250,7 +1258,7 @@ async function exportFontFace(
   return {
     exportFont,
     fontFamily: `${faces.map((font) => `"${font.family}"`).join(",")},${MONO_FALLBACK_STACK}`,
-    fontStyleBlock: `<style>${fontFaces.join("")}</style>`,
+    fontStyleBlock: `<style>${fontFaces.join("")}${(await runtime.extraFontFaces?.()) ?? ""}</style>`,
   };
 }
 
@@ -2015,11 +2023,8 @@ export async function renderExport(
   return { svg, layout };
 }
 
-export async function createHighlightedSvg(
-  options: ExportOptions,
-  runtime?: ExportRuntime,
-): Promise<string> {
-  return (await renderExport(options, runtime)).svg;
+export async function createHighlightedSvg(options: ExportOptions): Promise<string> {
+  return (await renderExport(options)).svg;
 }
 
 /** The export as a PNG file, rasterised by the browser at `pixelRatio`. */
