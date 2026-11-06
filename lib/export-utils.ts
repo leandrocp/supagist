@@ -32,31 +32,42 @@ import {
   type FooterItem,
 } from "@/lib/export-metadata";
 
-export { inferLanguage };
-
 export const EXPORT_WIDTH = 1200;
 export const EXPORT_LINE_HEIGHT = 24;
 export const EXPORT_FONT_SIZE = 14;
 export const EXPORT_MAX_LINES = 30;
 export const EXPORT_CHROME_PAD_X = 18;
-export const EXPORT_WINDOW_CHROME_HEIGHT = 40;
+const EXPORT_WINDOW_CHROME_HEIGHT = 40;
 export const EXPORT_INNER_PADDING = 16;
-export const EXPORT_OUTER_PADDING = 64;
+const EXPORT_OUTER_PADDING = 64;
 export const EXPORT_OUTER_PADDING_VALUES = [0, 16, 32, 64, 96, 128] as const;
 export const EXPORT_INNER_PADDING_VALUES = [8, 12, 16, 24, 32, 48] as const;
 export const EXPORT_CORNER_RADIUS_VALUES = [0, 4, 8, 12, 16] as const;
-export const EXPORT_WIN_RADIUS = 12;
+const EXPORT_WIN_RADIUS = 12;
 export const EXPORT_MAX_CHARS_PER_LINE = 110;
 export const EXPORT_CHAR_WIDTH = 8.43; // measured monospace advance at 14px
 export const EXPORT_FONT_SIZE_VALUES = [12, 13, 14, 16, 18, 20] as const;
-export const EXPORT_MIN_WIDTH = 240;
-export const EXPORT_LINE_NUM_WIDTH = 18; // width reserved for line number column
-export const EXPORT_LINE_NUM_GAP = 18; // visual gap between line-number gutter and code
+const EXPORT_MIN_WIDTH = 240;
+export const EXPORT_LINE_NUM_WIDTH = 18;
+export const EXPORT_LINE_NUM_GAP = 18;
 export const EXPORT_GUTTER_WIDTH =
   EXPORT_CHROME_PAD_X + EXPORT_LINE_NUM_WIDTH + EXPORT_LINE_NUM_GAP;
 export const EXPORT_METADATA_URL = "https://supagist.app";
-export const EXPORT_METADATA_TEXT = `Created with Supagist (${EXPORT_METADATA_URL})`;
 export const EXPORT_COMMENT_PREFIX = "↳";
+export const EXPORT_WINDOW_DECORATIONS = [
+  "macos",
+  "macos-subtle",
+  "windows",
+  "minimal",
+  "none",
+  "lumis",
+  "markdown",
+] as const satisfies readonly BrandWindowDecoration[];
+/** The status-bar strip under the code, and the spacing of its items. */
+const FOOTER = { height: 36, gap: 18, charWidth: 7, avatar: 14, avatarGap: 6 } as const;
+/** Space between two labels in the same slot of a generic window bar. */
+const HEADER_LABEL_GAP = 14;
+const MONO_FALLBACK_STACK = "ui-monospace,SFMono-Regular,Menlo,Consolas,monospace";
 
 function nearestExportValue(values: readonly number[], value: number) {
   return values.reduce((closest, candidate) =>
@@ -153,7 +164,7 @@ export const MARKDOWN_HEADER = {
   controls: "[-][□][x]",
 } as const;
 /** The Lumis sun, top to bottom, in units of its diameter / 152. */
-export const LUMIS_SUN_BANDS = [
+const LUMIS_SUN_BANDS = [
   { color: "#8C6BFF", from: 0, to: 30 },
   { color: "#FF5FAE", from: 33, to: 58 },
   { color: "#FF6F6F", from: 62, to: 84 },
@@ -433,7 +444,7 @@ const INERTIA_ASCII: readonly (readonly [row: number, column: number, text: stri
   [83, 39, "##+''''#+++++###"],
 ];
 
-export type ExportViewport = { left: number; top: number; width: number; height: number };
+type ExportViewport = { left: number; top: number; width: number; height: number };
 
 /**
  * SVG markup for a brand's canvas layers, laid out on the visible canvas so
@@ -557,7 +568,7 @@ type ExportVisualRow = {
   comment?: ExportComment;
 };
 
-export type ExportFont = {
+type ExportFont = {
   id: string;
   label: string;
   family: string;
@@ -573,7 +584,7 @@ export const EXPORT_FONTS: ExportFont[] = [
   {
     id: "system",
     label: "System",
-    family: "ui-monospace,SFMono-Regular,Menlo,Consolas,monospace",
+    family: MONO_FALLBACK_STACK,
     file: "",
   },
   {
@@ -614,10 +625,8 @@ async function loadFontBase64(file: string): Promise<string> {
   return b64;
 }
 
-// Avatar URLs need to be embedded as data URLs in the SVG so the canvas
-// rasterisation step doesn't taint the canvas (cross-origin URLs in an SVG
-// painted onto a canvas would block toBlob). We cache by URL across renders
-// because most exports include the same author / reactor avatars repeatedly.
+// Images are embedded as data URLs: a cross-origin URL in an SVG painted onto
+// a canvas taints it, and toBlob then refuses to export.
 const imageDataUrlCache = new Map<string, string | null>();
 
 async function loadImageDataUrl(url: string): Promise<string | null> {
@@ -643,13 +652,9 @@ async function loadImageDataUrl(url: string): Promise<string | null> {
   }
 }
 
-// Pick a readable text colour for a known card-fill colour. Brand frames
-// override `cardFill` with a fixed hex (Vercel #000, Stripe #0c2e4e, etc.),
-// so the editor's `editorFg` from the syntax theme often clashes — light
-// theme + dark brand card means dark-on-dark filename text.
-//
-// Returns "#ffffff" for cards that read dark, "#000000" otherwise. Callers
-// typically wrap in fill-opacity for the soft secondary look used elsewhere.
+// Chrome text follows the card fill, not the theme: brand frames set their
+// own `cardFill`, so a light theme on a dark brand card would put the theme's
+// dark text on a dark card.
 export function readableOnFill(fill: string): "#000000" | "#ffffff" {
   const m = /^#?([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(fill.trim());
   if (!m) return "#000000";
@@ -662,35 +667,17 @@ export function readableOnFill(fill: string): "#000000" | "#ffffff" {
   return r * 0.299 + g * 0.587 + b * 0.114 > 140 ? "#000000" : "#ffffff";
 }
 
-/**
- * Per-brand chrome customisations for the editor card itself. Each brand has
- * a recognisable shape — Vercel is borderless and chromeless, Stripe sits in
- * a rounded subtle-border card, Resend uses a clean header strip, etc. The
- * default (no frame) is the macOS-style three-dots + centred filename header
- * we use everywhere else.
- */
-export type BrandFrame = BrandFramePreset;
-
 export type ExportBackground = {
   label: string;
   from: string;
   to: string;
-  /** Public path to a brand SVG logo when this gradient is brand-flavoured;
-   *  the export-modal picker renders it as a marker so brands stand out from
-   *  the generic gradient rows. */
+  /** The brand's logo, shown in the background picker. */
   logoUrl?: string;
-  /** Public path to a brand-supplied PNG pattern. When set, the export
-   *  renders the image as the outer canvas backdrop instead of (or on top
-   *  of) the gradient — that's what ray.so does for Tailwind/Resend. */
+  /** A brand PNG painted over the whole canvas, on top of the gradient. */
   patternUrl?: string;
-  /** Brand id ("vercel", "stripe", ...). When set, the export emits
-   *  brand-specific SVG decoration on top of the flat fill (Vercel's
-   *  registration brackets + gridlines, Stripe's skewed stripe + colour
-   *  layers, Tailwind's gridlines). Mirrors ray.so's per-brand Frame
-   *  components. */
+  /** With `scene`, draws the scene's guides (brackets, gridlines, stripes). */
   brandId?: BrandId;
-  /** Per-brand chrome customisation — see BrandFrame. */
-  frame?: BrandFrame;
+  frame?: BrandFramePreset;
   /** Layered canvas lighting, border, guides, and frame-depth recipe. */
   scene?: BrandScenePreset;
   /** Brand canvas layers; brands with these have no ambient scene. */
@@ -711,13 +698,7 @@ export const EXPORT_BACKGROUNDS: ExportBackground[] = [
   { label: "Dusk", from: "#C471ED", to: "#12C2E9" },
 ];
 
-/**
- * Brand-flavoured gradients available alongside the generic ones in the
- * export modal. Values mirror ray.so's partner-themes catalog so each brand
- * reads the same way it does there. We only use the brand's gradient + logo
- * here — the syntax palette stays driven by whatever theme the user picked,
- * so a Vercel background can frame, say, a github_light snippet.
- */
+/** Each brand preset's canvas, as a background any theme can sit on. */
 export const EXPORT_BRAND_BACKGROUNDS: ExportBackground[] = BRAND_PRESETS.map(
   (preset: BrandPresetShape) => ({
     ...preset.background,
@@ -775,15 +756,6 @@ function inlineReactionWidth(chips: ExportReactionChip[]): number {
 
 function exportMetadataText(sourceUrl: string) {
   return `Created with Supagist (${sourceUrl})`;
-}
-
-function exportTopPad(
-  windowDecoration: WindowDecoration = "macos",
-  innerPadding = EXPORT_INNER_PADDING,
-  fontSize = EXPORT_FONT_SIZE,
-  frame?: BrandFramePreset,
-) {
-  return exportHeaderHeight(windowDecoration, fontSize, frame) + innerPadding;
 }
 
 function resolveRenderedWindowDecoration(
@@ -872,9 +844,14 @@ function footerContentWidth(
   author: string,
 ) {
   return items.reduce((width, item, index) => {
-    const gap = index === 0 ? 0 : 18;
-    if (item === "author") return width + gap + 14 + 6 + `@${author}`.length * 7;
-    return width + gap + footerItemText(item, language, theme, lineCount, code).length * 7;
+    const gap = index === 0 ? 0 : FOOTER.gap;
+    if (item === "author")
+      return (
+        width + gap + FOOTER.avatar + FOOTER.avatarGap + `@${author}`.length * FOOTER.charWidth
+      );
+    return (
+      width + gap + footerItemText(item, language, theme, lineCount, code).length * FOOTER.charWidth
+    );
   }, 0);
 }
 
@@ -899,7 +876,8 @@ function headerRequiredWidth(
   const widths = { left: 0, center: 0, right: 0 };
   const add = (position: keyof typeof widths, text: string) => {
     if (!text) return;
-    widths[position] += (widths[position] > 0 ? 14 : 0) + text.length * HEADER_LABEL_CHAR_WIDTH;
+    widths[position] +=
+      (widths[position] > 0 ? HEADER_LABEL_GAP : 0) + text.length * HEADER_LABEL_CHAR_WIDTH;
   };
 
   if (settings.showFilename && allowFilename) {
@@ -912,15 +890,15 @@ function headerRequiredWidth(
   const centerInset = Math.max(leftInset, rightInset);
   const leftCenter =
     widths.left > 0 && widths.center > 0
-      ? 2 * (leftInset + widths.left + 14 + widths.center / 2)
+      ? 2 * (leftInset + widths.left + HEADER_LABEL_GAP + widths.center / 2)
       : 0;
   const centerRight =
     widths.center > 0 && widths.right > 0
-      ? 2 * (rightInset + widths.right + 14 + widths.center / 2)
+      ? 2 * (rightInset + widths.right + HEADER_LABEL_GAP + widths.center / 2)
       : 0;
   const leftRight =
     widths.left > 0 && widths.right > 0
-      ? leftInset + widths.left + 14 + widths.right + rightInset
+      ? leftInset + widths.left + HEADER_LABEL_GAP + widths.right + rightInset
       : 0;
 
   // The preview lays the labels out in a three-column grid with an 8px gap on
@@ -947,148 +925,183 @@ function headerRequiredWidth(
   );
 }
 
-export function estimateExportDimensions({
-  code,
-  filename = "",
-  language,
-  theme,
-  width = EXPORT_WIDTH,
-  height,
-  background,
-  outerPadding,
-  lineNumbers = false,
-  reactions,
-  showReactions = false,
-  comments,
-  showComments = false,
-  showFooter = false,
-  header,
-  footer,
-  footerAuthorUsername,
-  windowDecoration = "macos",
-  innerPadding = EXPORT_INNER_PADDING,
-  fontSize = EXPORT_FONT_SIZE,
-  compactReactions = false,
-}: {
+/** What an export draws. Omitted fields take the composer's defaults. */
+export type ExportOptions = {
   code: string;
-  filename?: string;
-  language: string;
+  filename: string;
   theme: string;
+  /** The widest the card may grow; with `height`, its exact width. */
   width?: number;
+  /** A fixed card height (the OG image): rows that do not fit are cut. */
   height?: number;
+  /** Null draws the card alone, with no canvas or outer padding. */
   background?: ExportBackground | null;
   outerPadding?: number;
   lineNumbers?: boolean;
+  fontId?: string;
+  /** A face embedded after `fontId`'s, for glyphs its subset lacks. */
+  fallbackFontId?: string;
+  /** Null or empty: inferred from the filename and code. */
+  language?: string | null;
   reactions?: Record<number, ExportReactionChip[]> | null;
   showReactions?: boolean;
+  footerAuthorUsername?: string | null;
+  footerAuthorAvatarUrl?: string | null;
   comments?: Record<number, ExportComment> | null;
   showComments?: boolean;
-  showFooter?: boolean;
-  header?: ExportHeaderSettings;
-  footer?: ExportFooterSettings;
-  footerAuthorUsername?: string | null;
+  /** Recorded in the image's metadata; defaults to the Supagist homepage. */
+  sourceUrl?: string | null;
   windowDecoration?: WindowDecoration;
+  cornerRadius?: number;
   innerPadding?: number;
+  header?: Partial<ExportHeaderSettings>;
+  footer?: Partial<ExportFooterSettings>;
   fontSize?: number;
-  compactReactions?: boolean;
-}) {
-  code = normalizeSnippetCode(code);
-  const rawLines = code.split(/\r?\n/);
-  const innerPaddingPx = normalizeExportInnerPadding(innerPadding);
-  const codeLineHeight = exportLineHeightForFontSize(fontSize, background?.frame?.lineHeight);
-  const codeCharWidth = exportCharWidthForFontSize(fontSize);
-  const resolvedHeader = normalizeHeaderSettings(header);
-  const resolvedFooter = normalizeFooterSettings(footer, showFooter);
-  const footerItems = visibleFooterItems(resolvedFooter);
-  const renderFooter = footerItems.length > 0;
-  const effectiveWindowDecoration = resolveRenderedWindowDecoration(
-    resolvedHeader.enabled,
-    windowDecoration,
-    Boolean(background?.frame?.headerStrip),
+  wordDiff?: boolean;
+  aspectRatio?: ExportAspectRatio | null;
+  ligatures?: boolean;
+};
+
+/** Whether a generic (non-brand) window bar has room for the filename. */
+function genericHeaderShowsFilename(frame: BrandFramePreset | undefined) {
+  return Boolean(frame?.headerStrip) || (frame?.showCenteredFilename ?? true);
+}
+
+/** The card's spacing and chrome, as the renderer and the size estimate both use them. */
+function cardMetrics(o: ExportOptions) {
+  const frame = o.background?.frame;
+  const innerPadding = normalizeExportInnerPadding(o.innerPadding ?? EXPORT_INNER_PADDING);
+  const fontSize = normalizeExportFontSize(o.fontSize ?? EXPORT_FONT_SIZE);
+  const lineHeight = exportLineHeightForFontSize(fontSize, frame?.lineHeight);
+  const header = normalizeHeaderSettings(o.header);
+  const footer = normalizeFooterSettings(o.footer);
+  const footerItems = visibleFooterItems(footer);
+  const decoration = resolveRenderedWindowDecoration(
+    header.enabled,
+    o.windowDecoration ?? "macos",
+    Boolean(frame?.headerStrip),
   );
-  const renderHeader = effectiveWindowDecoration !== "none";
-  const topPad = exportTopPad(
-    effectiveWindowDecoration,
-    innerPaddingPx,
+  const headerHeight = exportHeaderHeight(decoration, fontSize, frame);
+  const topPad = headerHeight + innerPadding;
+  return {
+    frame,
+    innerPadding,
     fontSize,
-    background?.frame,
-  );
-  const hasReactions = showReactions && reactions && Object.keys(reactions).length > 0;
-  const longestLinePx = Math.min(
-    Math.max(
-      ...rawLines.map((line, idx) => {
-        const lineNum = idx + 1;
-        const chips = hasReactions ? (reactions![lineNum] ?? []) : [];
-        const reactionWidth = compactReactions ? inlineReactionWidth(chips) : lineChipsWidth(chips);
-        return Math.ceil(line.length * codeCharWidth) + reactionWidth;
-      }),
-      0,
-    ),
-    Math.ceil(EXPORT_MAX_CHARS_PER_LINE * codeCharWidth),
-  );
-  const author = footerAuthorUsername || "you";
-  const footerWidthPx = renderFooter
-    ? footerContentWidth(footerItems, language, theme, rawLines.length, code, author)
-    : 0;
-  const headerInsets = headerMetadataInsets(effectiveWindowDecoration);
-  const headerWidthPx = !renderHeader
-    ? 0
-    : isBrandHeaderDecoration(effectiveWindowDecoration)
-      ? brandHeaderRequiredWidth(
-          effectiveWindowDecoration,
-          background?.frame,
-          brandHeaderRuns(
-            effectiveWindowDecoration,
-            background?.frame,
-            resolvedHeader,
-            filename,
+    lineHeight,
+    charWidth: exportCharWidthForFontSize(fontSize),
+    header,
+    footer,
+    footerItems,
+    footerHeight: footerItems.length > 0 ? FOOTER.height : 0,
+    decoration,
+    headerHeight,
+    topPad,
+    /** Rows of code (and comments) the card holds. */
+    maxRows:
+      o.height !== undefined
+        ? Math.max(1, Math.floor((o.height - topPad - innerPadding) / lineHeight))
+        : EXPORT_MAX_LINES,
+    margin: o.background ? (o.outerPadding ?? EXPORT_OUTER_PADDING) : 0,
+  };
+}
+
+type CardMetrics = ReturnType<typeof cardMetrics>;
+
+/** The card width that fits the longest line and the header and footer labels. */
+function cardWidth(
+  m: CardMetrics,
+  o: ExportOptions,
+  code: string,
+  language: string,
+  longestLinePx: number,
+) {
+  const author = o.footerAuthorUsername || "you";
+  const lineCount = code.split(/\r?\n/).length;
+  const footerWidthPx =
+    m.footerItems.length > 0
+      ? footerContentWidth(m.footerItems, language, o.theme, lineCount, code, author)
+      : 0;
+  const insets = headerMetadataInsets(m.decoration);
+  const headerWidthPx =
+    m.decoration === "none"
+      ? 0
+      : isBrandHeaderDecoration(m.decoration)
+        ? brandHeaderRequiredWidth(
+            m.decoration,
+            m.frame,
+            brandHeaderRuns(m.decoration, m.frame, m.header, o.filename, language, ""),
+            m.fontSize,
+          )
+        : headerRequiredWidth(
+            m.header,
+            o.filename,
             language,
-            "",
-          ),
-          fontSize,
-        )
-      : headerRequiredWidth(
-          resolvedHeader,
-          filename,
-          language,
-          headerInsets.left,
-          headerInsets.right,
-          Boolean(background?.frame?.headerStrip) ||
-            (background?.frame?.showCenteredFilename ?? true),
-        );
+            insets.left,
+            insets.right,
+            genericHeaderShowsFilename(m.frame),
+          );
+  // The line-number gutter is fixed; inner padding goes on both sides of the code.
   const naturalWidth = Math.max(
-    longestLinePx +
-      (lineNumbers ? EXPORT_GUTTER_WIDTH + innerPaddingPx : innerPaddingPx) +
-      innerPaddingPx,
+    longestLinePx + (o.lineNumbers ? EXPORT_GUTTER_WIDTH : 0) + 2 * m.innerPadding,
     footerWidthPx + 2 * EXPORT_CHROME_PAD_X,
     headerWidthPx,
   );
-  const actualWidth =
-    height !== undefined ? width : Math.min(width, Math.max(EXPORT_MIN_WIDTH, naturalWidth));
-  const maxLines = height
-    ? Math.max(1, Math.floor((height - topPad - innerPaddingPx) / codeLineHeight))
-    : EXPORT_MAX_LINES;
-  const sourceTruncated = rawLines.length > maxLines;
-  const visibleRawLines = rawLines.slice(0, maxLines);
-  // Each commented line adds a row under it, so the estimate has to count them
-  // or the preview card comes out shorter than what createHighlightedSvg draws.
-  const commentRowCount =
-    showComments && comments
-      ? visibleRawLines.reduce((count, _line, index) => {
-          const comment = comments[index + 1];
-          return count + (comment ? wrapCommentText(comment.body).length : 0);
-        }, 0)
-      : 0;
-  const displayLineCount = visibleRawLines.length + commentRowCount + (sourceTruncated ? 1 : 0);
-  const footerHeight = renderFooter ? 36 : 0;
-  const actualHeight =
-    height ??
-    topPad + Math.max(displayLineCount, 1) * codeLineHeight + innerPaddingPx + footerHeight;
-  const outerPaddingPx = background ? (outerPadding ?? EXPORT_OUTER_PADDING) : 0;
-
+  const width = o.width ?? EXPORT_WIDTH;
   return {
-    width: Math.round(actualWidth + outerPaddingPx * 2),
-    height: Math.round(actualHeight + outerPaddingPx * 2),
+    author,
+    footerWidthPx,
+    headerInsets: insets,
+    width:
+      o.height !== undefined ? width : Math.min(width, Math.max(EXPORT_MIN_WIDTH, naturalWidth)),
+  };
+}
+
+/** The export's size, without highlighting: what the live preview lays out. */
+export function estimateExportDimensions(
+  options: ExportOptions & {
+    /** The resolved language, as the preview shows it. */
+    language: string;
+    /** Size reactions as the composer's one-pill-per-line, not the export's chips. */
+    compactReactions?: boolean;
+  },
+) {
+  const code = normalizeSnippetCode(options.code);
+  const m = cardMetrics(options);
+  const rawLines = code.split(/\r?\n/);
+  const reactions =
+    options.showReactions && options.reactions && Object.keys(options.reactions).length > 0
+      ? options.reactions
+      : null;
+  const longestLinePx = Math.min(
+    Math.max(
+      ...rawLines.map((line, idx) => {
+        const chips = reactions?.[idx + 1] ?? [];
+        const reactionWidth = options.compactReactions
+          ? inlineReactionWidth(chips)
+          : lineChipsWidth(chips);
+        return Math.ceil(line.length * m.charWidth) + reactionWidth;
+      }),
+      0,
+    ),
+    Math.ceil(EXPORT_MAX_CHARS_PER_LINE * m.charWidth),
+  );
+  const { width } = cardWidth(m, options, code, options.language, longestLinePx);
+  const visibleRawLines = rawLines.slice(0, m.maxRows);
+  const comments = options.showComments ? options.comments : null;
+  const commentRowCount = comments
+    ? visibleRawLines.reduce((count, _line, index) => {
+        const comment = comments[index + 1];
+        return count + (comment ? wrapCommentText(comment.body).length : 0);
+      }, 0)
+    : 0;
+  const displayLineCount =
+    visibleRawLines.length + commentRowCount + (rawLines.length > m.maxRows ? 1 : 0);
+  const height =
+    options.height ??
+    m.topPad + Math.max(displayLineCount, 1) * m.lineHeight + m.innerPadding + m.footerHeight;
+  return {
+    width: Math.round(width + m.margin * 2),
+    height: Math.round(height + m.margin * 2),
   };
 }
 
@@ -1196,8 +1209,17 @@ export type ExportRuntime = {
   highlighter: Promise<Pick<Highlighter, "loadLanguage" | "highlight" | "highlightIter">>;
   loadFontBase64(file: string): Promise<string>;
   loadImageDataUrl(url: string): Promise<string | null>;
-  /** Told where the card landed, so callers place it without parsing the SVG. */
-  onLayout?(layout: ExportLayout): void;
+  /** The format of the faces `loadFontBase64` returns. */
+  fontFormat: "woff2" | "truetype";
+};
+
+const browserRuntime: ExportRuntime = {
+  get highlighter() {
+    return import("@/lib/lumis-client").then((module) => module.clientHighlighterPromise);
+  },
+  loadFontBase64,
+  loadImageDataUrl,
+  fontFormat: "woff2",
 };
 
 /** Where an export put its card, in the SVG's output pixels (its width/height). */
@@ -1211,18 +1233,26 @@ export type ExportLayout = {
 
 async function exportFontFace(
   fontId: string | undefined,
-  loadFont: (file: string) => Promise<string>,
+  fallbackFontId: string | undefined,
+  runtime: Pick<ExportRuntime, "loadFontBase64" | "fontFormat">,
 ) {
   const exportFont = EXPORT_FONTS.find((f) => f.id === fontId) ?? EXPORT_FONTS[0]!;
-  const fontFamily = exportFont.file
-    ? `"${exportFont.family}",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace`
-    : exportFont.family;
-  let fontStyleBlock = "";
-  if (exportFont.file) {
-    const b64 = await loadFont(exportFont.file);
-    fontStyleBlock = `<style>@font-face{font-family:'${exportFont.family}';font-style:normal;font-weight:400;src:url('data:font/woff2;base64,${b64}') format('woff2')}</style>`;
-  }
-  return { exportFont, fontFamily, fontStyleBlock };
+  const faces = [exportFont, EXPORT_FONTS.find((f) => f.id === fallbackFontId)].filter(
+    (font): font is ExportFont => Boolean(font?.file),
+  );
+  if (faces.length === 0) return { exportFont, fontFamily: exportFont.family, fontStyleBlock: "" };
+  const mime = runtime.fontFormat === "woff2" ? "woff2" : "ttf";
+  const fontFaces = await Promise.all(
+    faces.map(
+      async (font) =>
+        `@font-face{font-family:'${font.family}';font-style:normal;font-weight:400;src:url('data:font/${mime};base64,${await runtime.loadFontBase64(font.file)}') format('${runtime.fontFormat}')}`,
+    ),
+  );
+  return {
+    exportFont,
+    fontFamily: `${faces.map((font) => `"${font.family}"`).join(",")},${MONO_FALLBACK_STACK}`,
+    fontStyleBlock: `<style>${fontFaces.join("")}</style>`,
+  };
 }
 
 /**
@@ -1271,14 +1301,12 @@ export async function createExportSceneSvg(
   width: number,
   height: number,
   fontId: string | undefined,
-  runtime?: Pick<ExportRuntime, "loadFontBase64" | "loadImageDataUrl">,
+  runtime: Omit<ExportRuntime, "highlighter"> = browserRuntime,
 ): Promise<string> {
-  const { fontFamily, fontStyleBlock } = await exportFontFace(
-    fontId,
-    runtime?.loadFontBase64 ?? loadFontBase64,
-  );
-  const loadImage = runtime?.loadImageDataUrl ?? loadImageDataUrl;
-  const patternDataUrl = background.patternUrl ? await loadImage(background.patternUrl) : null;
+  const { fontFamily, fontStyleBlock } = await exportFontFace(fontId, undefined, runtime);
+  const patternDataUrl = background.patternUrl
+    ? await runtime.loadImageDataUrl(background.patternUrl)
+    : null;
   return (
     `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">` +
     fontStyleBlock +
@@ -1297,48 +1325,35 @@ export async function createExportSceneSvg(
   );
 }
 
-// height: when provided (e.g. OG image), clips to fit and keeps the passed width.
-//         when undefined, both dimensions are computed from the code content.
-export async function createHighlightedSvg(
-  code: string,
-  filename: string,
-  theme: string,
-  width: number,
-  height: number | undefined,
-  background?: ExportBackground | null,
-  outerPadding?: number,
-  lineNumbers?: boolean,
-  fontId?: string,
-  languageOverride?: string | null,
-  reactions?: Record<number, ExportReactionChip[]> | null,
-  showReactions?: boolean,
-  showFilename?: boolean,
-  showFooter?: boolean,
-  footerAuthorUsername?: string | null,
-  footerAuthorAvatarUrl?: string | null,
-  comments?: Record<number, ExportComment> | null,
-  showComments?: boolean,
-  sourceUrl?: string | null,
-  windowDecoration: WindowDecoration = "macos",
-  cornerRadius?: number,
-  innerPadding = EXPORT_INNER_PADDING,
-  headerSettings?: ExportHeaderSettings,
-  footerSettings?: ExportFooterSettings,
-  fontSize = EXPORT_FONT_SIZE,
-  wordDiff = false,
-  aspectRatio?: ExportAspectRatio | null,
-  ligatures = true,
-  runtime?: ExportRuntime,
-): Promise<string> {
-  code = normalizeSnippetCode(code);
-  const language = languageOverride || inferLanguage(filename, code);
+/** The export as SVG, and where its card landed. */
+export async function renderExport(
+  options: ExportOptions,
+  runtime: ExportRuntime = browserRuntime,
+): Promise<{ svg: string; layout: ExportLayout }> {
+  const code = normalizeSnippetCode(options.code);
+  const {
+    filename,
+    theme,
+    height,
+    background,
+    lineNumbers,
+    reactions,
+    showReactions,
+    footerAuthorAvatarUrl,
+    comments,
+    showComments,
+    sourceUrl,
+    cornerRadius,
+    wordDiff = false,
+    aspectRatio,
+    ligatures = true,
+  } = options;
+  const language = options.language || inferLanguage(filename, code);
   const [highlighter, { loadTheme }] = await Promise.all([
-    runtime?.highlighter ??
-      import("@/lib/lumis-client").then((module) => module.clientHighlighterPromise),
+    runtime.highlighter,
     import("@/lib/theme-loader"),
   ]);
-  const loadFont = runtime?.loadFontBase64 ?? loadFontBase64;
-  const loadImage = runtime?.loadImageDataUrl ?? loadImageDataUrl;
+  const loadImage = runtime.loadImageDataUrl;
   const loaded = await loadTheme(theme);
   const themeData = loaded.data;
   const highlightedLanguage = await loadLanguageOrPlaintext(highlighter, language);
@@ -1352,53 +1367,32 @@ export async function createHighlightedSvg(
 
   const commentTokenStyle = { color: editorFg, bold: false, italic: true };
 
-  const { exportFont, fontFamily, fontStyleBlock } = await exportFontFace(fontId, loadFont);
+  const { exportFont, fontFamily, fontStyleBlock } = await exportFontFace(
+    options.fontId,
+    options.fallbackFontId,
+    runtime,
+  );
 
-  const innerPaddingPx = normalizeExportInnerPadding(innerPadding);
-  const codeFontSize = normalizeExportFontSize(fontSize);
-  const codeLineHeight = exportLineHeightForFontSize(codeFontSize, background?.frame?.lineHeight);
-  const codeCharWidth = exportCharWidthForFontSize(codeFontSize);
-  const resolvedHeader = normalizeHeaderSettings(headerSettings, showFilename ?? true);
-  const resolvedFooter = normalizeFooterSettings(footerSettings, showFooter ?? false);
-  const footerItems = visibleFooterItems(resolvedFooter);
+  const m = cardMetrics(options);
+  const innerPaddingPx = m.innerPadding;
+  const codeFontSize = m.fontSize;
+  const codeLineHeight = m.lineHeight;
+  const codeCharWidth = m.charWidth;
+  const resolvedHeader = m.header;
+  const resolvedFooter = m.footer;
+  const footerItems = m.footerItems;
   const renderFooter = footerItems.length > 0;
-  const renderedWindowDecoration = resolveRenderedWindowDecoration(
-    resolvedHeader.enabled,
-    windowDecoration,
-    Boolean(background?.frame?.headerStrip),
-  );
-  const renderHeader = renderedWindowDecoration !== "none";
-  const headerHeight = exportHeaderHeight(
-    renderedWindowDecoration,
-    codeFontSize,
-    background?.frame,
-  );
-  const topPad = exportTopPad(
-    renderedWindowDecoration,
-    innerPaddingPx,
-    codeFontSize,
-    background?.frame,
-  );
-  const maxSourceLines =
-    height !== undefined
-      ? Math.max(1, Math.floor((height - topPad - innerPaddingPx) / codeLineHeight))
-      : EXPORT_MAX_LINES;
+  const renderedWindowDecoration = m.decoration;
+  const headerHeight = m.headerHeight;
+  const topPad = m.topPad;
 
   const rawLines = code.split(/\r?\n/);
-  const sourceLines = rawLines.slice(0, maxSourceLines);
+  const sourceLines = rawLines.slice(0, m.maxRows);
   const sourceTruncated = rawLines.length > sourceLines.length;
 
-  // Compute dynamic width from longest source line (only in auto-height mode).
-  // Reactions are placed inline AFTER the code on each line — matching the
-  // editor — so we no longer reserve a left column for them. We use the
-  // ACTUAL chip width in pixels (not a char approximation) so the card
-  // hugs the content tightly without leftover slack on the right.
   const hasReactions = showReactions && reactions && Object.keys(reactions).length > 0;
-  // Pre-fetch every unique avatar URL we'll need (each visible reactor on
-  // every chip + footer author) and inline them as <pattern> defs. Patterns
-  // are referenced by id in circle fills — one def per URL even if reused
-  // across many chips. URLs that fail to load fall back to the initial-
-  // circle render.
+  // One <pattern> per avatar URL, shared by every circle that shows it. URLs
+  // that fail to load fall back to the initial circle.
   const avatarUrls = new Set<string>();
   if (hasReactions) {
     for (const chips of Object.values(reactions!)) {
@@ -1422,18 +1416,13 @@ export async function createHighlightedSvg(
     }),
   );
 
-  // Stable id per URL so we can reference the same pattern from multiple
-  // circles. Hashing the URL keeps ids deterministic + safe for SVG.
   const avatarPatternIds = new Map<string, string>();
   let avatarSeq = 0;
   for (const url of avatarDataUrls.keys()) {
     avatarSeq += 1;
     avatarPatternIds.set(url, `avatar-${avatarSeq}`);
   }
-  // Pixel-accurate width of the longest source line including its chips.
-  // Used to size the card so the content fits with consistent left/right
-  // gutters — the older char-based estimate over-counted chip width by
-  // ~8 px and produced a noticeable right-side slack.
+  // Reactions sit after the code on their line, so they widen the card.
   const longestLinePx = Math.min(
     Math.max(
       ...sourceLines.map((l, idx) => {
@@ -1445,46 +1434,16 @@ export async function createHighlightedSvg(
     ),
     Math.ceil(EXPORT_MAX_CHARS_PER_LINE * codeCharWidth),
   );
-  // The selected footer details participate in natural-width sizing so a
-  // long theme or author handle never crowds the card edge.
-  const author = footerAuthorUsername || "you";
-  const footerWidthPx = renderFooter
-    ? footerContentWidth(footerItems, language, theme, rawLines.length, code, author)
-    : 0;
-  const headerInsets = headerMetadataInsets(renderedWindowDecoration);
+  const {
+    author,
+    footerWidthPx,
+    headerInsets,
+    width: actualWidth,
+  } = cardWidth(m, options, code, language, longestLinePx);
+  const renderHeader = renderedWindowDecoration !== "none";
   const brandHeader = isBrandHeaderDecoration(renderedWindowDecoration)
     ? renderedWindowDecoration
     : null;
-  const headerWidthPx = !renderHeader
-    ? 0
-    : brandHeader
-      ? brandHeaderRequiredWidth(
-          brandHeader,
-          background?.frame,
-          brandHeaderRuns(brandHeader, background?.frame, resolvedHeader, filename, language, ""),
-          codeFontSize,
-        )
-      : headerRequiredWidth(
-          resolvedHeader,
-          filename,
-          language,
-          headerInsets.left,
-          headerInsets.right,
-          Boolean(background?.frame?.headerStrip) ||
-            (background?.frame?.showCenteredFilename ?? true),
-        );
-  // Line-number exports keep the gutter fixed, then apply configurable inner
-  // padding on both sides of the code body. Header and footer chrome also
-  // participate in natural sizing so aligned labels cannot overlap controls.
-  const naturalWidth = Math.max(
-    longestLinePx +
-      (lineNumbers ? EXPORT_GUTTER_WIDTH + innerPaddingPx : innerPaddingPx) +
-      innerPaddingPx,
-    footerWidthPx + 2 * EXPORT_CHROME_PAD_X,
-    headerWidthPx,
-  );
-  const computedWidth = Math.max(EXPORT_MIN_WIDTH, naturalWidth);
-  const actualWidth = height !== undefined ? width : Math.min(width, computedWidth);
 
   // Let Lumis resolve comment annotations, preserving comments on blank lines.
   const renderComments = Boolean(showComments) && Boolean(comments);
@@ -1540,13 +1499,8 @@ export async function createHighlightedSvg(
     }
   });
 
-  const maxVisualLines =
-    height !== undefined
-      ? Math.max(1, Math.floor((height - topPad - innerPaddingPx) / codeLineHeight))
-      : EXPORT_MAX_LINES;
-
-  const visualTruncated = allVisualRows.length > maxVisualLines;
-  const displayRows = allVisualRows.slice(0, maxVisualLines);
+  const visualTruncated = allVisualRows.length > m.maxRows;
+  const displayRows = allVisualRows.slice(0, m.maxRows);
   if (sourceTruncated || visualTruncated) {
     displayRows.push({
       tokens: [{ text: "…", color: editorFg, bold: false, italic: false }],
@@ -1565,18 +1519,11 @@ export async function createHighlightedSvg(
     if (row.sourceLine !== null && !row.comment) lastVisualIdxBySrcLine.set(row.sourceLine, i);
   });
 
-  // Footer strip mirrors the editor's status bar — language, line count,
-  // char count, author chip — opted into via `showFooter`. ~36px tall plus
-  // a 1px top divider. (renderFooter declared earlier for the width calc.)
-  const FOOTER_HEIGHT = 36;
   const actualHeight =
     height ??
-    topPad +
-      Math.max(displayRows.length, 1) * codeLineHeight +
-      innerPaddingPx +
-      (renderFooter ? FOOTER_HEIGHT : 0);
+    topPad + Math.max(displayRows.length, 1) * codeLineHeight + innerPaddingPx + m.footerHeight;
 
-  const margin = background ? (outerPadding ?? EXPORT_OUTER_PADDING) : 0;
+  const margin = m.margin;
   let outerPaddingPx = margin;
   // The canvas area shown in the image. Normally the whole canvas; for 16:9 the
   // card is padded by the larger 16:9 slack so the background covers a centred
@@ -1613,7 +1560,7 @@ export async function createHighlightedSvg(
     outerPaddingPx + (lineNumbers ? EXPORT_GUTTER_WIDTH + innerPaddingPx : innerPaddingPx);
   const gutterDividerX = outerPaddingPx + EXPORT_GUTTER_WIDTH;
   const gutterDividerTop = outerPaddingPx + headerHeight;
-  const gutterDividerBottom = outerPaddingPx + actualHeight - (renderFooter ? FOOTER_HEIGHT : 0);
+  const gutterDividerBottom = outerPaddingPx + actualHeight - m.footerHeight;
   const gutterDividerMarkup = lineNumbers
     ? `<line data-export-gutter-divider="true" x1="${gutterDividerX}" y1="${gutterDividerTop}" x2="${gutterDividerX}" y2="${gutterDividerBottom}" stroke="${escapeXml(editorFg)}" stroke-opacity="0.12" stroke-width="1"/>`
     : "";
@@ -1879,7 +1826,7 @@ export async function createHighlightedSvg(
     !brandHeader &&
     resolvedHeader.showFilename &&
     filename &&
-    (Boolean(frame?.headerStrip) || (frame?.showCenteredFilename ?? true))
+    genericHeaderShowsFilename(frame)
       ? {
           text: filename,
           opacity: 0.7,
@@ -1905,13 +1852,12 @@ export async function createHighlightedSvg(
       position: "left" | "center" | "right";
     } => item !== null,
   );
-  const headerGap = 14;
   const headerMarkup = (["left", "center", "right"] as const)
     .map((position) => {
       const positionItems = headerItems.filter((item) => item.position === position);
       const contentWidth = positionItems.reduce(
         (sum, item, index) =>
-          sum + item.text.length * HEADER_LABEL_CHAR_WIDTH + (index > 0 ? headerGap : 0),
+          sum + item.text.length * HEADER_LABEL_CHAR_WIDTH + (index > 0 ? HEADER_LABEL_GAP : 0),
         0,
       );
       let cursor =
@@ -1923,7 +1869,7 @@ export async function createHighlightedSvg(
 
       return positionItems
         .map((item, index) => {
-          if (index > 0) cursor += headerGap;
+          if (index > 0) cursor += HEADER_LABEL_GAP;
           const markup = `<text x="${cursor}" y="${dotsY}" font-size="${item.size}" font-family="${escapeXml(fontFamily)}" dominant-baseline="middle" fill="${chromeColor}" fill-opacity="${item.opacity}">${escapeXml(item.text)}</text>`;
           cursor += item.text.length * HEADER_LABEL_CHAR_WIDTH;
           return markup;
@@ -1963,8 +1909,8 @@ export async function createHighlightedSvg(
   // estimation and rendering use the same ordered item list for parity.
   let footerMarkup = "";
   if (renderFooter) {
-    const footerY = outerPaddingPx + actualHeight - FOOTER_HEIGHT;
-    const footerCenterY = footerY + FOOTER_HEIGHT / 2;
+    const footerY = outerPaddingPx + actualHeight - FOOTER.height;
+    const footerCenterY = footerY + FOOTER.height / 2;
     const footerStartX =
       resolvedFooter.alignment === "center"
         ? outerPaddingPx + (actualWidth - footerWidthPx) / 2
@@ -1976,17 +1922,17 @@ export async function createHighlightedSvg(
     const items: string[] = [];
 
     for (const [index, item] of footerItems.entries()) {
-      if (index > 0) cursor += 18;
+      if (index > 0) cursor += FOOTER.gap;
       if (item !== "author") {
         const text = footerItemText(item, language, theme, rawLines.length, code);
         items.push(
           `<text x="${cursor}" y="${footerCenterY}" ${dimAttrs}>${escapeXml(text)}</text>`,
         );
-        cursor += text.length * 7;
+        cursor += text.length * FOOTER.charWidth;
         continue;
       }
 
-      const avatarSize = 14;
+      const avatarSize = FOOTER.avatar;
       const avatarCx = cursor + avatarSize / 2;
       const footerPatternId = footerAuthorAvatarUrl
         ? avatarPatternIds.get(footerAuthorAvatarUrl)
@@ -2003,11 +1949,11 @@ export async function createHighlightedSvg(
             `<text x="${avatarCx}" y="${footerCenterY}" font-size="9" font-family="${escapeXml(fontFamily)}" font-weight="700" fill="#ffffff" text-anchor="middle" dominant-baseline="central">${escapeXml(avatarLetter)}</text>`,
         );
       }
-      cursor += avatarSize + 6;
+      cursor += avatarSize + FOOTER.avatarGap;
       items.push(
         `<text x="${cursor}" y="${footerCenterY}" ${dimAttrs}>${escapeXml(`@${author}`)}</text>`,
       );
-      cursor += `@${author}`.length * 7;
+      cursor += `@${author}`.length * FOOTER.charWidth;
     }
 
     footerMarkup =
@@ -2075,22 +2021,20 @@ export async function createHighlightedSvg(
 
   const svgWidth = aspectRatio ? EXPORT_CANVAS_16_9.width : totalWidth;
   const svgHeight = aspectRatio ? EXPORT_CANVAS_16_9.height : totalHeight;
-  if (runtime?.onLayout) {
-    const k = svgWidth / viewport.width;
-    runtime.onLayout({
-      width: svgWidth,
-      height: svgHeight,
-      card: {
-        left: (outerPaddingPx - viewport.left) * k,
-        top: (outerPaddingPx - viewport.top) * k,
-        width: actualWidth * k,
-        height: actualHeight * k,
-      },
-      codeFontPx: codeFontSize * k,
-    });
-  }
+  const k = svgWidth / viewport.width;
+  const layout: ExportLayout = {
+    width: svgWidth,
+    height: svgHeight,
+    card: {
+      left: (outerPaddingPx - viewport.left) * k,
+      top: (outerPaddingPx - viewport.top) * k,
+      width: actualWidth * k,
+      height: actualHeight * k,
+    },
+    codeFontPx: codeFontSize * k,
+  };
 
-  return (
+  const svg =
     `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${svgWidth}" height="${svgHeight}" viewBox="${viewport.left} ${viewport.top} ${viewport.width} ${viewport.height}">` +
     metadataMarkup +
     fontStyleBlock +
@@ -2104,94 +2048,47 @@ export async function createHighlightedSvg(
     gutterDividerMarkup +
     lineMarkup +
     footerMarkup +
-    `</svg>`
-  );
+    `</svg>`;
+  return { svg, layout };
 }
 
+export async function createHighlightedSvg(
+  options: ExportOptions,
+  runtime?: ExportRuntime,
+): Promise<string> {
+  return (await renderExport(options, runtime)).svg;
+}
+
+/** The export as a PNG file, rasterised by the browser at `pixelRatio`. */
 export async function renderToFile(
-  code: string,
-  filename: string,
-  theme: string,
-  width: number,
-  height: number | undefined,
-  outFilename: string,
-  pixelRatio?: number,
-  background?: ExportBackground | null,
-  outerPadding?: number,
-  lineNumbers?: boolean,
-  fontId?: string,
-  languageOverride?: string | null,
-  reactions?: Record<number, ExportReactionChip[]> | null,
-  showReactions?: boolean,
-  showFilename?: boolean,
-  showFooter?: boolean,
-  footerAuthorUsername?: string | null,
-  footerAuthorAvatarUrl?: string | null,
-  comments?: Record<number, ExportComment> | null,
-  showComments?: boolean,
-  sourceUrl?: string | null,
-  windowDecoration?: WindowDecoration,
-  cornerRadius?: number,
-  innerPadding?: number,
-  headerSettings?: ExportHeaderSettings,
-  footerSettings?: ExportFooterSettings,
-  fontSize?: number,
-  aspectRatio?: ExportAspectRatio | null,
-  ligatures?: boolean,
+  options: ExportOptions & { outFilename: string; pixelRatio?: number },
 ): Promise<File> {
-  const svg = await createHighlightedSvg(
-    code,
-    filename,
-    theme,
-    width,
-    height,
-    background,
-    outerPadding,
-    lineNumbers,
-    fontId,
-    languageOverride,
-    reactions,
-    showReactions,
-    showFilename,
-    showFooter,
-    footerAuthorUsername,
-    footerAuthorAvatarUrl,
-    comments,
-    showComments,
-    sourceUrl,
-    windowDecoration,
-    cornerRadius,
-    innerPadding,
-    headerSettings,
-    footerSettings,
-    fontSize,
-    false,
-    aspectRatio,
-    ligatures,
-  );
-  const svgW = parseInt(/\bwidth="(\d+)"/.exec(svg)?.[1] ?? String(width));
-  const svgH = parseInt(/\bheight="(\d+)"/.exec(svg)?.[1] ?? "400");
+  const { svg, layout } = await renderExport(options);
   const blob = new Blob([svg], { type: "image/svg+xml;charset=utf-8" });
   const url = URL.createObjectURL(blob);
   try {
     const image = await loadImage(url);
     const canvas = document.createElement("canvas");
-    const scale = pixelRatio ?? Math.max(window.devicePixelRatio, 3);
-    canvas.width = Math.ceil(svgW * scale);
-    canvas.height = Math.ceil(svgH * scale);
+    const scale = options.pixelRatio ?? Math.max(window.devicePixelRatio, 3);
+    canvas.width = Math.ceil(layout.width * scale);
+    canvas.height = Math.ceil(layout.height * scale);
     const ctx = canvas.getContext("2d");
     if (!ctx) throw new Error("Could not create image canvas.");
     ctx.scale(scale, scale);
-    ctx.drawImage(image, 0, 0, svgW, svgH);
+    ctx.drawImage(image, 0, 0, layout.width, layout.height);
     const pngBlob = await new Promise<Blob | null>((res) => canvas.toBlob(res, "image/png"));
     if (!pngBlob) throw new Error("Could not create PNG image.");
     const pngBytes = new Uint8Array(await pngBlob.arrayBuffer());
-    const withMetadata = addPngTextMetadata(pngBytes, "Source", sourceUrl || EXPORT_METADATA_URL);
+    const withMetadata = addPngTextMetadata(
+      pngBytes,
+      "Source",
+      options.sourceUrl || EXPORT_METADATA_URL,
+    );
     const pngBuffer = withMetadata.buffer.slice(
       withMetadata.byteOffset,
       withMetadata.byteOffset + withMetadata.byteLength,
     ) as ArrayBuffer;
-    return new File([pngBuffer], outFilename, { type: "image/png" });
+    return new File([pngBuffer], options.outFilename, { type: "image/png" });
   } finally {
     URL.revokeObjectURL(url);
   }

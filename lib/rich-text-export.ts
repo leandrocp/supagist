@@ -11,9 +11,9 @@ import {
   EXPORT_MAX_LINES,
   escapeXml,
   exportLineHeightForFontSize,
-  inferLanguage,
   normalizeExportFontSize,
 } from "@/lib/export-utils";
+import { inferLanguage } from "@/lib/snippet-utils";
 
 /** What "Copy as rich text" writes: the same code as styled HTML and as text. */
 export type RichTextClipboard = { html: string; text: string };

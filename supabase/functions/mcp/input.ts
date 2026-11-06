@@ -9,6 +9,7 @@ import {
   EXPORT_OUTER_PADDING_VALUES,
   EXPORT_INNER_PADDING_VALUES,
   EXPORT_CORNER_RADIUS_VALUES,
+  EXPORT_WINDOW_DECORATIONS,
 } from "./spike/generated/export-utils.js";
 
 export const backgrounds = [...EXPORT_BACKGROUNDS, ...EXPORT_BRAND_BACKGROUNDS];
@@ -75,9 +76,7 @@ const renderShape = {
   outerPadding: z.literal(EXPORT_OUTER_PADDING_VALUES).optional(),
   innerPadding: z.literal(EXPORT_INNER_PADDING_VALUES).optional(),
   cornerRadius: z.literal(EXPORT_CORNER_RADIUS_VALUES).optional(),
-  windowDecoration: z
-    .enum(["macos", "macos-subtle", "windows", "minimal", "none", "lumis", "markdown"])
-    .optional(),
+  windowDecoration: z.enum(EXPORT_WINDOW_DECORATIONS).optional(),
   lineNumbers: z.boolean().optional(),
   wordDiff: z
     .boolean()

@@ -99,7 +99,6 @@ app/
     snippet-reactions.tsx      Snippet-level emoji reactions (Broadcast on snippet-reactions:<id>)
     snippet-presence.tsx       Code block footer — live visitor stack (Presence)
     snippet-export-modal.tsx   Wraps ExportModal with the saved-snippet's author/avatar
-    export-button.tsx          DropdownMenu trigger for the saved-view export modal
     share-button.tsx           Copies the snippet URL to clipboard
   actions/
     publish.ts                 Auth + rate-limit gates, CRLF normalization, asset uploads, snippets insert
@@ -191,7 +190,7 @@ naturalWidth = max(
 
 The line-number gutter is fixed chrome and never changes with `innerPadding`. Inner padding applies to all four sides of the code body after that gutter. `outerPadding` remains separate and only surrounds the card when a background is enabled.
 
-Brand styling is always explicit: selecting a Brand writes its background, frame, official Lumis theme, window, font, and spacing values into the draft. `createHighlightedSvg` never infers a background from a theme; `null` always means no background. Per-brand `BrandFrame` configs drive macOS dots on/off, optional left-aligned filename strips, card stroke, corner radius, and card fill. Chrome text picks white or black based on `cardFill` luminance so contrast holds when Theme is customized independently.
+Brand styling is always explicit: selecting a Brand writes its background, frame, official Lumis theme, window, font, and spacing values into the draft. `createHighlightedSvg` never infers a background from a theme; `null` always means no background. Per-brand `frame` configs (`BrandFramePreset`) drive macOS dots on/off, optional left-aligned filename strips, card stroke, corner radius, and card fill. Chrome text picks white or black based on `cardFill` luminance so contrast holds when Theme is customized independently.
 
 Reactor avatars in chip pills are fetched, base64-encoded, and embedded as a single SVG `<pattern>` per unique URL — the canvas-rasterisation step would otherwise taint the canvas and refuse to produce a PNG.
 

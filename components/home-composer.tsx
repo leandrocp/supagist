@@ -35,14 +35,18 @@ import {
   normalizeExportInnerPadding,
   normalizeExportOuterPadding,
   toPngFilename,
-  inferLanguage,
   triggerDownload,
   estimateExportDimensions,
   EXPORT_CANVAS_16_9,
   type ExportAspectRatio,
   type WindowDecoration,
 } from "@/lib/export-utils";
-import { languageDisplayName, codePointLength, normalizeSnippetCode } from "@/lib/snippet-utils";
+import {
+  inferLanguage,
+  languageDisplayName,
+  codePointLength,
+  normalizeSnippetCode,
+} from "@/lib/snippet-utils";
 import { ThemePicker } from "@/components/theme-picker";
 import { BrandPicker } from "@/components/brand-picker";
 import { SendEnvelope } from "@/components/brand/hero-envelope";
@@ -576,7 +580,6 @@ export function HomeComposer({ full = false }: HomeComposerProps) {
     lineNumbers: draft.lineNumbers,
     reactions: exportReactions,
     showReactions: draft.showReactions,
-    showFooter: draft.footer.enabled,
     header: draft.header,
     footer: draft.footer,
     footerAuthorUsername: effectiveViewerLabel || "you",

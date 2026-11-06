@@ -103,7 +103,7 @@ describe("ExportModal", () => {
     );
 
     await waitFor(() => {
-      expect(vi.mocked(createHighlightedSvg).mock.calls.at(-1)?.[24]).toBe(20);
+      expect(vi.mocked(createHighlightedSvg).mock.calls.at(-1)?.[0].fontSize).toBe(20);
     });
   });
 
@@ -112,7 +112,8 @@ describe("ExportModal", () => {
     // effect's dependencies left an open preview showing the old card.
     const { createHighlightedSvg } = await import("@/lib/export-utils");
     vi.mocked(createHighlightedSvg).mockClear();
-    const showComments = (call: unknown[] | undefined) => call?.[17];
+    const showComments = (call: [{ showComments?: boolean }, ...unknown[]] | undefined) =>
+      call?.[0].showComments;
 
     const props = {
       onClose: vi.fn(),
@@ -171,15 +172,21 @@ describe("ExportModal", () => {
 
     rerender(<ExportModal open {...props} settings={{ ...sealed, pixelRatio: 2 }} />);
     await waitFor(() => {
-      expect(vi.mocked(createHighlightedSvg).mock.calls.at(-1)?.slice(26)).toEqual(["16:9", false]);
+      expect(vi.mocked(createHighlightedSvg).mock.calls.at(-1)?.[0]).toMatchObject({
+        aspectRatio: "16:9",
+        ligatures: false,
+      });
     });
     fireEvent.click(screen.getByRole("button", { name: "Save as PNG" }));
     await waitFor(() => {
-      const call = vi.mocked(renderToFile).mock.calls.at(-1)!;
-      expect(call[6]).toBe(2);
-      expect(call[7]?.label).toBe("Forest");
-      expect(call[21]).toBe("windows");
-      expect(call.slice(27)).toEqual(["16:9", false]);
+      const [options] = vi.mocked(renderToFile).mock.calls.at(-1)!;
+      expect(options.pixelRatio).toBe(2);
+      expect(options.background?.label).toBe("Forest");
+      expect(options).toMatchObject({
+        windowDecoration: "windows",
+        aspectRatio: "16:9",
+        ligatures: false,
+      });
     });
   });
 });
