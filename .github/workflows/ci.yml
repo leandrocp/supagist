@@ -144,7 +144,7 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - uses: supabase/setup-cli@v3.0.1
+      - uses: supabase/setup-cli@v3.2.0
         with:
           version: 2.117.0
       # The stack listens on 54320-54329, inside Linux's ephemeral range, so an
@@ -214,7 +214,7 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - uses: supabase/setup-cli@v3.0.1
+      - uses: supabase/setup-cli@v3.2.0
         with:
           version: 2.117.0
       # The stack listens on 54320-54329, inside Linux's ephemeral range, so an
@@ -277,7 +277,7 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - uses: supabase/setup-cli@v3.0.1
+      - uses: supabase/setup-cli@v3.2.0
         with:
           version: 2.117.0
       # The stack listens on 54320-54329, inside Linux's ephemeral range, so an
@@ -321,7 +321,7 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - uses: supabase/setup-cli@v3.0.1
+      - uses: supabase/setup-cli@v3.2.0
         with:
           version: 2.117.0
       # The stack listens on 54320-54329, inside Linux's ephemeral range, so an
