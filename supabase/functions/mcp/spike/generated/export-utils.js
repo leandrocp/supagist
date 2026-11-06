@@ -43,15 +43,16 @@ export const EXPORT_GUTTER_WIDTH =
   EXPORT_CHROME_PAD_X + EXPORT_LINE_NUM_WIDTH + EXPORT_LINE_NUM_GAP;
 export const EXPORT_METADATA_URL = "https://supagist.app";
 export const EXPORT_COMMENT_PREFIX = "↳";
-export const EXPORT_WINDOW_DECORATIONS = [
-  "macos",
-  "macos-subtle",
-  "windows",
-  "minimal",
-  "none",
-  "lumis",
-  "markdown",
-];
+/** Every window decoration; the Record makes a new decoration fail to compile until listed. */
+export const EXPORT_WINDOW_DECORATIONS = Object.keys({
+  macos: true,
+  "macos-subtle": true,
+  windows: true,
+  minimal: true,
+  none: true,
+  lumis: true,
+  markdown: true,
+});
 /** The status-bar strip under the code, and the spacing of its items. */
 const FOOTER = { height: 36, gap: 18, charWidth: 7, avatar: 14, avatarGap: 6 };
 /** Space between two labels in the same slot of a generic window bar. */
@@ -1047,12 +1048,15 @@ const browserRuntime = {
   loadFontBase64,
   loadImageDataUrl,
   fontFormat: "woff2",
+  systemFonts: true,
 };
 
 /** Where an export put its card, in the SVG's output pixels (its width/height). */
 
 async function exportFontFace(fontId, fallbackFontId, runtime) {
-  const exportFont = EXPORT_FONTS.find((f) => f.id === fontId) ?? EXPORT_FONTS[0];
+  const listed = EXPORT_FONTS.find((f) => f.id === fontId) ?? EXPORT_FONTS[0];
+  const exportFont =
+    listed.file || runtime.systemFonts ? listed : EXPORT_FONTS.find((f) => f.id === "jetbrains");
   const faces = [exportFont, EXPORT_FONTS.find((f) => f.id === fallbackFontId)].filter((font) =>
     Boolean(font?.file),
   );
@@ -1067,7 +1071,7 @@ async function exportFontFace(fontId, fallbackFontId, runtime) {
   return {
     exportFont,
     fontFamily: `${faces.map((font) => `"${font.family}"`).join(",")},${MONO_FALLBACK_STACK}`,
-    fontStyleBlock: `<style>${fontFaces.join("")}</style>`,
+    fontStyleBlock: `<style>${fontFaces.join("")}${(await runtime.extraFontFaces?.()) ?? ""}</style>`,
   };
 }
 
@@ -1816,8 +1820,8 @@ export async function renderExport(options, runtime = browserRuntime) {
   return { svg, layout };
 }
 
-export async function createHighlightedSvg(options, runtime) {
-  return (await renderExport(options, runtime)).svg;
+export async function createHighlightedSvg(options) {
+  return (await renderExport(options)).svg;
 }
 
 /** The export as a PNG file, rasterised by the browser at `pixelRatio`. */

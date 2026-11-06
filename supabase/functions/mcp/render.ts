@@ -154,7 +154,7 @@ export async function renderSnippet(rawInput: RenderInput): Promise<RenderResult
     );
   if (visualRows > EXPORT_MAX_LINES)
     throw new RenderInputError(
-      "Export exceeds 30 visual rows after wrapping/comments; choose a shorter excerpt or split the image",
+      `Export exceeds ${EXPORT_MAX_LINES} visual rows after wrapping/comments; choose a shorter excerpt or split the image`,
     );
   const cursor = parserEventCursor();
   const highlighter = await clientHighlighterPromise;
@@ -190,8 +190,6 @@ export async function renderSnippet(rawInput: RenderInput): Promise<RenderResult
     aspectRatio: input.aspectRatio ?? presetAspectRatio,
     ligatures: input.ligatures ?? presetLigatures,
   };
-  // `system` draws in JetBrains Mono: Edge has no system fonts to fall back on.
-  const renderFontId = fontId === "system" ? "jetbrains" : fontId;
   const rendered = await renderExport(
     {
       code: input.code,
@@ -201,11 +199,10 @@ export async function renderSnippet(rawInput: RenderInput): Promise<RenderResult
       background,
       outerPadding: appearance.outerPadding,
       lineNumbers: appearance.lineNumbers,
-      fontId: renderFontId,
+      fontId,
       // App font subsets rely on browser fallback for the comment arrow; embed
       // Hack too, so native conversion never turns it into a missing glyph.
-      fallbackFontId:
-        showComments && input.comments && renderFontId !== "hack" ? "hack" : undefined,
+      fallbackFontId: showComments && input.comments && fontId !== "hack" ? "hack" : undefined,
       language,
       reactions: input.reactions,
       showReactions: input.showReactions ?? Boolean(input.reactions),
@@ -227,6 +224,7 @@ export async function renderSnippet(rawInput: RenderInput): Promise<RenderResult
       loadFontBase64,
       loadImageDataUrl,
       fontFormat: "truetype",
+      systemFonts: false,
     },
   );
   let svg = rendered.svg;

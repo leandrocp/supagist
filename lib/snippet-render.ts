@@ -86,6 +86,14 @@ const runtime: ExportRuntime = {
     return (await readFile(join(FONT_DIR, name))).toString("base64");
   },
   fontFormat: "truetype",
+  systemFonts: false,
+  extraFontFaces() {
+    emojiFace ??= readFile(EMOJI_FONT).then(
+      (bytes) =>
+        `@font-face{font-family:'Noto Emoji';src:url('data:font/ttf;base64,${bytes.toString("base64")}') format('truetype')}`,
+    );
+    return emojiFace;
+  },
   async loadImageDataUrl(url) {
     try {
       if (url.startsWith("/")) {
@@ -102,15 +110,6 @@ const runtime: ExportRuntime = {
     }
   },
 };
-
-/** resvg needs the emoji face embedded. */
-async function forResvg(svg: string): Promise<string> {
-  emojiFace ??= readFile(EMOJI_FONT).then(
-    (bytes) =>
-      `@font-face{font-family:'Noto Emoji';src:url('data:font/ttf;base64,${bytes.toString("base64")}') format('truetype')}`,
-  );
-  return svg.replace("</style>", `${await emojiFace}</style>`);
-}
 
 /**
  * The full canonical render with its canvas, as Save as PNG draws it, at
@@ -143,9 +142,7 @@ export async function renderSnippetSvg(
       background,
       outerPadding: appearance.outerPadding,
       lineNumbers: appearance.lineNumbers,
-      // `system` names no file to embed, and resvg loads no system fonts; draw
-      // it in JetBrains Mono, as the MCP renderer does.
-      fontId: snippet.font_id === "system" ? "jetbrains" : snippet.font_id,
+      fontId: snippet.font_id,
       language: snippet.language,
       footerAuthorUsername: snippet.author?.username ?? null,
       footerAuthorAvatarUrl: snippet.author?.avatar_url ?? null,
@@ -160,7 +157,7 @@ export async function renderSnippetSvg(
     },
     runtime,
   );
-  return { svg: await forResvg(svg), layout };
+  return { svg, layout };
 }
 
 /**
@@ -174,6 +171,5 @@ export async function renderSnippetSceneSvg(
 ): Promise<string | null> {
   const background = findExportBackground(parseSnippetAppearance(snippet.appearance).background);
   if (!background) return null;
-  const fontId = snippet.font_id === "system" ? "jetbrains" : snippet.font_id;
-  return forResvg(await createExportSceneSvg(background, width, height, fontId, runtime));
+  return createExportSceneSvg(background, width, height, snippet.font_id, runtime);
 }
