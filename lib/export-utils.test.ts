@@ -71,6 +71,7 @@ import {
   createHighlightedSvg,
   EXPORT_BACKGROUNDS,
   renderToFile,
+  renderExport,
   estimateExportDimensions,
   addPngTextMetadata,
   exportCornerRadiusFromSliderIndex,
@@ -2746,5 +2747,62 @@ describe("Lumis and MDEx brand presets", () => {
     // The label moves into the filename's place at the left padding.
     expect(Number(language.getAttribute("x"))).toBeLessThan(Number(card.getAttribute("x")) + 20);
     expect(language.getAttribute("fill")).toBe("#A8A29E");
+  });
+});
+
+// ── renderExport with a non-browser runtime ──────────────────────────────────
+
+describe("renderExport — runtime fonts and layout", () => {
+  const runtime = {
+    highlighter: import("@/lib/lumis-client").then((module) => module.clientHighlighterPromise),
+    loadFontBase64: async (file: string) => `B64${file.replace(/\W/g, "")}`,
+    loadImageDataUrl: async () => null,
+    fontFormat: "truetype" as const,
+    systemFonts: false,
+    extraFontFaces: async () => "@font-face{font-family:'Extra'}",
+  };
+  const base = { code: "const x = 1;", filename: "x.ts", theme: "github_light" };
+
+  it("embeds TrueType faces, draws system in JetBrains Mono, and adds fallback and extra faces", async () => {
+    const { svg } = await renderExport(
+      { ...base, fontId: "system", fallbackFontId: "hack" },
+      runtime,
+    );
+    const style = /<style>(.*?)<\/style>/.exec(svg)?.[1] ?? "";
+    expect(style).toContain(
+      "font-family:'JetBrains Mono';font-style:normal;font-weight:400;src:url('data:font/ttf;base64,B64fontsjetbrainsmonowoff2') format('truetype')",
+    );
+    expect(style).toContain("font-family:'Hack'");
+    expect(style.indexOf("'JetBrains Mono'")).toBeLessThan(style.indexOf("'Hack'"));
+    expect(style).toContain("@font-face{font-family:'Extra'}");
+    expect(style).not.toContain("woff2;base64");
+    expect(svg).toContain('font-family="&quot;JetBrains Mono&quot;,&quot;Hack&quot;,ui-monospace');
+  });
+
+  it("keeps system fonts unembedded in a runtime that can draw them", async () => {
+    const { svg } = await renderExport(
+      { ...base, fontId: "system" },
+      { ...runtime, systemFonts: true, extraFontFaces: undefined },
+    );
+    expect(svg).not.toContain("<style>");
+  });
+
+  it("reports where the card landed in a 16:9 export, in output pixels", async () => {
+    const { svg, layout } = await renderExport(
+      { ...base, background: { label: "T", from: "#000000", to: "#111111" }, aspectRatio: "16:9" },
+      runtime,
+    );
+    const [vx, vy, vw] = /viewBox="([^"]+)"/.exec(svg)![1]!.split(" ").map(Number);
+    const card = /<rect x="([\d.]+)" y="([\d.]+)" width="([\d.]+)" height="([\d.]+)" rx=/
+      .exec(svg)!
+      .slice(1)
+      .map(Number);
+    const k = 1600 / vw!;
+    expect(layout.width).toBe(1600);
+    expect(layout.height).toBe(900);
+    expect(layout.card.left).toBeCloseTo((card[0]! - vx!) * k, 6);
+    expect(layout.card.top).toBeCloseTo((card[1]! - vy!) * k, 6);
+    expect(layout.card.width).toBeCloseTo(card[2]! * k, 6);
+    expect(layout.card.height).toBeCloseTo(card[3]! * k, 6);
   });
 });
