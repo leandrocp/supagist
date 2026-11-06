@@ -248,9 +248,6 @@ export function ExportModal({
     setTimeout(() => setRichCopied(false), 2000);
   };
 
-  // Use a Drawer on phone-sized viewports and a Dialog above the md
-  // breakpoint. Same body inside; the wrapper just changes how the modal is
-  // presented (slide up from the bottom on mobile, centred dialog on desktop).
   const isDesktop = useMediaQuery("(min-width: 768px)");
 
   const handleOpenChange = (o: boolean) => {
@@ -265,7 +262,6 @@ export function ExportModal({
       data-testid="export-body"
       className="grid gap-6 md:min-h-0 md:flex-1 md:grid-cols-[minmax(0,1fr)_18rem] md:grid-rows-[minmax(0,1fr)_auto]"
     >
-      {/* Preview */}
       <div
         data-testid="export-preview"
         className="flex min-h-52 items-center justify-center overflow-hidden rounded-[18px] bg-surf2 p-6 md:row-span-2 md:min-h-0 md:p-10"
@@ -285,7 +281,6 @@ export function ExportModal({
         ) : null}
       </div>
 
-      {/* Controls */}
       <div
         data-testid="export-settings"
         className="space-y-5 md:col-start-2 md:row-start-1 md:min-h-0 md:overflow-y-auto"
@@ -330,7 +325,6 @@ export function ExportModal({
         ) : null}
       </div>
 
-      {/* Export actions */}
       <div className="flex flex-col gap-1 rounded-[14px] bg-surf2 p-1.5 md:col-start-2 md:row-start-2">
         {EXPORT_ACTIONS.map(({ key, label, Icon, isAsync }) => {
           const handleClick =
