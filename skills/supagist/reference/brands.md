@@ -60,6 +60,7 @@ contents.
 | `mdex-purple`      | MDEx Purple      | light | `mdex` (Elixir); light pages                                                      |
 | `mdex-purple-dark` | MDEx Purple Dark | dark  | Same as `mdex-purple`, for dark pages                                             |
 | `inertia`          | Inertia          | dark  | `inertiajs/inertia-laravel` (Composer), any package in the `@inertiajs` scope     |
+| `turso`            | Turso            | dark  | `@libsql/client`, `@tursodatabase/database`                                       |
 
 "Look" is the preset's appearance. When the image goes on a light page (many
 READMEs and blogs) and a brand has a light and a dark variant, pick the one

@@ -24,6 +24,11 @@ These marks identify third-party Brand presets and do not imply endorsement.
   (`mdex-tile.svg`) are the projects' own marks, from the Supagist brand
   preset design package (v5.2). They are multi-colour, so the picker paints
   them as images rather than masks.
+- Turso is the unmodified [official aqua logomark](https://turso.tech/logokit/turso-logomark-aqua.svg).
+  Its [brand page](https://turso.tech/brand) permits using these logo files when
+  referencing Turso; no separate open-source licence is stated. The same page
+  supplies all five preset colours: Aqua `#4FF8D2`, Dark Teal `#183134`,
+  Pickled Bluewood `#293945`, Mirage `#162129`, and Bunker `#0D1318`.
 - The `plz` preset ships **no** mark. The project has no logo to source, and
   drawing one would put an invented glyph in front of users as if it were the
   project's identity. The picker falls back to an accent dot.

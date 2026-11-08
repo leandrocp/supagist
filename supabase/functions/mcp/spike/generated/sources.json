@@ -3,7 +3,7 @@
   "lib/snippet-utils.ts": "242d69de49286b29ac4822a053acf24d364013ccee12f47f027ae7c6d2da2d1d",
   "lib/lumis-lines.ts": "8c3087ad0540d937510fc8621797bc12da372a3615bd518488b6ab472f5f6495",
   "lib/presence-utils.ts": "e49fd5060ea596fcdcad0e9a4a75886facd936a722cb58372800d1f71efd5973",
-  "lib/brand-presets.ts": "da9d3662f47d2f08221f34c3ddc59a5d035a5b3397eef835891142f4b44afd93",
+  "lib/brand-presets.ts": "047ade45034e2ed359943ff00f8e4d7476b412eb621c2d5077ac304e100fa687",
   "lib/brand-scenes.ts": "843aab6741476bb69358340f3cb3a8fffde245f2f0faf3df1a6d1bc28e8b5f63",
   "lib/export-metadata.ts": "cd8d84eb20ed899fe6dd840e4447d968cf52f7c962350b0a2c9d053860dd79f0",
   "lib/brand-themes.ts": "d0a3a219ca7f54b3a0255c9223cba4f54af0166ba9941b806e7b8ae7ae2fa12a"

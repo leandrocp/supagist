@@ -1006,6 +1006,23 @@ export const BRAND_PRESETS = [
       header: { ...DEFAULT_HEADER_SETTINGS, enabled: false },
     }),
   },
+  // Official Turso palette: Aqua, Bunker, Dark Teal, Mirage and Pickled Bluewood.
+  // https://turso.tech/brand — GitHub Dark keeps syntax readable on the Mirage card.
+  {
+    id: "turso",
+    name: "Turso",
+    logoUrl: "/brands/turso.svg",
+    accent: "#4FF8D2",
+    appearance: "dark",
+    background: {
+      label: "Turso",
+      from: "#0D1318",
+      to: "#183134",
+      brandId: "turso",
+      frame: darkFrame("#162129", "#293945", 8),
+    },
+    settings: defaults("github_dark"),
+  },
 ];
 
 export function resolveBrandScene(preset) {

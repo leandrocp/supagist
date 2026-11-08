@@ -30,7 +30,7 @@ const BASE_APPEARANCE = {
 
 describe("BRAND_PRESETS", () => {
   it("ships the complete social-developer launch catalog", () => {
-    expect(BRAND_PRESETS).toHaveLength(34);
+    expect(BRAND_PRESETS).toHaveLength(35);
     expect(BRAND_PRESETS.map((preset) => preset.name)).toEqual(
       expect.arrayContaining([
         "Supabase",
@@ -53,6 +53,7 @@ describe("BRAND_PRESETS", () => {
         "MDEx Purple",
         "MDEx Purple Dark",
         "Inertia",
+        "Turso",
       ]),
     );
   });
@@ -370,6 +371,46 @@ describe("Inertia preset", () => {
     const inertia = getBrandPreset("inertia")!;
     expect(inertia.logoUrl).toBe("/brands/inertia.svg");
     expect(existsSync(join(process.cwd(), "public", inertia.logoUrl))).toBe(true);
+  });
+});
+
+describe("Turso preset", () => {
+  it("applies the official aqua and dark palette with a readable existing theme", () => {
+    const turso = getBrandPreset("turso");
+    expect(turso).not.toBeNull();
+    if (!turso) throw new Error("Turso preset is missing");
+
+    expect(turso).toMatchObject({
+      name: "Turso",
+      accent: "#4FF8D2",
+      appearance: "dark",
+      logoUrl: "/brands/turso.svg",
+      background: {
+        label: "Turso",
+        from: "#0D1318",
+        to: "#183134",
+        brandId: "turso",
+        frame: {
+          showDots: false,
+          cardFill: "#162129",
+          cardBorder: { color: "#293945", width: 1 },
+          cardRadius: 8,
+        },
+      },
+    });
+    const applied = applyBrandPreset(BASE_APPEARANCE, turso);
+    expect(applied).toMatchObject({
+      background: "Turso",
+      theme: "github_dark",
+      fontId: "geist",
+      outerPadding: 32,
+      innerPadding: 16,
+      cornerRadius: 8,
+      lineNumbers: false,
+      windowDecoration: "minimal",
+    });
+    expect(findMatchingBrandPreset(applied)?.id).toBe("turso");
+    expect(existsSync(join(process.cwd(), "public", turso.logoUrl!))).toBe(true);
   });
 });
 
