@@ -39,7 +39,7 @@
     "@lumis-sh/wasm-nushell": "^0.26.9",
     "@lumis-sh/wasm-objc": "^0.26.3",
     "@lumis-sh/wasm-ocaml": "^0.26.5",
-    "@lumis-sh/wasm-ocaml_interface": "^0.26.5",
+    "@lumis-sh/wasm-ocaml_interface": "^0.26.6",
     "@lumis-sh/wasm-perl": "^0.26.7",
     "@lumis-sh/wasm-qmljs": "^0.26.4",
     "@lumis-sh/wasm-tlaplus": "^0.26.1",
