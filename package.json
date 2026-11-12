@@ -31,7 +31,7 @@
     "@lumis-sh/wasm-d": "^0.26.4",
     "@lumis-sh/wasm-fortran": "^0.26.4",
     "@lumis-sh/wasm-fsharp": "^0.26.9",
-    "@lumis-sh/wasm-haskell": "^0.26.4",
+    "@lumis-sh/wasm-haskell": "^0.26.5",
     "@lumis-sh/wasm-julia": "^0.26.4",
     "@lumis-sh/wasm-latex": "^0.26.3",
     "@lumis-sh/wasm-lean": "^0.26.0",
