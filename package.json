@@ -78,7 +78,7 @@
     "@vitest/coverage-v8": "^5.1.0",
     "happy-dom": "^21.0.4",
     "oxfmt": "^0.76.0",
-    "oxlint": "^1.91.0",
+    "oxlint": "^1.93.0",
     "postcss": "^8",
     "tailwindcss": "^4.3.4",
     "tailwindcss-animate": "^1.0.7",
