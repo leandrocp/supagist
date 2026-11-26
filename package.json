@@ -29,7 +29,7 @@
     "@lumis-sh/wasm-arduino": "^0.26.5",
     "@lumis-sh/wasm-bundle-full": "^0.2.0",
     "@lumis-sh/wasm-d": "^0.26.4",
-    "@lumis-sh/wasm-fortran": "^0.26.4",
+    "@lumis-sh/wasm-fortran": "^0.26.5",
     "@lumis-sh/wasm-fsharp": "^0.26.9",
     "@lumis-sh/wasm-haskell": "^0.26.5",
     "@lumis-sh/wasm-julia": "^0.26.4",
