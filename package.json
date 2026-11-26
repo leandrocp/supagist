@@ -41,7 +41,7 @@
     "@lumis-sh/wasm-ocaml": "^0.26.5",
     "@lumis-sh/wasm-ocaml_interface": "^0.26.6",
     "@lumis-sh/wasm-perl": "^0.26.7",
-    "@lumis-sh/wasm-qmljs": "^0.26.4",
+    "@lumis-sh/wasm-qmljs": "^0.26.5",
     "@lumis-sh/wasm-tlaplus": "^0.26.2",
     "@lumis-sh/wasm-vhdl": "^0.26.5",
     "@radix-ui/react-checkbox": "^1.4.1",
